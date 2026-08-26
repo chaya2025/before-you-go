@@ -175,6 +175,14 @@ function stateFor(
   if (done.has(step.id)) return 'done';
   if (applies === 'unknown') return 'uncertain';
   if (waitingOn.length > 0) return 'waiting_on';
+
+  // ⭐ A start_now step is actionable NOW, wherever it sits in the sequence.
+  // That is the entire reason act_when exists apart from sequence_position:
+  // the רקורד is needed last and must be begun first. Marking it 'later'
+  // reproduces exactly the failure it was added to prevent —
+  // "אם מציגים אותו בסוף — המשתמש כבר איחר".
+  if (step.act_when === 'start_now') return 'do_now';
+
   // Everything at the earliest unfinished position is actionable now. Later
   // steps are shown greyed but never hidden — "אחרי הטסט אף אחד לא אמר מה השלב
   // הבא" is a documented failure, and hiding is how it happens.

@@ -33,3 +33,6 @@ Thumbs.db
 
 # Local Claude config (machine-specific)
 .claude/settings.local.json
+
+# generated roadmap reports
+*.roadmap.txt

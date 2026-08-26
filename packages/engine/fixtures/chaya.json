@@ -1,0 +1,12 @@
+{
+  "_comment": "א/2 student, no teudat zehut, no foreign licence, 21. The documented case.",
+  "language": "he",
+  "visa_type": "a2",
+  "visa_valid_now": true,
+  "foreign_license": { "kind": "none" },
+  "has_teudat_zehut": false,
+  "teudat_zehut_confirmed": true,
+  "born": "2005-01",
+  "entered_israel": "2010-06",
+  "completed_steps": []
+}
