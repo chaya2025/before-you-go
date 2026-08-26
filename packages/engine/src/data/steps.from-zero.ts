@@ -37,6 +37,7 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     act_when: 'start_now',
     channel: 'population_authority',
     authority: "רשות האוכלוסין וההגירה",
+    links: [{ label: { he: "רשות האוכלוסין", en: 'Population and Immigration Authority' }, url: 'https://www.gov.il/he/departments/population_and_immigration_authority' }],
     evidence: [
       servicePage(
         "הגשת בקשה להוצאת רישיון נהיגה",
@@ -56,7 +57,9 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     track: 'from_zero',
     title: { he: "הוצאת מספר מזהה 89 (\"הטופס הלבן\")", en: 'Get your 89 identity number (the "white form")' },
     action: {
-      he: "הגע למשרד הרישוי עם דרכון מקורי ואשרת שהייה בתוקף. תקבל מספר מזהה שמתחיל ב-89, מודפס על דף A4.",
+      he:
+        "הגע למשרד הרישוי עם דרכון מקורי ואשרת שהייה בתוקף. תקבל דף A4 מודפס עם מספר שמתחיל ב-89.\n\n" +
+        "⭐ הדף הזה הוא תעודת הזיהוי שלך לכל מה שקשור לרישיון. קח אותו איתך לכל תור במשרד הרישוי, לתחנת הצילום ולטסט.",
       en: 'Go to a licensing office with your original passport and a valid visa. You get an identity number starting with 89, printed on an A4 sheet.',
     },
     applies_when: NO_TEUDAT_ZEHUT,
@@ -72,10 +75,10 @@ export const FROM_ZERO_STEPS: StepInput[] = [
       he: "לך בלי תור. אם דוחים אותך — קבע תור באותו רגע, במקום.",
       en: 'Go without an appointment. If they turn you away, book one there and then.',
     },
-    checklist: [
-      { he: "האשרה בתוקף?", en: 'Is your visa currently valid?' },
-      { he: "הדרכון מקורי, לא צילום?", en: 'Is the passport the original, not a copy?' },
-    ],
+    // ⚠️ "האשרה בתוקף?" was here and is gone: cc.visa_valid already asks it
+    // before this step. Saying the same thing twice is what made the screen noisy.
+    checklist: [{ he: "הדרכון מקורי, לא צילום?", en: 'Is the passport the original, not a copy?' }],
+    links: [{ label: { he: "זימון תור למשרד הרישוי", en: 'Book a licensing office appointment' }, url: 'https://www.gov.il/he/Departments/General/govisit' }],
     evidence: [
       servicePage(
         "הוצאת רישיון נהיגה לעובד זר",
@@ -109,7 +112,9 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     track: 'from_zero',
     title: { he: "מילוי בקשה מקוונת (\"הטופס הירוק\")", en: 'Fill in the online application' },
     action: {
-      he: "מלא את הבקשה להוצאת רישיון נהיגה: פרטים אישיים, בחירת דרגות, והצהרה רפואית.",
+      he:
+        "מלא את הבקשה להוצאת רישיון נהיגה: פרטים אישיים, בחירת דרגות, והצהרה רפואית. המילוי ללא תשלום.\n\n" +
+        "⚠️ הטופס מקוון בלבד — אין ממנו דף להביא איתך. הדף שאתה נושא הוא הטופס הלבן (89).",
       en: 'Complete the licence application: personal details, the grades you want, and the medical declaration.',
     },
     applies_when: EVERYONE,
@@ -118,19 +123,19 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     must_come_after: ['fz.doc_89'],
     channel: 'online',
     authority: "משרד התחבורה",
+    links: [{ label: { he: "טופס הבקשה", en: 'The application form' }, url: 'https://www.gov.il/he/service/apply_for_new_driver_drivers_license' }],
     evidence: [
       servicePage(
         "הגשת בקשה להוצאת רישיון נהיגה",
         "ההצהרה הרפואית תקפה חמש שנים",
         "ההצהרה הרפואית תקפה ל5 שנים.",
       ),
-      // The nickname is not on gov.il, but it is what everyone actually calls it,
-      // at the counter and in the community. Worth using, because a user
-      // searching for "טופס ירוק" is searching for the right thing.
-      fieldReport(
-        "\"טופס ירוק\" הוא הכינוי שבשימוש בכל מקום — במשרד הרישוי ובקהילה — אף שאינו מונח רשמי באתר",
-        { generalizability: 'pattern', last_verified_at: LAST_VERIFIED_LATE },
-      ),
+      // The nickname lives in the TITLE, so someone searching for it lands on the
+      // right step. It does not need a line of its own arguing about terminology.
+      fieldReport("\"טופס ירוק\" הוא הכינוי שבשימוש במשרד הרישוי ובקהילה", {
+        generalizability: 'pattern',
+        last_verified_at: LAST_VERIFIED_LATE,
+      }),
     ],
   },
 
@@ -149,10 +154,11 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     requires_documents: ['doc.passport', 'doc.form_89'],
     checklist: [
       {
-        he: "הטופס הלבן (89) פיזית איתך — ולא רק הטופס הירוק שמילאת?",
-        en: 'Do you physically have the white form (89), not just the green form you filled in?',
+        he: "הטופס הלבן (89) איתך? זה הדף הפיזי. הטופס הירוק מקוון ואין ממנו מה להביא.",
+        en: 'Do you have the white form (89)? That is the physical sheet. The green form is online, there is nothing to bring.',
       },
     ],
+    links: [{ label: { he: "תחנות צילום", en: 'Photo stations' }, url: 'https://www.gov.il/he/service/drivers_license_photo_stations' }],
     cost: {
       amount_ils: 50,
       note: { he: "הצילום חינם. התשלום הוא על בדיקת הראייה.", en: 'The photo is free. The payment is for the eye test.' },
@@ -188,6 +194,7 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     applies_when: EVERYONE,
     sequence_position: 5,
     channel: 'test_center',
+    links: [{ label: { he: "הרשמה למבחן תיאוריה", en: 'Register for the theory test' }, url: 'https://www.theorytest.org.il/' }],
     checklist: [
       {
         he: "צריך להיבחן בעל-פה ולא במחשב? התקשר ל-*5678 לברר באילו שפות זה אפשרי — אנחנו לא יודעים.",
@@ -269,8 +276,12 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     track: 'from_zero',
     title: { he: "⭐ קבע תור להוצאת ההיתר — עוד לפני הטסט", en: '⭐ Book the permit appointment BEFORE your test' },
     action: {
-      he: "קבע עכשיו תור למשרד הרישוי להוצאת היתר הנהיגה, לתאריך שאחרי הטסט. מי שממתין לתוצאה ורק אז מזמן תור, ממתין כשבועיים.",
-      en: 'Book a licensing office appointment now, for a date after your test. Waiting for the result first means about two more weeks.',
+      he:
+        "קבע תור למשרד הרישוי להוצאת ההיתר כשבועיים מראש, לתאריך שאחרי הטסט.\n\n" +
+        "אם עברת — התור כבר מחכה. אם לא — מבטלים אותו. מי שממתין לתוצאה ורק אז מזמן תור, ממתין כשבועיים נוספים.",
+      en:
+        'Book the licensing office appointment about two weeks ahead, for a date after your test.\n\n' +
+        'If you pass, it is already waiting. If you do not, you cancel it. Booking only after the result costs about two more weeks.',
     },
     applies_when: NO_TEUDAT_ZEHUT,
     sequence_position: 8,
@@ -280,6 +291,7 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     channel: 'licensing_office',
     authority: "משרד הרישוי",
     requires_appointment: true,
+    links: [{ label: { he: "זימון תור", en: 'Book an appointment' }, url: 'https://www.gov.il/he/Departments/General/govisit' }],
     evidence: [
       fieldReport(
         "יש לקבוע את התור לפני הטסט, לתאריך שאחריו. המתנה לתוצאה עולה כשבועיים",
@@ -307,13 +319,9 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     sequence_position: 9,
     channel: 'test_center',
     requires_documents: ['doc.passport', 'doc.form_89'],
-    checklist: [
-      {
-        he: "⚠️ מספר הדרכון במסמך ה-89 זהה למספר בדרכון שבידך? אי-התאמה מונעת את קיום הטסט, והוא נרשם ככישלון.",
-        en: '⚠️ Does the passport number on your 89 document match the passport in your hand? A mismatch stops the test from happening, and it is recorded as a failure.',
-      },
-      { he: "קבעת כבר תור להוצאת ההיתר?", en: 'Have you already booked the permit appointment?' },
-    ],
+    // ⚠️ The passport-number check was here AND in cc.passport_number_match,
+    // which runs before this step anyway. The copy is gone.
+    checklist: [{ he: "קבעת כבר תור להוצאת ההיתר?", en: 'Have you already booked the permit appointment?' }],
     cost: {
       amount_ils: 165,
       max_ils: 394,
@@ -569,6 +577,11 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     must_come_after: ['fz.receive_card'],
     channel: 'licensing_office',
     requires_appointment: true,
+    links: [
+      { label: { he: "הוצאת העתק רישיון", en: 'Duplicate licence service' }, url: 'https://www.gov.il/he/service/duplicate_drivers_license_in_case_of_loss' },
+      { label: { he: "בחירת אופן המסירה", en: 'Choose delivery' }, url: 'https://fastdl.co.il/' },
+      { label: { he: "זימון תור", en: 'Book an appointment' }, url: 'https://www.gov.il/he/Departments/General/govisit' },
+    ],
     fallback: {
       he: "אין לך כתובת רשומה? בחר איסוף עצמי בדפוס בארי — חינם, ואינו תלוי בכתובת.",
       en: 'No registered address? Choose self-collection at Defus Bari. It is free and does not depend on an address.',

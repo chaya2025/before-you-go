@@ -92,6 +92,15 @@ export const Step = z.object({
   requires_documents: z.array(z.string()).default([]),
 
   /**
+   * Where he actually goes to do it. Added 2026-08-26 at Chaya's request:
+   * a roadmap that names a step and then makes him search for the form is
+   * doing half the job.
+   */
+  links: z
+    .array(z.object({ label: Text, url: z.string().regex(/^https?:\/\/\S+$/) }))
+    .default([]),
+
+  /**
    * Checks to run before this step, especially before a physical visit.
    * גיליון 13 principle 15 — a wasted visit costs a day off work and an
    * appointment that is hard to get.

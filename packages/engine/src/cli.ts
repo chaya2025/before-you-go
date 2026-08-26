@@ -44,7 +44,7 @@ const CLOCK_MARK: Record<ClockState['status'], string> = {
   not_started: '· ',
 };
 
-function report(result: Result, today: string): string {
+function report(result: Result, today: string, withSources: boolean): string {
   const L: string[] = [];
   const rule = (ch = '=') => L.push(ch.repeat(74));
 
@@ -121,12 +121,22 @@ function report(result: Result, today: string): string {
   }
 
   // ── roadmap ────────────────────────────────────────────────────────────
+  //
+  // ⭐ Chaya, 2026-08-26, after reading the first version:
+  //   "as a user it's very overwhelming to see a bunch of lines with the same
+  //    thing... display whatever is important. On the side you could click to
+  //    see the sources, and maybe you'll find five sources for one line."
+  //
+  // So: ONE line per fact, however many sources back it. The sources are not
+  // hidden — principle 20 still holds — they are one click away instead of
+  // shouting over the instruction. Here that click is `--sources`.
   L.push('', '');
   L.push(`הדרך שלך — ${result.roadmap.length} שלבים`);
   L.push('');
   for (const s of result.roadmap) {
     L.push(`${STATE_MARK[s.state]} ${s.step.title.he}`);
-    L.push(`     ${s.step.action.he.split('\n')[0]}`);
+    // The action can run to several lines. All of it, indented.
+    for (const line of s.step.action.he.split('\n')) L.push(line ? `     ${line}` : '');
 
     if (s.start_now) L.push(`     ⭐ להתחיל עכשיו, גם אם השלב עצמו מגיע בהמשך`);
     if (s.must_precede) L.push(`     ⭐ חייב להיעשות לפני: ${s.must_precede}`);
@@ -143,16 +153,29 @@ function report(result: Result, today: string): string {
       const c = s.step.cost;
       L.push(`     ₪ ${c.amount_ils}${c.max_ils ? `-${c.max_ils}` : ''}${c.note ? ` · ${c.note.he}` : ''}`);
     }
+    for (const link of s.step.links) L.push(`     🔗 ${link.label.he}: ${link.url}`);
 
-    // ⭐ Official facts stated plainly, field reports introduced as reports.
-    // Nothing is hidden for being uncertain (principle 20).
+    // The sources, folded. Counted by mark so he can see at a glance what kind
+    // of evidence is behind the step without reading five near-identical lines.
     const shown = attributions(s.step.evidence);
-    for (const a of shown.official) {
-      L.push(`     ${CERTAINTY_META[a.mark].symbol} ${a.lead_in.he ? a.lead_in.he + ' ' : ''}${a.claim}`);
-      if (a.citation) L.push(`        ${a.citation}`);
+    const counts = new Map<string, number>();
+    for (const part of s.step.evidence) {
+      counts.set(part.certainty, (counts.get(part.certainty) ?? 0) + 1);
     }
-    for (const a of shown.reported) {
-      L.push(`     ${CERTAINTY_META[a.mark].symbol} ${a.lead_in.he}: ${a.claim}`);
+    const badge = [...counts.entries()]
+      .map(([mark, n]) => `${CERTAINTY_META[mark as keyof typeof CERTAINTY_META].symbol}${n > 1 ? `×${n}` : ''}`)
+      .join(' ');
+    L.push(`     📎 ${s.step.evidence.length} מקורות  ${badge}`);
+
+    if (withSources) {
+      for (const a of shown.official) {
+        L.push(`        ${CERTAINTY_META[a.mark].symbol} ${a.lead_in.he ? a.lead_in.he + ' ' : ''}${a.claim}`);
+        if (a.citation) L.push(`           ${a.citation}`);
+        if (a.url) L.push(`           ${a.url}`);
+      }
+      for (const a of shown.reported) {
+        L.push(`        ${CERTAINTY_META[a.mark].symbol} ${a.lead_in.he}: ${a.claim}`);
+      }
     }
     L.push('');
   }
@@ -245,7 +268,7 @@ function main() {
 
   const result = evaluate(parsed.data, today);
   const outPath = file.replace(/\.json$/, '') + '.roadmap.txt';
-  fs.writeFileSync(outPath, report(result, today), 'utf8');
+  fs.writeFileSync(outPath, report(result, today, args.includes('--sources')), 'utf8');
   console.log(summary(result, outPath));
 }
 
