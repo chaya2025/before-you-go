@@ -1,0 +1,35 @@
+# Secrets — never commit
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+
+# USER DOCUMENTS — passports, visas, licences. NEVER commit.
+uploads/
+user-docs/
+samples/real/
+*.pdf.user
+*_personal.*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+build/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local Claude config (machine-specific)
+.claude/settings.local.json
