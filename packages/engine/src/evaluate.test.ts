@@ -47,6 +47,16 @@ describe('persona 1 — the founder. א/2 student, no teudat zehut, no foreign l
     expect(doc89.start_now).toBe(true);
   });
 
+  it('⭐ a start_now step is DO NOW, never "later" — even when another step sits ahead of it', () => {
+    // Found by reading CLI output. fz.doc_89 is at position 2, so the position
+    // rule alone marked it 'later' while it also carried ⭐start-now. A step
+    // that says "begin this immediately" and then greys itself out reproduces
+    // the exact failure act_when was added to prevent.
+    for (const s of r.roadmap.filter((s) => s.start_now)) {
+      expect(['do_now', 'done'], s.step.id).toContain(s.state);
+    }
+  });
+
   it('gets the PHYSICAL permit step, not the online one', () => {
     // Same entitlement, different channel. This is the whole finding.
     expect(ids).toContain('fz.permit_in_person');
