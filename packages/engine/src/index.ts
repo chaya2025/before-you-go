@@ -13,4 +13,7 @@ export * from './certainty';
 export * from './profile';
 export * from './condition';
 export * from './domain';
+export * from './dates';
+export * from './result';
+export * from './evaluate';
 export * from './data';

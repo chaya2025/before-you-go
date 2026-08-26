@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { VisaType } from '../profile';
-import { evaluate, type Facts } from '../condition';
+import { evaluateCondition, type Facts } from '../condition';
 import { FOREIGN_RESIDENT_CEILING } from '../domain';
 import {
   ALL_VISA_PROFILES,
@@ -79,7 +79,7 @@ describe('⭐ the two axes stay separate — the highest-consequence rule in the
 
 describe('⚠️ א/5 and 2(א)(5) — telling these apart is the worst mistake available', () => {
   const isBlocked = (visa_type: string) =>
-    ALL_BLOCKERS.some((b) => evaluate(b.applies_when, { ...baseFacts, visa_type } as Facts) === true);
+    ALL_BLOCKERS.some((b) => evaluateCondition(b.applies_when, { ...baseFacts, visa_type } as Facts) === true);
 
   it('א/5 is NOT blocked', () => {
     // Blocking a fully eligible temporary resident is the worst output this

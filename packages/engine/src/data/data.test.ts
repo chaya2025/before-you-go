@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { Step, CheckedStep } from '../domain';
-import { Condition, evaluate, type Facts } from '../condition';
+import { Condition, evaluateCondition, type Facts } from '../condition';
 import { ALL_STEPS } from './index';
 
 const stepById = (id: string) => {
@@ -267,22 +267,22 @@ describe('the exemption — the highest-consequence rule in the conversion route
 
   it('five years on a permanent licence + a רקורד + grade B exempts him from BOTH tests', () => {
     // נוהל ס' 2: "פטור מבדיקת ראיה וממבחן שליטה" — the exemption is double.
-    expect(evaluate(eyeTest(), veteranConverter)).toBe(false);
-    expect(evaluate(controlTest(), veteranConverter)).toBe(false);
+    expect(evaluateCondition(eyeTest(), veteranConverter)).toBe(false);
+    expect(evaluateCondition(controlTest(), veteranConverter)).toBe(false);
   });
 
   it('⭐ C1 still needs מבחן שליטה after twenty years — the 180 vs 181 gap', () => {
     // The obligation runs to תקנה 181. The exemption stops at 180.
     // This is תיקון 6, a gap Chaya caught herself on 20.8.
     const wantsC1: Facts = { ...veteranConverter, requested_class: 'C1', foreign_license_years: 20 };
-    expect(evaluate(controlTest(), wantsC1)).toBe(true);
-    expect(evaluate(eyeTest(), wantsC1)).toBe(true);
+    expect(evaluateCondition(controlTest(), wantsC1)).toBe(true);
+    expect(evaluateCondition(eyeTest(), wantsC1)).toBe(true);
   });
 
   it('no רקורד means no exemption, however long he has held the licence', () => {
     // Seniority he cannot prove is seniority he does not have.
     const noRecord: Facts = { ...veteranConverter, has_record_document: 'no' };
-    expect(evaluate(controlTest(), noRecord)).toBe(true);
+    expect(evaluateCondition(controlTest(), noRecord)).toBe(true);
   });
 
   it('a country that does not issue a רקורד is treated as "no exemption", not as an error', () => {
@@ -290,20 +290,20 @@ describe('the exemption — the highest-consequence rule in the conversion route
       ...veteranConverter,
       has_record_document: 'origin_country_does_not_issue',
     };
-    expect(evaluate(controlTest(), cannotGetOne)).toBe(true);
+    expect(evaluateCondition(controlTest(), cannotGetOne)).toBe(true);
   });
 
   it('under five years needs both tests', () => {
     const newDriver: Facts = { ...veteranConverter, foreign_license_years: 2 };
-    expect(evaluate(eyeTest(), newDriver)).toBe(true);
-    expect(evaluate(controlTest(), newDriver)).toBe(true);
+    expect(evaluateCondition(eyeTest(), newDriver)).toBe(true);
+    expect(evaluateCondition(controlTest(), newDriver)).toBe(true);
   });
 
   it('⭐ when he never said how long he has held it, the tests stay on his roadmap as UNKNOWN', () => {
     // Not false. He is not told "you are exempt" on the strength of a blank.
     const vague: Facts = { ...veteranConverter, foreign_license_years: 'unknown' };
-    expect(evaluate(eyeTest(), vague)).toBe('unknown');
-    expect(evaluate(controlTest(), vague)).toBe('unknown');
+    expect(evaluateCondition(eyeTest(), vague)).toBe('unknown');
+    expect(evaluateCondition(controlTest(), vague)).toBe('unknown');
   });
 });
 
@@ -312,14 +312,14 @@ describe('the entries-and-exits form is asked of exactly one category', () => {
   const form = () => stepById('cv.entry_exit_form').applies_when;
 
   it('applies to תושב ישראל ששב', () => {
-    expect(evaluate(form(), { ...veteranConverter, nohal_category: 'toshav_israel' })).toBe(true);
+    expect(evaluateCondition(form(), { ...veteranConverter, nohal_category: 'toshav_israel' })).toBe(true);
   });
 
   it('is never asked of a תושב מדינת חוץ, who is not even entitled to request it', () => {
-    expect(evaluate(form(), veteranConverter)).toBe(false);
+    expect(evaluateCondition(form(), veteranConverter)).toBe(false);
   });
 
   it('is never asked of an עולה חדש', () => {
-    expect(evaluate(form(), { ...veteranConverter, nohal_category: 'oleh_chadash' })).toBe(false);
+    expect(evaluateCondition(form(), { ...veteranConverter, nohal_category: 'oleh_chadash' })).toBe(false);
   });
 });

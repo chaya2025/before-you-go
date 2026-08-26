@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Condition, evaluate, missingFacts, and, or, not, type Facts } from './condition';
+import { Condition, evaluateCondition, missingFacts, and, or, not, type Facts } from './condition';
 
 /** A fully-answered person: ב/1 foreign worker, national licence, 3 years in. */
 const known: Facts = {
@@ -53,19 +53,19 @@ describe('principle 8 — an unanswered question never becomes a no', () => {
   const needs89: Condition = { field: 'has_teudat_zehut', op: 'eq', value: false };
 
   it('applies the step when we know he has no teudat zehut', () => {
-    expect(evaluate(needs89, known)).toBe(true);
+    expect(evaluateCondition(needs89, known)).toBe(true);
   });
 
   it('returns unknown, NOT false, when he never answered', () => {
-    expect(evaluate(needs89, vague)).toBe('unknown');
+    expect(evaluateCondition(needs89, vague)).toBe('unknown');
     // The distinction that matters: this step stays on his roadmap.
-    expect(evaluate(needs89, vague)).not.toBe(false);
+    expect(evaluateCondition(needs89, vague)).not.toBe(false);
   });
 
   it('a number comparison against an unanswered field is unknown, not out of range', () => {
     const exemption: Condition = { field: 'foreign_license_years', op: 'gte', value: 5 };
-    expect(evaluate(exemption, known)).toBe(true);
-    expect(evaluate(exemption, vague)).toBe('unknown');
+    expect(evaluateCondition(exemption, known)).toBe(true);
+    expect(evaluateCondition(exemption, vague)).toBe('unknown');
   });
 });
 
@@ -79,7 +79,7 @@ describe('real rules from the workbook', () => {
         { field: 'requested_class', op: 'in', value: ['A2', 'A1', 'A', '1', 'B'] },
       ],
     };
-    expect(evaluate(exempt, known)).toBe(true);
+    expect(evaluateCondition(exempt, known)).toBe(true);
   });
 
   it('C1 always needs מבחן שליטה, even after twenty years — the 180 vs 181 gap', () => {
@@ -90,7 +90,7 @@ describe('real rules from the workbook', () => {
         { field: 'requested_class', op: 'in', value: ['A2', 'A1', 'A', '1', 'B'] },
       ],
     };
-    expect(evaluate(exempt, { ...known, requested_class: 'C1', foreign_license_years: 20 })).toBe(false);
+    expect(evaluateCondition(exempt, { ...known, requested_class: 'C1', foreign_license_years: 20 })).toBe(false);
   });
 
   it('no exemption without a רקורד, however long he has held the licence', () => {
@@ -100,7 +100,7 @@ describe('real rules from the workbook', () => {
         { field: 'has_record_document', op: 'eq', value: 'yes' },
       ],
     };
-    expect(evaluate(exempt, { ...known, has_record_document: 'no' })).toBe(false);
+    expect(evaluateCondition(exempt, { ...known, has_record_document: 'no' })).toBe(false);
   });
 
   it('the grade ceiling: תושב מדינת חוץ cannot convert to bus or heavy truck — ס\' 1(ג)', () => {
@@ -110,29 +110,29 @@ describe('real rules from the workbook', () => {
         { field: 'requested_class', op: 'in', value: ['C', 'D', 'D1', 'D2', 'D3', 'E'] },
       ],
     };
-    expect(evaluate(blocked, { ...known, requested_class: 'D' })).toBe(true);
-    expect(evaluate(blocked, known)).toBe(false);
+    expect(evaluateCondition(blocked, { ...known, requested_class: 'D' })).toBe(true);
+    expect(evaluateCondition(blocked, known)).toBe(false);
   });
 
   it('the two clocks are separate: past one year, still inside five', () => {
     const mayStillConvert: Condition = { field: 'months_since_anchor', op: 'lt', value: 60 };
     const mayStillDriveOnForeign: Condition = { field: 'months_since_anchor', op: 'lt', value: 12 };
     const atThreeYears = { ...known, months_since_anchor: 36 };
-    expect(evaluate(mayStillConvert, atThreeYears)).toBe(true);
-    expect(evaluate(mayStillDriveOnForeign, atThreeYears)).toBe(false);
+    expect(evaluateCondition(mayStillConvert, atThreeYears)).toBe(true);
+    expect(evaluateCondition(mayStillDriveOnForeign, atThreeYears)).toBe(false);
   });
 
   it('the IDP trap', () => {
     const canConvert: Condition = { field: 'foreign_license_kind', op: 'eq', value: 'national' };
-    expect(evaluate(canConvert, { ...known, foreign_license_kind: 'idp_only' })).toBe(false);
+    expect(evaluateCondition(canConvert, { ...known, foreign_license_kind: 'idp_only' })).toBe(false);
   });
 });
 
 describe('is_known / is_unknown can answer even with nothing to go on', () => {
   it('asks about the gap itself', () => {
-    expect(evaluate({ field: 'age_years', op: 'is_unknown' }, vague)).toBe(true);
-    expect(evaluate({ field: 'age_years', op: 'is_known' }, vague)).toBe(false);
-    expect(evaluate({ field: 'age_years', op: 'is_known' }, known)).toBe(true);
+    expect(evaluateCondition({ field: 'age_years', op: 'is_unknown' }, vague)).toBe(true);
+    expect(evaluateCondition({ field: 'age_years', op: 'is_known' }, vague)).toBe(false);
+    expect(evaluateCondition({ field: 'age_years', op: 'is_known' }, known)).toBe(true);
   });
 });
 
