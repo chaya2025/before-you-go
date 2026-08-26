@@ -36,3 +36,7 @@ Thumbs.db
 
 # generated roadmap reports
 *.roadmap.txt
+
+# vite
+apps/web/dist/
+.vite/

@@ -1,0 +1,24 @@
+{
+  "name": "@byg/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A thin HTTP wrapper around the engine. Validates, calls, returns. No rules live here.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@byg/engine": "*",
+    "@fastify/cors": "^11.3.0",
+    "fastify": "^5.12.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.3.0",
+    "tsx": "^4.23.12",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}
