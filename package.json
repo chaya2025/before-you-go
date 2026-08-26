@@ -1,0 +1,19 @@
+{
+  "name": "before-you-go",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Before You Go / לדעת לפני שמגיעים — readiness checks for Israeli bureaucratic processes",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}

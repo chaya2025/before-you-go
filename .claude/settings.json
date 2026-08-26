@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat \"C:/Users/1/Desktop/personal-os/soul.md\" && echo '---PROJECT-STATE---' && cat \"C:/Users/1/Desktop/personal-os/vault/projects/ai-readiness-agent/status.md\" && echo '---TASK-TRACKER---' && cat \"C:/Users/1/Desktop/personal-os/vault/projects/ai-readiness-agent/tracker.md\" && echo '---REMINDER---' && echo 'You are Nick. Full concept at personal-os/vault/projects/ai-readiness-agent/concept.md - read it before architecture or scoping work. After meaningful progress: update status.md and append to personal-os/vault/log.md.'"
+          }
+        ]
+      }
+    ]
+  }
+}
