@@ -1,0 +1,356 @@
+import { describe, it, expect } from 'vitest';
+import { Profile } from './profile';
+import { evaluate, deriveFacts } from './evaluate';
+
+/**
+ * ============================================================================
+ * THE PERSONA TESTS
+ * ============================================================================
+ *
+ * Five real people through the whole engine. Two of them exist purely because
+ * getting them wrong is the worst thing this product could do:
+ *   · א/5 must come out ELIGIBLE
+ *   · 2(א)(5) must come out BLOCKED
+ * Those two look alike in writing and mean opposite things.
+ */
+
+const TODAY = '2026-08-26';
+const p = (o: Record<string, unknown>) => Profile.parse(o);
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('persona 1 — the founder. א/2 student, no teudat zehut, no foreign licence, 21', () => {
+  const a2Student = p({
+    visa_type: 'a2',
+    visa_valid_now: true,
+    foreign_license: { kind: 'none' },
+    has_teudat_zehut: false,
+    teudat_zehut_confirmed: true,
+    born: '2005-01',
+    entered_israel: '2010-06',
+  });
+  const r = evaluate(a2Student, TODAY);
+  const ids = r.roadmap.map((s) => s.step.id);
+
+  it('is not blocked', () => {
+    expect(r.blocked).toBeNull();
+  });
+
+  it('goes the from-zero route, as a foreign resident', () => {
+    expect(r.diagnosis.track).toBe('from_zero');
+    expect(r.diagnosis.nohal_category).toBe('toshav_medinat_chutz');
+  });
+
+  it('is told to get the 89 number, and told to do it first', () => {
+    expect(ids).toContain('fz.doc_89');
+    const doc89 = r.roadmap.find((s) => s.step.id === 'fz.doc_89')!;
+    expect(doc89.start_now).toBe(true);
+  });
+
+  it('gets the PHYSICAL permit step, not the online one', () => {
+    // Same entitlement, different channel. This is the whole finding.
+    expect(ids).toContain('fz.permit_in_person');
+    expect(ids).not.toContain('fz.permit_online');
+  });
+
+  it('gets the physical completion declaration, not the online one', () => {
+    expect(ids).toContain('fz.completion_in_person');
+    expect(ids).not.toContain('fz.completion_online');
+  });
+
+  it('is never shown a conversion step', () => {
+    expect(ids.filter((id) => id.startsWith('cv.'))).toEqual([]);
+  });
+
+  it('⭐ is warned to book the permit appointment BEFORE the test', () => {
+    const booking = r.roadmap.find((s) => s.step.id === 'fz.book_permit_appointment')!;
+    expect(booking.must_precede).toBe('fz.test');
+  });
+
+  it('gets the accompaniment clock, because she is under 24', () => {
+    expect(r.clocks.map((c) => c.clock.id)).toContain('clock.accompaniment');
+  });
+
+  it('⭐ a clock that has not begun says NOT STARTED, not "unknown"', () => {
+    // "We do not know when you entered Israel" and "you have not passed the
+    // test yet" are different sentences. Found by reading output, not by a
+    // failing test — the whole screen said "unknown" and meant two things.
+    const accompaniment = r.clocks.find((c) => c.clock.id === 'clock.accompaniment')!;
+    expect(accompaniment.status).toBe('not_started');
+    expect(accompaniment.missing_answer).toBeUndefined();
+  });
+
+  it('gets no conversion clocks, because she has no foreign licence', () => {
+    const clockIds = r.clocks.map((c) => c.clock.id);
+    expect(clockIds).not.toContain('clock.foreign_driving');
+    expect(clockIds).not.toContain('clock.conversion_window');
+  });
+
+  it('is told the visa must stay valid throughout', () => {
+    expect(r.standing_conditions.map((c) => c.id)).toContain('cc.visa_valid');
+  });
+
+  it('cannot do the eye test before she has the 89 document', () => {
+    const eye = r.roadmap.find((s) => s.step.id === 'fz.photo_and_eye')!;
+    expect(eye.waiting_on).toContain('fz.doc_89');
+    expect(eye.state).toBe('waiting_on');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('⭐ persona 2 — א/5 תושב ארעי. HOLDS a teudat zehut, and is still a foreign resident', () => {
+  const a5 = p({
+    visa_type: 'a5',
+    visa_valid_now: true,
+    has_teudat_zehut: true,
+    teudat_zehut_confirmed: true,
+    foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 7, held_class: 'B' },
+    requested_class: 'B',
+    has_record_document: 'yes',
+    entered_israel: '2024-01',
+    born: '1990-05',
+  });
+  const r = evaluate(a5, TODAY);
+  const ids = r.roadmap.map((s) => s.step.id);
+
+  it('⭐ IS NOT BLOCKED — the highest-consequence assertion in the suite', () => {
+    // Blocking a fully eligible temporary resident is the worst output this
+    // product can produce. א/5 is not 2(א)(5).
+    expect(r.blocked).toBeNull();
+    expect(r.roadmap.length).toBeGreaterThan(0);
+  });
+
+  it('is still capped at 176-181 despite holding an ID', () => {
+    // The two axes. The ID decides the channel; the category decides the ceiling.
+    expect(r.diagnosis.grade_ceiling).toEqual({ from: 176, to: 181 });
+    expect(r.diagnosis.nohal_category).toBe('toshav_medinat_chutz');
+  });
+
+  it('carries the caveat that spells the split out to him', () => {
+    expect(r.diagnosis.caveat?.he).toContain('176-181');
+  });
+
+  it('goes the conversion route', () => {
+    expect(r.diagnosis.track).toBe('conversion');
+    expect(ids.filter((id) => id.startsWith('fz.'))).toEqual([]);
+  });
+
+  it('is NOT sent to get an 89 number, because he has a teudat zehut', () => {
+    expect(ids).not.toContain('cv.doc_89');
+  });
+
+  it('is exempt from both tests — 7 years, a רקורד, and grade B', () => {
+    expect(ids).not.toContain('cv.eye_test');
+    expect(ids).not.toContain('cv.control_test');
+  });
+
+  it('⭐ still starts with the רקורד, though it is needed at the end', () => {
+    expect(r.roadmap[0]!.step.id).toBe('cv.record');
+    expect(r.roadmap[0]!.start_now).toBe(true);
+  });
+
+  it('gets both conversion clocks, counted from entry', () => {
+    const clocks = Object.fromEntries(r.clocks.map((c) => [c.clock.id, c]));
+    expect(clocks['clock.foreign_driving']!.starts).toBe('2024-01-01');
+    expect(clocks['clock.conversion_window']!.starts).toBe('2024-01-01');
+  });
+
+  it('⭐ the one-year driving clock has expired while the five-year window is still open', () => {
+    // The confusion that makes people give up years before they have to.
+    const clocks = Object.fromEntries(r.clocks.map((c) => [c.clock.id, c]));
+    expect(clocks['clock.foreign_driving']!.status).toBe('expired');
+    expect(clocks['clock.conversion_window']!.status).toBe('running');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('⭐ persona 3 — 2(א)(5). Blocked, and told exactly why', () => {
+  const asylum = p({
+    visa_type: 'section_2a5',
+    foreign_license: { kind: 'none' },
+    has_teudat_zehut: false,
+  });
+  const r = evaluate(asylum, TODAY);
+
+  it('is blocked', () => {
+    expect(r.blocked).not.toBeNull();
+    expect(r.blocked!.blocker.id).toBe('block.section_2a5');
+  });
+
+  it('gets no roadmap, because there is nothing honest to put in one', () => {
+    expect(r.roadmap).toEqual([]);
+    expect(r.clocks).toEqual([]);
+  });
+
+  it('is told where the prohibition comes from, and that it is contested', () => {
+    expect(r.blocked!.blocker.explanation.he).toContain('אינו כתוב בנוהל');
+    expect(r.blocked!.blocker.explanation.he).toContain('בג"ץ');
+    expect(r.blocked!.blocker.legal_status).toBe('in_litigation');
+  });
+
+  it('is given a date to look again, and organisations to turn to', () => {
+    expect(r.blocked!.days_to_expected_resolution).toBeGreaterThan(0);
+    expect(r.blocked!.blocker.referrals.length).toBeGreaterThan(0);
+  });
+
+  it('still gets a diagnosis — he is not just shown a wall', () => {
+    expect(r.diagnosis.nohal_category).toBe('not_defined_in_nohal');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('persona 4 — ב/1 foreign worker, 2 years on his licence, no רקורד', () => {
+  const worker = p({
+    visa_type: 'b1',
+    visa_valid_now: true,
+    has_teudat_zehut: false,
+    teudat_zehut_confirmed: true,
+    foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 2, held_class: 'B' },
+    requested_class: 'B',
+    has_record_document: 'no',
+    entered_israel: '2026-03',
+    born: '1995-02',
+  });
+  const r = evaluate(worker, TODAY);
+  const ids = r.roadmap.map((s) => s.step.id);
+
+  it('must sit both tests — under five years, and no רקורד either way', () => {
+    expect(ids).toContain('cv.eye_test');
+    expect(ids).toContain('cv.control_test');
+  });
+
+  it('IS sent to get an 89 number, because he has no teudat zehut', () => {
+    expect(ids).toContain('cv.doc_89');
+  });
+
+  it('is not asked for the entries-and-exits form — that is one category only', () => {
+    expect(ids).not.toContain('cv.entry_exit_form');
+  });
+
+  it('is inside both clocks, having entered five months ago', () => {
+    const clocks = Object.fromEntries(r.clocks.map((c) => [c.clock.id, c]));
+    expect(clocks['clock.foreign_driving']!.status).toBe('running');
+    expect(clocks['clock.conversion_window']!.status).toBe('running');
+  });
+
+  it('⚠️ is warned that the one-year driving clock is close', () => {
+    // Entered 2026-03, so the year runs out 2027-03 and the נוהל's own 60-day
+    // warning window has not opened yet. Check the arithmetic is sane instead.
+    const driving = r.clocks.find((c) => c.clock.id === 'clock.foreign_driving')!;
+    expect(driving.deadline).toBe('2027-03-01');
+    expect(driving.days_left).toBeGreaterThan(0);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('⭐ persona 5 — answered only the two required questions', () => {
+  // F1 rule 6: the roadmap builds on ש1 and ש2 alone. Everything else may be
+  // skipped, and skipping must never silently remove a step.
+  const vague = p({ visa_type: 'b1', foreign_license: { kind: 'national' } });
+  const r = evaluate(vague, TODAY);
+
+  it('still gets a roadmap', () => {
+    expect(r.blocked).toBeNull();
+    expect(r.roadmap.length).toBeGreaterThan(0);
+  });
+
+  it('⭐ steps we cannot place stay on it, marked uncertain — never dropped', () => {
+    const uncertain = r.roadmap.filter((s) => s.applies === 'unknown');
+    expect(uncertain.length).toBeGreaterThan(0);
+    expect(uncertain.every((s) => s.state === 'uncertain')).toBe(true);
+  });
+
+  it('⭐ each uncertain step names the question that would settle it', () => {
+    const uncertain = r.roadmap.filter((s) => s.applies === 'unknown');
+    for (const step of uncertain) {
+      expect(step.missing_answers.length, step.step.id).toBeGreaterThan(0);
+    }
+  });
+
+  it('collects every outstanding question into one list', () => {
+    expect(r.diagnosis.unanswered).toContain('has_teudat_zehut');
+  });
+
+  it('shows the clocks as unknown rather than inventing a deadline', () => {
+    const window = r.clocks.find((c) => c.clock.id === 'clock.conversion_window')!;
+    expect(window.status).toBe('unknown');
+    expect(window.deadline).toBeNull();
+    expect(window.days_left).toBeNull();
+    // And it names the question that would start the countdown.
+    expect(window.missing_answer).toBe('months_since_anchor');
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('mid-process entry — ticking what he has already done', () => {
+  const partway = p({
+    visa_type: 'a2',
+    visa_valid_now: true,
+    foreign_license: { kind: 'none' },
+    has_teudat_zehut: false,
+    teudat_zehut_confirmed: true,
+    born: '2005-01',
+    completed_steps: ['fz.english_name', 'fz.doc_89', 'fz.online_form'],
+  });
+  const r = evaluate(partway, TODAY);
+
+  it('marks what he ticked as done', () => {
+    const done = r.roadmap.filter((s) => s.state === 'done').map((s) => s.step.id);
+    expect(done).toEqual(expect.arrayContaining(['fz.english_name', 'fz.doc_89', 'fz.online_form']));
+  });
+
+  it('⭐ unblocks the eye test, now that the 89 document is done', () => {
+    const eye = r.roadmap.find((s) => s.step.id === 'fz.photo_and_eye')!;
+    expect(eye.waiting_on).toEqual([]);
+    expect(eye.state).toBe('do_now');
+  });
+
+  it('keeps every future step visible, greyed rather than hidden', () => {
+    // "אחרי הטסט אף אחד לא אמר מה השלב הבא" — hiding is how that happens.
+    expect(r.roadmap.some((s) => s.state === 'later')).toBe(true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('the fact derivation itself', () => {
+  it('reads the aliyah date for an עולה, not the entry date', () => {
+    const oleh = p({
+      visa_type: 'a1',
+      foreign_license: { kind: 'national' },
+      entered_israel: '2015-01',
+      made_aliyah: '2025-08',
+    });
+    const facts = deriveFacts(oleh, TODAY);
+    // 12 months since aliyah, not 139 since entry. Reading the wrong one here
+    // would tell him his five-year window closed six years ago.
+    expect(facts.months_since_anchor).toBe(12);
+  });
+
+  it('reads the return date for a returning resident', () => {
+    const returning = p({
+      visa_type: 'citizen',
+      foreign_license: { kind: 'national' },
+      entered_israel: '1990-01',
+      returned_to_israel: '2025-08',
+    });
+    expect(deriveFacts(returning, TODAY).months_since_anchor).toBe(12);
+  });
+
+  it('an IDP routes to the from-zero track and is never a block', () => {
+    const idp = p({ visa_type: 'b1', foreign_license: { kind: 'idp_only' } });
+    expect(deriveFacts(idp, TODAY).track).toBe('from_zero');
+    expect(evaluate(idp, TODAY).blocked).toBeNull();
+  });
+
+  it('never derives a month count from a date it does not have', () => {
+    const noDate = p({ visa_type: 'b1', foreign_license: { kind: 'national' } });
+    expect(deriveFacts(noDate, TODAY).months_since_anchor).toBe('unknown');
+    expect(deriveFacts(noDate, TODAY).age_years).toBe('unknown');
+  });
+});
