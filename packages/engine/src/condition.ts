@@ -188,11 +188,11 @@ const isUnknown = (v: unknown): boolean => v === 'unknown';
  * breaking principle 8, so the return type makes that impossible to do by
  * accident — TypeScript will not let `'unknown'` pass as a boolean.
  */
-export function evaluate(condition: Condition, facts: Facts): Trilean {
+export function evaluateCondition(condition: Condition, facts: Facts): Trilean {
   if ('always' in condition) return true;
-  if ('all' in condition) return and(condition.all.map((c) => evaluate(c, facts)));
-  if ('any' in condition) return or(condition.any.map((c) => evaluate(c, facts)));
-  if ('not' in condition) return not(evaluate(condition.not, facts));
+  if ('all' in condition) return and(condition.all.map((c) => evaluateCondition(c, facts)));
+  if ('any' in condition) return or(condition.any.map((c) => evaluateCondition(c, facts)));
+  if ('not' in condition) return not(evaluateCondition(condition.not, facts));
 
   const actual = facts[condition.field];
   const expected = condition.value;
