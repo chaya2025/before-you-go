@@ -1,0 +1,13 @@
+{
+  "_comment": "ב/1 foreign worker, 2 years on his licence, no רקורד. Must sit both tests.",
+  "language": "he",
+  "visa_type": "b1",
+  "visa_valid_now": true,
+  "has_teudat_zehut": false,
+  "teudat_zehut_confirmed": true,
+  "foreign_license": { "kind": "national", "valid_now": true, "years_held_permanent": 2, "held_class": "B", "country": "Ukraine" },
+  "requested_class": "B",
+  "has_record_document": "no",
+  "entered_israel": "2026-03",
+  "born": "1995-02"
+}

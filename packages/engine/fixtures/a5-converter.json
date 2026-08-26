@@ -1,0 +1,13 @@
+{
+  "_comment": "א/5 תושב ארעי. HAS a teudat zehut, 7 years on a foreign licence, has a רקורד. Must NOT be blocked.",
+  "language": "he",
+  "visa_type": "a5",
+  "visa_valid_now": true,
+  "has_teudat_zehut": true,
+  "teudat_zehut_confirmed": true,
+  "foreign_license": { "kind": "national", "valid_now": true, "years_held_permanent": 7, "held_class": "B", "country": "France" },
+  "requested_class": "B",
+  "has_record_document": "yes",
+  "entered_israel": "2024-01",
+  "born": "1990-05"
+}
