@@ -99,6 +99,7 @@ export const CONVERSION_STEPS: StepInput[] = [
     act_when: 'start_now',
     channel: 'population_authority',
     authority: "רשות האוכלוסין וההגירה",
+    links: [{ label: { he: "רשות האוכלוסין", en: 'Population and Immigration Authority' }, url: 'https://www.gov.il/he/departments/population_and_immigration_authority' }],
     evidence: [
       servicePage(
         "הגשת בקשה להוצאת רישיון נהיגה",
@@ -128,6 +129,7 @@ export const CONVERSION_STEPS: StepInput[] = [
     authority: "משרד הרישוי",
     requires_appointment: false,
     requires_documents: ['doc.passport', 'doc.visa'],
+    links: [{ label: { he: "זימון תור למשרד הרישוי", en: 'Book a licensing office appointment' }, url: 'https://www.gov.il/he/Departments/General/govisit' }],
     fallback: {
       he: "לך בלי תור. אם דוחים אותך — קבע תור באותו רגע, במקום.",
       en: 'Go without an appointment. If they turn you away, book one there and then.',
@@ -174,6 +176,7 @@ export const CONVERSION_STEPS: StepInput[] = [
     sequence_position: 4,
     channel: 'population_authority',
     authority: "רשות האוכלוסין",
+    links: [{ label: { he: "בירור פרטים על נוסע", en: 'Entries and exits enquiry' }, url: 'https://www.gov.il/he/service/inquiry_of_exit_and_entery_from_israel' }],
     cost: {
       amount_ils: 0,
       note: { he: "בקשה נוספת באותו יום — 20 ₪.", en: 'A second request on the same day costs 20 ILS.' },
@@ -231,6 +234,7 @@ export const CONVERSION_STEPS: StepInput[] = [
     must_come_after: ['cv.doc_89'],
     channel: 'online',
     authority: "משרד התחבורה",
+    links: [{ label: { he: "טופס הבקשה", en: 'The application form' }, url: 'https://www.gov.il/he/service/apply_for_new_driver_drivers_license' }],
     evidence: [
       nohal(
         "פרק \"התהליך\"",
@@ -257,6 +261,7 @@ export const CONVERSION_STEPS: StepInput[] = [
     sequence_position: 7,
     must_come_after: ['cv.online_form'],
     channel: 'photo_station',
+    links: [{ label: { he: "תחנות צילום", en: 'Photo stations' }, url: 'https://www.gov.il/he/service/drivers_license_photo_stations' }],
     evidence: [
       nohal(
         "פרק \"התהליך\"",
@@ -283,6 +288,7 @@ export const CONVERSION_STEPS: StepInput[] = [
     applies_when: { not: EXEMPT_FROM_TESTS },
     sequence_position: 8,
     channel: 'photo_station',
+    links: [{ label: { he: "תחנות צילום ובדיקת ראייה", en: 'Photo stations and eye tests' }, url: 'https://www.gov.il/he/service/drivers_license_photo_stations' }],
     evidence: [
       nohal(
         "פרק \"התהליך\"",
@@ -308,6 +314,7 @@ export const CONVERSION_STEPS: StepInput[] = [
     sequence_position: 9,
     channel: 'online',
     requires_appointment: true,
+    links: [{ label: { he: "GoVisit — זימון תור", en: 'GoVisit appointment booking' }, url: 'https://www.gov.il/he/Departments/General/govisit' }],
     evidence: [
       nohal(
         "פרק \"התהליך\"",
@@ -331,6 +338,7 @@ export const CONVERSION_STEPS: StepInput[] = [
     channel: 'licensing_office',
     requires_appointment: true,
     requires_documents: ['doc.foreign_license', 'doc.passport', 'doc.visa'],
+    links: [{ label: { he: "הנוהל המלא", en: 'The full procedure' }, url: 'https://www.gov.il/he/pages/1961' }],
     checklist: [
       { he: "האשרה בתוקף היום? הזכאות נבחנת לרגע ההגשה.", en: 'Is your visa valid TODAY? Eligibility is judged at the moment you submit.' },
       { he: "הרישיון הזר בתוקף — לא רק קיים?", en: 'Is your foreign licence valid, not merely in your possession?' },
