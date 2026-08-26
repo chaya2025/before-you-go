@@ -1,0 +1,165 @@
+import { useEffect, useState } from 'react';
+import type { Result } from '@byg/engine';
+import { fetchStatuses, fetchReadiness, ValidationError, type StatusesResponse } from './api';
+import { UI, pick, dirFor, type Lang } from './i18n';
+import { Intake, type Answers } from './components/Intake';
+import { Diagnosis, Blocked } from './components/Diagnosis';
+import { Roadmap } from './components/Roadmap';
+
+/**
+ * ============================================================================
+ * Before You Go
+ * ============================================================================
+ *
+ * Three screens, in the order F1 lays out:
+ *
+ *   intake → diagnosis → roadmap
+ *
+ * The diagnosis step in the middle is not a nicety. F1 step 17 marks it חובה,
+ * because "טעות באבחון מייצרת רודמאפ שגוי לגמרי" — so the user confirms what
+ * the system concluded before he is shown a road built on it.
+ */
+
+type Screen = 'intake' | 'diagnosis' | 'roadmap';
+
+export function App() {
+  const [lang, setLang] = useState<Lang>('he');
+  const [screen, setScreen] = useState<Screen>('intake');
+  const [statuses, setStatuses] = useState<StatusesResponse | null>(null);
+  const [result, setResult] = useState<Result | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const t = (k: keyof typeof UI) => pick(UI[k], lang);
+
+  /**
+   * ⚠️ The direction of the whole document changes with the language, not just
+   * the words. Hebrew right-to-left, English left-to-right, layout mirrored.
+   * "כיווניות RTL מלאה מהיסוד, לא כשכבת תיקון."
+   */
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = dirFor(lang);
+  }, [lang]);
+
+  /** The visa list comes from the API, so this app holds no domain knowledge. */
+  useEffect(() => {
+    fetchStatuses()
+      .then(setStatuses)
+      .catch(() => setError(t('error_offline')));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function submit(answers: Answers) {
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await fetchReadiness(answers);
+      setResult(r);
+      // A blocked result has no roadmap to confirm a diagnosis for.
+      setScreen(r.blocked ? 'roadmap' : 'diagnosis');
+    } catch (err) {
+      setError(
+        err instanceof ValidationError
+          ? err.issues.map((i) => `${i.field}: ${i.message}`).join(' · ')
+          : t('error_offline'),
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function restart() {
+    setResult(null);
+    setScreen('intake');
+    setError(null);
+  }
+
+  return (
+    <div className="page stack">
+      <header className="stack-sm">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--gap-sm)' }}>
+          <div>
+            {/* The logotype stands in for the mark, which the PRD says is not
+                needed before launch: "נדרש לפני ההשקה, לא לפני ה-POC." */}
+            <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span
+                aria-hidden="true"
+                style={{
+                  display: 'inline-block',
+                  width: '0.55rem',
+                  height: '0.55rem',
+                  borderRadius: '50%',
+                  background: 'var(--amber)',
+                }}
+              />
+              <span className="ltr">{t('brand')}</span>
+            </h1>
+            <p className="muted" style={{ margin: 0 }}>
+              {t('tagline')}
+            </p>
+          </div>
+
+          <button
+            className="btn btn-quiet"
+            onClick={() => setLang(lang === 'he' ? 'en' : 'he')}
+            aria-label={lang === 'he' ? 'Switch to English' : 'עבור לעברית'}
+          >
+            {lang === 'he' ? 'EN' : 'עב'}
+          </button>
+        </div>
+      </header>
+
+      {screen === 'intake' && (
+        <p className="muted">
+          {t('intro')} <strong>{t('privacy')}</strong>
+        </p>
+      )}
+
+      {error && (
+        <div
+          className="card"
+          style={{ borderInlineStartWidth: '4px', borderInlineStartColor: 'var(--uncertain)' }}
+          role="alert"
+        >
+          <h3>{t('error_title')}</h3>
+          <p className="small">{error}</p>
+        </div>
+      )}
+
+      {screen === 'intake' && statuses && (
+        <Intake
+          lang={lang}
+          statuses={statuses.statuses}
+          licenseClasses={statuses.license_classes}
+          onSubmit={submit}
+          busy={busy}
+        />
+      )}
+
+      {screen === 'diagnosis' && result && (
+        <Diagnosis
+          result={result}
+          lang={lang}
+          onConfirm={() => setScreen('roadmap')}
+          onBack={restart}
+        />
+      )}
+
+      {screen === 'roadmap' && result && (
+        <>
+          {result.blocked ? (
+            <Blocked result={result} lang={lang} onBack={restart} />
+          ) : (
+            <>
+              <Roadmap result={result} lang={lang} />
+              <button className="btn btn-quiet" onClick={restart}>
+                {t('start_over')}
+              </button>
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

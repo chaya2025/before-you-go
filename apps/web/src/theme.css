@@ -1,0 +1,298 @@
+/* ==========================================================================
+   אור ראשון — the design system
+   ==========================================================================
+
+   Straight from PRD §6. Nothing here was invented; every value is quoted.
+
+   The guiding idea, in the founder's words:
+     "חוויית הבירוקרטיה הקיימת היא משרד ממשלתי: כחול קר, תאורה פלואורסצנטית,
+      טפסים אטומים. השפה החזותית של המוצר היא ההפך המדויק מכך: נייר חמים,
+      דיו עמוק ורגוע, ונקודת אור אחת בענבר שמסמנת היכן אתה עומד."
+
+   And who it is for:
+     "המוצר פונה לאנשים שכבר נדחו, כבר בזבזו יום עבודה, וכבר הרגישו טיפשים
+      מול פקיד. העיצוב אינו אמור להרשים אותם. הוא אמור להרגיע אותם ולהיות
+      קריא בטלפון, בעמידה, בתור."
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&family=Suez+One&display=swap');
+
+:root {
+  /* ---- brand ---------------------------------------------------------- */
+  --ink: #14312e;      /* text, headings, structure. Deep green-black, warmer than black */
+  --paper: #faf6ef;    /* the page. A warm paper tone, not clinical white, not government grey */
+  --surface: #ffffff;  /* cards and forms, sitting above the paper */
+  --line: #e4ddd1;     /* borders and dividers */
+  --muted: #6b7a76;    /* secondary text, future steps */
+
+  /* ⭐ THE ONLY ACCENT. "אינו משמש לשום דבר אחר, ולכן העין לומדת שענבר
+     פירושו 'כאן'." Marks where you are standing: the open step, progress,
+     the next action. Never used for anything else — not for errors, not for
+     links, not for decoration, and never for certainty. */
+  --amber: #c8781e;
+  --amber-soft: #fdf3e6;
+
+  /* ---- the certainty scale -------------------------------------------
+     ⚠️ "סולם הוודאות נפרד לחלוטין מצבעי המותג, ובמכוון: הוא מידע ולא עיצוב.
+        אין להשתמש בענבר או בדיו כדי לבטא ודאות."
+     Information, not decoration. Deliberately outside the brand palette. */
+  --verified: #1f6f52;      /* 🟢 מאומת — quoted from an official source */
+  --likely: #9a7115;        /* 🟡 סביר — part quoted, part inferred */
+  --first-hand: #2b6c8f;    /* 🔵 דיווח מהשטח — real, not officially documented */
+  --uncertain: #a34433;     /* 🔴 לא ודאי — checked, could not settle it */
+  --in-litigation: #6b4e9b; /* ⏳ בשינוי — legally contested right now */
+
+  /* ⬜ לא נבדק. NOT in the PRD, which lists five levels and folds "never
+     checked" into "unknown". The founder ruled on 25.8 that they are different
+     things: "we never looked" is not "we looked and found nothing". A neutral
+     slate — visibly not-a-status, and distinct from --muted so it is never
+     read as "a future step". */
+  --unchecked: #767e7b;
+
+  /* ---- type -----------------------------------------------------------
+     Two families only. "ההיררכיה נבנית ממשקל וגודל ולא מריבוי גופנים." */
+  --font-display: 'Suez One', Georgia, serif;   /* headings and logo, LARGE ONLY */
+  --font-body: 'Heebo', system-ui, sans-serif;  /* body, UI, numbers */
+
+  /* 17px, deliberately larger than usual:
+     "חלק מהקהל קורא עברית כשפה שנייה." */
+  --size-base: 17px;
+
+  /* ---- spacing and shape ---------------------------------------------- */
+  --gap-xs: 0.375rem;
+  --gap-sm: 0.625rem;
+  --gap: 1rem;
+  --gap-lg: 1.75rem;
+  --gap-xl: 2.75rem;
+  --radius: 10px;
+  --radius-sm: 6px;
+
+  /* Minimum touch target. Accessibility line in the PRD: "יעדי מגע 44px ומעלה." */
+  --touch: 44px;
+
+  --shadow: 0 1px 2px rgba(20, 49, 46, 0.05), 0 4px 16px rgba(20, 49, 46, 0.04);
+}
+
+/* ==========================================================================
+   Direction
+   ==========================================================================
+   "כיווניות RTL מלאה מהיסוד, לא כשכבת תיקון."
+
+   Everything below uses LOGICAL properties — inline-start, inline-end,
+   margin-inline — rather than left and right. That is what makes the whole
+   layout mirror correctly when `dir` flips, instead of needing a second set
+   of rules for English.
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: var(--size-base);
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ⚠️ "מספרים, תאריכים וקודי אשרה נשארים LTR בתוך טקסט עברי."
+   A visa code like א/5 or a date like 2026-08-27 must not be reordered by
+   the RTL algorithm when it sits inside a Hebrew sentence. */
+.ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+}
+
+/* Tabular numerals, so dates and amounts line up in columns.
+   "כולל ספרות טבלאיות לתאריכים ולסכומים." */
+.num {
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.25;
+  margin: 0;
+}
+
+h1 { font-size: 1.9rem; }
+h2 { font-size: 1.35rem; }
+h3 { font-size: 1.05rem; font-family: var(--font-body); font-weight: 700; }
+
+p { margin: 0 0 var(--gap-sm); }
+
+a {
+  color: var(--ink);
+  text-underline-offset: 3px;
+}
+
+/* ==========================================================================
+   Focus — keyboard navigation is a stated accessibility requirement
+   ========================================================================== */
+
+:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ==========================================================================
+   Layout
+   ==========================================================================
+   Mobile is the REFERENCE device, not an afterthought:
+   "קהל היעד מטפל בבירוקרטיה מהטלפון, ולעיתים קרובות בעמידה ובתור."
+   One column below 640px. Breakpoints 640 / 1024.
+   ========================================================================== */
+
+.page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: var(--gap) var(--gap) var(--gap-xl);
+}
+
+@media (min-width: 640px) {
+  .page { padding: var(--gap-lg) var(--gap-lg) var(--gap-xl); }
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--gap);
+  box-shadow: var(--shadow);
+}
+
+.stack > * + * { margin-block-start: var(--gap); }
+.stack-sm > * + * { margin-block-start: var(--gap-sm); }
+
+.muted { color: var(--muted); }
+.small { font-size: 0.875rem; }
+
+/* ==========================================================================
+   Controls
+   ========================================================================== */
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+.btn {
+  min-height: var(--touch);
+  padding: 0 var(--gap-lg);
+  border: 1px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  background: var(--line);
+  border-color: var(--line);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* ⭐ The primary action is where you are standing, so it earns the amber. */
+.btn-primary {
+  background: var(--amber);
+  border-color: var(--amber);
+  color: #fff;
+}
+
+.btn-quiet {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+  padding: 0 var(--gap);
+}
+
+/* An answer option. Big enough to hit with a thumb while standing in a queue. */
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  width: 100%;
+  min-height: var(--touch);
+  padding: var(--gap-sm) var(--gap);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  text-align: start;
+  cursor: pointer;
+}
+
+.option:hover { border-color: var(--muted); }
+
+.option[aria-pressed='true'] {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+  font-weight: 500;
+}
+
+.option-note {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+input[type='text'],
+input[type='number'],
+select {
+  min-height: var(--touch);
+  width: 100%;
+  padding: 0 var(--gap-sm);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+/* ==========================================================================
+   Certainty chips
+   ==========================================================================
+   ⭐ "ודאות היא אלמנט עיצובי. לכל דרישה תגית ודאות גלויה וסעיף מקור.
+      היושרה של המוצר חייבת להיראות, לא רק להיכתב."
+
+   ⚠️ "אין הסתמכות על צבע בלבד. כל דרגת ודאות נושאת גם סמל וגם מילה."
+   Every chip carries a symbol AND a word, so it survives colour blindness,
+   a black-and-white printout, and a screen reader.
+   ========================================================================== */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-xs);
+  padding: 0.1rem var(--gap-sm);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.chip-verified { color: var(--verified); }
+.chip-likely { color: var(--likely); }
+.chip-first_hand { color: var(--first-hand); }
+.chip-uncertain { color: var(--uncertain); }
+.chip-in_litigation { color: var(--in-litigation); }
+.chip-unchecked { color: var(--unchecked); }
