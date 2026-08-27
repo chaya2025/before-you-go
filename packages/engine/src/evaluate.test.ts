@@ -491,9 +491,12 @@ describe('⭐ nothing from the other route leaks in (Chaya, 27.8)', () => {
   it('gets the online channel throughout, because he has an ID', () => {
     const ids = r.roadmap.map((s) => s.step.id);
     expect(ids).toContain('fz.permit_online');
-    expect(ids).toContain('fz.completion_online');
     expect(ids).not.toContain('fz.permit_in_person');
     expect(ids).not.toContain('fz.permit_fee');
+    // ⚠️ And at 31 he files NO declaration at all — over 24 is exempt from the
+    // ליווי and therefore from the form. He is told so rather than left guessing.
+    expect(ids).not.toContain('fz.completion_online');
+    expect(ids).toContain('fz.no_declaration_needed');
   });
 
   it('and the person WITHOUT an ID still gets all of it', () => {
@@ -553,10 +556,13 @@ describe('⭐ everything shown belongs to the person shown it (27.8 sweep)', () 
   });
 
   it('⭐ the נהג חדש passenger limit is stated, and it outlasts the ליווי', () => {
-    const acc = noId.roadmap.find((s) => s.step.id === 'fz.accompanied_driving')!;
-    expect(acc.step.action.he).toContain('שני נוסעים');
-    expect(acc.step.action.he).toContain('21');
-    expect(acc.step.evidence.some((e) => e.quote?.includes('לא יסיע'))).toBe(true);
+    // ⚠️ It lives in its own step, NOT on the accompaniment one: the ליווי is
+    // scoped to under-24, while the passenger limit runs to 21 and new-driver
+    // status runs two years for everyone.
+    const limits = noId.roadmap.find((s) => s.step.id === 'fz.new_driver_limits')!;
+    expect(limits.step.action.he).toContain('שני נוסעים');
+    expect(limits.step.action.he).toContain('21');
+    expect(limits.step.evidence.some((e) => e.quote?.includes('שני נוסעים'))).toBe(true);
   });
 
   it('⭐ the "new driver" sign applies to EVERY new driver, not only under-24s', () => {
@@ -578,5 +584,69 @@ describe('⭐ everything shown belongs to the person shown it (27.8 sweep)', () 
     const test = noId.roadmap.find((s) => s.step.id === 'fz.test')!;
     expect(test.step.evidence.some((e) => e.quote?.includes('אישור על תשלום האגרה'))).toBe(true);
     expect(test.step.evidence.some((e) => e.claim.includes('לא התבקש אישור תשלום'))).toBe(true);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('⭐ נהג חדש, from the gov.il text Chaya supplied (27.8)', () => {
+  const young = evaluate(
+    p({ visa_type: 'a2', has_teudat_zehut: false, foreign_license: { kind: 'none' }, born: '2007-01' }),
+    TODAY,
+  );
+  const older = evaluate(
+    p({ visa_type: 'a2', has_teudat_zehut: false, foreign_license: { kind: 'none' }, born: '1990-01' }),
+    TODAY,
+  );
+  const step = (r: ReturnType<typeof evaluate>, id: string) => r.roadmap.find((s) => s.step.id === id);
+
+  it('⚠️ over 24 files NO completion declaration — he is exempt, and told so', () => {
+    // The bug: a 40-year-old was being sent to file a form gov.il explicitly
+    // exempts him from. "נהג שגילו 24 ומעלה פטור מהגשת טופס הצהרת סיום הליווי".
+    expect(step(older, 'fz.completion_in_person')).toBeUndefined();
+    expect(step(older, 'fz.no_declaration_needed')).toBeDefined();
+    expect(step(older, 'fz.accompanied_driving')).toBeUndefined();
+  });
+
+  it('under 24 does the ליווי and does file it', () => {
+    expect(step(young, 'fz.accompanied_driving')).toBeDefined();
+    expect(step(young, 'fz.completion_in_person')).toBeDefined();
+    expect(step(young, 'fz.no_declaration_needed')).toBeUndefined();
+  });
+
+  it('⭐ but new-driver status applies to BOTH — it is not an age rule', () => {
+    for (const r of [young, older]) {
+      expect(step(r, 'fz.new_driver_limits')).toBeDefined();
+      expect(step(r, 'fz.new_driver_sign')).toBeDefined();
+    }
+  });
+
+  it('the ליווי says how it is actually split, and how many hours', () => {
+    const acc = step(young, 'fz.accompanied_driving')!.step.action.he;
+    expect(acc).toContain('שלושת החודשים הראשונים');
+    expect(acc).toContain('21:00');
+    expect(acc).toContain('50 שעות');
+  });
+
+  it('⭐ the declaration says WHEN, and that he need not wait for the card', () => {
+    // Chaya: "הצהרת סיום ליווי - doesn't say when."
+    const dec = step(young, 'fz.completion_in_person')!.step;
+    const both = dec.action.he + dec.evidence.map((e) => e.quote ?? '').join(' ');
+    expect(both).toContain('שישה חודשים מיום מתן ההיתר');
+    // And the line that answers the year she spent waiting for a card.
+    expect(both).toContain('ללא צורך בהמתנה לקבלת הרישיון בדואר');
+  });
+
+  it('the sign says to take it OFF when he is no longer a new driver', () => {
+    const sign = step(young, 'fz.new_driver_sign')!.step;
+    expect(sign.action.he).toContain('להוריד');
+    expect(sign.evidence.some((e) => e.quote?.includes('נהג שאינו נהג חדש לא ינהג'))).toBe(true);
+  });
+
+  it('all of it is now quoted from the ministry, not inferred', () => {
+    for (const id of ['fz.new_driver_limits', 'fz.new_driver_sign']) {
+      const ev = step(young, id)!.step.evidence;
+      expect(ev.some((e) => e.certainty === 'verified' && e.quote), id).toBeTruthy();
+    }
   });
 });

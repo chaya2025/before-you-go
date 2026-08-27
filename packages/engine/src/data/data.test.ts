@@ -84,8 +84,10 @@ describe('traceability — hard rule 4, no exceptions', () => {
     const fieldOnly = ALL_STEPS.filter((s) =>
       s.evidence.every((e) => e.certainty === 'first_hand' || e.certainty === 'unchecked'),
     );
+    // ⭐ Was four. fz.completion_in_person GRADUATED on 27.8 when Chaya supplied
+    // the gov.il text: the timing and the online-only channel are now quoted,
+    // and her contrary experience sits beside them rather than alone.
     expect(fieldOnly.map((s) => s.id).sort()).toEqual([
-      'fz.completion_in_person',
       'fz.permit_fee',
       'fz.permit_in_person',
       'fz.plastic_fee',
