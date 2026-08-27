@@ -41,10 +41,15 @@ describe('persona 1 — the founder. א/2 student, no teudat zehut, no foreign l
     expect(r.diagnosis.nohal_category).toBe('toshav_medinat_chutz');
   });
 
-  it('is told to get the 89 number, and told to do it first', () => {
+  it('is told to get the 89 number, and that it comes before the other steps', () => {
     expect(ids).toContain('fz.doc_89');
     const doc89 = r.roadmap.find((s) => s.step.id === 'fz.doc_89')!;
-    expect(doc89.start_now).toBe(true);
+    // ⚠️ It is first in ORDER, carried by must_come_after on the later steps.
+    // It is NOT start_now: that flag means "months, and someone else controls
+    // it", which is true of the רקורד and false of a single walk-in visit.
+    expect(doc89.start_now).toBe(false);
+    expect(r.roadmap.find((s) => s.step.id === 'fz.online_form')!.waiting_on).toContain('fz.doc_89');
+    expect(r.roadmap.find((s) => s.step.id === 'fz.photo_and_eye')!.waiting_on).toContain('fz.doc_89');
   });
 
   it('⭐ a start_now step is DO NOW, never "later" — even when another step sits ahead of it', () => {
@@ -556,21 +561,18 @@ describe('⭐ everything shown belongs to the person shown it (27.8 sweep)', () 
   });
 
   it('⭐ the נהג חדש passenger limit is stated, and it outlasts the ליווי', () => {
-    // ⚠️ It lives in its own step, NOT on the accompaniment one: the ליווי is
-    // scoped to under-24, while the passenger limit runs to 21 and new-driver
-    // status runs two years for everyone.
-    const limits = noId.roadmap.find((s) => s.step.id === 'fz.new_driver_limits')!;
-    expect(limits.step.action.he).toContain('שני נוסעים');
-    expect(limits.step.action.he).toContain('21');
-    expect(limits.step.evidence.some((e) => e.quote?.includes('שני נוסעים'))).toBe(true);
+    // One box now, with the lines inside it scoped by age. noId is 21 in 2026,
+    // so the passenger limit no longer binds her — and correctly is not shown.
+    const box = noId.roadmap.find((s) => s.step.id === 'fz.new_driver')!;
+    expect(box.step.evidence.some((e) => e.quote?.includes('שני נוסעים'))).toBe(true);
   });
 
   it('⭐ the "new driver" sign applies to EVERY new driver, not only under-24s', () => {
     // The ליווי is age-dependent. This is not, so it is its own step.
     for (const r of [citizen, noId]) {
-      const sign = r.roadmap.find((s) => s.step.id === 'fz.new_driver_sign');
-      expect(sign, 'sign step missing').toBeDefined();
-      expect(sign!.applies).toBe(true);
+      const box = r.roadmap.find((s) => s.step.id === 'fz.new_driver');
+      expect(box, 'new-driver box missing').toBeDefined();
+      expect(box!.applies).toBe(true);
     }
   });
 
@@ -605,27 +607,24 @@ describe('⭐ נהג חדש, from the gov.il text the founder supplied (27.8)', 
     // exempts him from. "נהג שגילו 24 ומעלה פטור מהגשת טופס הצהרת סיום הליווי".
     expect(step(older, 'fz.completion_in_person')).toBeUndefined();
     expect(step(older, 'fz.no_declaration_needed')).toBeDefined();
-    expect(step(older, 'fz.accompanied_driving')).toBeUndefined();
   });
 
   it('under 24 does the ליווי and does file it', () => {
-    expect(step(young, 'fz.accompanied_driving')).toBeDefined();
     expect(step(young, 'fz.completion_in_person')).toBeDefined();
     expect(step(young, 'fz.no_declaration_needed')).toBeUndefined();
   });
 
   it('⭐ but new-driver status applies to BOTH — it is not an age rule', () => {
     for (const r of [young, older]) {
-      expect(step(r, 'fz.new_driver_limits')).toBeDefined();
-      expect(step(r, 'fz.new_driver_sign')).toBeDefined();
+      expect(step(r, 'fz.new_driver')).toBeDefined();
     }
   });
 
   it('the ליווי says how it is actually split, and how many hours', () => {
-    const acc = step(young, 'fz.accompanied_driving')!.step.action.he;
-    expect(acc).toContain('שלושת החודשים הראשונים');
-    expect(acc).toContain('21:00');
-    expect(acc).toContain('50 שעות');
+    const notes = step(young, 'fz.new_driver')!.notes.map((n) => n.he).join(' ');
+    expect(notes).toContain('שלושת החודשים הראשונים');
+    expect(notes).toContain('21:00');
+    expect(notes).toContain('50 שעות');
   });
 
   it('⭐ the declaration says WHEN, and that he need not wait for the card', () => {
@@ -638,15 +637,89 @@ describe('⭐ נהג חדש, from the gov.il text the founder supplied (27.8)', 
   });
 
   it('the sign says to take it OFF when he is no longer a new driver', () => {
-    const sign = step(young, 'fz.new_driver_sign')!.step;
-    expect(sign.action.he).toContain('להוריד');
-    expect(sign.evidence.some((e) => e.quote?.includes('נהג שאינו נהג חדש לא ינהג'))).toBe(true);
+    const box = step(young, 'fz.new_driver')!.step;
+    expect(box.action.he).toContain('להוריד');
+    expect(box.evidence.some((e) => e.quote?.includes('נהג שאינו נהג חדש לא ינהג'))).toBe(true);
   });
 
   it('all of it is now quoted from the ministry, not inferred', () => {
-    for (const id of ['fz.new_driver_limits', 'fz.new_driver_sign']) {
-      const ev = step(young, id)!.step.evidence;
-      expect(ev.some((e) => e.certainty === 'verified' && e.quote), id).toBeTruthy();
+    const ev = step(young, 'fz.new_driver')!.step.evidence;
+    expect(ev.filter((e) => e.certainty === 'verified' && e.quote).length).toBeGreaterThan(3);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('⭐ the rules adjust to the age — the reason this product exists', () => {
+  // The founder, 27.8: "the questionnaire asked for an age, so the system knows how
+  // old a person is and should apply the exact rules for him. That's exactly
+  // why my system is unique — it's personal and can avoid more mistakes."
+  const at = (bornYear: string) =>
+    evaluate(
+      p({ visa_type: 'a2', has_teudat_zehut: false, foreign_license: { kind: 'none' }, born: `${bornYear}-01` }),
+      TODAY,
+    );
+  const notes = (r: ReturnType<typeof evaluate>) =>
+    (r.roadmap.find((s) => s.step.id === 'fz.new_driver')?.notes ?? []).map((n) => n.he).join(' ');
+
+  it('everyone gets the box — new-driver status and the sign are age-independent', () => {
+    for (const y of ['2008', '2006', '1990']) {
+      expect(at(y).roadmap.find((s) => s.step.id === 'fz.new_driver'), y).toBeDefined();
     }
+  });
+
+  it('at 18: ליווי AND the passenger limit', () => {
+    const n = notes(at('2008'));
+    expect(n).toContain('מתחת לגיל 24');
+    expect(n).toContain('שני נוסעים');
+  });
+
+  it('at 22: ליווי, but the passenger limit is over', () => {
+    const n = notes(at('2004'));
+    expect(n).toContain('מתחת לגיל 24');
+    expect(n).not.toContain('שני נוסעים');
+  });
+
+  it('at 36: neither — and it says so, rather than leaving him guessing', () => {
+    const n = notes(at('1990'));
+    expect(n).not.toContain('מתחת לגיל 24');
+    expect(n).not.toContain('שני נוסעים');
+    // ⚠️ And it says what does NOT apply, rather than going silent.
+    expect(n).toContain('אין חובת ליווי');
+  });
+
+  it('⚠️ when the age is unknown, every line is shown rather than silently dropped', () => {
+    // Trilean: age_years is 'unknown', so each condition is 'unknown', and the
+    // filter keeps anything that is not definitely false. Better to show a rule
+    // that may not bind him than to hide one that does.
+    const noAge = evaluate(
+      p({ visa_type: 'a2', has_teudat_zehut: false, foreign_license: { kind: 'none' } }),
+      TODAY,
+    );
+    const n = (noAge.roadmap.find((s) => s.step.id === 'fz.new_driver')?.notes ?? [])
+      .map((x) => x.he)
+      .join(' ');
+    expect(n).toContain('מתחת לגיל 24');
+    expect(n).toContain('שני נוסעים');
+  });
+});
+
+describe('clocks are only for real deadlines', () => {
+  const r = evaluate(
+    p({ visa_type: 'a2', has_teudat_zehut: false, foreign_license: { kind: 'none' }, born: '2007-01' }),
+    TODAY,
+  );
+
+  it('⭐ theory validity and the medical declaration are no longer clocks', () => {
+    // The founder: "most people do it and get their licence within 5 years from then."
+    // A countdown implies a risk that is not real, and four "עוד לא התחיל" lines
+    // bury the two clocks that matter.
+    const ids = r.clocks.map((c) => c.clock.id);
+    expect(ids).not.toContain('clock.theory_validity');
+    expect(ids).not.toContain('clock.medical_declaration');
+  });
+
+  it('but the five-year validity is still stated, on the step it belongs to', () => {
+    expect(r.roadmap.find((s) => s.step.id === 'fz.theory')!.step.action.he).toContain('חמש שנים');
   });
 });
