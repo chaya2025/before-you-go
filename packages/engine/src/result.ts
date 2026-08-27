@@ -1,5 +1,6 @@
 import type { Trilean, ConditionField, NohalCategory, Track, Facts } from './condition';
 import type { Step, Blocker, Clock, ContinuousCondition, Text } from './domain';
+import type { SourcePart } from './certainty';
 import type { ProfileWarning } from './profile';
 import type { IsoDate } from './dates';
 
@@ -73,6 +74,30 @@ export type ClockState = {
   missing_answer?: ConditionField;
 };
 
+/**
+ * ⭐ Something that has to be dealt with BEFORE the roadmap means anything.
+ *
+ * From the POC document: "אשרה שפג תוקפה אינה הערת שוליים במפת הדרכים — היא
+ * הופכת לשלב הראשון בה."
+ *
+ * ⚠️ Found by audit on 27.8: `visa_valid_now: false` changed absolutely nothing
+ * in the output. The question was being asked and the answer thrown away, which
+ * is worse than not asking — the user reasonably assumes an answer that changed
+ * nothing did not matter.
+ */
+export type UrgentIssue = {
+  id: string;
+  title: Text;
+  /** What it actually stops him doing. */
+  consequence: Text;
+  /** What to do about it. Never just the bad news. */
+  action: Text;
+  evidence: SourcePart[];
+};
+
+/** Whether the grade he asked for is available to his category at all. */
+export type CeilingStatus = 'within' | 'above' | 'unknown';
+
 export type Diagnosis = {
   nohal_category: NohalCategory | 'unknown';
   track: Track | 'unknown';
@@ -83,6 +108,25 @@ export type Diagnosis = {
   extra_requirements: Text[];
   /** Anything specific to his status, e.g. the ב/2 short-visa trap. */
   caveat?: Text;
+
+  /** The grade he asked to convert to, echoed back so the summary is checkable. */
+  requested_class: string | 'unknown';
+
+  /**
+   * ⭐ Is that grade even available to him?
+   *
+   * נוהל ס' 1(ג): a תושב מדינת חוץ may not be issued anything outside 176-181.
+   * That is an ENTITLEMENT limit — there is no conversion route to a bus or a
+   * heavy truck under any conditions, however long he has driven one.
+   */
+  requested_class_status: CeilingStatus;
+  ceiling_explanation?: Text;
+
+  /**
+   * Whether the two tests are expected. Derived from the roadmap rather than
+   * recomputed, so the summary can never disagree with the steps below it.
+   */
+  exemption: 'exempt' | 'tests_required' | 'unknown';
   /** Everything he left unanswered that the roadmap actually wanted. */
   unanswered: ConditionField[];
 };
@@ -104,6 +148,12 @@ export type Result = {
 
   /** Non-null means the roadmap is empty and this is the whole answer. */
   blocked: BlockedResult | null;
+
+  /**
+   * ⚠️ Deal with these first. Rendered above the roadmap, because a roadmap
+   * built on a lapsed visa describes a process he cannot currently start.
+   */
+  urgent: UrgentIssue[];
 
   roadmap: RoadmapStep[];
   clocks: ClockState[];

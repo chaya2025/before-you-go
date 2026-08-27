@@ -11,7 +11,9 @@
   "scripts": {
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "check": "npm run check --silent --workspace @byg/engine --"
+    "check": "npm run check --silent --workspace @byg/engine --",
+    "dev:api": "npm run dev --workspace @byg/api",
+    "dev:web": "npm run dev --workspace @byg/web"
   },
   "devDependencies": {
     "typescript": "^7.0.2",
