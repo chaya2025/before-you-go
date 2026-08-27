@@ -5,6 +5,7 @@ import { UI, pick, dirFor, type Lang } from './i18n';
 import { Intake, type Answers } from './components/Intake';
 import { Diagnosis, Blocked } from './components/Diagnosis';
 import { Roadmap } from './components/Roadmap';
+import { Urgent } from './components/Urgent';
 
 /**
  * ============================================================================
@@ -152,6 +153,9 @@ export function App() {
             <Blocked result={result} lang={lang} onBack={restart} />
           ) : (
             <>
+              {/* ⚠️ Above the road, not beside it. A roadmap built on a lapsed
+                  visa describes a process he cannot currently start. */}
+              <Urgent issues={result.urgent} lang={lang} />
               <Roadmap result={result} lang={lang} />
               <button className="btn btn-quiet" onClick={restart}>
                 {t('start_over')}
