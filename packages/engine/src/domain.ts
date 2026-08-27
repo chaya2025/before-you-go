@@ -17,6 +17,21 @@ export const Text = z.object({ he: z.string().min(1), en: z.string().min(1) });
 export type Text = z.infer<typeof Text>;
 
 /**
+ * A checklist line, optionally scoped to who it applies to.
+ *
+ * ⚠️ Added 27.8. The founder, using the site as a citizen with a teudat zehut and no
+ * foreign licence: "it still gives me the option of an 8-9... make sure to be
+ * specific to the actual route where things apply."
+ *
+ * She was right. Steps shared between the two channels were carrying checklist
+ * lines written for the no-teudat-zehut case — asking a citizen whether he has
+ * his 89 document, which he was correctly never told to get. `when` scopes the
+ * line to the person it is actually about.
+ */
+export const ChecklistItem = Text.extend({ when: Condition.optional() });
+export type ChecklistItem = z.infer<typeof ChecklistItem>;
+
+/**
  * ⚠️ Every requirement shown to a user cites where it came from (hard rule 4).
  * `.min(1)` is doing real work here: a step with an empty evidence array fails
  * to load. There is no way to add an unsourced requirement to this system.
@@ -105,7 +120,7 @@ export const Step = z.object({
    * גיליון 13 principle 15 — a wasted visit costs a day off work and an
    * appointment that is hard to get.
    */
-  checklist: z.array(Text).default([]),
+  checklist: z.array(ChecklistItem).default([]),
 
   /**
    * ⭐ the founder's rule, and it has no equivalent in גיליון 13:

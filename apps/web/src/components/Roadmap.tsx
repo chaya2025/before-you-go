@@ -141,11 +141,22 @@ function Step({ item, lang }: { item: RoadmapStep; lang: Lang }) {
         </p>
       ))}
 
-      {step.checklist.map((c, i) => (
+      {/* ⚠️ item.checklist, not step.checklist — the engine has already removed
+          the lines that do not apply to this person. Rendering the raw list is
+          how a citizen ended up being asked about his 89 document. */}
+      {item.checklist.map((c, i) => (
         <p key={i} className="small">
           ☐ {pick(c, lang)}
         </p>
       ))}
+
+      {/* What to physically carry, resolved against who he actually is. */}
+      {item.documents.length > 0 && (
+        <p className="small">
+          🎒 {t('bring')}:{' '}
+          {item.documents.map((d) => pick(d.name, lang)).join(' · ')}
+        </p>
+      )}
 
       {step.cost?.amount_ils !== undefined && (
         <p className="small">
