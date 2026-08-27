@@ -63,10 +63,14 @@ export const FROM_ZERO_STEPS: StepInput[] = [
       en: 'Go to a licensing office with your original passport and a valid visa. You get an identity number starting with 89, printed on an A4 sheet.',
     },
     applies_when: NO_TEUDAT_ZEHUT,
-    // ⚠️ First. Not because it is urgent, but because the green form's identity
-    // field expects this number. Doing it later costs two wasted visits.
+    // ⚠️ First in ORDER, and that is all. `must_come_after` on the later steps
+    // already carries that; it is not a long-lead item.
+    //
+    // It used to be marked start_now, which rendered as "begin today, it takes
+    // time" — false for a single walk-in visit. Chaya, 27.8: "it literally takes
+    // one visit." start_now means "months, and someone else controls it", which
+    // is true of the רקורד and of nothing else here.
     sequence_position: 2,
-    act_when: 'start_now',
     channel: 'licensing_office',
     authority: "משרד הרישוי",
     requires_appointment: false,
@@ -163,10 +167,10 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     requires_documents: ['doc.identity', 'doc.passport', 'doc.form_89'],
     checklist: [
       {
-        he: "הטופס הלבן (89) איתך? זה הדף הפיזי. הטופס הירוק מקוון ואין ממנו מה להביא.",
-        en: 'Do you have the white form (89)? That is the physical sheet. The green form is online, there is nothing to bring.',
-        // ⚠️ Only for someone who HAS an 89. A citizen never gets one, and
-        // asking him about it was the bug Chaya found on 27.8.
+        // The green-form clarification lives on the green-form step and nowhere
+        // else — repeating it at every stop is noise, not emphasis.
+        he: "הטופס הלבן (89) איתך?",
+        en: 'Do you have the white form (89) with you?',
         when: NO_TEUDAT_ZEHUT,
       },
     ],
@@ -458,50 +462,83 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     ],
   },
 
+
   {
-    id: 'fz.accompanied_driving',
+    id: 'fz.new_driver',
     track: 'from_zero',
-    title: { he: "שישה חודשי נהיגה עם מלווה", en: 'Six months of accompanied driving' },
+    title: { he: "מגבלות נהג חדש", en: 'New-driver restrictions' },
     action: {
-      he:
-        "מתחת לגיל 24 חלה תקופת ליווי של שישה חודשים. ⚠️ היא נספרת מיום הוצאת ההיתר, לא מיום הטסט.\n\n" +
-        "שלושת החודשים הראשונים — ליווי מלא, ביום ובלילה. שלושת הבאים — ליווי בשעות הלילה בלבד, בין 21:00 ל-06:00.\n\n" +
-        "בסך הכול 50 שעות נהיגה לפחות: 20 בדרך עירונית, 15 בדרך בין-עירונית, ו-15 בשעות הלילה. אין הגבלה על מספר המלווים.\n\n" +
-        "⚠️ אם לא סיימת את התוכנית בתוך שישה חודשים — תקבל היתר נהיגה נוסף לשישה חודשים עד להשלמתה.",
-      en:
-        'Under 24 you must drive accompanied for six months. ⚠️ It counts from the day the permit issues, not from the test.\n\n' +
-        'The first three months are fully accompanied, day and night. The next three are night-time only, between 21:00 and 06:00.\n\n' +
-        'Fifty hours of driving at least: 20 urban, 15 interurban, 15 at night. There is no limit on how many different people accompany you.\n\n' +
-        '⚠️ If you have not finished within six months, you are given a further six-month permit until you do.',
+      he: "אתה \"נהג חדש\" למשך שנתיים מיום קבלת הרישיון. כל עוד אתה נהג חדש, חובה להצמיד שלט \"נהג חדש\" לשוליים התחתונים של השמשה האחורית בכל רכב שאתה נוהג בו — 12X20 ס\"מ, אותיות בגובה 40 מ\"מ, שחור על רקע צהוב מחזיר אור. ⚠️ וכשאתה כבר לא נהג חדש, חובה להוריד אותו.",
+      en: 'You are a "new driver" for two years from the day you receive the licence. Throughout, you must fix a "new driver" sign to the lower edge of the rear window of any car you drive — 12x20 cm, 40 mm letters, black on reflective yellow. \u26a0\ufe0f And once you are no longer a new driver, you must take it off.',
     },
-    applies_when: { field: 'age_years', op: 'lt', value: 24 },
+    /**
+     * ⭐ ONE box, and the lines inside it adjust to the person.
+     *
+     * Chaya, 27.8: "the questionnaire asked for an age, so the system knows how
+     * old a person is and should apply the exact rules for him. That's exactly
+     * why my system is unique — it's personal and can avoid more mistakes."
+     *
+     * So the box shows for everyone (new-driver status and the sign are
+     * age-independent), and the ליווי and passenger lines appear only for the
+     * ages they bind. Nobody reads a restriction that is not his.
+     */
+    applies_when: EVERYONE,
     sequence_position: 12,
     channel: 'unknown',
+    notes: [
+      {
+        // ── under 24: the accompaniment programme ──
+        he: "מתחת לגיל 24 — חובת ליווי של שישה חודשים מיום הוצאת ההיתר. ⚠️ מיום ההיתר, לא מיום הטסט. שלושת החודשים הראשונים ליווי מלא ביום ובלילה, ושלושת הבאים בשעות הלילה בלבד (21:00–06:00).",
+        en: 'Under 24 — six months of accompanied driving from the day the permit issues. \u26a0\ufe0f From the permit, not from the test. The first three months fully accompanied day and night, the next three at night only (21:00–06:00).',
+        when: { field: 'age_years', op: 'lt', value: 24 },
+      },
+      {
+        he: "בסך הכול 50 שעות נהיגה לפחות: 20 בדרך עירונית, 15 בדרך בין-עירונית, ו-15 בשעות הלילה. אין הגבלה על מספר המלווים. אם לא סיימת בתוך שישה חודשים — תקבל היתר נוסף לשישה חודשים עד להשלמה.",
+        en: 'Fifty hours of driving at least: 20 urban, 15 interurban, 15 at night. No limit on how many different people accompany you. If you have not finished within six months, you get a further six-month permit until you do.',
+        when: { field: 'age_years', op: 'lt', value: 24 },
+      },
+      {
+        // ── under 21: the passenger limit, which outlives the ליווי ──
+        he: "⚠️ מתחת לגיל 21 — אסור להסיע יותר משני נוסעים, עד שימלאו לך 21. אם יושב מלווה במושב שלצידך, ההגבלה אינה חלה.",
+        en: '\u26a0\ufe0f Under 21 — you may not carry more than two passengers, until you turn 21. If an accompanying driver sits beside you, the restriction does not apply.',
+        when: { field: 'age_years', op: 'lt', value: 21 },
+      },
+      {
+        // ── 24 and over: say what does NOT apply, so he is not left wondering ──
+        he: "מגיל 24 ומעלה אין חובת ליווי ואין הגבלת נוסעים — אבל שאר תנאי נהג חדש עדיין חלים עליך.",
+        en: 'From 24 upwards there is no accompaniment requirement and no passenger limit — but the rest of the new-driver conditions still apply to you.',
+        when: { field: 'age_years', op: 'gte', value: 24 },
+      },
+    ],
     evidence: [
       servicePage(
-        "הגשת בקשה להוצאת רישיון נהיגה",
-        "ליווי של חצי שנה מיום הוצאת הרישיון, מתחת לגיל 24, ובתנאי שלא נעברה עבירה",
-        "מתחת לגיל 24 - הרישיון יישלח רק לאחר הצהרת נהג חדש על סיום תכנית הליווי, בתנאי שעברה חצי שנה מיום הוצאת רישיון הנהיגה ובתנאי שלא נעברה עבירה.",
+        "נהג חדש ומלווה",
+        "נהג חדש לשנתיים; מתחת ל-24 נקרא \"נהג חדש צעיר\"; מגיל 24 יש פטור מליווי",
+        "נהג מוגדר כנהג חדש בשנתיים הראשונות לאחר קבלת רישיון הנהיגה. נהג חדש צעיר הוא נהג חדש, שטרם מלאו לו 24 שנים... נהג חדש שגילו 24 שנים או יותר פטור מליווי.",
       ),
-      // ⭐ Added 27.8 at Chaya's request — the restriction nobody mentions
-      // alongside the ליווי, and it outlasts it.
-      //
-      // ⚠️ 🟡 rather than 🟢 on purpose. Chaya found the official page
-      // (gov.il/he/pages/new_driver) and it IS the right source, but gov.il
-      // returns 403 to automated fetching — the risk her own research recorded
-      // on 20.8 — so the quote below comes from the statute text via wikisource
-      // rather than from the ministry page. It upgrades to 🟢 the moment the
-      // sentence is copied from gov.il by hand.
       servicePage(
         "נהג חדש ומלווה",
-        "שישה חודשי ליווי מיום ההיתר הראשון: שלושה מלאים ושלושה בשעות הלילה בלבד",
+        "שישה חודשי ליווי מיום ההיתר: שלושה מלאים ושלושה בשעות הלילה בלבד",
         "חובת הליווי תחול לתקופה של שישה חודשים מיום קבלת היתר הנהיגה הראשון, מהם שלושה חודשי ליווי מלא במהלך נהיגה ביום ובלילה, ושלושה חודשי ליווי בשעות הלילה בלבד. שעות הלילה הן השעות שבין 21:00 ל-06:00.",
       ),
       servicePage(
         "נהג חדש ומלווה",
-        "מכסת השעות, ומה קורה אם התוכנית לא הסתיימה בזמן",
-        "50 שעות לפחות, מהן 20 שעות נהיגה בדרך עירונית, 15 שעות נהיגה בדרך בין עירונית, ו-15 שעות נהיגה בשעות הלילה... אם בתום שישה חודשים לא הסתיימה תוכנית הליווי, יינתן לנהג היתר נהיגה לשישה חודשים נוספים עד להשלמתה.",
+        "מכסת השעות, ריבוי מלווים, והיתר נוסף אם לא הסתיים בזמן",
+        "50 שעות לפחות, מהן 20 שעות נהיגה בדרך עירונית, 15 שעות נהיגה בדרך בין עירונית, ו-15 שעות נהיגה בשעות הלילה... אין הגבלה על מספר המלווים לשם ביצוע תכנית הליווי... אם בתום שישה חודשים לא הסתיימה תוכנית הליווי, יינתן לנהג היתר נהיגה לשישה חודשים נוספים עד להשלמתה.",
       ),
+      servicePage(
+        "נהג חדש ומלווה",
+        "הגבלת שני הנוסעים עד גיל 21, ומלווה שמסיר אותה",
+        "נהג חדש צעיר, שטרם מלאו לו 21 שנים, לא יורשה להסיע יותר משני נוסעים, אלא אם יושב מלווה במושב שלצידו. נהג חדש, כל עוד רשום ברישיון הנהיגה שלו שהוא נהג חדש, אינו רשאי להסיע יותר משני נוסעים ברכב, אלא לאחר שימלאו לו 21 שנים.",
+      ),
+      servicePage(
+        "נהג חדש ומלווה",
+        "חובת השלט, מידותיו ומיקומו — וחובת הסרתו כשאינך עוד נהג חדש",
+        "כל נהג המוגדר כנהג חדש חייב לתלות על השמשה האחורית של כלי הרכב בו הוא נוהג שלט המיידע את הנהגים האחרים כי לפניהם נהג חסר ניסיון. ברכב פרטי וברכב מסחרי עד 4 טונות, יש להציג שלט בגודל של 12X20 סנטימטרים. גובה האותיות יהיה 40 מילימטרים בצבע שחור על גבי רקע צהוב המחזיר אור. השלט יוצמד לשוליים התחתונים של השמשה האחורית... נהג שאינו נהג חדש לא ינהג ברכב כאשר מוצמד שלט זה לשמשה האחורית.",
+      ),
+      // ⬜ The page attributes the sign to תקנות התעבורה without naming a
+      // regulation number, and no source found gives one.
+      notChecked("מספר התקנה המדויק שמחייב את שלט \"נהג חדש\""),
     ],
   },
 
@@ -619,68 +656,7 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     evidence: [fieldReport("אגרת כרטיס הפלסטיק משולמת בסניף דואר")],
   },
 
-  {
-    id: 'fz.new_driver_limits',
-    track: 'from_zero',
-    title: { he: "מגבלות נהג חדש", en: 'New-driver restrictions' },
-    action: {
-      he:
-        "אתה \"נהג חדש\" למשך שנתיים מיום קבלת הרישיון.\n\n" +
-        "⚠️ כל עוד רשום ברישיונך שאתה נהג חדש, אינך רשאי להסיע יותר משני נוסעים — עד שימלאו לך 21. אם יושב מלווה במושב שלצידך, ההגבלה אינה חלה.",
-      en:
-        'You are a "new driver" for two years from the day you receive the licence.\n\n' +
-        '⚠️ While your licence says you are a new driver, you may not carry more than two passengers — until you turn 21. If an accompanying driver sits beside you, the restriction does not apply.',
-    },
-    // ⚠️ NOT scoped to under-24 like the ליווי. The passenger limit runs to 21,
-    // and the new-driver status itself runs two years for everyone — so this is
-    // its own step rather than a line on the accompaniment one.
-    applies_when: EVERYONE,
-    sequence_position: 12,
-    channel: 'unknown',
-    evidence: [
-      servicePage(
-        "נהג חדש ומלווה",
-        "נהג חדש הוא נהג חדש לשנתיים, ומי שטרם מלאו לו 21 אינו רשאי להסיע יותר משני נוסעים",
-        "נהג מוגדר כנהג חדש בשנתיים הראשונות לאחר קבלת רישיון הנהיגה. נהג חדש, כל עוד רשום ברישיון הנהיגה שלו שהוא נהג חדש, אינו רשאי להסיע יותר משני נוסעים ברכב, אלא לאחר שימלאו לו 21 שנים.",
-      ),
-      servicePage(
-        "נהג חדש ומלווה",
-        "מלווה במושב שלצד הנהג מסיר את ההגבלה",
-        "נהג חדש צעיר, שטרם מלאו לו 21 שנים, לא יורשה להסיע יותר משני נוסעים, אלא אם יושב מלווה במושב שלצידו.",
-      ),
-    ],
-  },
 
-  {
-    id: 'fz.new_driver_sign',
-    track: 'from_zero',
-    title: { he: "שלט \"נהג חדש\" על הרכב", en: 'Display the "new driver" sign' },
-    action: {
-      he:
-        "הצמד שלט \"נהג חדש\" לשוליים התחתונים של השמשה האחורית בכל רכב שאתה נוהג בו, כל עוד אתה נהג חדש.\n\n" +
-        "ברכב פרטי ומסחרי עד 4 טון: שלט בגודל 12X20 ס\"מ, אותיות בגובה 40 מ\"מ, שחור על רקע צהוב מחזיר אור.\n\n" +
-        "⚠️ וכשאתה כבר לא נהג חדש — חובה להוריד אותו.",
-      en:
-        'Attach a "new driver" sign to the lower edge of the rear window of any car you drive, for as long as you are a new driver.\n\n' +
-        'For a private or commercial vehicle up to 4 tonnes: 12x20 cm, 40 mm letters, black on reflective yellow.\n\n' +
-        '⚠️ And once you are no longer a new driver, you must take it off.',
-    },
-    // ⚠️ EVERY new driver, not only those under 24. The ליווי is age-dependent;
-    // this is not, which is why it is its own step rather than a note on that one.
-    applies_when: EVERYONE,
-    sequence_position: 12,
-    channel: 'unknown',
-    evidence: [
-      servicePage(
-        "נהג חדש ומלווה",
-        "חובת השלט, מידותיו, מיקומו — וחובת הסרתו כשהנהג אינו עוד נהג חדש",
-        "כל נהג המוגדר כנהג חדש חייב לתלות על השמשה האחורית של כלי הרכב בו הוא נוהג שלט המיידע את הנהגים האחרים כי לפניהם נהג חסר ניסיון. ברכב פרטי וברכב מסחרי עד 4 טונות, יש להציג שלט בגודל של 12X20 סנטימטרים. גובה האותיות יהיה 40 מילימטרים בצבע שחור על גבי רקע צהוב המחזיר אור. השלט יוצמד לשוליים התחתונים של השמשה האחורית... נהג חדש לא ינהג ברכב ללא שלט נהג חדש מוצמד לשמשה האחורית. נהג שאינו נהג חדש לא ינהג ברכב כאשר מוצמד שלט זה לשמשה האחורית.",
-      ),
-      // ⬜ The page attributes the rule to תקנות התעבורה without naming a
-      // regulation number, and no source found gives one.
-      notChecked("מספר התקנה המדויק שמחייב את השלט"),
-    ],
-  },
 
   {
     id: 'fz.no_declaration_needed',

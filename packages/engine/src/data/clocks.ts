@@ -4,13 +4,19 @@ import { nohal, servicePage, official, fieldReport, LAST_VERIFIED_LATE } from '.
 
 /**
  * ============================================================================
- * CLOCKS — six of them, and conflating any two costs someone real time
+ * CLOCKS — four of them, and conflating any two costs someone real time
  * ============================================================================
  *
  * גיליון 13 principle 1 names the worst confusion in the whole domain:
  *
  *   "driving_allowed_until מול conversion_deadline. זו נקודת הבלבול שגורמת
  *    לאנשים לוותר שנים לפני שצריך."
+ *
+ * ⚠️ Theory validity and the medical declaration used to be clocks here and
+ * are not any more. Chaya, 27.8: "most people do it and get their licence
+ * within 5 years from then." A countdown implies a risk that is not real,
+ * and four lines reading "עוד לא התחיל" bury the two clocks that matter.
+ * Both are still stated — as plain text on the step they belong to.
  *
  * People hear "one year" and conclude their chance is gone. It is not. They may
  * no longer DRIVE on the foreign licence, but they may still CONVERT it for
@@ -142,43 +148,5 @@ export const CLOCKS: ClockInput[] = [
     ],
   },
 
-  {
-    id: 'clock.theory_validity',
-    name: { he: "תוקף מבחן התיאוריה", en: 'How long your theory pass lasts' },
-    applies_when: { field: 'track', op: 'eq', value: 'from_zero' },
-    anchor: 'theory_passed',
-    duration_days: 1826,
-    on_expiry: {
-      he: "המבחן העיוני פג. יש להיבחן מחדש.",
-      en: 'Your theory pass has expired. You need to sit it again.',
-    },
-    warn_before_days: 90,
-    evidence: [
-      servicePage(
-        "המבחן העיוני (תאוריה)",
-        "תוקף המבחן העיוני הוא חמש שנים",
-        "תוקף המבחן העיוני הוא ל-5 שנים.",
-      ),
-    ],
-  },
 
-  {
-    id: 'clock.medical_declaration',
-    name: { he: "תוקף ההצהרה הרפואית", en: 'How long your medical declaration lasts' },
-    applies_when: { field: 'track', op: 'eq', value: 'from_zero' },
-    anchor: 'medical_declaration',
-    duration_days: 1826,
-    on_expiry: {
-      he: "ההצהרה הרפואית פגה ויש להגיש חדשה.",
-      en: 'Your medical declaration has expired and needs to be resubmitted.',
-    },
-    warn_before_days: 90,
-    evidence: [
-      servicePage(
-        "הגשת בקשה להוצאת רישיון נהיגה",
-        "ההצהרה הרפואית תקפה חמש שנים",
-        "ההצהרה הרפואית תקפה ל5 שנים.",
-      ),
-    ],
-  },
 ];
