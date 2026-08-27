@@ -28,6 +28,9 @@ export function App() {
   const [screen, setScreen] = useState<Screen>('intake');
   const [statuses, setStatuses] = useState<StatusesResponse | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  /** Kept so ticking a step can re-run the engine with the same answers. */
+  const [answers, setAnswers] = useState<Answers | null>(null);
+  const [done, setDone] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,11 +54,13 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function submit(answers: Answers) {
+  async function submit(a: Answers, completed: string[] = []) {
     setBusy(true);
     setError(null);
+    setAnswers(a);
+    setDone(completed);
     try {
-      const r = await fetchReadiness(answers);
+      const r = await fetchReadiness({ ...a, completed_steps: completed });
       setResult(r);
       // A blocked result has no roadmap to confirm a diagnosis for.
       setScreen(r.blocked ? 'roadmap' : 'diagnosis');
@@ -72,8 +77,32 @@ export function App() {
 
   function restart() {
     setResult(null);
+    setAnswers(null);
+    setDone([]);
     setScreen('intake');
     setError(null);
+  }
+
+  /**
+   * ⭐ Ticking a step re-runs the WHOLE engine with it marked done.
+   *
+   * Not a cosmetic strike-through: the next step unblocks, the progress moves,
+   * and a clock that only exists once you are in a particular situation starts
+   * ticking. Chaya's design — "I want the system to realise where the user
+   * actually is."
+   */
+  async function toggleStep(id: string, isDone: boolean) {
+    if (!answers) return;
+    const next = isDone ? [...done, id] : done.filter((x) => x !== id);
+    setDone(next);
+    setBusy(true);
+    try {
+      setResult(await fetchReadiness({ ...answers, completed_steps: next }));
+    } catch {
+      setError(t('error_offline'));
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -156,7 +185,7 @@ export function App() {
               {/* ⚠️ Above the road, not beside it. A roadmap built on a lapsed
                   visa describes a process he cannot currently start. */}
               <Urgent issues={result.urgent} lang={lang} />
-              <Roadmap result={result} lang={lang} />
+              <Roadmap result={result} lang={lang} onToggle={toggleStep} />
               <button className="btn btn-quiet" onClick={restart}>
                 {t('start_over')}
               </button>

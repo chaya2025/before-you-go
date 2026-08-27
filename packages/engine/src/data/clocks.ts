@@ -123,6 +123,10 @@ export const CLOCKS: ClockInput[] = [
       en: '⏱️ Your window to choose how the licence reaches you',
     },
     applies_when: EVERYONE,
+    // ⚠️ Hidden until he tells us the card never arrived and he has started the
+    // duplicate route. Until then it is a countdown on a thing that has not
+    // happened, sitting next to two that have.
+    activated_by: 'fz.duplicate',
     anchor: 'duplicate_fee_paid',
     /**
      * ⚠️ The shortest window in the entire research. Nothing else is close.

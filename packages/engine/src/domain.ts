@@ -347,6 +347,23 @@ export const Clock = z.object({
   /** Warn this far ahead. The נוהל itself recommends 60 days for the conversion window. */
   warn_before_days: z.number().int().min(0).default(0),
 
+  /**
+   * ⭐ Only surface this clock once the named step has actually been done.
+   *
+   * Chaya, 27.8, on the 48-hour delivery window: "hopefully it shouldn't apply
+   * to anyone, because they'll get it on their first try... as of now there's
+   * no need for it to even display, it just confuses."
+   *
+   * She is right, and the fix is not to delete it — the clock is real, and it is
+   * the shortest one in the whole research. It simply belongs to a situation
+   * most people never enter. So it stays in the data and appears only when he
+   * ticks the step that starts it.
+   *
+   * This is the first piece of her larger idea: the system should know where the
+   * person actually is, and show him that.
+   */
+  activated_by: z.string().optional(),
+
   evidence: Evidence,
 });
 export type Clock = z.infer<typeof Clock>;
