@@ -387,3 +387,44 @@ export const EXEMPTION_RANGE = { from: 176, to: 180 } as const;
 export function regulationFor(licenseClass: string): number | undefined {
   return CLASS_TO_REGULATION[licenseClass];
 }
+
+/**
+ * The heavy grades sit in תקנות 182-185.
+ *
+ * ⚠️ Deliberately a BAND, not a per-grade mapping. גיליון 06 closed question 18
+ * for 176-181 by quoting each regulation's own heading, but stopped there:
+ * "נותרו 182-185 (E, C, D, D1, D2, D3) — לא מופו לתקנה בודדת".
+ * Inventing which of them is 183 would be exactly the kind of confident guess
+ * this system exists to avoid, and nothing here needs it — the only question
+ * that matters is whether a grade sits above a category's ceiling.
+ */
+export const HEAVY_CLASS_BAND = { from: 182, to: 185 } as const;
+export const HEAVY_CLASSES = ['C', 'D', 'D1', 'D2', 'D3', 'E'] as const;
+
+/** The lowest regulation a grade could belong to. Enough to compare against a ceiling. */
+export function regulationBandFor(licenseClass: string): { from: number; to: number } | undefined {
+  const exact = CLASS_TO_REGULATION[licenseClass];
+  if (exact !== undefined) return { from: exact, to: exact };
+  if ((HEAVY_CLASSES as readonly string[]).includes(licenseClass)) return { ...HEAVY_CLASS_BAND };
+  return undefined;
+}
+
+/**
+ * ⭐ Is this grade available to this category at all?
+ *
+ * נוהל ס' 1(ג) on תושב מדינת חוץ: "ובלבד שרשות הרישוי לא תיתן לו רישיון נהיגה
+ * אלא לפי תקנות 176-181". That is an ENTITLEMENT limit, not a difficulty — there
+ * is no conversion route to a bus or a heavy truck under any conditions.
+ *
+ * F1 validation 3 requires the system to say so rather than quietly building a
+ * roadmap that cannot end in a licence.
+ */
+export function classWithinCeiling(
+  licenseClass: string,
+  ceiling: { from: number; to: number } | null | undefined,
+): 'within' | 'above' | 'unknown' {
+  if (!ceiling) return 'unknown';
+  const band = regulationBandFor(licenseClass);
+  if (!band) return 'unknown';
+  return band.from > ceiling.to ? 'above' : 'within';
+}

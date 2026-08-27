@@ -1,6 +1,7 @@
 import type { Result } from '@byg/engine';
 import { CERTAINTY_META } from '@byg/engine';
 import { UI, pick, type Lang } from '../i18n';
+import { Urgent } from './Urgent';
 
 /**
  * ============================================================================
@@ -25,6 +26,8 @@ export function Diagnosis({
 }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
   const d = result.diagnosis;
+
+  const windowClock = result.clocks.find((c) => c.clock.id === 'clock.conversion_window');
 
   const trackLabel =
     d.track === 'conversion' ? t('track_conversion') : d.track === 'from_zero' ? t('track_from_zero') : '—';
@@ -54,6 +57,47 @@ export function Diagnosis({
             label={t('d_tz')}
             value={d.has_teudat_zehut === true ? t('yes') : d.has_teudat_zehut === false ? t('no') : t('unsure')}
           />
+
+          {/* ⭐ Everything below was missing until 27.8, which is why the
+              summary felt disconnected from the road underneath it. These are
+              precisely the conclusions that change what the roadmap contains. */}
+          {d.requested_class !== 'unknown' && (
+            <Row
+              label={t('d_requested')}
+              value={
+                <span style={{ color: d.requested_class_status === 'above' ? 'var(--uncertain)' : undefined }}>
+                  <span className="ltr">{d.requested_class}</span>
+                  {d.requested_class_status === 'above' ? ' ⚠️' : ''}
+                </span>
+              }
+            />
+          )}
+
+          {d.track === 'conversion' && (
+            <Row
+              label={t('d_exemption')}
+              value={
+                d.exemption === 'exempt'
+                  ? t('exempt_yes')
+                  : d.exemption === 'tests_required'
+                    ? t('exempt_no')
+                    : t('exempt_unknown')
+              }
+            />
+          )}
+
+          {/* The window, read off the clock rather than recomputed, so the
+              summary can never disagree with the countdown on the next screen. */}
+          {windowClock?.deadline && (
+            <Row
+              label={t('d_window')}
+              value={
+                <span className="num" style={{ color: windowClock.status === 'expired' ? 'var(--uncertain)' : undefined }}>
+                  {windowClock.deadline}
+                </span>
+              }
+            />
+          )}
         </dl>
 
         {/* ⚠️ Status-specific traps — the ב/2 short-visa one lives here, and the
@@ -70,6 +114,19 @@ export function Diagnosis({
           </p>
         ))}
       </section>
+
+      {result.urgent.length > 0 && (
+        <div className="stack-sm">
+          <h3>{t('urgent_first')}</h3>
+          <Urgent issues={result.urgent} lang={lang} />
+        </div>
+      )}
+
+      {result.diagnosis.unanswered.length > 0 && (
+        <p className="muted small">
+          {t('d_open_questions')}: <span className="ltr">{result.diagnosis.unanswered.join(', ')}</span>
+        </p>
+      )}
 
       <div style={{ display: 'flex', gap: 'var(--gap-sm)', flexWrap: 'wrap' }}>
         <button className="btn btn-primary" onClick={onConfirm}>

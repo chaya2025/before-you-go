@@ -364,3 +364,76 @@ describe('the fact derivation itself', () => {
     expect(deriveFacts(noDate, TODAY).age_years).toBe('unknown');
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('⭐ answers that must actually change the answer (audit, 27.8)', () => {
+  // The founder, after using the site: "the אבחון didn't really affect the road map."
+  // An audit changed one answer at a time and found two that changed NOTHING.
+  // Both were real bugs. These tests exist so they cannot come back.
+
+  const BASE = {
+    visa_type: 'b1',
+    visa_valid_now: true,
+    has_teudat_zehut: false,
+    teudat_zehut_confirmed: true,
+    foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 7, held_class: 'B' },
+    requested_class: 'B',
+    has_record_document: 'yes',
+    entered_israel: '2024-01',
+    born: '1990-05',
+  };
+  const run = (patch: Record<string, unknown> = {}) => evaluate(p({ ...BASE, ...patch }), TODAY);
+
+  it('⚠️ an expired visa is the FIRST thing he is told, not a footnote', () => {
+    // Was silently ignored. The question was asked and the answer thrown away.
+    const ok = run();
+    const expired = run({ visa_valid_now: false });
+    expect(ok.urgent).toEqual([]);
+    expect(expired.urgent.map((u) => u.id)).toContain('urgent.visa_expired');
+  });
+
+  it('the expired-visa notice says what it blocks AND how to fix it', () => {
+    const issue = run({ visa_valid_now: false }).urgent[0]!;
+    // Never bad news alone — the brand rule is "לעולם לא מסך דחייה יבש".
+    expect(issue.consequence.he).toContain('הרשויות');
+    expect(issue.action.he).toContain('חודש');
+    expect(issue.evidence.length).toBeGreaterThan(0);
+  });
+
+  it('⭐ asking for a bus licence as a foreign resident is flagged, not quietly routed', () => {
+    // Was building an ordinary conversion roadmap for a grade that can never
+    // be issued. נוהל ס' 1(ג) is an entitlement limit, not a difficulty.
+    const bus = run({ requested_class: 'D' });
+    expect(bus.diagnosis.requested_class_status).toBe('above');
+    expect(bus.urgent.map((u) => u.id)).toContain('urgent.grade_above_ceiling');
+  });
+
+  it('the same request is fine for an עולה, who reaches 185', () => {
+    const oleh = run({ visa_type: 'a1', made_aliyah: '2024-01', requested_class: 'D' });
+    expect(oleh.diagnosis.grade_ceiling).toEqual({ from: 176, to: 185 });
+    expect(oleh.diagnosis.requested_class_status).toBe('within');
+    expect(oleh.urgent.map((u) => u.id)).not.toContain('urgent.grade_above_ceiling');
+  });
+
+  it('C1 sits inside the ceiling, so it is never flagged — only 182-185 are above', () => {
+    expect(run({ requested_class: 'C1' }).diagnosis.requested_class_status).toBe('within');
+    expect(run({ requested_class: 'B' }).diagnosis.requested_class_status).toBe('within');
+  });
+
+  it('the exemption shown in the summary matches the steps in the roadmap', () => {
+    // Read off the roadmap rather than recomputed, so the two can never disagree.
+    const exempt = run();
+    expect(exempt.diagnosis.exemption).toBe('exempt');
+    expect(exempt.roadmap.map((s) => s.step.id)).not.toContain('cv.control_test');
+
+    const notExempt = run({ has_record_document: 'no' });
+    expect(notExempt.diagnosis.exemption).toBe('tests_required');
+    expect(notExempt.roadmap.map((s) => s.step.id)).toContain('cv.control_test');
+  });
+
+  it('the summary echoes the grade back, so a wrong answer is visible before the roadmap', () => {
+    expect(run({ requested_class: 'C1' }).diagnosis.requested_class).toBe('C1');
+    expect(run({ requested_class: 'unknown' }).diagnosis.requested_class).toBe('unknown');
+  });
+});
