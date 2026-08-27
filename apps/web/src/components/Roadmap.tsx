@@ -66,7 +66,15 @@ function Clock({ clock, lang }: { clock: ClockState; lang: Lang }) {
   );
 }
 
-function Step({ item, lang }: { item: RoadmapStep; lang: Lang }) {
+function Step({
+  item,
+  lang,
+  onToggle,
+}: {
+  item: RoadmapStep;
+  lang: Lang;
+  onToggle?: (id: string, done: boolean) => void;
+}) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
   const [open, setOpen] = useState(false);
   const { step } = item;
@@ -95,8 +103,35 @@ function Step({ item, lang }: { item: RoadmapStep; lang: Lang }) {
         <span aria-hidden="true">
           {item.state === 'done' ? '✅' : item.state === 'uncertain' ? '❔' : item.state === 'waiting_on' ? '⏸️' : '•'}
         </span>
-        <h3 style={{ flex: 1 }}>{pick(step.title, lang)}</h3>
+        <h3 style={{ flex: 1, textDecoration: item.state === 'done' ? 'line-through' : undefined }}>
+          {pick(step.title, lang)}
+        </h3>
       </div>
+
+      {/* ⭐ Ticking a step re-runs the whole engine. That is what makes the map
+          move with him instead of describing a stranger — and it is what starts
+          the clocks that only exist once he is in a particular situation. */}
+      {onToggle && (
+        <label
+          style={{
+            display: 'flex',
+            gap: 'var(--gap-sm)',
+            alignItems: 'center',
+            minHeight: 'var(--touch)',
+            cursor: 'pointer',
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={item.state === 'done'}
+            onChange={(e) => onToggle(step.id, e.target.checked)}
+            style={{ width: '1.15rem', height: '1.15rem', accentColor: 'var(--amber)' }}
+          />
+          <span className="small muted">
+            {item.state === 'done' ? t('marked_done') : t('mark_done')}
+          </span>
+        </label>
+      )}
 
       {pick(step.action, lang)
         .split('\n')
@@ -228,7 +263,15 @@ function Step({ item, lang }: { item: RoadmapStep; lang: Lang }) {
   );
 }
 
-export function Roadmap({ result, lang }: { result: Result; lang: Lang }) {
+export function Roadmap({
+  result,
+  lang,
+  onToggle,
+}: {
+  result: Result;
+  lang: Lang;
+  onToggle?: (id: string, done: boolean) => void;
+}) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
   const doneCount = result.roadmap.filter((s) => s.state === 'done').length;
 
@@ -262,20 +305,30 @@ export function Roadmap({ result, lang }: { result: Result; lang: Lang }) {
       <div>
         <h2>{t('roadmap_title')}</h2>
         {/* ⭐ "התקדמות נמדדת קדימה. מוצג כמה כבר הושלם, לא כמה נותר." */}
+        {/* ⭐ "התקדמות נמדדת קדימה. מוצג כמה כבר הושלם, לא כמה נותר." */}
         <p className="muted small">
+          <span className="num">{doneCount}</span> {t('progress')} {t('of')}{' '}
           <span className="num">{result.roadmap.length}</span> {t('steps_count')}
-          {doneCount > 0 && (
-            <>
-              {' · '}
-              <span className="num">{doneCount}</span> {t('done')}
-            </>
-          )}
         </p>
+        {doneCount > 0 && (
+          <div
+            aria-hidden="true"
+            style={{ height: 6, borderRadius: 999, background: 'var(--line)', overflow: 'hidden' }}
+          >
+            <div
+              style={{
+                width: `${(doneCount / result.roadmap.length) * 100}%`,
+                height: '100%',
+                background: 'var(--amber)',
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <div className="stack">
         {result.roadmap.map((item) => (
-          <Step key={item.step.id} item={item} lang={lang} />
+          <Step key={item.step.id} item={item} lang={lang} onToggle={onToggle} />
         ))}
       </div>
     </div>
