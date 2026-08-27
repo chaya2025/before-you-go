@@ -14,7 +14,21 @@ import type { Result, Text } from '@byg/engine';
  * rendering nothing. That is the API contract, enforced by the compiler.
  */
 
-const BASE = 'http://127.0.0.1:3001';
+/**
+ * Where the API lives.
+ *
+ * In development the website (5173) and the API (3001) are two different
+ * servers, so the address has to be spelled out in full.
+ *
+ * In a production build they are served by the SAME server, so the address is
+ * the empty string: every request becomes a RELATIVE url (`/api/v1/...`) and
+ * the browser sends it back to whatever host served the page. That means the
+ * deployed URL is never written down anywhere and can never go stale.
+ *
+ * `VITE_API_BASE` is an escape hatch: set it at build time and it wins. That is
+ * what we would use if the API ever moved to its own domain.
+ */
+const BASE = import.meta.env.VITE_API_BASE ?? (import.meta.env.PROD ? '' : 'http://127.0.0.1:3001');
 
 export type StatusOption = {
   value: string;
