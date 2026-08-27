@@ -457,9 +457,10 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
     blocked: null,
     urgent: urgentIssues(facts, ceiling),
     roadmap,
-    clocks: ALL_CLOCKS.map((c) => computeClock(c, profile, facts, today)).filter(
-      (c) => evaluateCondition(c.clock.applies_when, facts) !== false,
-    ),
+    clocks: ALL_CLOCKS.map((c) => computeClock(c, profile, facts, today))
+      .filter((c) => evaluateCondition(c.clock.applies_when, facts) !== false)
+      // ⭐ A clock gated on a step stays out of sight until he has done it.
+      .filter((c) => !c.clock.activated_by || profile.completed_steps.includes(c.clock.activated_by)),
     standing_conditions: ALL_CONTINUOUS_CONDITIONS.filter(
       (c) => evaluateCondition(c.applies_when, facts) !== false,
     ),

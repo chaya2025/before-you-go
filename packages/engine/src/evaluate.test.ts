@@ -723,3 +723,58 @@ describe('clocks are only for real deadlines', () => {
     expect(r.roadmap.find((s) => s.step.id === 'fz.theory')!.step.action.he).toContain('חמש שנים');
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('⭐ the system follows where the person actually is', () => {
+  // The founder, 27.8: "hopefully the 48-hour clock shouldn't apply to anyone, because
+  // they'll get it on their first try... as of now there's no need for it to
+  // even display, it just confuses. I want the system to realise where the user
+  // actually is — checkboxes for what you have done, and if the user hits the
+  // duplicate process, the clock should tick."
+
+  const base = {
+    visa_type: 'a2',
+    has_teudat_zehut: false,
+    foreign_license: { kind: 'none' },
+    born: '2007-01',
+  };
+  const withSteps = (completed: string[]) =>
+    evaluate(p({ ...base, completed_steps: completed }), TODAY);
+
+  it('the 48-hour window is not shown to someone who has not lost a card', () => {
+    expect(withSteps([]).clocks.map((c) => c.clock.id)).not.toContain(
+      'clock.duplicate_delivery_choice',
+    );
+  });
+
+  it('⭐ and starts the moment he says he is in the duplicate route', () => {
+    const inDuplicate = withSteps(['fz.duplicate']);
+    expect(inDuplicate.clocks.map((c) => c.clock.id)).toContain('clock.duplicate_delivery_choice');
+  });
+
+  it('the clock is kept in the data, not deleted — it is the shortest one there is', () => {
+    // Two days. Nothing else in the research is close.
+    const c = withSteps(['fz.duplicate']).clocks.find(
+      (x) => x.clock.id === 'clock.duplicate_delivery_choice',
+    )!;
+    expect(c.clock.duration_days).toBe(2);
+  });
+
+  it('ticking a step marks it done and unblocks what was waiting on it', () => {
+    const before = withSteps([]);
+    expect(before.roadmap.find((s) => s.step.id === 'fz.photo_and_eye')!.state).toBe('waiting_on');
+
+    const after = withSteps(['fz.doc_89']);
+    expect(after.roadmap.find((s) => s.step.id === 'fz.doc_89')!.state).toBe('done');
+    // ⚠️ No longer BLOCKED. It reads 'later' rather than 'do_now' because
+    // fz.english_name at position 1 is still outstanding — the prerequisite
+    // cleared, the queue did not.
+    expect(after.roadmap.find((s) => s.step.id === 'fz.photo_and_eye')!.state).not.toBe('waiting_on');
+    expect(after.roadmap.find((s) => s.step.id === 'fz.photo_and_eye')!.waiting_on).toEqual([]);
+  });
+
+  it('a step that is not ticked never silently becomes done', () => {
+    expect(withSteps(['fz.doc_89']).roadmap.filter((s) => s.state === 'done')).toHaveLength(1);
+  });
+});

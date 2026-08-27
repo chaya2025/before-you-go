@@ -183,6 +183,11 @@ export const UI = {
   },
   uncertain_answer: { he: 'כדי לדעת, צריך לענות על', en: 'To know, answer' },
   done: { he: 'הושלם', en: 'Done' },
+  mark_done: { he: 'סמן שביצעת', en: 'Mark as done' },
+  marked_done: { he: 'ביצעת', en: 'Done' },
+  progress: { he: 'הושלמו', en: 'completed' },
+  of: { he: 'מתוך', en: 'of' },
+  updating: { he: 'מעדכן…', en: 'Updating…' },
 
   expired: { he: 'עבר', en: 'Passed' },
   days_left: { he: 'ימים נותרו', en: 'days left' },
