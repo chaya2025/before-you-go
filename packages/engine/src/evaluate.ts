@@ -242,6 +242,10 @@ function buildRoadmap(facts: Facts, profile: Profile): RoadmapStep[] {
         checklist: step.checklist
           .filter((c) => !c.when || evaluateCondition(c.when, facts) !== false)
           .map(({ he, en }) => ({ he, en })),
+
+        notes: step.notes
+          .filter((n) => !n.when || evaluateCondition(n.when, facts) !== false)
+          .map(({ he, en }) => ({ he, en })),
       };
     })
     .sort((a, b) => {
@@ -388,7 +392,11 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
     has_teudat_zehut: facts.has_teudat_zehut,
     grade_ceiling: ceiling,
     extra_requirements: conversionOnly ? (category?.extra_requirements ?? []) : [],
-    ...(visa?.caveat ? { caveat: visa.caveat } : {}),
+    // ⚠️ A caveat can be route-specific. Several are about conversion, and were
+    // being shown to people who have never held a licence.
+    ...(visa?.caveat && (!visa.caveat.when || evaluateCondition(visa.caveat.when, facts) !== false)
+      ? { caveat: { he: visa.caveat.he, en: visa.caveat.en } }
+      : {}),
     requested_class: requested,
     requested_class_status,
     ...(requested_class_status === 'above' && ceiling

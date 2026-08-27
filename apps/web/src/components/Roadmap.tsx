@@ -105,6 +105,14 @@ function Step({ item, lang }: { item: RoadmapStep; lang: Lang }) {
           <p key={i}>{line}</p>
         ))}
 
+      {/* Clarifications that apply to HIM. The 89 explanation used to appear
+          for everyone, including people who will never hold one. */}
+      {item.notes.map((n, i) => (
+        <p key={i} className="small">
+          {pick(n, lang)}
+        </p>
+      ))}
+
       {item.start_now && (
         <p style={{ color: 'var(--amber)', fontWeight: 500 }}>
           ⭐ {t('start_now')} — <span className="muted">{t('start_now_why')}</span>
