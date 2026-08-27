@@ -3,15 +3,17 @@ import { checkProfile } from './profile';
 import type { Facts, Trilean, ConditionField, NohalCategory, Track } from './condition';
 import { evaluateCondition, missingFacts } from './condition';
 import type { Step, Clock } from './domain';
+import { classWithinCeiling } from './domain';
 import {
   ALL_STEPS,
+  ALL_DOCUMENTS,
   ALL_BLOCKERS,
   ALL_CLOCKS,
   ALL_CONTINUOUS_CONDITIONS,
   visaProfileFor,
   categoryRuleFor,
 } from './data';
-import type { Result, RoadmapStep, ClockState, Diagnosis, StepState } from './result';
+import type { Result, RoadmapStep, ClockState, Diagnosis, StepState, UrgentIssue } from './result';
 import { monthsSince, ageInYears, startOfMonth, addDays, daysBetween, type IsoDate } from './dates';
 
 /**
@@ -237,6 +239,92 @@ function buildRoadmap(facts: Facts, profile: Profile): RoadmapStep[] {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 4. Things to deal with before the roadmap means anything
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * ⭐ From the POC document:
+ *   "אשרה שפג תוקפה אינה הערת שוליים במפת הדרכים — היא הופכת לשלב הראשון בה."
+ *
+ * ⚠️ Added 27.8 after an audit found that answering "my visa is not valid"
+ * changed NOTHING in the output. The question was asked and the answer thrown
+ * away — worse than not asking, because a user reasonably concludes that an
+ * answer which changed nothing did not matter.
+ */
+function urgentIssues(
+  facts: Facts,
+  ceiling: { from: number; to: number } | null,
+): UrgentIssue[] {
+  const issues: UrgentIssue[] = [];
+
+  /**
+   * ⭐ The grade he asked for is outside what his category may be issued.
+   *
+   * This is NOT a rejection — he is fully eligible, just not for that grade.
+   * But leaving it out of the way would let him follow a roadmap whose
+   * destination does not exist, so it goes above the road rather than beside it.
+   * F1 validation 3.
+   */
+  if (
+    ceiling &&
+    facts.requested_class !== 'unknown' &&
+    classWithinCeiling(facts.requested_class, ceiling) === 'above'
+  ) {
+    issues.push({
+      id: 'urgent.grade_above_ceiling',
+      title: {
+        he: `הדרגה שביקשת (${facts.requested_class}) אינה פתוחה בפניך`,
+        en: `The grade you asked for (${facts.requested_class}) is not open to you`,
+      },
+      consequence: {
+        he: `לפי ס׳ 1(ג) לנוהל, רשות הרישוי לא תיתן לך רישיון אלא לפי תקנות ${ceiling.from}-${ceiling.to}. זו מגבלת זכאות ולא שאלה של קושי — אין מסלול המרה לאוטובוס (D) או למשאית כבדה (C, E) בשום תנאי, גם אחרי עשרות שנות נהיגה.`,
+        en: `Under clause 1(c) of the procedure, the licensing authority may only issue you a licence under regulations ${ceiling.from}-${ceiling.to}. This is an entitlement limit, not a matter of difficulty — there is no conversion route to a bus (D) or a heavy truck (C, E) under any conditions, however many years you have driven one.`,
+      },
+      action: {
+        he: `חזור ובחר דרגה בטווח ${ceiling.from}-${ceiling.to} כדי לראות את המסלול שלך. השלבים למטה נכונים לדרגות שכן פתוחות בפניך.`,
+        en: `Go back and choose a grade within ${ceiling.from}-${ceiling.to} to see your route. The steps below are correct for the grades that are open to you.`,
+      },
+      evidence: [
+        {
+          claim:
+            'תושב מדינת חוץ מוגבל לתקנות 176-181 — אין המרה לאוטובוס או למשאית כבדה',
+          certainty: 'verified',
+          citation:
+            'נוהל אופן המרת רישיון נהיגה ממדינת חוץ · 15.2.2024 · ס׳ 1(ג)',
+          quote:
+            'ובלבד שרשות הרישוי לא תיתן לו רישיון נהיגה אלא לפי תקנות 176-181 (דרגות C1, B, A, A1, A2, 1)',
+          url: 'https://www.gov.il/he/pages/1961',
+          last_verified_at: '2026-08-21',
+          variation_factors: [],
+        },
+      ],
+    });
+  }
+
+  if (facts.visa_valid_now === false) {
+    const visaDoc = ALL_DOCUMENTS.find((d) => d.id === 'doc.visa');
+    issues.push({
+      id: 'urgent.visa_expired',
+      title: {
+        he: "האשרה שלך אינה בתוקף — זה השלב הראשון",
+        en: 'Your visa is not valid — this is step one',
+      },
+      consequence: {
+        he: "כל עוד האשרה אינה בתוקף, שום שלב בתהליך לא יתקדם. הזכאות נבחנת ליום ההגשה, ואשרה שפגה חוסמת כל פעולה מול הרשויות — לא רק במשרד הרישוי.",
+        en: 'While your visa is not valid, no step will move forward. Eligibility is judged on the day you apply, and an expired visa blocks every dealing with the authorities, not only the licensing office.',
+      },
+      action: {
+        he: "חדש את האשרה לפחות חודש מראש. החידוש מקוון ואורך כחודש. רק אחר כך קבע תורים.",
+        en: 'Renew your visa at least a month in advance. Renewal is online and takes about a month. Book appointments only after that.',
+      },
+      evidence: visaDoc ? visaDoc.evidence : [],
+    });
+  }
+
+  return issues;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 4. Put it together
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -251,13 +339,36 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
   // system rests on a status the user states outright.
   const hit = ALL_BLOCKERS.find((b) => evaluateCondition(b.applies_when, facts) === true);
 
+  const ceiling = category?.grade_ceiling ?? null;
+
+  /**
+   * ⭐ F1 validation 3, which was never implemented until the 27.8 audit caught
+   * it: asking to convert to a bus or a heavy truck as a תושב מדינת חוץ used to
+   * produce a perfectly ordinary conversion roadmap. It cannot end in a licence.
+   * נוהל ס' 1(ג) is an entitlement limit, not a difficulty.
+   */
+  const requested = facts.requested_class;
+  const requested_class_status =
+    requested === 'unknown' ? 'unknown' : classWithinCeiling(requested, ceiling);
+
   const diagnosis: Diagnosis = {
     nohal_category: facts.nohal_category,
     track: facts.track,
     has_teudat_zehut: facts.has_teudat_zehut,
-    grade_ceiling: category?.grade_ceiling ?? null,
+    grade_ceiling: ceiling,
     extra_requirements: category?.extra_requirements ?? [],
     ...(visa?.caveat ? { caveat: visa.caveat } : {}),
+    requested_class: requested,
+    requested_class_status,
+    ...(requested_class_status === 'above' && ceiling
+      ? {
+          ceiling_explanation: {
+            he: `⚠️ הדרגה שביקשת (${requested}) אינה פתוחה בפניך. לפי ס׳ 1(ג) לנוהל, רשות הרישוי לא תיתן לך רישיון אלא לפי תקנות ${ceiling.from}-${ceiling.to}. זו מגבלת זכאות ולא שאלה של קושי — אין מסלול המרה לאוטובוס (D) או למשאית כבדה (C, E) בשום תנאי. בחר דרגה בטווח הזה כדי לראות את המסלול שלך.`,
+            en: `⚠️ The grade you asked for (${requested}) is not open to you. Under clause 1(c) of the procedure, the licensing authority may only issue you a licence under regulations ${ceiling.from}-${ceiling.to}. This is an entitlement limit, not a matter of difficulty — there is no conversion route to a bus (D) or a heavy truck (C, E) under any conditions. Choose a grade in that range to see your route.`,
+          },
+        }
+      : {}),
+    exemption: 'unknown',
     unanswered: [],
   };
 
@@ -271,6 +382,7 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
           ? daysBetween(today, hit.expected_resolution_at)
           : null,
       },
+      urgent: urgentIssues(facts, ceiling),
       roadmap: [],
       clocks: [],
       standing_conditions: [],
@@ -283,10 +395,28 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
   // Every question that would firm up a step he is actually being shown.
   diagnosis.unanswered = [...new Set(roadmap.flatMap((r) => r.missing_answers))].sort();
 
+  /**
+   * Exemption is READ OFF the roadmap rather than recomputed, so the summary can
+   * never disagree with the steps printed underneath it. If neither test made it
+   * onto his road, he is exempt; if either is uncertain, so is the answer.
+   */
+  const testSteps = roadmap.filter(
+    (r) => r.step.id === 'cv.eye_test' || r.step.id === 'cv.control_test',
+  );
+  diagnosis.exemption =
+    facts.track !== 'conversion'
+      ? 'unknown'
+      : testSteps.length === 0
+        ? 'exempt'
+        : testSteps.some((r) => r.applies === 'unknown')
+          ? 'unknown'
+          : 'tests_required';
+
   return {
     facts,
     diagnosis,
     blocked: null,
+    urgent: urgentIssues(facts, ceiling),
     roadmap,
     clocks: ALL_CLOCKS.map((c) => computeClock(c, profile, facts, today)).filter(
       (c) => evaluateCondition(c.clock.applies_when, facts) !== false,
