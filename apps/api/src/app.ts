@@ -24,11 +24,20 @@ import { Profile, evaluate, ALL_VISA_PROFILES, LicenseClass } from '@byg/engine'
  * separation the engine and the CLI already use.
  */
 
-/** The dev servers Vite might pick. A list, not a wildcard. */
+/**
+ * The dev servers Vite might pick. A list, not a wildcard.
+ *
+ * In production the website is served by this same server, so requests are
+ * same-origin and CORS never comes into it. `WEB_ORIGIN` exists only for the
+ * day the website moves to its own domain: set it and that origin is allowed,
+ * without ever loosening this to `*`. The body carries someone's immigration
+ * status, so a wildcard is not an option.
+ */
 export const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:5174',
   'http://127.0.0.1:5173',
+  ...(process.env.WEB_ORIGIN ? [process.env.WEB_ORIGIN] : []),
 ];
 
 export async function buildApp(opts: { logger?: boolean } = {}): Promise<FastifyInstance> {

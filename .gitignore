@@ -42,3 +42,7 @@ apps/web/dist/
 .vite/
 
 .tmp/
+
+# Password vaults — NEVER commit
+*.kdbx
+*.kdbx.lock
