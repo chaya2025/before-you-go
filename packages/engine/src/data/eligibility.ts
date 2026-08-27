@@ -158,6 +158,9 @@ export const VISA_PROFILES: VisaProfileInput[] = [
     caveat: {
       he: "⚠️ חלון ההמרה הוא חמש שנים, אבל אשרת ביקור היא עד שלושה חודשים — והזכאות נבחנת ליום ההגשה. בפועל החלון שלך הוא מה שנותר באשרה, לא חמש שנים.",
       en: '⚠️ The conversion window is five years, but a visit permit lasts up to three months, and eligibility is judged on the day you submit. In practice your window is whatever is left on your visa, not five years.',
+      // ⚠️ Conversion-only. A citizen answering that he has never held a
+      // licence was being told the conversion route needs six months abroad.
+      when: { field: 'track', op: 'eq', value: 'conversion' },
     },
     evidence: [
       isResidencePermit('ב/2', 'ביקור'),
@@ -200,6 +203,9 @@ export const VISA_PROFILES: VisaProfileInput[] = [
     caveat: {
       he: "מסלול ההמרה נפתח רק אם שהית שישה חודשים רצופים בחו\"ל אחרי שקיבלת את הרישיון הזר.",
       en: 'The conversion route only opens if you spent six consecutive months abroad after getting your foreign licence.',
+      // ⚠️ Conversion-only. A citizen answering that he has never held a
+      // licence was being told the conversion route needs six months abroad.
+      when: { field: 'track', op: 'eq', value: 'conversion' },
     },
     evidence: [
       official(
@@ -224,6 +230,9 @@ export const VISA_PROFILES: VisaProfileInput[] = [
     caveat: {
       he: "מסלול ההמרה רלוונטי רק אם שבת מחו\"ל אחרי שישה חודשים רצופים לפחות.",
       en: 'The conversion route is only relevant if you returned after at least six consecutive months abroad.',
+      // ⚠️ Conversion-only. A citizen answering that he has never held a
+      // licence was being told the conversion route needs six months abroad.
+      when: { field: 'track', op: 'eq', value: 'conversion' },
     },
     evidence: [
       nohal(

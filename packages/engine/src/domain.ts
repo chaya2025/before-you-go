@@ -28,8 +28,12 @@ export type Text = z.infer<typeof Text>;
  * his 89 document, which he was correctly never told to get. `when` scopes the
  * line to the person it is actually about.
  */
-export const ChecklistItem = Text.extend({ when: Condition.optional() });
-export type ChecklistItem = z.infer<typeof ChecklistItem>;
+export const ConditionalText = Text.extend({ when: Condition.optional() });
+export type ConditionalText = z.infer<typeof ConditionalText>;
+
+/** Kept as an alias: a checklist line is just a conditional piece of text. */
+export const ChecklistItem = ConditionalText;
+export type ChecklistItem = ConditionalText;
 
 /**
  * ⚠️ Every requirement shown to a user cites where it came from (hard rule 4).
@@ -121,6 +125,16 @@ export const Step = z.object({
    * appointment that is hard to get.
    */
   checklist: z.array(ChecklistItem).default([]),
+
+  /**
+   * Clarifications attached to a step, each optionally scoped.
+   *
+   * ⚠️ Added 27.8. The green-form step was telling EVERY user "the sheet you
+   * carry is the white form (89)" — including people who have a teudat zehut
+   * and will never hold an 89. The founder: "the 89 has nothing to do with him —
+   * just tell him to fill in the טופס ירוק online, nothing else."
+   */
+  notes: z.array(ConditionalText).default([]),
 
   /**
    * ⭐ the founder's rule, and it has no equivalent in גיליון 13:
@@ -220,8 +234,14 @@ export const VisaProfile = z.object({
   usually_has_teudat_zehut: z.union([z.boolean(), z.literal('unknown')]),
   /** The physical document he actually carries. Used to word the ש4 screen. */
   identity_document: Text,
-  /** Anything true of this status specifically. The ב/2 short-visa trap lives here. */
-  caveat: Text.optional(),
+  /**
+   * Anything true of this status specifically. The ב/2 short-visa trap lives here.
+   *
+   * ⚠️ Scopeable, because several of these are about CONVERSION — a citizen was
+   * being told "the conversion route only opens if you spent six months abroad"
+   * while answering that he has never held a licence.
+   */
+  caveat: ConditionalText.optional(),
   evidence: Evidence,
 });
 export type VisaProfile = z.infer<typeof VisaProfile>;

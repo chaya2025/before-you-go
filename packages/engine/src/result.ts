@@ -71,6 +71,9 @@ export type RoadmapStep = {
 
   /** Checklist lines that actually apply to him. Same filtering as documents. */
   checklist: Text[];
+
+  /** Clarifications that apply to him. Same filtering again. */
+  notes: Text[];
 };
 
 export type ClockStatus = 'running' | 'expired' | 'unknown' | 'not_started';
