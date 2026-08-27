@@ -464,11 +464,15 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     title: { he: "שישה חודשי נהיגה עם מלווה", en: 'Six months of accompanied driving' },
     action: {
       he:
-        "מתחת לגיל 24 חלה תקופת ליווי של חצי שנה. ⚠️ היא נספרת מיום הוצאת ההיתר, לא מיום הטסט.\n\n" +
-        "בנוסף, אתה \"נהג חדש\" למשך שנתיים מיום הוצאת הרישיון. ⚠️ ואם עוד לא מלאו לך 21 — גם אחרי שתקופת הליווי נגמרה, אסור לך להסיע יותר משני נוסעים, עד גיל 21 או עד תום השנתיים, המוקדם מביניהם. אלא אם יושב לצדך מלווה.",
+        "מתחת לגיל 24 חלה תקופת ליווי של שישה חודשים. ⚠️ היא נספרת מיום הוצאת ההיתר, לא מיום הטסט.\n\n" +
+        "שלושת החודשים הראשונים — ליווי מלא, ביום ובלילה. שלושת הבאים — ליווי בשעות הלילה בלבד, בין 21:00 ל-06:00.\n\n" +
+        "בסך הכול 50 שעות נהיגה לפחות: 20 בדרך עירונית, 15 בדרך בין-עירונית, ו-15 בשעות הלילה. אין הגבלה על מספר המלווים.\n\n" +
+        "⚠️ אם לא סיימת את התוכנית בתוך שישה חודשים — תקבל היתר נהיגה נוסף לשישה חודשים עד להשלמתה.",
       en:
         'Under 24 you must drive accompanied for six months. ⚠️ It counts from the day the permit issues, not from the test.\n\n' +
-        'You are also a "new driver" for two years from the day the licence issues. ⚠️ And if you are not yet 21, then even after the accompanied period ends you may not carry more than two passengers — until you turn 21 or the two years end, whichever comes first — unless an accompanying driver sits beside you.',
+        'The first three months are fully accompanied, day and night. The next three are night-time only, between 21:00 and 06:00.\n\n' +
+        'Fifty hours of driving at least: 20 urban, 15 interurban, 15 at night. There is no limit on how many different people accompany you.\n\n' +
+        '⚠️ If you have not finished within six months, you are given a further six-month permit until you do.',
     },
     applies_when: { field: 'age_years', op: 'lt', value: 24 },
     sequence_position: 12,
@@ -488,17 +492,16 @@ export const FROM_ZERO_STEPS: StepInput[] = [
       // on 20.8 — so the quote below comes from the statute text via wikisource
       // rather than from the ministry page. It upgrades to 🟢 the moment the
       // sentence is copied from gov.il by hand.
-      {
-        claim:
-          "נהג חדש הוא נהג חדש למשך שנתיים. מי שטרם מלאו לו 21, גם אחרי תום תקופת הליווי, לא יסיע יותר משני נוסעים עד גיל 21 — אלא אם יושב לצדו מלווה",
-        certainty: 'likely',
-        citation: "דף \"נהג חדש ומלווה\", משרד התחבורה · מגובה בפקודת התעבורה [נוסח חדש] ס' 12א(א) ו-12א2",
-        quote:
-          "נהג חדש שטרם מלאו לו 21 שנים וחלפה לגביו התקופה שבה חלה עליו חובת הליווי... לא יסיע ברכב מנועי יותר משני נוסעים עד שימלאו לו 21 שנים, אלא אם כן יושב... מלווה",
-        url: 'https://www.gov.il/he/pages/new_driver?chapterIndex=3',
-        last_verified_at: '2026-08-27',
-        variation_factors: [],
-      },
+      servicePage(
+        "נהג חדש ומלווה",
+        "שישה חודשי ליווי מיום ההיתר הראשון: שלושה מלאים ושלושה בשעות הלילה בלבד",
+        "חובת הליווי תחול לתקופה של שישה חודשים מיום קבלת היתר הנהיגה הראשון, מהם שלושה חודשי ליווי מלא במהלך נהיגה ביום ובלילה, ושלושה חודשי ליווי בשעות הלילה בלבד. שעות הלילה הן השעות שבין 21:00 ל-06:00.",
+      ),
+      servicePage(
+        "נהג חדש ומלווה",
+        "מכסת השעות, ומה קורה אם התוכנית לא הסתיימה בזמן",
+        "50 שעות לפחות, מהן 20 שעות נהיגה בדרך עירונית, 15 שעות נהיגה בדרך בין עירונית, ו-15 שעות נהיגה בשעות הלילה... אם בתום שישה חודשים לא הסתיימה תוכנית הליווי, יינתן לנהג היתר נהיגה לשישה חודשים נוספים עד להשלמתה.",
+      ),
     ],
   },
 
@@ -506,8 +509,20 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     id: 'fz.completion_online',
     track: 'from_zero',
     title: { he: "הצהרת סיום ליווי", en: 'Declare the accompaniment period complete' },
-    action: { he: "הגש את הצהרת נהג חדש על סיום תכנית הליווי.", en: 'Submit the new-driver declaration that the accompaniment period is over.' },
-    applies_when: HAS_TEUDAT_ZEHUT,
+    action: {
+      he:
+        "הגש את הצהרת נהג חדש על סיום תכנית הליווי — שישה חודשים מיום מתן ההיתר, בטופס מקוון.\n\n" +
+        "סיימת את הליווי מוקדם יותר? אפשר להצהיר כבר עכשיו. הרישיון הקבוע עדיין יישלח בתום שישה החודשים.\n\n" +
+        "⭐ ברגע שההצהרה אושרה — מותר לך לנהוג עם תעודה מזהה בלבד. אין צורך לחכות שהרישיון יגיע בדואר.",
+      en:
+        'Submit the new-driver declaration that the accompaniment period is over — six months from the day the permit was issued, on the online form.\n\n' +
+        'Finished the accompaniment early? You can declare now. The permanent licence is still sent at the six-month mark.\n\n' +
+        '⭐ Once the declaration is confirmed you may drive with photo ID alone. There is no need to wait for the licence to arrive by post.',
+    },
+    // ⚠️ Corrected 27.8 from the gov.il page: the declaration exists only for
+    // someone who actually did a ליווי period, i.e. under 24. A 40-year-old was
+    // being told to file a form he is explicitly exempt from.
+    applies_when: { all: [HAS_TEUDAT_ZEHUT, { field: 'age_years', op: 'lt', value: 24 }] },
     sequence_position: 13,
     channel: 'online',
     evidence: [
@@ -516,9 +531,20 @@ export const FROM_ZERO_STEPS: StepInput[] = [
         "הרישיון הקבוע נשלח רק אחרי הצהרת סיום הליווי",
         "הרישיון יישלח רק לאחר הצהרת נהג חדש על סיום תכנית הליווי.",
       ),
-      // ⭐ Confirmed by the founder 25.8: it genuinely is online for teudat zehut
-      // holders. That is what makes this a true channel split rather than a
-      // step that happens to be physical for everyone.
+      // ⭐ Upgraded 27.8 from a bare link-exists inference to a real quote:
+      // The founder supplied the gov.il text, which gives the timing, the online-only
+      // channel, and that you may declare early.
+      servicePage(
+        "נהג חדש ומלווה",
+        "מתי מגישים, שההגשה מקוונת בלבד, ושאפשר להגיש מוקדם",
+        "על הנהג, כתנאי לקבלת רישיון נהיגה כנהג חדש אשר סיים את תכנית הליווי, להצהיר על כך באופן מקוון בלבד, באמצעות הטופס המקוון, שישה חודשים מיום מתן ההיתר. ניתן להגיש את ההצהרה גם אם הסתיים הליווי וטרם חלפו שישה חודשים. במקרה זה, יישלח הרישיון הקבוע לביתו של הנהג החדש בתום שישה חודשים.",
+      ),
+      // ⭐ The line that answers the year she spent waiting for a card.
+      servicePage(
+        "נהג חדש ומלווה",
+        "אחרי אישור ההצהרה מותר לנהוג עם תעודה מזהה בלבד",
+        "בסיום תהליך ההצהרה וקבלת אישור כי התהליך הושלם בהצלחה, רשאי הנהג לנהוג ברכב כשברשותו תעודה מזהה ללא צורך בהמתנה לקבלת הרישיון בדואר.",
+      ),
       fieldReport("לבעלי תעודת זהות ההצהרה אכן מוגשת מקוון", {
         generalizability: 'corroborated',
         last_verified_at: LAST_VERIFIED_LATE,
@@ -531,14 +557,34 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     track: 'from_zero',
     title: { he: "הצהרת סיום ליווי — בהגעה פיזית", en: 'Declare completion in person' },
     action: {
-      he: "ההצהרה אינה מקוונת. קבע תור, הגע למשרד הרישוי עם כל המסמכים, והפקיד מצהיר במערכת במקומך.",
-      en: 'The declaration is not online. Book an appointment, bring all your documents, and the clerk files it in the system for you.',
+      he:
+        "ההצהרה מוגשת שישה חודשים מיום מתן ההיתר. סיימת את הליווי מוקדם יותר? אפשר להצהיר כבר עכשיו, והרישיון הקבוע עדיין יישלח בתום שישה החודשים.\n\n" +
+        "⚠️ עפ״י דיווחים, למי שאין תעודת זהות ההצהרה אינה מקוונת: קבע תור, הגע למשרד הרישוי עם כל המסמכים, והפקיד מצהיר במערכת במקומך.\n\n" +
+        "⭐ ברגע שההצהרה אושרה — מותר לך לנהוג עם תעודה מזהה בלבד. אין צורך לחכות שהרישיון יגיע בדואר.",
+      en:
+        'The declaration is filed six months from the day the permit was issued. Finished the accompaniment early? You can declare now, and the permanent licence is still sent at the six-month mark.\n\n' +
+        '⚠️ From what people report, without a teudat zehut it is not online: book an appointment, bring all your documents, and the clerk files it for you.\n\n' +
+        '⭐ Once the declaration is confirmed you may drive with photo ID alone. No need to wait for the licence to arrive by post.',
     },
-    applies_when: NO_TEUDAT_ZEHUT,
+    // ⚠️ Same correction: only someone who did a ליווי declares its end.
+    applies_when: { all: [NO_TEUDAT_ZEHUT, { field: 'age_years', op: 'lt', value: 24 }] },
     sequence_position: 13,
     channel: 'licensing_office',
     requires_appointment: true,
     evidence: [
+      // ⚠️ The official page says "מקוון בלבד". Her documented experience is the
+      // opposite. The page does not merely omit the exception — it states the
+      // reverse, which is how someone ends up expecting a form that is not there.
+      servicePage(
+        "נהג חדש ומלווה",
+        "מתי מגישים, ושאפשר להגיש מוקדם",
+        "על הנהג, כתנאי לקבלת רישיון נהיגה כנהג חדש אשר סיים את תכנית הליווי, להצהיר על כך באופן מקוון בלבד, באמצעות הטופס המקוון, שישה חודשים מיום מתן ההיתר. ניתן להגיש את ההצהרה גם אם הסתיים הליווי וטרם חלפו שישה חודשים. במקרה זה, יישלח הרישיון הקבוע לביתו של הנהג החדש בתום שישה חודשים.",
+      ),
+      servicePage(
+        "נהג חדש ומלווה",
+        "אחרי אישור ההצהרה מותר לנהוג עם תעודה מזהה בלבד",
+        "בסיום תהליך ההצהרה וקבלת אישור כי התהליך הושלם בהצלחה, רשאי הנהג לנהוג ברכב כשברשותו תעודה מזהה ללא צורך בהמתנה לקבלת הרישיון בדואר.",
+      ),
       fieldReport(
         "מי שאין לו תעודת זהות אינו יכול להצהיר מקוון — נדרשים תור והגעה פיזית, והפקיד מצהיר במערכת",
       ),
@@ -574,12 +620,50 @@ export const FROM_ZERO_STEPS: StepInput[] = [
   },
 
   {
+    id: 'fz.new_driver_limits',
+    track: 'from_zero',
+    title: { he: "מגבלות נהג חדש", en: 'New-driver restrictions' },
+    action: {
+      he:
+        "אתה \"נהג חדש\" למשך שנתיים מיום קבלת הרישיון.\n\n" +
+        "⚠️ כל עוד רשום ברישיונך שאתה נהג חדש, אינך רשאי להסיע יותר משני נוסעים — עד שימלאו לך 21. אם יושב מלווה במושב שלצידך, ההגבלה אינה חלה.",
+      en:
+        'You are a "new driver" for two years from the day you receive the licence.\n\n' +
+        '⚠️ While your licence says you are a new driver, you may not carry more than two passengers — until you turn 21. If an accompanying driver sits beside you, the restriction does not apply.',
+    },
+    // ⚠️ NOT scoped to under-24 like the ליווי. The passenger limit runs to 21,
+    // and the new-driver status itself runs two years for everyone — so this is
+    // its own step rather than a line on the accompaniment one.
+    applies_when: EVERYONE,
+    sequence_position: 12,
+    channel: 'unknown',
+    evidence: [
+      servicePage(
+        "נהג חדש ומלווה",
+        "נהג חדש הוא נהג חדש לשנתיים, ומי שטרם מלאו לו 21 אינו רשאי להסיע יותר משני נוסעים",
+        "נהג מוגדר כנהג חדש בשנתיים הראשונות לאחר קבלת רישיון הנהיגה. נהג חדש, כל עוד רשום ברישיון הנהיגה שלו שהוא נהג חדש, אינו רשאי להסיע יותר משני נוסעים ברכב, אלא לאחר שימלאו לו 21 שנים.",
+      ),
+      servicePage(
+        "נהג חדש ומלווה",
+        "מלווה במושב שלצד הנהג מסיר את ההגבלה",
+        "נהג חדש צעיר, שטרם מלאו לו 21 שנים, לא יורשה להסיע יותר משני נוסעים, אלא אם יושב מלווה במושב שלצידו.",
+      ),
+    ],
+  },
+
+  {
     id: 'fz.new_driver_sign',
     track: 'from_zero',
     title: { he: "שלט \"נהג חדש\" על הרכב", en: 'Display the "new driver" sign' },
     action: {
-      he: "הצמד שלט \"נהג חדש\" לשמשה האחורית של כל רכב שאתה נוהג בו, כל עוד אתה מוגדר נהג חדש — בדרך כלל שנתיים מיום הוצאת הרישיון.",
-      en: 'Attach a "new driver" sign to the rear window of any car you drive, for as long as you are classed a new driver — generally two years from the day the licence issues.',
+      he:
+        "הצמד שלט \"נהג חדש\" לשוליים התחתונים של השמשה האחורית בכל רכב שאתה נוהג בו, כל עוד אתה נהג חדש.\n\n" +
+        "ברכב פרטי ומסחרי עד 4 טון: שלט בגודל 12X20 ס\"מ, אותיות בגובה 40 מ\"מ, שחור על רקע צהוב מחזיר אור.\n\n" +
+        "⚠️ וכשאתה כבר לא נהג חדש — חובה להוריד אותו.",
+      en:
+        'Attach a "new driver" sign to the lower edge of the rear window of any car you drive, for as long as you are a new driver.\n\n' +
+        'For a private or commercial vehicle up to 4 tonnes: 12x20 cm, 40 mm letters, black on reflective yellow.\n\n' +
+        '⚠️ And once you are no longer a new driver, you must take it off.',
     },
     // ⚠️ EVERY new driver, not only those under 24. The ליווי is age-dependent;
     // this is not, which is why it is its own step rather than a note on that one.
@@ -587,21 +671,37 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     sequence_position: 12,
     channel: 'unknown',
     evidence: [
-      {
-        claim:
-          "חובה להציג שלט \"נהג חדש\" כל עוד הנהג מוגדר נהג חדש — בדרך כלל שנתיים",
-        certainty: 'likely',
-        citation: "הרשות הלאומית לבטיחות בדרכים (ראל\"ב), מענה רשמי",
-        quote:
-          "כל עוד הוא מוגדר כ\"נהג חדש\" בהתאם לדין. ככלל משך הזמן שנהג מוגדר כ-\"נהג חדש\" הוא שנתיים",
-        url: 'https://ask.ralbad.org.il/3734',
-        last_verified_at: '2026-08-27',
-        variation_factors: [],
-      },
-      // ⬜ The regulation number itself was not found. ראל"ב answers the
-      // question without citing one, and the commercial sites that give
-      // dimensions and fines cite nothing at all.
-      notChecked("מספר התקנה שמחייבת את השלט, וכן גודלו ומיקומו המדויקים"),
+      servicePage(
+        "נהג חדש ומלווה",
+        "חובת השלט, מידותיו, מיקומו — וחובת הסרתו כשהנהג אינו עוד נהג חדש",
+        "כל נהג המוגדר כנהג חדש חייב לתלות על השמשה האחורית של כלי הרכב בו הוא נוהג שלט המיידע את הנהגים האחרים כי לפניהם נהג חסר ניסיון. ברכב פרטי וברכב מסחרי עד 4 טונות, יש להציג שלט בגודל של 12X20 סנטימטרים. גובה האותיות יהיה 40 מילימטרים בצבע שחור על גבי רקע צהוב המחזיר אור. השלט יוצמד לשוליים התחתונים של השמשה האחורית... נהג חדש לא ינהג ברכב ללא שלט נהג חדש מוצמד לשמשה האחורית. נהג שאינו נהג חדש לא ינהג ברכב כאשר מוצמד שלט זה לשמשה האחורית.",
+      ),
+      // ⬜ The page attributes the rule to תקנות התעבורה without naming a
+      // regulation number, and no source found gives one.
+      notChecked("מספר התקנה המדויק שמחייב את השלט"),
+    ],
+  },
+
+  {
+    id: 'fz.no_declaration_needed',
+    track: 'from_zero',
+    title: { he: "אין צורך בהצהרת סיום ליווי", en: 'No completion declaration needed' },
+    action: {
+      he: "מגיל 24 ומעלה אין חובת ליווי, ולכן אין גם טופס הצהרה להגיש. הרישיון יישלח אליך בדואר. ⚠️ אבל תנאי נהג חדש עדיין חלים עליך.",
+      en: 'From 24 upwards there is no accompaniment requirement, so there is no declaration form to file either. The licence is posted to you. ⚠️ New-driver conditions still apply to you.',
+    },
+    // ⚠️ Added 27.8. A 40-year-old was being shown a declaration step he is
+    // explicitly exempt from. Saying nothing would leave him wondering; saying
+    // this closes it.
+    applies_when: { field: 'age_years', op: 'gte', value: 24 },
+    sequence_position: 13,
+    channel: 'unknown',
+    evidence: [
+      servicePage(
+        "נהג חדש ומלווה",
+        "מגיל 24 יש פטור מהליווי ומטופס ההצהרה, אך לא מתנאי נהג חדש",
+        "נהג שגילו 24 ומעלה פטור מהגשת טופס הצהרת סיום הליווי, אולם עדיין חלים עליו תנאי נהג חדש. ורישיון הנהיגה יישלח אליו באמצעות הדואר.",
+      ),
     ],
   },
 
