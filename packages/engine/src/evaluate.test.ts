@@ -509,3 +509,74 @@ describe('⭐ nothing from the other route leaks in (Chaya, 27.8)', () => {
     expect(noId.roadmap.map((s) => s.step.id)).toContain('fz.doc_89');
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('⭐ everything shown belongs to the person shown it (27.8 sweep)', () => {
+  const citizen = evaluate(
+    p({
+      visa_type: 'citizen',
+      has_teudat_zehut: true,
+      teudat_zehut_confirmed: true,
+      foreign_license: { kind: 'none' },
+      born: '1995-05',
+    }),
+    TODAY,
+  );
+  const noId = evaluate(
+    p({ visa_type: 'a2', has_teudat_zehut: false, foreign_license: { kind: 'none' }, born: '2005-01' }),
+    TODAY,
+  );
+
+  const textOf = (r: ReturnType<typeof evaluate>) =>
+    [
+      ...r.roadmap.flatMap((s) => [s.step.action.he, ...s.notes.map((n) => n.he), ...s.checklist.map((c) => c.he)]),
+      r.diagnosis.caveat?.he ?? '',
+      ...r.diagnosis.extra_requirements.map((e) => e.he),
+    ].join(' ');
+
+  it('⭐ a citizen with no foreign licence is never told about the 89', () => {
+    // The green-form step used to end "הדף שאתה נושא הוא הטופס הלבן (89)"
+    // for everyone. He will never hold one.
+    expect(textOf(citizen)).not.toContain('89');
+  });
+
+  it('⭐ and is never told about converting, on any surface', () => {
+    // caveat, extra_requirements, actions, notes and checklist all checked.
+    const text = textOf(citizen);
+    expect(text).not.toContain('המרה');
+    expect(text).not.toContain('שישה חודשים רצופים');
+  });
+
+  it('but the person WITHOUT an ID still gets the 89 explanation', () => {
+    expect(textOf(noId)).toContain('89');
+  });
+
+  it('⭐ the נהג חדש passenger limit is stated, and it outlasts the ליווי', () => {
+    const acc = noId.roadmap.find((s) => s.step.id === 'fz.accompanied_driving')!;
+    expect(acc.step.action.he).toContain('שני נוסעים');
+    expect(acc.step.action.he).toContain('21');
+    expect(acc.step.evidence.some((e) => e.quote?.includes('לא יסיע'))).toBe(true);
+  });
+
+  it('⭐ the "new driver" sign applies to EVERY new driver, not only under-24s', () => {
+    // The ליווי is age-dependent. This is not, so it is its own step.
+    for (const r of [citizen, noId]) {
+      const sign = r.roadmap.find((s) => s.step.id === 'fz.new_driver_sign');
+      expect(sign, 'sign step missing').toBeDefined();
+      expect(sign!.applies).toBe(true);
+    }
+  });
+
+  it('the plastic card says roughly how long it should take', () => {
+    const card = noId.roadmap.find((s) => s.step.id === 'fz.receive_card')!;
+    expect(card.step.action.he).toContain('חודש');
+  });
+
+  it('the fee-receipt requirement keeps the official quote AND the counter-observation', () => {
+    // On the official list, yet nobody asked for it. Both shown, neither hidden.
+    const test = noId.roadmap.find((s) => s.step.id === 'fz.test')!;
+    expect(test.step.evidence.some((e) => e.quote?.includes('אישור על תשלום האגרה'))).toBe(true);
+    expect(test.step.evidence.some((e) => e.claim.includes('לא התבקש אישור תשלום'))).toBe(true);
+  });
+});

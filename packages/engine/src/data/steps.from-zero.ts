@@ -112,10 +112,8 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     track: 'from_zero',
     title: { he: "מילוי בקשה מקוונת (\"הטופס הירוק\")", en: 'Fill in the online application' },
     action: {
-      he:
-        "מלא את הבקשה להוצאת רישיון נהיגה: פרטים אישיים, בחירת דרגות, והצהרה רפואית. המילוי ללא תשלום.\n\n" +
-        "⚠️ הטופס מקוון בלבד — אין ממנו דף להביא איתך. הדף שאתה נושא הוא הטופס הלבן (89).",
-      en: 'Complete the licence application: personal details, the grades you want, and the medical declaration.',
+      he: "מלא את הבקשה להוצאת רישיון נהיגה: פרטים אישיים, בחירת דרגות, והצהרה רפואית. המילוי ללא תשלום.",
+      en: 'Complete the licence application: personal details, the grades you want, and the medical declaration. Filling it in is free.',
     },
     applies_when: EVERYONE,
     sequence_position: 3,
@@ -124,6 +122,15 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     channel: 'online',
     authority: "משרד התחבורה",
     links: [{ label: { he: "טופס הבקשה", en: 'The application form' }, url: 'https://www.gov.il/he/service/apply_for_new_driver_drivers_license' }],
+    // ⚠️ Only for someone who holds an 89. Telling a citizen that "the sheet you
+    // carry is the white form" is meaningless to him and actively confusing.
+    notes: [
+      {
+        he: "הטופס מקוון בלבד — אין ממנו דף להביא. הדף שאתה נושא הוא הטופס הלבן (89).",
+        en: 'The form is online only — there is no printout to carry. The sheet you carry is the white form (89).',
+        when: NO_TEUDAT_ZEHUT,
+      },
+    ],
     evidence: [
       servicePage(
         "הגשת בקשה להוצאת רישיון נהיגה",
@@ -358,6 +365,14 @@ export const FROM_ZERO_STEPS: StepInput[] = [
       fieldReport(
         "אי-התאמה בין מספר הדרכון שבמסמך ה-89 לדרכון שבידך מונעת את קיום הטסט, והוא נרשם ככישלון",
       ),
+      // ⚠️ Chaya, 27.8: "אישור תשלום האגרה — never heard about that."
+      // It IS on the official list, quoted above, so it stays. But her own
+      // experience is that nobody asked for it, and under her own rule that
+      // observation is evidence too. Both are shown; neither is hidden.
+      fieldReport(
+        "בפועל לא התבקש אישור תשלום האגרה בטסט. הוא מופיע ברשימה הרשמית, ולכן עדיף להביא — אבל ייתכן שלא יבקשו",
+        { last_verified_at: '2026-08-27' },
+      ),
     ],
   },
 
@@ -448,8 +463,12 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     track: 'from_zero',
     title: { he: "שישה חודשי נהיגה עם מלווה", en: 'Six months of accompanied driving' },
     action: {
-      he: "מתחת לגיל 24 חלה תקופת ליווי של חצי שנה. ⚠️ היא נספרת מיום הוצאת ההיתר, לא מיום הטסט.",
-      en: 'Under 24 you must drive accompanied for six months. ⚠️ It counts from the day the permit issues, not from the test.',
+      he:
+        "מתחת לגיל 24 חלה תקופת ליווי של חצי שנה. ⚠️ היא נספרת מיום הוצאת ההיתר, לא מיום הטסט.\n\n" +
+        "בנוסף, אתה \"נהג חדש\" למשך שנתיים מיום הוצאת הרישיון. ⚠️ ואם עוד לא מלאו לך 21 — גם אחרי שתקופת הליווי נגמרה, אסור לך להסיע יותר משני נוסעים, עד גיל 21 או עד תום השנתיים, המוקדם מביניהם. אלא אם יושב לצדך מלווה.",
+      en:
+        'Under 24 you must drive accompanied for six months. ⚠️ It counts from the day the permit issues, not from the test.\n\n' +
+        'You are also a "new driver" for two years from the day the licence issues. ⚠️ And if you are not yet 21, then even after the accompanied period ends you may not carry more than two passengers — until you turn 21 or the two years end, whichever comes first — unless an accompanying driver sits beside you.',
     },
     applies_when: { field: 'age_years', op: 'lt', value: 24 },
     sequence_position: 12,
@@ -460,6 +479,26 @@ export const FROM_ZERO_STEPS: StepInput[] = [
         "ליווי של חצי שנה מיום הוצאת הרישיון, מתחת לגיל 24, ובתנאי שלא נעברה עבירה",
         "מתחת לגיל 24 - הרישיון יישלח רק לאחר הצהרת נהג חדש על סיום תכנית הליווי, בתנאי שעברה חצי שנה מיום הוצאת רישיון הנהיגה ובתנאי שלא נעברה עבירה.",
       ),
+      // ⭐ Added 27.8 at Chaya's request — the restriction nobody mentions
+      // alongside the ליווי, and it outlasts it.
+      //
+      // ⚠️ 🟡 rather than 🟢 on purpose. Chaya found the official page
+      // (gov.il/he/pages/new_driver) and it IS the right source, but gov.il
+      // returns 403 to automated fetching — the risk her own research recorded
+      // on 20.8 — so the quote below comes from the statute text via wikisource
+      // rather than from the ministry page. It upgrades to 🟢 the moment the
+      // sentence is copied from gov.il by hand.
+      {
+        claim:
+          "נהג חדש הוא נהג חדש למשך שנתיים. מי שטרם מלאו לו 21, גם אחרי תום תקופת הליווי, לא יסיע יותר משני נוסעים עד גיל 21 — אלא אם יושב לצדו מלווה",
+        certainty: 'likely',
+        citation: "דף \"נהג חדש ומלווה\", משרד התחבורה · מגובה בפקודת התעבורה [נוסח חדש] ס' 12א(א) ו-12א2",
+        quote:
+          "נהג חדש שטרם מלאו לו 21 שנים וחלפה לגביו התקופה שבה חלה עליו חובת הליווי... לא יסיע ברכב מנועי יותר משני נוסעים עד שימלאו לו 21 שנים, אלא אם כן יושב... מלווה",
+        url: 'https://www.gov.il/he/pages/new_driver?chapterIndex=3',
+        last_verified_at: '2026-08-27',
+        variation_factors: [],
+      },
     ],
   },
 
@@ -535,12 +574,44 @@ export const FROM_ZERO_STEPS: StepInput[] = [
   },
 
   {
+    id: 'fz.new_driver_sign',
+    track: 'from_zero',
+    title: { he: "שלט \"נהג חדש\" על הרכב", en: 'Display the "new driver" sign' },
+    action: {
+      he: "הצמד שלט \"נהג חדש\" לשמשה האחורית של כל רכב שאתה נוהג בו, כל עוד אתה מוגדר נהג חדש — בדרך כלל שנתיים מיום הוצאת הרישיון.",
+      en: 'Attach a "new driver" sign to the rear window of any car you drive, for as long as you are classed a new driver — generally two years from the day the licence issues.',
+    },
+    // ⚠️ EVERY new driver, not only those under 24. The ליווי is age-dependent;
+    // this is not, which is why it is its own step rather than a note on that one.
+    applies_when: EVERYONE,
+    sequence_position: 12,
+    channel: 'unknown',
+    evidence: [
+      {
+        claim:
+          "חובה להציג שלט \"נהג חדש\" כל עוד הנהג מוגדר נהג חדש — בדרך כלל שנתיים",
+        certainty: 'likely',
+        citation: "הרשות הלאומית לבטיחות בדרכים (ראל\"ב), מענה רשמי",
+        quote:
+          "כל עוד הוא מוגדר כ\"נהג חדש\" בהתאם לדין. ככלל משך הזמן שנהג מוגדר כ-\"נהג חדש\" הוא שנתיים",
+        url: 'https://ask.ralbad.org.il/3734',
+        last_verified_at: '2026-08-27',
+        variation_factors: [],
+      },
+      // ⬜ The regulation number itself was not found. ראל"ב answers the
+      // question without citing one, and the commercial sites that give
+      // dimensions and fines cite nothing at all.
+      notChecked("מספר התקנה שמחייבת את השלט, וכן גודלו ומיקומו המדויקים"),
+    ],
+  },
+
+  {
     id: 'fz.receive_card',
     track: 'from_zero',
     title: { he: "קבלת רישיון הנהיגה הקבוע", en: 'Receive the permanent licence' },
     action: {
-      he: "כרטיס הפלסטיק נשלח בדואר לכתובת המעודכנת ברשות האוכלוסין.",
-      en: 'The plastic card is posted to the address registered with the Population Authority.',
+      he: "כרטיס הפלסטיק נשלח בדואר לכתובת המעודכנת ברשות האוכלוסין, ואמור להגיע תוך כחודש.",
+      en: 'The plastic card is posted to the address registered with the Population Authority, and should arrive within about a month.',
     },
     applies_when: EVERYONE,
     sequence_position: 15,
