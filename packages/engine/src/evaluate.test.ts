@@ -437,3 +437,75 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     expect(run({ requested_class: 'unknown' }).diagnosis.requested_class).toBe('unknown');
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('⭐ nothing from the other route leaks in (the founder, 27.8)', () => {
+  // Her report, as a citizen with a teudat zehut and no foreign licence:
+  // "it still gives me the option of an 8-9... it even tells the user he could
+  //  be converting it. Make sure to be specific to the actual route."
+
+  const citizen = p({
+    visa_type: 'citizen',
+    has_teudat_zehut: true,
+    teudat_zehut_confirmed: true,
+    foreign_license: { kind: 'none' },
+    born: '1995-05',
+  });
+  const r = evaluate(citizen, TODAY);
+  const allDocs = r.roadmap.flatMap((s) => s.documents.map((d) => d.id));
+  const allChecks = r.roadmap.flatMap((s) => s.checklist.map((c) => c.he));
+
+  it('is on the from-zero route with no conversion steps', () => {
+    expect(r.diagnosis.track).toBe('from_zero');
+    expect(r.roadmap.filter((s) => s.step.id.startsWith('cv.'))).toEqual([]);
+  });
+
+  it('⭐ is never told to bring the 89 document he was never told to get', () => {
+    // The step lists it because the step is shared between both channels.
+    // The DOCUMENT knows it only applies without a teudat zehut, and the engine
+    // now asks it rather than trusting the step's raw list.
+    expect(r.roadmap.map((s) => s.step.id)).not.toContain('fz.doc_89');
+    expect(allDocs).not.toContain('doc.form_89');
+  });
+
+  it('⭐ is not asked the checklist questions that belong to the other channel', () => {
+    expect(allChecks.some((c) => c.includes('הטופס הלבן'))).toBe(false);
+    expect(allChecks.some((c) => c.includes('תור להוצאת ההיתר'))).toBe(false);
+  });
+
+  it('⭐ is told nothing about converting — he has never held a licence', () => {
+    // Six consecutive months abroad and the entries-and-exits form are
+    // conversion requirements, and were being shown on the from-zero route.
+    expect(r.diagnosis.extra_requirements).toEqual([]);
+    expect(r.clocks.map((c) => c.clock.id)).not.toContain('clock.conversion_window');
+    expect(r.clocks.map((c) => c.clock.id)).not.toContain('clock.foreign_driving');
+  });
+
+  it('⚠️ claims no grade ceiling on the from-zero route, because none is sourced', () => {
+    // ס' 1(ג) states the 176-181 cap about CONVERSION. Whether it binds someone
+    // going from zero is genuinely unknown, so the honest answer is nothing.
+    expect(r.diagnosis.grade_ceiling).toBeNull();
+  });
+
+  it('gets the online channel throughout, because he has an ID', () => {
+    const ids = r.roadmap.map((s) => s.step.id);
+    expect(ids).toContain('fz.permit_online');
+    expect(ids).toContain('fz.completion_online');
+    expect(ids).not.toContain('fz.permit_in_person');
+    expect(ids).not.toContain('fz.permit_fee');
+  });
+
+  it('and the person WITHOUT an ID still gets all of it', () => {
+    // The filtering must remove things for the right person, not for everyone.
+    const noId = evaluate(
+      p({ visa_type: 'a2', has_teudat_zehut: false, foreign_license: { kind: 'none' }, born: '2005-01' }),
+      TODAY,
+    );
+    const docs = noId.roadmap.flatMap((s) => s.documents.map((d) => d.id));
+    const checks = noId.roadmap.flatMap((s) => s.checklist.map((c) => c.he));
+    expect(docs).toContain('doc.form_89');
+    expect(checks.some((c) => c.includes('הטופס הלבן'))).toBe(true);
+    expect(noId.roadmap.map((s) => s.step.id)).toContain('fz.doc_89');
+  });
+});

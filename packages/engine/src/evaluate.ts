@@ -228,6 +228,20 @@ function buildRoadmap(facts: Facts, profile: Profile): RoadmapStep[] {
         checks_first: ALL_CONTINUOUS_CONDITIONS.filter(
           (c) => c.check_before.includes(step.id) && evaluateCondition(c.applies_when, facts) !== false,
         ),
+
+        // ⚠️ Ask each document whether it applies to HIM, rather than trusting
+        // the step's list. A step shared between the two channels lists what
+        // either might need. `!== false` keeps documents we cannot place, so an
+        // unanswered question never quietly removes a requirement.
+        documents: step.requires_documents
+          .map((id) => ALL_DOCUMENTS.find((d) => d.id === id))
+          .filter((d): d is NonNullable<typeof d> => Boolean(d))
+          .filter((d) => evaluateCondition(d.applies_when, facts) !== false),
+
+        // Same for checklist lines. An unscoped line applies to everyone.
+        checklist: step.checklist
+          .filter((c) => !c.when || evaluateCondition(c.when, facts) !== false)
+          .map(({ he, en }) => ({ he, en })),
       };
     })
     .sort((a, b) => {
@@ -339,7 +353,24 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
   // system rests on a status the user states outright.
   const hit = ALL_BLOCKERS.find((b) => evaluateCondition(b.applies_when, facts) === true);
 
-  const ceiling = category?.grade_ceiling ?? null;
+  /**
+   * ⚠️ Everything a CategoryRule carries — the window, the ceiling, the extra
+   * requirements — comes from the CONVERSION נוהל. None of it is sourced for
+   * the from-zero route, and asserting it there would be exactly the confident
+   * guess this system exists to avoid.
+   *
+   * Found by the founder on 27.8, using the site as a citizen with no foreign
+   * licence: she was being told about six consecutive months abroad and an
+   * entries-and-exits form, both of which are conversion requirements and
+   * meaningless to someone who has never held a licence.
+   *
+   * ⬜ NEW OPEN QUESTION this exposes: whether a תושב מדינת חוץ is capped at
+   * 176-181 when going from ZERO too. ס' 1(ג) says it about conversion; the
+   * gov.il from-zero page says nothing about foreign residents and grades.
+   * Until someone asks, the honest answer on that route is "we do not know".
+   */
+  const conversionOnly = facts.track === 'conversion';
+  const ceiling = conversionOnly ? (category?.grade_ceiling ?? null) : null;
 
   /**
    * ⭐ F1 validation 3, which was never implemented until the 27.8 audit caught
@@ -356,7 +387,7 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
     track: facts.track,
     has_teudat_zehut: facts.has_teudat_zehut,
     grade_ceiling: ceiling,
-    extra_requirements: category?.extra_requirements ?? [],
+    extra_requirements: conversionOnly ? (category?.extra_requirements ?? []) : [],
     ...(visa?.caveat ? { caveat: visa.caveat } : {}),
     requested_class: requested,
     requested_class_status,

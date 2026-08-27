@@ -151,11 +151,16 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     sequence_position: 4,
     must_come_after: ['fz.doc_89'],
     channel: 'photo_station',
-    requires_documents: ['doc.passport', 'doc.form_89'],
+    // Generic ID for everyone; the passport-with-visa and the 89 only for those
+    // they apply to. The engine filters each against its own applies_when.
+    requires_documents: ['doc.identity', 'doc.passport', 'doc.form_89'],
     checklist: [
       {
         he: "הטופס הלבן (89) איתך? זה הדף הפיזי. הטופס הירוק מקוון ואין ממנו מה להביא.",
         en: 'Do you have the white form (89)? That is the physical sheet. The green form is online, there is nothing to bring.',
+        // ⚠️ Only for someone who HAS an 89. A citizen never gets one, and
+        // asking him about it was the bug the founder found on 27.8.
+        when: NO_TEUDAT_ZEHUT,
       },
     ],
     links: [{ label: { he: "תחנות צילום", en: 'Photo stations' }, url: 'https://www.gov.il/he/service/drivers_license_photo_stations' }],
@@ -318,10 +323,19 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     applies_when: EVERYONE,
     sequence_position: 9,
     channel: 'test_center',
-    requires_documents: ['doc.passport', 'doc.form_89'],
+    requires_documents: ['doc.identity', 'doc.passport', 'doc.form_89', 'doc.payment_receipt', 'doc.glasses'],
     // ⚠️ The passport-number check was here AND in cc.passport_number_match,
     // which runs before this step anyway. The copy is gone.
-    checklist: [{ he: "קבעת כבר תור להוצאת ההיתר?", en: 'Have you already booked the permit appointment?' }],
+    checklist: [
+      {
+        he: "קבעת כבר תור להוצאת ההיתר?",
+        en: 'Have you already booked the permit appointment?',
+        // ⚠️ There IS no appointment for someone with a teudat zehut — his
+        // permit arrives online within 72 hours. The whole reason this question
+        // exists is the channel difference.
+        when: NO_TEUDAT_ZEHUT,
+      },
+    ],
     cost: {
       amount_ils: 165,
       max_ils: 394,
