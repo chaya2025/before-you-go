@@ -1,6 +1,6 @@
 import type { RequiredDocumentInput } from '../domain';
 import type { Condition } from '../condition';
-import { nohal, servicePage, fieldReport, notChecked } from './sources';
+import { nohal, servicePage, official, fieldReport, notChecked } from './sources';
 
 /**
  * ============================================================================
@@ -26,6 +26,33 @@ const FOREIGN_RESIDENT: Condition = {
 };
 
 export const DOCUMENTS: RequiredDocumentInput[] = [
+  {
+    /**
+     * ⚠️ Added 27.8. Filtering documents per person exposed a hole: a citizen
+     * on the from-zero route was told to bring nothing at all, because
+     * doc.passport is scoped to foreign residents. The photo station and the
+     * test both want photo ID from EVERYONE — the gov.il page lists three
+     * acceptable ones and does not care which.
+     */
+    id: 'doc.identity',
+    name: { he: "תעודה מזהה בתוקף", en: 'Valid photo ID' },
+    applies_when: { always: true },
+    issued_by: { he: "—", en: '—' },
+    must_be_original: true,
+    notes: {
+      he: "תעודת זהות, דרכון או רישיון נהיגה — כל אחד מהם מתקבל.",
+      en: 'A teudat zehut, a passport or a driving licence — any of the three is accepted.',
+    },
+    evidence: [
+      official(
+        'דף "תחנות צילום לרישיון נהיגה", משרד התחבורה',
+        "מסמכי הזיהוי המתקבלים",
+        "תעודה מזהה בתוקף: תעודת זהות, דרכון או רישיון נהיגה.",
+        'https://www.gov.il/he/service/drivers_license_photo_stations',
+      ),
+    ],
+  },
+
   {
     id: 'doc.foreign_license',
     name: { he: "רישיון נהיגה לאומי בתוקף", en: 'A valid national driving licence' },

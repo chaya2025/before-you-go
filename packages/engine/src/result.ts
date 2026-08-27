@@ -1,5 +1,5 @@
 import type { Trilean, ConditionField, NohalCategory, Track, Facts } from './condition';
-import type { Step, Blocker, Clock, ContinuousCondition, Text } from './domain';
+import type { Step, Blocker, Clock, ContinuousCondition, Text, RequiredDocument } from './domain';
 import type { SourcePart } from './certainty';
 import type { ProfileWarning } from './profile';
 import type { IsoDate } from './dates';
@@ -57,6 +57,20 @@ export type RoadmapStep = {
 
   /** Re-checked before this step every time. A completed step can be voided silently. */
   checks_first: ContinuousCondition[];
+
+  /**
+   * ⚠️ RESOLVED and FILTERED, not the raw id list on the step.
+   *
+   * Every document declares its own `applies_when`. A step shared between the
+   * two channels lists everything either of them might need, so the engine has
+   * to ask each document whether it applies to THIS person. Without that, a
+   * citizen was being told to bring his 89 document — one he was correctly
+   * never told to obtain. Found by Chaya, 27.8.
+   */
+  documents: RequiredDocument[];
+
+  /** Checklist lines that actually apply to him. Same filtering as documents. */
+  checklist: Text[];
 };
 
 export type ClockStatus = 'running' | 'expired' | 'unknown' | 'not_started';
