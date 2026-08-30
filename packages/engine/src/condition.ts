@@ -122,6 +122,14 @@ export type Facts = {
   track: Track | 'unknown';
   months_since_anchor: number | 'unknown';
   age_years: number | 'unknown';
+
+  /**
+   * Whole months from today until the visa's expiry month. Negative once that
+   * month has passed. 'unknown' when he did not give a date.
+   *
+   * ⚠️ Derived, never asked. The user answers a month; this is the arithmetic.
+   */
+  months_until_visa_expiry: number | 'unknown';
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
