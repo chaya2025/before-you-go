@@ -421,6 +421,80 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     expect(oleh.urgent.map((u) => u.id)).not.toContain('urgent.grade_above_ceiling');
   });
 
+  // ── the documents, and the order they have to be fixed in ──────────────
+
+  const DOCS = {
+    form_89_number: '89123456',
+    form_89_passport_number: 'AB1234567',
+    passport_number: 'CD7654321', // renewed. A different passport entirely.
+  };
+
+  it('⭐⭐ the founder\'s real case: the 89 mismatch, and the visa that has to come first', () => {
+    // What actually happened to her, in this order:
+    //   the 89 did not match her passport, which killed her TEST
+    //   she went to update the 89
+    //   they told her at the desk that her visa had expired
+    //   she renewed the visa, went back, and then the 89 could be updated
+    //
+    // Two trips, because she learned about her problems one at a time. This is
+    // the entire reason a readiness check exists.
+    const r = run({ ...DOCS, visa_valid_now: false });
+    const ids = r.roadmap.map((s) => s.step.id);
+    expect(ids).toContain('fix.renew_visa');
+    expect(ids).toContain('fix.update_89');
+
+    const fix89 = r.roadmap.find((s) => s.step.id === 'fix.update_89')!;
+    expect(fix89.waiting_on).toContain('fix.renew_visa');
+    expect(fix89.state).toBe('waiting_on');
+
+    // And the visa fix is not waiting on anything. It is where he starts.
+    const fixVisa = r.roadmap.find((s) => s.step.id === 'fix.renew_visa')!;
+    expect(fixVisa.state).toBe('do_now');
+  });
+
+  it('⭐ the same mismatch with a valid visa is do-now, with nothing in front of it', () => {
+    // waiting_on counts only steps on HIS road, so a man whose visa is fine
+    // never sees a dependency that does not apply to him.
+    const r = run({ ...DOCS, visa_valid_now: true });
+    const fix89 = r.roadmap.find((s) => s.step.id === 'fix.update_89')!;
+    expect(fix89.waiting_on).toEqual([]);
+    expect(fix89.state).toBe('do_now');
+    expect(r.roadmap.map((s) => s.step.id)).not.toContain('fix.renew_visa');
+  });
+
+  it('matching numbers put no fix on the road at all', () => {
+    const r = run({
+      form_89_passport_number: 'AB1234567',
+      passport_number: 'ab-1234567', // same passport, typed differently
+    });
+    expect(r.roadmap.map((s) => s.step.id)).not.toContain('fix.update_89');
+  });
+
+  it('⚠️ a person who typed no documents is never told he might have a problem', () => {
+    // The bug four tests caught on 30.8. A fix step is opt-in on evidence,
+    // while the rest of the engine is opt-out on doubt — and telling somebody
+    // his documents might be broken when nobody asked is the same sin as
+    // rendering unknown as no, pointed the other way.
+    const ids = run().roadmap.map((s) => s.step.id);
+    expect(ids).not.toContain('fix.update_89');
+    expect(ids).not.toContain('fix.name_on_89');
+    expect(ids).not.toContain('fix.name_on_license');
+  });
+
+  it('⭐ a name spelled differently on the licence becomes a step, but surname-first does not', () => {
+    const split = run({
+      passport_name_latin: 'Olexandr Petrenko',
+      foreign_license: { kind: 'national', valid_now: true, name_latin: 'Oleksandr Petrenko' },
+    });
+    expect(split.roadmap.map((s) => s.step.id)).toContain('fix.name_on_license');
+
+    const ordered = run({
+      passport_name_latin: 'John Smith',
+      foreign_license: { kind: 'national', valid_now: true, name_latin: 'SMITH JOHN' },
+    });
+    expect(ordered.roadmap.map((s) => s.step.id)).not.toContain('fix.name_on_license');
+  });
+
   // ── the expiry date, which was also being collected and ignored ────────
 
   it('an expiry month in the future settles a visa he was unsure about', () => {
