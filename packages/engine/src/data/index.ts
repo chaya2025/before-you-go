@@ -1,5 +1,6 @@
 import { FROM_ZERO_STEPS } from './steps.from-zero';
 import { CONVERSION_STEPS } from './steps.conversion';
+import { FIX_STEPS } from './steps.fixes';
 import { VISA_PROFILES, CATEGORY_RULES } from './eligibility';
 import { BLOCKERS } from './blockers';
 import { CLOCKS } from './clocks';
@@ -34,7 +35,10 @@ import {
  * sources with opposite evidence profiles — the נוהל for conversion, the gov.il
  * service page plus one documented case for from-zero.
  */
-export const ALL_STEPS: StepType[] = [...FROM_ZERO_STEPS, ...CONVERSION_STEPS].map((step) => {
+// ⭐ FIX_STEPS first, and their sequence_position is negative, because a
+// document that is wrong comes before step one of either route — it is what
+// makes step one possible. The founder, 30.8.
+export const ALL_STEPS: StepType[] = [...FIX_STEPS, ...FROM_ZERO_STEPS, ...CONVERSION_STEPS].map((step) => {
   const parsed = CheckedStep.safeParse(step);
   if (!parsed.success) {
     throw new Error(
@@ -108,6 +112,7 @@ export const documentById = (id: string) => ALL_DOCUMENTS.find((d) => d.id === i
 export {
   FROM_ZERO_STEPS,
   CONVERSION_STEPS,
+  FIX_STEPS,
   VISA_PROFILES,
   CATEGORY_RULES,
   BLOCKERS,
