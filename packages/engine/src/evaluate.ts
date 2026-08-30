@@ -251,6 +251,36 @@ function stateFor(
 function buildRoadmap(facts: Facts, profile: Profile): RoadmapStep[] {
   const done = new Set(profile.completed_steps);
 
+  /**
+   * ⭐ HOLDING A DOCUMENT IS EVIDENCE, AND IT COUNTS THE SAME AS TICKING A STEP.
+   *
+   * ⚠️ Found by Chaya on 30.8, using the documents screen the same day it was
+   * built. She entered an 89 whose passport number did not match, and the
+   * roadmap correctly told her to go and update it — while ALSO still telling
+   * her to go and obtain an 89 for the first time. Two contradictory
+   * instructions about the same document, on the same screen.
+   *
+   * Her rule, and it is better than a fix: the 89 field is optional precisely
+   * because filling it in IS the answer. "If you have it and you input it,
+   * [it is not part of the roadmap]. If you don't, it's part of the roadmap."
+   *
+   * You cannot know your 89 number without holding the document. So the
+   * transcription is proof, and it marks the step done rather than hiding it —
+   * which also unblocks everything waiting on it (fz.online_form,
+   * fz.photo_and_eye) exactly as ticking the box would.
+   *
+   * ⭐ This is mid-process entry arriving without anyone having to declare it.
+   * He came to check his documents and the system worked out where he already
+   * stands.
+   */
+  const holdsForm89 = Boolean(
+    profile.form_89_number || profile.form_89_passport_number || profile.form_89_name_latin,
+  );
+  if (holdsForm89) {
+    done.add('fz.doc_89');
+    done.add('cv.doc_89');
+  }
+
   // Steps that plainly do not apply are dropped. Steps we CANNOT PLACE are kept.
   const relevant = ALL_STEPS.map((step) => ({ step, applies: evaluateCondition(step.applies_when, facts) }))
     .filter(({ step, applies }) => {

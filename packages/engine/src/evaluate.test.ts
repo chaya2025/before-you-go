@@ -462,6 +462,44 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     expect(r.roadmap.map((s) => s.step.id)).not.toContain('fix.renew_visa');
   });
 
+  it('⭐⭐ typing an 89 number proves he has one, so he is not sent to get one', () => {
+    // ⚠️ Found by Chaya on 30.8, using the documents screen the day it was
+    // built. She entered a mismatched 89 and was told BOTH to update it and to
+    // go and obtain one for the first time. Two contradictory instructions
+    // about the same document, on the same page.
+    //
+    // Her rule: the field is optional precisely because filling it in IS the
+    // answer. You cannot know your 89 number without holding the document.
+    // ⚠️ cv.* here: this persona holds a national licence, so he is on the
+    // CONVERSION route. The from-zero half of the same rule is covered by the
+    // fz.doc_89 fixture run through the CLI.
+    const r = run({ ...DOCS, visa_valid_now: false });
+    const doc89 = r.roadmap.find((s) => s.step.id === 'cv.doc_89')!;
+    expect(doc89.state).toBe('done');
+
+    // And it must genuinely unblock what was waiting on it, exactly as ticking
+    // the box would. Half a fix would leave the road stalled behind a step the
+    // system already knows is finished.
+    const form = r.roadmap.find((s) => s.step.id === 'cv.online_form')!;
+    expect(form.waiting_on).not.toContain('cv.doc_89');
+    expect(form.state).not.toBe('waiting_on');
+  });
+
+  it('and someone who did NOT type an 89 is still told to go and get one', () => {
+    const r = run({ visa_valid_now: true });
+    const doc89 = r.roadmap.find((s) => s.step.id === 'cv.doc_89')!;
+    expect(doc89.state).not.toBe('done');
+  });
+
+  it('any one of the three 89 fields is enough evidence that he holds it', () => {
+    // He may know the number, or only recognise the name printed on it.
+    for (const field of ['form_89_number', 'form_89_passport_number', 'form_89_name_latin']) {
+      const r = run({ [field]: field === 'form_89_name_latin' ? 'John Smith' : '89123456' });
+      const doc89 = r.roadmap.find((s) => s.step.id === 'cv.doc_89')!;
+      expect(doc89.state, field).toBe('done');
+    }
+  });
+
   it('matching numbers put no fix on the road at all', () => {
     const r = run({
       form_89_passport_number: 'AB1234567',
