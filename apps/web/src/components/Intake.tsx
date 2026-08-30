@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { StatusOption } from '../api';
+import { anchorFieldFor } from '@byg/engine';
 import { UI, pick, type Lang } from '../i18n';
 
 /**
@@ -98,12 +99,18 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
    * enter" of an עולה would collect the wrong date and compute the wrong
    * deadline, silently.
    */
-  const dateKey =
-    chosen?.value === 'a1'
-      ? 'made_aliyah'
-      : chosen?.value === 'citizen' || chosen?.value === 'permanent_resident'
-        ? 'returned_to_israel'
-        : 'entered_israel';
+  // ⚠️ Was hardcoded here: a1 meant aliyah, citizen or permanent resident meant
+  // return, everything else meant entry. Domain knowledge in the website, which
+  // this architecture says it must never hold.
+  //
+  // It agreed with the engine on the day it was checked. But גיליון 14 had
+  // already reclassified תושב קבע once, and this list would not have followed —
+  // it would have gone on asking a returning resident when he ENTERED Israel,
+  // the engine would have looked for a date nobody was asked for, and the
+  // clocks would have read 'unknown' with no explanation anywhere.
+  //
+  // The category now comes from the API, and the mapping from the engine.
+  const dateKey = anchorFieldFor(chosen?.nohal_category ?? 'unknown');
 
   const dateLabel =
     dateKey === 'made_aliyah' ? t('q_aliyah') : dateKey === 'returned_to_israel' ? t('q_returned') : t('q_entered');

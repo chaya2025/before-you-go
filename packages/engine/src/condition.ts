@@ -109,6 +109,39 @@ export const NohalCategory = z.enum([
 ]);
 export type NohalCategory = z.infer<typeof NohalCategory>;
 
+/**
+ * ⭐ WHICH DATE EACH CATEGORY COUNTS FROM. One definition, exported, because it
+ * was being made twice.
+ *
+ * ⚠️ Found 30.8 during a critical pass. Intake.tsx decided which date question
+ * to ask by hardcoding visa codes — a1 means aliyah, citizen or permanent
+ * resident means return, everything else means entry. The engine decided the
+ * same thing from nohal_category, in deriveFacts.
+ *
+ * They agreed on the day I checked. But גיליון 14 had ALREADY reclassified
+ * תושב קבע once, from תושב מדינת חוץ to תושב ישראל, and the website would not
+ * have followed: it would have gone on asking a returning resident when he
+ * ENTERED Israel, and the engine would have looked for a date he was never
+ * asked for. The clocks would simply have read 'unknown' and nobody would have
+ * known why.
+ *
+ * That is domain knowledge living in the website, which this architecture says
+ * it must never hold. Now both read this.
+ */
+export const ANCHOR_FIELD_BY_CATEGORY = {
+  oleh_chadash: 'made_aliyah',
+  toshav_israel: 'returned_to_israel',
+  toshav_medinat_chutz: 'entered_israel',
+  not_defined_in_nohal: 'entered_israel',
+} as const satisfies Record<NohalCategory, 'made_aliyah' | 'returned_to_israel' | 'entered_israel'>;
+
+export type AnchorField = (typeof ANCHOR_FIELD_BY_CATEGORY)[NohalCategory];
+
+/** Falls back to entry, which is the right default for an unplaced status. */
+export function anchorFieldFor(category: NohalCategory | 'unknown'): AnchorField {
+  return category === 'unknown' ? 'entered_israel' : ANCHOR_FIELD_BY_CATEGORY[category];
+}
+
 export const Track = z.enum(['conversion', 'from_zero']);
 export type Track = z.infer<typeof Track>;
 
