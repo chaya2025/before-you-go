@@ -18,6 +18,7 @@ const known: Facts = {
   track: 'conversion',
   months_since_anchor: 36,
   age_years: 34,
+  months_until_visa_expiry: 18,
 };
 
 /** The same person, except he skipped every optional question. */

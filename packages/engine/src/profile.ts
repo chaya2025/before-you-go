@@ -293,6 +293,20 @@ export function checkProfile(profile: Profile, today: string): ProfileWarning[] 
     }
   }
 
+  /**
+   * ⚠️ He said the visa is valid, but the expiry month he gave has passed.
+   * Usually a renewed visa with the old date still in the form. The engine
+   * refuses to resolve this on its own (see deriveFacts case 3), so the person
+   * is asked instead. F1 validation 2: ask for confirmation, never block.
+   */
+  if (profile.visa_valid_now === true && profile.visa_expires !== 'unknown' && profile.visa_expires < thisMonth) {
+    warnings.push({
+      field: 'visa_expires',
+      message_he: 'אמרת שהאשרה בתוקף, אבל חודש התפוגה שמסרת כבר עבר. אם חידשת, עדכן את התאריך.',
+      message_en: 'You said the visa is valid, but the expiry month you gave has already passed. If you renewed it, update the date.',
+    });
+  }
+
   return warnings;
 }
 

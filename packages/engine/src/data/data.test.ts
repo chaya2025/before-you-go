@@ -26,6 +26,7 @@ const veteranConverter: Facts = {
   track: 'conversion',
   months_since_anchor: 36,
   age_years: 34,
+  months_until_visa_expiry: 18,
 };
 
 /**
