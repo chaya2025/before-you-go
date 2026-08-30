@@ -86,6 +86,18 @@ export const ConditionField = z.enum([
   'track', // conversion · from_zero
   'months_since_anchor', // from whichever of עלייה / שיבה / כניסה applies
   'age_years', // at the moment the rule is evaluated
+
+  // ── the documents (ש7), all derived by comparison ────────────────────────
+  // ⚠️ A fact that is not listed here is invisible to every rule. That is how
+  // visa_expires sat in the Profile for days changing nothing.
+  'months_until_visa_expiry',
+  'passport_valid_now',
+  'months_until_passport_expiry',
+  'passport_89_number_match',
+  'passport_89_name_match',
+  'passport_license_name_match',
+  'months_until_license_expiry',
+  'foreign_license_language',
 ]);
 export type ConditionField = z.infer<typeof ConditionField>;
 
