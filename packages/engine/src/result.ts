@@ -102,8 +102,34 @@ export type ClockState = {
  * is worse than not asking — the user reasonably assumes an answer that changed
  * nothing did not matter.
  */
+/**
+ * ⭐ Does this stop him acting TODAY, or does he simply need to know it?
+ *
+ * ⚠️ Chaya, 30.8, correcting a real harm in the first version: a visa expiring
+ * in three days does NOT stop anyone. He can walk into the office today and be
+ * served, because the visa is valid until it expires. Putting that in the same
+ * red box as "your visa has expired" would tell him to deal with it first, and
+ * a person who reads that may not go at all — losing the days he still had.
+ *
+ * Her rule, in her words: "he can still go, but he has to renew the visa at
+ * least a month before it expires... the renew a month before should be a
+ * friendly reminder."
+ *
+ *   'blocking'  — acting today is pointless until this is dealt with.
+ *   'advisory'  — carry on now. This is something to know, or to start in
+ *                 parallel. It never delays anything.
+ *
+ * ⭐ This axis generalises past driving licences. Every government process has
+ * things that genuinely stop you and things that merely need timing, and
+ * collapsing the two is how official guidance becomes frightening and useless.
+ */
+export type UrgentSeverity = 'blocking' | 'advisory';
+
 export type UrgentIssue = {
   id: string;
+
+  /** See UrgentSeverity. Never render an advisory as a blocker. */
+  severity: UrgentSeverity;
   title: Text;
   /** What it actually stops him doing. */
   consequence: Text;

@@ -462,6 +462,58 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     expect(run({ visa_valid_now: 'unknown' }).urgent.map((u) => u.id)).not.toContain('urgent.visa_expired');
   });
 
+  it('⭐ a visa that has not expired yet never blocks him, it only reminds him', () => {
+    // ⚠️ Chaya, 30.8. Her rule: "he can still go, but he has to renew the visa
+    // at least a month before it expires... the renew a month before should be
+    // a friendly reminder."
+    //
+    // The first version put this in the same box as an EXPIRED visa. Someone
+    // with three days left would have read "deal with this first" above his
+    // whole roadmap and reasonably not gone at all, losing the days he had.
+    const soon = run({ visa_expires: '2026-10' }).urgent.find(
+      (u) => u.id === 'urgent.visa_expiring_soon',
+    )!;
+    expect(soon.severity).toBe('advisory');
+    // It has to SAY so, not merely be typed so.
+    expect(soon.consequence.he).toContain('אינה חסימה');
+    expect(soon.action.he).toContain('במקביל');
+  });
+
+  it('an expired visa is the one that genuinely blocks', () => {
+    const expired = run({ visa_valid_now: false }).urgent.find(
+      (u) => u.id === 'urgent.visa_expired',
+    )!;
+    expect(expired.severity).toBe('blocking');
+  });
+
+  it('an unreachable grade blocks; an IDP does not', () => {
+    // The ceiling means the destination does not exist. The IDP only means the
+    // route changed, and the from-zero route below it is entirely walkable.
+    const bus = run({ requested_class: 'D' }).urgent.find(
+      (u) => u.id === 'urgent.grade_above_ceiling',
+    )!;
+    expect(bus.severity).toBe('blocking');
+
+    const idp = run({ foreign_license: { kind: 'idp_only', valid_now: true } }).urgent.find(
+      (u) => u.id === 'urgent.idp_not_convertible',
+    )!;
+    expect(idp.severity).toBe('advisory');
+  });
+
+  it('every urgent issue declares a severity', () => {
+    // Guards the next one somebody adds. A missing severity would render as a
+    // blocker by default in the UI, which is the failure this whole axis exists
+    // to prevent.
+    const all = [
+      ...run({ visa_valid_now: false }).urgent,
+      ...run({ visa_expires: '2026-10' }).urgent,
+      ...run({ requested_class: 'D' }).urgent,
+      ...run({ foreign_license: { kind: 'idp_only', valid_now: true } }).urgent,
+    ];
+    expect(all.length).toBeGreaterThan(0);
+    for (const u of all) expect(['blocking', 'advisory']).toContain(u.severity);
+  });
+
   it('⭐ two months of runway is flagged, because one of them is the renewal', () => {
     const soon = run({ visa_expires: '2026-10' });
     expect(soon.urgent.map((u) => u.id)).toContain('urgent.visa_expiring_soon');
