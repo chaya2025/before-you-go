@@ -123,8 +123,8 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
     issued_by: { he: "משרד הרישוי", en: 'The licensing office' },
     must_be_original: true,
     notes: {
-      he: "דף A4 מודפס — מסמך נפרד שאפשר לאבד, לא חותמת בדרכון. ⚠️ המספר משמש אך ורק במשרד הרישוי: לא בביטוח לאומי, לא ברשות האוכלוסין, ולא בקופת חולים.",
-      en: 'A printed A4 sheet, a separate document you can lose, not a stamp in your passport. ⚠️ The number is used only at the licensing office: not at National Insurance, the Population Authority, or your health fund.',
+      he: "דף A4 מודפס — מסמך נפרד שאפשר לאבד, לא חותמת בדרכון. ⚠️ המספר משמש אך ורק במשרד הרישוי: לא בביטוח לאומי, לא ברשות האוכלוסין, ולא בקופת חולים. ⭐ אין לו תאריך תפוגה: הדבר היחיד שיכול לשבור אותו הוא חידוש דרכון, שמשנה את מספר הדרכון שמודפס עליו.",
+      en: 'A printed A4 sheet, a separate document you can lose, not a stamp in your passport. ⚠️ The number is used only at the licensing office: not at National Insurance, the Population Authority, or your health fund. ⭐ It has no expiry date: the only thing that can break it is renewing your passport, which changes the passport number printed on it.',
     },
     evidence: [
       servicePage(
@@ -133,6 +133,23 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
         "במשרד הרישוי יונפק מספר זיהוי פיקטיבי המתחיל בספרות 89.",
       ),
       fieldReport("המסמך הוא דף A4 מודפס, והמספר משמש רק במשרד הרישוי"),
+      /**
+       * ⭐ ⬜ CLOSED 30.8. The question was raised on 30.8 — does the 89 carry
+       * an expiry date? — and deliberately left unanswered rather than guessed.
+       * Chaya looked at hers:
+       *
+       *   "the 89 doesn't have an expiry date on it, only the actual 89 number
+       *    and your passport number"
+       *
+       * ⭐ Which means the ONLY thing that can break an 89 is the passport
+       * number on it going stale. There is no second way for it to lapse, and
+       * no date to track. That makes urgent.passport_renewal_breaks_89 the
+       * complete story rather than one case of several.
+       */
+      fieldReport(
+        "מסמך ה-89 אינו נושא תאריך תפוגה — הוא נושא את מספר ה-89 ואת מספר הדרכון בלבד",
+        { last_verified_at: '2026-08-30' },
+      ),
     ],
   },
 
