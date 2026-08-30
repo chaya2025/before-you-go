@@ -339,6 +339,46 @@ function urgentIssues(
     });
   }
 
+  /**
+   * ⭐ He holds an International Driving Permit and nothing else.
+   *
+   * ⚠️ The ROUTING for this was already correct: deriveFacts sends idp_only to
+   * the from-zero track, because an IDP is not a national licence and cannot be
+   * converted. So the roadmap he sees is right.
+   *
+   * The harm is quieter than a wrong roadmap, and worse for being quiet. He
+   * answered a question, was moved onto the LONGER route, and was never told
+   * that is what happened or why. Silently rerouting somebody is exactly the
+   * behaviour this product exists to replace.
+   *
+   * ⭐ And the fact that makes this worth surfacing at all: an IDP is issued
+   * ON THE BASIS of a national licence. Anyone holding one almost certainly has
+   * a national licence in their home country. Retrieving it may open the
+   * conversion route, which is materially shorter. Nobody tells him that.
+   *
+   * Not a blocker: he is fully entitled to go from zero. F6 rule 3 — a person
+   * whose route changed has to know why and on what authority.
+   */
+  if (facts.foreign_license_kind === 'idp_only') {
+    const licenceDoc = ALL_DOCUMENTS.find((d) => d.id === 'doc.foreign_license');
+    issues.push({
+      id: 'urgent.idp_not_convertible',
+      title: {
+        he: 'רישיון בין-לאומי אינו מתקבל להמרה',
+        en: 'An international permit cannot be converted',
+      },
+      consequence: {
+        he: 'הנוהל מקבל רישיון לאומי בלבד. לכן המסלול שמוצג לך למטה הוא הוצאת רישיון מאפס, ולא המרה. זו אינה דחייה: אתה זכאי לחלוטין למסלול מאפס.',
+        en: 'The procedure accepts a national licence only. That is why the route shown below is issuing a licence from zero, not conversion. This is not a rejection: you are fully entitled to the from-zero route.',
+      },
+      action: {
+        he: 'רישיון בין-לאומי מונפק על בסיס רישיון לאומי, ולכן סביר שיש לך רישיון לאומי במדינת המוצא. אם תוכל להשיג אותו במקור ובתוקף, ייתכן שמסלול ההמרה ייפתח בפניך, והוא קצר משמעותית. שווה לבדוק לפני שמתחילים מאפס.',
+        en: 'An international permit is issued on the basis of a national licence, so you probably hold a national licence in your home country. If you can obtain it, original and valid, the conversion route may open to you, and it is considerably shorter. Worth checking before starting from zero.',
+      },
+      evidence: licenceDoc ? licenceDoc.evidence : [],
+    });
+  }
+
   return issues;
 }
 

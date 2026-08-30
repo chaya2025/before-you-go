@@ -94,6 +94,36 @@ function report(result: Result, today: string, withSources: boolean): string {
     return L.join('\n');
   }
 
+  // ── urgent ─────────────────────────────────────────────────────────────
+  //
+  // ⭐ Above the clocks and above the road, because that is the entire point of
+  // an UrgentIssue: a roadmap built on a lapsed visa describes a process he
+  // cannot currently start.
+  //
+  // ⚠️ Added 30.8. The CLI had NEVER rendered these. The ceiling and expired
+  // visa issues built on 27.8 were invisible in the one tool used for reading
+  // real output, which is the tool that found them in the first place. A
+  // finding that cannot be seen is a finding that does not exist.
+  if (result.urgent.length) {
+    L.push('', '');
+    rule('─');
+    L.push(`❗ לטפל בזה קודם  ·  ${result.urgent.length}`);
+    rule('─');
+    for (const u of result.urgent) {
+      L.push('');
+      L.push(`  ${u.title.he}`);
+      L.push(`     מה זה עוצר: ${u.consequence.he}`);
+      L.push(`     מה לעשות:   ${u.action.he}`);
+      if (withSources) {
+        for (const part of u.evidence) {
+          const meta = CERTAINTY_META[part.certainty];
+          L.push(`     ${meta.symbol} ${part.claim}`);
+          if (part.citation) L.push(`        ${part.citation}`);
+        }
+      }
+    }
+  }
+
   // ── clocks ─────────────────────────────────────────────────────────────
   if (result.clocks.length) {
     L.push('', '');
@@ -207,6 +237,11 @@ function summary(result: Result, outPath: string): string {
       `${GREEN}${BOLD}OK${RESET}  track=${BOLD}${d.track}${RESET}  category=${d.nohal_category}  ceiling=${ceiling}  teudat_zehut=${d.has_teudat_zehut}`,
     );
     L.push('');
+    // ⚠️ Urgent first in the terminal too, same reason as in the report.
+    for (const u of result.urgent) {
+      L.push(`  ${RED}${BOLD}❗ ${u.id}${RESET}`);
+    }
+    if (result.urgent.length) L.push('');
     for (const c of result.clocks) {
       const colour = c.status === 'expired' ? RED : c.status === 'running' ? GREEN : GREY;
       const days = c.days_left === null ? '' : `${c.days_left} days`;
@@ -226,7 +261,7 @@ function summary(result: Result, outPath: string): string {
       L.push(`  ${colour}${STATE_MARK[s.state]} ${s.step.id.padEnd(28)}${RESET}${GREY}${flags}${RESET}`);
     }
     L.push('');
-    L.push(`  ${result.roadmap.length} steps · ${result.clocks.length} clocks · ${result.standing_conditions.length} standing conditions`);
+    L.push(`  ${result.roadmap.length} steps · ${result.urgent.length} urgent · ${result.clocks.length} clocks · ${result.standing_conditions.length} standing conditions`);
   }
   L.push('');
   L.push(`${GREY}full Hebrew report →${RESET} ${outPath}`);
