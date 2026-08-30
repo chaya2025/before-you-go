@@ -27,6 +27,15 @@ const veteranConverter: Facts = {
   months_since_anchor: 36,
   age_years: 34,
   months_until_visa_expiry: 18,
+  // No documents transcribed in the base fixture, which is the honest default:
+  // nothing entered can never become a mismatch.
+  passport_valid_now: 'unknown',
+  months_until_passport_expiry: 'unknown',
+  passport_89_number_match: 'unknown',
+  passport_89_name_match: 'unknown',
+  passport_license_name_match: 'unknown',
+  months_until_license_expiry: 'unknown',
+  foreign_license_language: 'unknown',
 };
 
 /**
