@@ -104,15 +104,23 @@ function report(result: Result, today: string, withSources: boolean): string {
   // visa issues built on 27.8 were invisible in the one tool used for reading
   // real output, which is the tool that found them in the first place. A
   // finding that cannot be seen is a finding that does not exist.
-  if (result.urgent.length) {
+  //
+  // ⚠️ the founder, 30.8: blocking and advisory must never share a heading. A visa
+  // expiring in three days does not stop him going today, and printing it under
+  // "deal with this first" is how a person loses the days he still had.
+  const blocking = result.urgent.filter((u) => u.severity === 'blocking');
+  const advisory = result.urgent.filter((u) => u.severity === 'advisory');
+
+  const urgentBlock = (issues: typeof result.urgent, heading: string, verb: string) => {
+    if (!issues.length) return;
     L.push('', '');
     rule('─');
-    L.push(`❗ לטפל בזה קודם  ·  ${result.urgent.length}`);
+    L.push(heading);
     rule('─');
-    for (const u of result.urgent) {
+    for (const u of issues) {
       L.push('');
       L.push(`  ${u.title.he}`);
-      L.push(`     מה זה עוצר: ${u.consequence.he}`);
+      L.push(`     ${verb} ${u.consequence.he}`);
       L.push(`     מה לעשות:   ${u.action.he}`);
       if (withSources) {
         for (const part of u.evidence) {
@@ -122,7 +130,10 @@ function report(result: Result, today: string, withSources: boolean): string {
         }
       }
     }
-  }
+  };
+
+  urgentBlock(blocking, `❗ לטפל בזה קודם  ·  ${blocking.length}`, 'מה זה עוצר:');
+  urgentBlock(advisory, `ℹ️  כדאי לדעת — לא עוצר אותך  ·  ${advisory.length}`, 'מה זה אומר: ');
 
   // ── clocks ─────────────────────────────────────────────────────────────
   if (result.clocks.length) {
@@ -239,7 +250,10 @@ function summary(result: Result, outPath: string): string {
     L.push('');
     // ⚠️ Urgent first in the terminal too, same reason as in the report.
     for (const u of result.urgent) {
-      L.push(`  ${RED}${BOLD}❗ ${u.id}${RESET}`);
+      const isBlocking = u.severity === 'blocking';
+      L.push(
+        `  ${isBlocking ? `${RED}${BOLD}❗ blocking` : `${YELLOW}ℹ  advisory`} ${u.id}${RESET}`,
+      );
     }
     if (result.urgent.length) L.push('');
     for (const c of result.clocks) {

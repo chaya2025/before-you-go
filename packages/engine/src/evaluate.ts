@@ -346,6 +346,7 @@ function urgentIssues(
   ) {
     issues.push({
       id: 'urgent.grade_above_ceiling',
+      severity: 'blocking',
       title: {
         he: `הדרגה שביקשת (${facts.requested_class}) אינה פתוחה בפניך`,
         en: `The grade you asked for (${facts.requested_class}) is not open to you`,
@@ -379,6 +380,7 @@ function urgentIssues(
     const visaDoc = ALL_DOCUMENTS.find((d) => d.id === 'doc.visa');
     issues.push({
       id: 'urgent.visa_expired',
+      severity: 'blocking',
       title: {
         he: "האשרה שלך אינה בתוקף — זה השלב הראשון",
         en: 'Your visa is not valid — this is step one',
@@ -423,17 +425,18 @@ function urgentIssues(
     const m = facts.months_until_visa_expiry;
     issues.push({
       id: 'urgent.visa_expiring_soon',
+      severity: 'advisory',
       title: {
-        he: m === 0 ? 'האשרה שלך פגה החודש' : `האשרה שלך פגה בעוד ${m} חודשים`,
-        en: m === 0 ? 'Your visa expires this month' : `Your visa expires in ${m} months`,
+        he: m === 0 ? 'האשרה בתוקף עד סוף החודש — כדאי להתחיל לחדש' : `האשרה בתוקף עוד ${m} חודשים — כדאי להתחיל לחדש`,
+        en: m === 0 ? 'Your visa is valid to the end of this month. Worth starting the renewal' : `Your visa is valid for ${m} more months. Worth starting the renewal`,
       },
       consequence: {
-        he: 'הזכאות נבחנת ליום ההגשה, ולא ליום שהתחלת. אשרה שתפוג באמצע התהליך מבטלת גם שלבים שכבר עברת, ותור שנקבע למועד שאחרי התפוגה לא יעזור לך.',
-        en: 'Eligibility is judged on the day you submit, not the day you started. A visa that lapses mid-process voids steps you have already completed, and an appointment booked for after it expires will not help you.',
+        he: 'זו אינה חסימה. האשרה בתוקף, ואפשר להמשיך בתהליך היום כרגיל — לקבוע תורים, להגיש ולהתייצב. מה שכן חשוב לדעת: הזכאות נבחנת ליום ההגשה, ולכן תור שנקבע למועד שאחרי התפוגה לא יעזור לך.',
+        en: 'This is not a blocker. Your visa is valid and you can carry on with the process today as normal: book appointments, submit, attend. What is worth knowing: eligibility is judged on the day you submit, so an appointment booked for after the expiry will not help you.',
       },
       action: {
-        he: 'חדש את האשרה עכשיו, לפני שתקבע תורים. החידוש מקוון ואורך כחודש, ולכן חודשיים הם כבר לוח זמנים צפוף ולא זמן פנוי.',
-        en: 'Renew the visa now, before booking appointments. Renewal is online and takes about a month, so two months is already a tight schedule rather than spare time.',
+        he: 'התחל את חידוש האשרה במקביל, בלי לעצור שום דבר אחר. החידוש מקוון ואורך כחודש, ולכן עדיף להתחיל אותו לפני שנשאר פחות מחודש.',
+        en: 'Start the visa renewal in parallel, without pausing anything else. It is done online and takes about a month, so it is better begun before less than a month is left.',
       },
       evidence: visaDoc ? visaDoc.evidence : [],
     });
@@ -463,6 +466,9 @@ function urgentIssues(
     const licenceDoc = ALL_DOCUMENTS.find((d) => d.id === 'doc.foreign_license');
     issues.push({
       id: 'urgent.idp_not_convertible',
+      // Nothing is stopped: he is fully entitled to the from-zero route shown
+      // below. This exists so he knows why the route changed, not to hold him up.
+      severity: 'advisory',
       title: {
         he: 'רישיון בין-לאומי אינו מתקבל להמרה',
         en: 'An international permit cannot be converted',
