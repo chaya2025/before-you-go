@@ -571,6 +571,48 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     expect(theirs).toContain('doc.record');
   });
 
+  it('⭐⭐ five years on a C1 is not five years on a B — the exemption reads the grade he HELD', () => {
+    // ⚠️ Found 30.8 by a coverage sweep: held_class was read by NO rule in the
+    // whole engine. EXEMPT_FROM_TESTS tested requested_class alone, but the
+    // נוהל says "שהיה בעל רישיון... מדרגה המקבילה לאחת המנויות בתקנה 176 עד 180".
+    // That is the grade he HELD. The five years have to be ON it.
+    //
+    // The man it hurt: twenty years driving a C1 (181) abroad, applying for a
+    // B. The old rule saw "requested B", declared him exempt from BOTH מבחן
+    // שליטה and בדיקת ראייה, and he would have arrived expecting to walk out
+    // with a licence.
+    const onC1 = run({
+      foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 20, held_class: 'C1' },
+      requested_class: 'B',
+      has_record_document: 'yes',
+    });
+    const c1ids = onC1.roadmap.map((s) => s.step.id);
+    expect(c1ids).toContain('cv.control_test');
+    expect(c1ids).toContain('cv.eye_test');
+
+    // The same seniority on a B (180) is inside the range, so he IS exempt.
+    const onB = run({
+      foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 20, held_class: 'B' },
+      requested_class: 'B',
+      has_record_document: 'yes',
+    });
+    const bids = onB.roadmap.map((s) => s.step.id);
+    expect(bids).not.toContain('cv.control_test');
+    expect(bids).not.toContain('cv.eye_test');
+  });
+
+  it('⚠️ an unknown held grade never quietly grants the exemption', () => {
+    // Unknown must fail towards showing the test, not towards skipping it.
+    // The costly direction is telling a man he is exempt when he is not.
+    const unknown = run({
+      foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 20 },
+      requested_class: 'B',
+      has_record_document: 'yes',
+    });
+    const ids = unknown.roadmap.map((s) => s.step.id);
+    expect(ids).toContain('cv.control_test');
+  });
+
   it('matching numbers put no fix on the road at all', () => {
     const r = run({
       form_89_passport_number: 'AB1234567',

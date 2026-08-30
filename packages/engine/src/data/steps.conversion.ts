@@ -36,10 +36,40 @@ const EVERYONE: Condition = { always: true };
  * And without a רקורד there is no exemption in practice, whatever the seniority,
  * because there is no way to prove the issue date.
  */
+/**
+ * ⚠️⚠️ FIXED 30.8, after a coverage sweep found held_class was read by NO rule
+ * in the entire engine. Chaya: "be critical, find things."
+ *
+ * The condition tested `requested_class` alone. The נוהל says:
+ *
+ *   "מבקש שהיה בעל רישיון נהיגה לאומי קבוע במשך חמש שנים לפחות
+ *    מדרגה המקבילה לאחת המנויות בתקנה 176 עד 180"
+ *
+ * "שהיה בעל ... מדרגה המקבילה" is about the grade he HELD. The five years have
+ * to be ON a grade inside 176-180. The engine was reading the grade he is
+ * ASKING FOR instead, which is a different sentence.
+ *
+ * ⚠️ THE PERSON IT HURT: twenty years driving a C1 (תקנה 181) abroad, applying
+ * for a B. The old condition saw "requested B" and declared him exempt from
+ * מבחן שליטה AND בדיקת ראייה. His seniority is on 181, outside the range, so
+ * the נוהל does not exempt him. He would have arrived expecting to walk out
+ * with a licence and been sent to sit two tests he had not prepared for.
+ *
+ * ⭐ BOTH checks are real and they are different rules, so both stay:
+ *   held_class      · ס' 2 — the five years must be ON a grade in 176-180
+ *   requested_class · תיקון 6 — C1 (181) requires מבחן שליטה however long he
+ *                     has driven, so it can never be the exempt outcome
+ *
+ * ⚠️ And note what happens when held_class is 'unknown': `in` on an unknown
+ * value is unknown, so the exemption is unknown, so the test steps render as
+ * uncertain rather than vanishing. Unknown must never quietly grant an
+ * exemption — that is the direction that costs somebody a wasted appointment.
+ */
 const EXEMPT_FROM_TESTS: Condition = {
   all: [
     { field: 'foreign_license_years', op: 'gte', value: 5 },
     { field: 'has_record_document', op: 'eq', value: 'yes' },
+    { field: 'held_class', op: 'in', value: ['A2', 'A1', 'A', '1', 'B'] },
     { field: 'requested_class', op: 'in', value: ['A2', 'A1', 'A', '1', 'B'] },
   ],
 };
