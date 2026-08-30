@@ -70,6 +70,13 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
     statuses: ALL_VISA_PROFILES.map((v) => ({
       value: v.visa_type,
       label: v.label,
+      /**
+       * ⭐ Added 30.8 so the website stops guessing. It needs to know which
+       * date to ask for, and that follows from the CATEGORY, not from the visa
+       * code. Sending the category means the mapping lives in the data, where
+       * it can be corrected once — גיליון 14 has already moved תושב קבע once.
+       */
+      nohal_category: v.nohal_category,
       /** Powers the ש4 confirmation: "לפי המעמד שבחרת כנראה אין לך ת״ז. נכון?" */
       usually_has_teudat_zehut: v.usually_has_teudat_zehut,
       /** The physical document he carries, so the question can be concrete. */

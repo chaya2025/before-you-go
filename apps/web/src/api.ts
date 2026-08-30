@@ -1,4 +1,4 @@
-import type { Result, Text } from '@byg/engine';
+import type { Result, Text, NohalCategory } from '@byg/engine';
 
 /**
  * ============================================================================
@@ -33,6 +33,8 @@ const BASE = import.meta.env.VITE_API_BASE ?? (import.meta.env.PROD ? '' : 'http
 export type StatusOption = {
   value: string;
   label: Text;
+  /** From the engine's data, so the website never decides this itself. */
+  nohal_category: NohalCategory;
   usually_has_teudat_zehut: boolean | 'unknown';
   identity_document: Text;
   caveat: Text | null;
