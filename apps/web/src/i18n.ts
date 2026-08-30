@@ -64,6 +64,45 @@ export const UI = {
     he: 'חודש ושנה מספיקים. מכאן נספרים שני השעונים.',
     en: 'Month and year is enough. Both clocks count from here.',
   },
+  /**
+   * ⚠️ the founder, 30.8, using the site: "it asks when he came back to Israel. What
+   * does it have to do with when he came back? I thought the thing was six
+   * months."
+   *
+   * She is the person who did this research and she still could not tell why
+   * the question was there. A generic "both clocks count from here" says
+   * nothing about WHICH clocks or WHY. So each category now gets its own
+   * sentence, naming what this date actually starts for HIM.
+   */
+  q_date_help_returned: {
+    he: 'חודש ושנה מספיקים. מכאן נספרות חמש השנים שבהן מותר להגיש את בקשת ההמרה. ⚠️ זהו תנאי נפרד מהשהייה בחו״ל, ולפי ס׳ 1(ב) שניהם נדרשים.',
+    en: 'Month and year is enough. This starts the five years during which the conversion may be submitted. ⚠️ It is a separate condition from the time spent abroad, and clause 1(b) requires both.',
+  },
+  q_date_help_aliyah: {
+    he: 'חודש ושנה מספיקים. מכאן נספרות חמש השנים שבהן מותר להגיש את בקשת ההמרה.',
+    en: 'Month and year is enough. This starts the five years during which the conversion may be submitted.',
+  },
+  q_date_help_entered: {
+    he: 'חודש ושנה מספיקים. מכאן נספרות חמש השנים להגשת הבקשה, וגם השנה שבה עוד מותר לנהוג כאן עם הרישיון הזר.',
+    en: 'Month and year is enough. This starts the five years for submitting, and also the one year you may still drive here on the foreign licence.',
+  },
+
+  /**
+   * ⭐⭐ THE QUESTION THAT WAS NEVER ASKED.
+   *
+   * ס' 1(ב) makes six consecutive months abroad a condition of conversion for a
+   * returning resident, and the engine has carried the field, the fact and the
+   * notice since 30.8 — with no screen anywhere collecting the answer. Half a
+   * feature, reported as done. Found by the founder inside ten minutes of using it.
+   */
+  q_six_months: {
+    he: 'אחרי שקיבלת את הרישיון הזר, שהית בחו״ל שישה חודשים רצופים לפחות?',
+    en: 'After you got the foreign licence, were you abroad for at least six consecutive months?',
+  },
+  q_six_months_help: {
+    he: 'רצופים, לא במצטבר. ארבעה חודשים ועוד ארבעה אינם שמונה לעניין הזה.',
+    en: 'Consecutive, not cumulative. Four months plus four months is not eight for this purpose.',
+  },
 
   q_born: { he: 'באיזו שנה נולדת?', en: 'What year were you born?' },
   q_born_help: {

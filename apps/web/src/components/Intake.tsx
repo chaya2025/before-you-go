@@ -85,6 +85,7 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
   const [years, setYears] = useState('');
   const [requestedClass, setRequestedClass] = useState('');
   const [record, setRecord] = useState<string | null>(null);
+  const [sixMonths, setSixMonths] = useState<boolean | 'unknown' | null>(null);
 
   const chosen = statuses.find((s) => s.value === visaType);
   const converting = licenceKind === 'national';
@@ -122,6 +123,7 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
       ...(bornYear.length === 4 ? { born: `${bornYear}-06` } : {}),
       ...(requestedClass ? { requested_class: requestedClass } : {}),
       ...(record ? { has_record_document: record } : {}),
+      ...(sixMonths !== null ? { lived_abroad_6_months_continuous: sixMonths } : {}),
     };
     onSubmit(answers);
   }
@@ -179,13 +181,40 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
 
       {/* ── ש3 · conversion only ───────────────────────────────────────── */}
       {converting && (
-        <Question title={dateLabel} help={t('q_date_help')}>
+        <Question
+          title={dateLabel}
+          help={t(
+            dateKey === 'returned_to_israel'
+              ? 'q_date_help_returned'
+              : dateKey === 'made_aliyah'
+                ? 'q_date_help_aliyah'
+                : 'q_date_help_entered',
+          )}
+        >
           <input
             type="month"
             value={dateAnswer}
             max="2026-12"
             onChange={(e) => setDateAnswer(e.target.value)}
             aria-label={dateLabel}
+          />
+        </Question>
+      )}
+
+      {/* ── ס' 1(ב) · returning residents only ──────────────────────────── */}
+      {/*
+        ⚠️ Shown ONLY to a returning resident who is converting. ס' 1(ב) is his
+        clause; a תושב מדינת חוץ falls under 1(ג) and this condition is not his.
+        Asking everyone would be the 27.8 leak in a new costume.
+      */}
+      {converting && dateKey === 'returned_to_israel' && (
+        <Question title={t('q_six_months')} help={t('q_six_months_help')}>
+          <Option selected={sixMonths === true} label={t('yes')} onClick={() => setSixMonths(true)} />
+          <Option selected={sixMonths === false} label={t('no')} onClick={() => setSixMonths(false)} />
+          <Option
+            selected={sixMonths === 'unknown'}
+            label={t('unsure')}
+            onClick={() => setSixMonths('unknown')}
           />
         </Question>
       )}
