@@ -613,6 +613,43 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     expect(ids).toContain('cv.control_test');
   });
 
+  it('⭐ an א/5 IS asked about his visa, though he holds a teudat zehut', () => {
+    // ⚠️ Chaya, 30.8: "consider it like anyone who doesn't have an ID. better
+    // flagging than ignoring it."
+    //
+    // cc.visa_valid was scoped to NO_TEUDAT_ZEHUT, so an א/5 was never asked
+    // about his visa. But his card is issued AGAINST that visa, not
+    // independently of it — so the condition was silently exempting the person
+    // most likely to be caught out.
+    //
+    // ⚠️ Scoped by nohal_category, not by visa code: the property that matters
+    // is being a foreign resident whose status rests on a permit.
+    const a5 = evaluate(
+      p({
+        visa_type: 'a5',
+        has_teudat_zehut: true,
+        teudat_zehut_confirmed: true,
+        foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 9, held_class: 'B' },
+        requested_class: 'B',
+        entered_israel: '2023-05',
+      }),
+      TODAY,
+    );
+    expect(a5.standing_conditions.map((c) => c.id)).toContain('cc.visa_valid');
+
+    // ⚠️ And a citizen must NOT inherit it. His ID rests on nothing.
+    const citizen = evaluate(
+      p({
+        visa_type: 'citizen',
+        has_teudat_zehut: true,
+        teudat_zehut_confirmed: true,
+        foreign_license: { kind: 'none' },
+      }),
+      TODAY,
+    );
+    expect(citizen.standing_conditions.map((c) => c.id)).not.toContain('cc.visa_valid');
+  });
+
   it('matching numbers put no fix on the road at all', () => {
     const r = run({
       form_89_passport_number: 'AB1234567',
