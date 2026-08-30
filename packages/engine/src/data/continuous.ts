@@ -1,6 +1,6 @@
 import type { ContinuousConditionInput } from '../domain';
 import type { Condition } from '../condition';
-import { nohal, servicePage, fieldReport, inferred, LAST_VERIFIED_LATE } from './sources';
+import { nohal, servicePage, fieldReport, inferred, unresolved, LAST_VERIFIED_LATE } from './sources';
 
 /**
  * ============================================================================
@@ -32,26 +32,42 @@ export const CONTINUOUS_CONDITIONS: ContinuousConditionInput[] = [
     id: 'cc.visa_valid',
     name: { he: "האשרה חייבת להיות בתוקף — בכל פעולה, לא רק בהתחלה", en: 'Your visa must be valid at every step, not just the first' },
     /**
-     * ⬜ OPEN QUESTION, raised 30.8 during a critical pass. NEEDS A PHONE CALL.
+     * ⭐ WIDENED 30.8, BY THE FOUNDER, and the reasoning is the one this whole engine
+     * runs on.
      *
-     * Scoping this to NO_TEUDAT_ZEHUT means an א/5 is never asked about his
-     * visa at all — he holds a teudat zehut, so the condition skips him.
+     * It used to be NO_TEUDAT_ZEHUT, which meant an א/5 was never asked about
+     * his visa at all — he holds a teudat zehut, so the condition skipped him.
      *
-     * ⚠️ But an א/5 is a TEMPORARY resident, and his teudat zehut is issued
-     * against that visa rather than independently of it. If the visa lapses,
-     * it is not obvious that the card keeps working. If it does not, this
-     * condition is silently exempting exactly the person who most needs it —
-     * and א/5 is already flagged in eligibility.ts as the highest-consequence
-     * row in the system, because his channel and his ceiling come apart.
+     * ⚠️ But an א/5 is a TEMPORARY resident and his card is issued AGAINST that
+     * visa, not independently of it. If the visa lapses it is not obvious the
+     * card keeps working, and if it does not, this condition was silently
+     * exempting precisely the person most likely to be caught out. א/5 is
+     * already flagged in eligibility.ts as the highest-consequence row in the
+     * system, because his channel and his ceiling come apart.
      *
-     * ⚠️ NOT CHANGED, deliberately. Widening it would be asserting a rule
-     * nobody has verified, which is the failure this engine exists to prevent.
-     * The honest state is that we do not know.
+     * Her call, in her words: "consider it like anyone who doesn't have an ID.
+     * better flagging than ignoring it."
      *
-     * Ask אגף הרישוי 02-6663050 or רשות האוכלוסין: does an א/5 teudat zehut
-     * remain usable at the licensing desk once the underlying אשרה has expired?
+     * ⭐ That is the same asymmetry as everywhere else here: showing a check
+     * that may not apply costs him a glance. Hiding one that does apply costs
+     * him a blocked process he cannot see the reason for.
+     *
+     * ⚠️ The scope is nohal_category, NOT the visa code. א/5 is not a special
+     * case — the property that matters is being a foreign resident whose
+     * status rests on a permit. Anyone reclassified into that category inherits
+     * the check automatically.
+     *
+     * ⬜ STILL OPEN, and the evidence below says so: does an א/5 teudat zehut
+     * remain usable at the licensing desk once the אשרה behind it has expired?
+     * אגף הרישוי 02-6663050. The widening is a deliberate choice under
+     * uncertainty, not a verified rule, and it is marked as one.
      */
-    applies_when: NO_TEUDAT_ZEHUT,
+    applies_when: {
+      any: [
+        NO_TEUDAT_ZEHUT,
+        { field: 'nohal_category', op: 'eq', value: 'toshav_medinat_chutz' },
+      ],
+    },
     check_before: [
       'fz.doc_89',
       'fz.photo_and_eye',
@@ -101,6 +117,13 @@ export const CONTINUOUS_CONDITIONS: ContinuousConditionInput[] = [
       fieldReport("חידוש אשרה מתבצע מקוון ואורך חודש לפחות", {
         varies_by: ['clerk_discretion'],
       }),
+      // ⬜ The widening itself, marked as the open question it is rather than
+      // dressed up as a rule. The founder chose to flag rather than ignore; nobody
+      // has yet confirmed what the desk does.
+      unresolved(
+        "התנאי הורחב גם למי שמחזיק תעודת זהות ארעית (א/5), מתוך הנחה שהתעודה נשענת על האשרה",
+        'שאלה פתוחה — לא אומת מול אגף הרישוי',
+      ),
     ],
   },
 
