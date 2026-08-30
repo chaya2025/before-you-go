@@ -79,7 +79,6 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
   const [visaType, setVisaType] = useState<string | null>(null);
   const [licenceKind, setLicenceKind] = useState<'national' | 'idp_only' | 'none' | null>(null);
   const [tz, setTz] = useState<boolean | 'unknown' | null>(null);
-  const [visaValid, setVisaValid] = useState<boolean | 'unknown' | null>(null);
   const [dateAnswer, setDateAnswer] = useState('');
   const [bornYear, setBornYear] = useState('');
   const [years, setYears] = useState('');
@@ -118,7 +117,6 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
         ...(years ? { years_held_permanent: Number(years) } : {}),
       },
       ...(tz !== null ? { has_teudat_zehut: tz, teudat_zehut_confirmed: true } : {}),
-      ...(visaValid !== null ? { visa_valid_now: visaValid } : {}),
       ...(dateAnswer ? { [dateKey]: dateAnswer } : {}),
       ...(bornYear.length === 4 ? { born: `${bornYear}-06` } : {}),
       ...(requestedClass ? { requested_class: requestedClass } : {}),
@@ -219,18 +217,20 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
         </Question>
       )}
 
-      {/* ── visa validity — eligibility is judged at submission ─────────── */}
-      {visaType && licenceKind && tz !== true && (
-        <Question title={t('q_visa_valid')} help={t('q_visa_valid_help')}>
-          <Option selected={visaValid === true} label={t('yes')} onClick={() => setVisaValid(true)} />
-          <Option selected={visaValid === false} label={t('no')} onClick={() => setVisaValid(false)} />
-          <Option
-            selected={visaValid === 'unknown'}
-            label={t('unsure')}
-            onClick={() => setVisaValid('unknown')}
-          />
-        </Question>
-      )}
+      {/*
+        ⚠️ THE VISA IS NOT ASKED HERE ANY MORE. The founder, 30.8:
+          "Person would have to enter the visa in the documents info anyway,
+           so why does he even ask?"
+
+        She is right, and checking it against the flow settles it: the
+        diagnosis is category, track, ceiling and teudat zehut. Visa validity
+        changes NONE of them. It only shapes the roadmap, and the roadmap comes
+        after the documents screen.
+
+        ⭐ So the split is clean. This screen asks WHO HE IS. The documents
+        screen asks WHAT HE IS HOLDING, and a visa expiry is something printed
+        on a document he has in his hand.
+      */}
 
       {/* ── age · the field that went missing twice ─────────────────────── */}
       {visaType && licenceKind && (
