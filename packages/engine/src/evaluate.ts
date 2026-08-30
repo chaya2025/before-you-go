@@ -429,6 +429,64 @@ function urgentIssues(
   }
 
   /**
+   * ⭐⭐ THE PASSPORT IS ABOUT TO EXPIRE, WHICH MEANS THE 89 IS ABOUT TO BREAK.
+   *
+   * ⚠️ Found by the audit on 30.8: passport_expires had been collected that
+   * afternoon and used by nothing at all — the identical mistake to
+   * visa_expires that morning, caught this time by a tool instead of by a
+   * person losing a day.
+   *
+   * ⭐ And it turns out to be the most useful thing on this screen, because of
+   * what it connects. Renewing a passport gives you a NEW NUMBER, and the 89
+   * still carries the old one. That is exactly what happened to the founder: the
+   * mismatch killed her test, which is recorded as a FAILURE rather than a
+   * no-show, with the fee paid and the wait wasted.
+   *
+   * She found out afterwards. Anyone whose passport expires during this process
+   * can be told beforehand — which is the entire product in one notice: the
+   * thing nobody warns you about, said early enough to be free.
+   *
+   * ⚠️ ADVISORY, not blocking. Per her rule on 30.8: a document that has not
+   * expired yet stops nobody. He can go to the office today. This is a second
+   * trip to plan for, not a reason to stand still.
+   */
+  if (
+    facts.months_until_passport_expiry !== 'unknown' &&
+    facts.months_until_passport_expiry >= 0 &&
+    facts.months_until_passport_expiry <= 6 &&
+    facts.has_teudat_zehut !== true
+  ) {
+    const m = facts.months_until_passport_expiry;
+    issues.push({
+      id: 'urgent.passport_renewal_breaks_89',
+      severity: 'advisory',
+      title: {
+        he: m === 0 ? 'הדרכון פג החודש — וזה ישבור את מסמך ה-89' : `הדרכון פג בעוד ${m} חודשים — וזה ישבור את מסמך ה-89`,
+        en: m === 0 ? 'Your passport expires this month, and that will break your 89' : `Your passport expires in ${m} months, and that will break your 89`,
+      },
+      consequence: {
+        he: 'זו אינה חסימה, ואפשר להמשיך בתהליך היום כרגיל. אבל דרכון מחודש מקבל מספר חדש, ואילו מסמך ה-89 ימשיך לשאת את המספר הישן. אי-התאמה ביניהם מונעת את קיום הטסט, והוא נרשם ככישלון ולא כאי-התייצבות: שילמת אגרה, המתנת, ונרשם לך כישלון על מבחן שלא התקיים.',
+        en: 'This is not a blocker and you can carry on today as normal. But a renewed passport gets a new number, while your 89 keeps carrying the old one. A mismatch between them stops the test from happening, and it is recorded as a failure rather than a no-show: fee paid, time waited, and a failure registered for a test that never took place.',
+      },
+      action: {
+        he: 'תכנן שתי פעולות ולא אחת: חידוש הדרכון, ואחריו תור למשרד הרישוי לעדכון מסמך ה-89. מספר ה-89 עצמו לא משתנה — מתעדכן רק הקישור לדרכון החדש. עדיף לסדר את זה לפני שקובעים טסט.',
+        en: 'Plan two things, not one: renew the passport, then book a licensing office appointment to update the 89. The 89 number itself does not change; only its link to the new passport does. Better done before booking a test.',
+      },
+      evidence: [
+        {
+          claim:
+            'אי-התאמה בין מספר הדרכון שבמסמך ה-89 לדרכון שברשות הנבחן מונעת את קיום הטסט, והוא נרשם ככישלון',
+          certainty: 'first_hand',
+          last_verified_at: '2026-08-21',
+          report_count: 1,
+          generalizability: 'single_report',
+          variation_factors: [],
+        },
+      ],
+    });
+  }
+
+  /**
    * ⭐ Still valid, but not for long.
    *
    * ⚠️ The threshold is NOT invented. The renewal itself is online and takes
