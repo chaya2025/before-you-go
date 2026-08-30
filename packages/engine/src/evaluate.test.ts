@@ -421,6 +421,31 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     expect(oleh.urgent.map((u) => u.id)).not.toContain('urgent.grade_above_ceiling');
   });
 
+  it('⭐ an IDP holder is routed from-zero AND told that is what happened', () => {
+    // The routing was always right: an IDP is not a national licence, so
+    // conversion is not open. But he was moved onto the LONGER route silently,
+    // having answered a question that appeared to change nothing.
+    const idp = run({ foreign_license: { kind: 'idp_only', valid_now: true } });
+    expect(idp.diagnosis.track).toBe('from_zero');
+    expect(idp.urgent.map((u) => u.id)).toContain('urgent.idp_not_convertible');
+  });
+
+  it('a national licence is never flagged as an IDP', () => {
+    expect(run().urgent.map((u) => u.id)).not.toContain('urgent.idp_not_convertible');
+  });
+
+  it('⭐ the IDP notice points him at the national licence he probably already has', () => {
+    // The whole value of the notice. An IDP is ISSUED on the basis of a
+    // national licence, so retrieving it may open the much shorter conversion
+    // route. Telling him only "this is not accepted" would waste that.
+    const issue = run({ foreign_license: { kind: 'idp_only', valid_now: true } }).urgent.find(
+      (u) => u.id === 'urgent.idp_not_convertible',
+    )!;
+    expect(issue.action.he).toContain('לאומי');
+    expect(issue.consequence.he).toContain('אינה דחייה');
+    expect(issue.evidence.length).toBeGreaterThan(0);
+  });
+
   it('C1 sits inside the ceiling, so it is never flagged — only 182-185 are above', () => {
     expect(run({ requested_class: 'C1' }).diagnosis.requested_class_status).toBe('within');
     expect(run({ requested_class: 'B' }).diagnosis.requested_class_status).toBe('within');
