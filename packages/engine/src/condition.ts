@@ -130,6 +130,35 @@ export type Facts = {
    * ⚠️ Derived, never asked. The user answers a month; this is the arithmetic.
    */
   months_until_visa_expiry: number | 'unknown';
+
+  // ── the documents he is holding (ש7) ─────────────────────────────────────
+  //
+  // ⭐ All derived by comparing what he transcribed. He is never asked whether
+  // his documents agree; he is asked what they say, and the engine notices.
+
+  passport_valid_now: Trilean;
+  months_until_passport_expiry: number | 'unknown';
+
+  /**
+   * ⭐ Does the passport number printed on the 89 match the passport he holds?
+   *
+   * The single most expensive mismatch in the research. Per
+   * cc.passport_number_match a failure here does not turn him away: the test is
+   * RECORDED AS A FAILURE, fee paid and wait wasted, and appealing blocks him
+   * from booking another until it concludes.
+   */
+  passport_89_number_match: Trilean;
+
+  /** Same idea, on the name. 'unknown' when the 89 carries no name field. */
+  passport_89_name_match: Trilean;
+
+  /** Passport against the foreign licence. Transliteration splits these. */
+  passport_license_name_match: Trilean;
+
+  months_until_license_expiry: number | 'unknown';
+
+  /** Drives doc.translation, which existed with no way to know it applied. */
+  foreign_license_language: 'he' | 'en' | 'other' | 'unknown';
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

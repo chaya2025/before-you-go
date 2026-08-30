@@ -128,6 +128,36 @@ export const ForeignLicense = z.object({
    * we do not have it — open question 15.
    */
   country: z.string().min(1).optional(),
+
+  /**
+   * When it expires. Separate from `valid_now`, and resolved the same four-case
+   * way the visa is — his own "no" wins, the date settles an unknown, and a
+   * contradiction becomes 'unknown' rather than a guess.
+   *
+   * ⚠️ Not decoration. cc.foreign_license_valid names the real scenario: the
+   * רקורד takes months, and the licence can expire while he waits for it. He
+   * would then arrive holding a licence that is no longer convertible.
+   */
+  expires: YearMonthOrUnknown.default('unknown'),
+
+  /**
+   * The script the licence is printed in.
+   *
+   * ⚠️ Nothing asked this before, so nobody was told they need a notarised
+   * translation until the desk told them. doc.translation already exists in the
+   * data with its source; it simply had no way to know whether it applied.
+   *
+   * 'latin' is not the same as English. A Ukrainian licence in Latin script
+   * still is not Hebrew or English, so it still needs translating. The engine
+   * needs the honest answer, which is what LANGUAGE it is in.
+   */
+  language: z.enum(['he', 'en', 'other', 'unknown']).default('unknown'),
+
+  /**
+   * The holder's name as printed on the licence, in Latin letters.
+   * Compared against the passport. See PASSPORT_NAME below for why.
+   */
+  name_latin: z.string().min(1).optional(),
 });
 export type ForeignLicense = z.infer<typeof ForeignLicense>;
 
@@ -229,6 +259,65 @@ export const Profile = z.object({
    * now" but "how old will he be when the licence issues", months from now.
    */
   born: YearMonthOrUnknown.default('unknown'),
+
+  // ── ש7 · the documents he is actually holding ────────────────────────────
+  //
+  // ⭐ the founder's design, 30.8: do not interrogate him about the RULES, ask him to
+  // read what is printed in front of him and let the system find the problem.
+  // He should never need to know that the 89 and the passport are linked. He
+  // transcribes two numbers; the engine notices they disagree.
+  //
+  // ⚠️ PRIVACY (hard rule 1). These numbers are compared and discarded. They are
+  // never stored, never logged, and — the part that is new — never echoed back
+  // in any message. A mismatch says "the numbers do not match", never
+  // "12345678 does not match", because that text ends up in a screenshot.
+  //
+  // At MVP these same fields become the output of a scan. Nothing here is
+  // thrown away when OCR arrives; the typing is replaced, not the model.
+
+  /** The number on the 89 document. Begins 89, and never changes once issued. */
+  form_89_number: z.string().min(1).optional(),
+
+  /**
+   * ⭐ THE FIELD THIS WHOLE FEATURE EXISTS FOR.
+   *
+   * The passport number PRINTED ON the 89. The 89 is issued against whichever
+   * passport he showed that day, and from then on the pair is his identity for
+   * the entire licence process.
+   *
+   * The founder renewed her passport mid-process. New number, no longer matching, and
+   * she found out at her test — which per cc.passport_number_match is recorded
+   * as a FAILURE, not as "did not attend". Fee paid, wait wasted, and appealing
+   * blocks booking a new test until it concludes.
+   *
+   * ⚠️ Nobody renews a passport and thinks it touches their driving licence.
+   * That is precisely why the system has to notice instead of asking him to.
+   */
+  form_89_passport_number: z.string().min(1).optional(),
+
+  /** The number in the passport he holds TODAY. Compared, never shown. */
+  passport_number: z.string().min(1).optional(),
+
+  passport_expires: YearMonthOrUnknown.default('unknown'),
+
+  /**
+   * His name in Latin letters, exactly as the passport prints it.
+   *
+   * ⚠️ The failure the founder could never hit, being fluent in both languages and
+   * born here. A name in Cyrillic, Amharic, Arabic or Chinese is transliterated
+   * separately onto every document, and the spellings disagree: Olexandr /
+   * Oleksandr / Alexander. Surname first on one, last on another. A married
+   * name on the newer document and a maiden name on the older one.
+   *
+   * cc.english_name_match already requires the passport to match רשות
+   * האוכלוסין. We cannot read their registry, so that edge stays a question we
+   * ask. What we CAN do is compare the documents he is holding against each
+   * other, which is a real check and was never being run.
+   */
+  passport_name_latin: z.string().min(1).optional(),
+
+  /** The name printed on the 89, if it carries one. Compared to the passport. */
+  form_89_name_latin: z.string().min(1).optional(),
 
   // ── mid-process entry (F0 feature 4.7) ───────────────────────────────────
   /**

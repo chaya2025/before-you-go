@@ -14,7 +14,8 @@ import {
   categoryRuleFor,
 } from './data';
 import type { Result, RoadmapStep, ClockState, Diagnosis, StepState, UrgentIssue } from './result';
-import { monthsSince, ageInYears, startOfMonth, addDays, daysBetween, type IsoDate } from './dates';
+import { numbersAgree, namesAgree, resolveValidity } from './identity';
+import { monthsSince, monthsUntil, ageInYears, startOfMonth, addDays, daysBetween, type IsoDate } from './dates';
 
 /**
  * ============================================================================
@@ -77,54 +78,47 @@ export function deriveFacts(profile: Profile, today: IsoDate): Facts {
    *
    * Negative means the month has already passed.
    */
-  const months_until_visa_expiry =
-    profile.visa_expires === 'unknown'
-      ? ('unknown' as const)
-      : (() => {
-          const elapsed = monthsSince(profile.visa_expires, today);
-          return elapsed === null ? ('unknown' as const) : -elapsed;
-        })();
+  const months_until_visa_expiry = monthsUntil(profile.visa_expires, today);
 
   /**
-   * ⭐ TWO ANSWERS THAT CAN DISAGREE, resolved without ever guessing.
-   *
-   * He is asked "is your visa valid?" and, separately, "when does it expire?".
-   * Four cases, and only one of them is obvious.
-   *
-   *   1. HE SAYS NO → no. Full stop, whatever the date says.
-   *      A visa can be revoked, cancelled or surrendered long before its
-   *      printed expiry. He knows something the date cannot show, and
-   *      overruling him with arithmetic would tell a man with no visa that he
-   *      is fine. The user's own "no" is never overridden.
-   *
-   *   2. DATE IS IN THE PAST, and he did not claim it is valid → expired.
-   *      Here the date is real evidence and it is allowed to decide.
-   *
-   *   3. DATE IS IN THE PAST but he says it IS valid → 'unknown', plus a
-   *      warning. Probably a renewed visa with the old date typed in, but
-   *      possibly a misread. Two credible answers point opposite ways, so the
-   *      engine says it does not know instead of picking a side. That is the
-   *      whole thesis of this product applied to its own inputs.
-   *
-   *   4. THE EXPIRY MONTH IS THIS MONTH → whatever he said.
-   *      The date is a MONTH, not a day, so we cannot tell whether the day has
-   *      passed. He can. We defer.
-   *
-   * ⚠️ Note what never happens: a missing date never makes a visa expired.
+   * ⭐ Extracted to identity.ts on 30.8, once the passport and the licence
+   * needed exactly the same reasoning. Three copies of a rule this subtle
+   * would be three chances to get one of them wrong. Read resolveValidity for
+   * the four cases and why each one is what it is.
    */
-  const visaDateSaysExpired = months_until_visa_expiry !== 'unknown' && months_until_visa_expiry < 0;
-  const visaDateSaysValid = months_until_visa_expiry !== 'unknown' && months_until_visa_expiry > 0;
+  const visa_valid_now = resolveValidity(profile.visa_valid_now, months_until_visa_expiry);
 
-  const visa_valid_now: Trilean =
-    profile.visa_valid_now === false
-      ? false
-      : visaDateSaysExpired
-        ? profile.visa_valid_now === true
-          ? 'unknown'
-          : false
-        : visaDateSaysValid
-          ? true
-          : profile.visa_valid_now;
+  // ── the documents (ש7) ────────────────────────────────────────────────────
+
+  const months_until_passport_expiry = monthsUntil(profile.passport_expires, today);
+  const passport_valid_now = resolveValidity('unknown', months_until_passport_expiry);
+
+  const months_until_license_expiry = monthsUntil(profile.foreign_license.expires, today);
+  const foreign_license_valid = resolveValidity(
+    profile.foreign_license.valid_now,
+    months_until_license_expiry,
+  );
+
+  /**
+   * ⭐ the founder's bug, made checkable. She renewed her passport mid-process; the
+   * 89 still carried the old number, and she found out at her test.
+   *
+   * ⚠️ Compared and discarded. Neither number reaches the Result.
+   */
+  const passport_89_number_match = numbersAgree(
+    profile.form_89_passport_number,
+    profile.passport_number,
+  );
+
+  const passport_89_name_match = namesAgree(
+    profile.form_89_name_latin,
+    profile.passport_name_latin,
+  );
+
+  const passport_license_name_match = namesAgree(
+    profile.foreign_license.name_latin,
+    profile.passport_name_latin,
+  );
 
   return {
     visa_type: profile.visa_type,
@@ -133,8 +127,15 @@ export function deriveFacts(profile: Profile, today: IsoDate): Facts {
     has_teudat_zehut: profile.has_teudat_zehut,
     visa_valid_now,
     months_until_visa_expiry,
+    passport_valid_now,
+    months_until_passport_expiry,
+    passport_89_number_match,
+    passport_89_name_match,
+    passport_license_name_match,
+    months_until_license_expiry,
+    foreign_license_language: profile.foreign_license.language,
     foreign_license_kind: profile.foreign_license.kind,
-    foreign_license_valid: profile.foreign_license.valid_now,
+    foreign_license_valid,
     foreign_license_years: profile.foreign_license.years_held_permanent,
     held_class: profile.foreign_license.held_class,
     requested_class: profile.requested_class,
