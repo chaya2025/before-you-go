@@ -1,7 +1,7 @@
 import type { Profile } from './profile';
 import { checkProfile } from './profile';
 import type { Facts, Trilean, ConditionField, NohalCategory, Track } from './condition';
-import { evaluateCondition, missingFacts } from './condition';
+import { evaluateCondition, missingFacts, anchorFieldFor } from './condition';
 import type { Step, Clock } from './domain';
 import { classWithinCeiling } from './domain';
 import {
@@ -59,12 +59,7 @@ export function deriveFacts(profile: Profile, today: IsoDate): Facts {
 
   // ⚠️ `anchor_differs_by_status`. Three categories, three different events,
   // and reading the wrong one silently computes the wrong deadline.
-  const anchorAnswer =
-    nohal_category === 'oleh_chadash'
-      ? profile.made_aliyah
-      : nohal_category === 'toshav_israel'
-        ? profile.returned_to_israel
-        : profile.entered_israel;
+  const anchorAnswer = profile[anchorFieldFor(nohal_category)];
 
   const months_since_anchor =
     anchorAnswer === 'unknown' ? 'unknown' : (monthsSince(anchorAnswer, today) ?? 'unknown');
