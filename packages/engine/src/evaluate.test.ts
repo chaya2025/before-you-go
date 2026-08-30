@@ -500,6 +500,42 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     }
   });
 
+  it('⭐ four months abroad gets a heads-up, never a refusal', () => {
+    // ⚠️ The third answer found to be collected and ignored, caught by the
+    // audit on 30.8. A returning resident could say he spent four months
+    // abroad and see the identical screen to a man who spent two years.
+    //
+    // ⭐ the founder chose the SOFT form, on the reasoning the engine already holds:
+    // a wrong block is worse than a missed one. A heads-up costs a moment of
+    // doubt; a wrong "no" costs half a year on the long route.
+    const returner = evaluate(
+      p({
+        visa_type: 'permanent_resident',
+        has_teudat_zehut: true,
+        teudat_zehut_confirmed: true,
+        foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 12, held_class: 'B' },
+        requested_class: 'B',
+        returned_to_israel: '2025-02',
+        lived_abroad_6_months_continuous: false,
+      }),
+      TODAY,
+    );
+    const issue = returner.urgent.find((u) => u.id === 'urgent.six_months_abroad')!;
+    expect(issue.severity).toBe('advisory');
+    // It must say the other route is open, not merely that this one is shut.
+    expect(issue.consequence.he).toContain('אינה דחייה');
+    expect(issue.consequence.he).toContain('מאפס');
+    // ס' 1(ב) is quoted, not paraphrased.
+    expect(issue.evidence[0]!.quote).toContain('שישה חודשים רצופים');
+  });
+
+  it('a foreign resident is never shown the 1(ב) notice — it is not his clause', () => {
+    // ס' 1(ב) governs a RETURNING resident. A תושב מדינת חוץ falls under 1(ג),
+    // and leaking one clause onto the other is the 27.8 bug in a new costume.
+    const foreign = run({ lived_abroad_6_months_continuous: false });
+    expect(foreign.urgent.map((u) => u.id)).not.toContain('urgent.six_months_abroad');
+  });
+
   it('matching numbers put no fix on the road at all', () => {
     const r = run({
       form_89_passport_number: 'AB1234567',
