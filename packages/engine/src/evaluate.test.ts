@@ -536,6 +536,41 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     expect(foreign.urgent.map((u) => u.id)).not.toContain('urgent.six_months_abroad');
   });
 
+  it('⭐⭐ the submission visit names every document it needs, filtered to him', () => {
+    // ⚠️ Found 30.8 by a coverage sweep. cv.attend — the ONE visit where he
+    // hands everything over — listed three documents out of nine. Four
+    // documents existed in the data, fully sourced, required by NO step:
+    // doc.record, doc.translation, doc.entry_exit_form, doc.teudat_oleh.
+    //
+    // ⚠️ The worst was doc.form_89. cv.doc_89 tells him to GO AND GET one and
+    // nothing told him to BRING it, though for a man with no teudat zehut it
+    // IS his identity for the whole process.
+    const noTz = run({ foreign_license: { kind: 'national', valid_now: true, language: 'other' } });
+    const attend = noTz.roadmap.find((s) => s.step.id === 'cv.attend')!;
+    const ids = attend.documents.map((d) => d.id);
+    expect(ids).toContain('doc.form_89');
+    expect(ids).toContain('doc.record');
+    expect(ids).toContain('doc.translation');
+
+    // ⭐ And the filtering is what makes listing all nine safe: a teudat zehut
+    // holder with an English licence must see neither.
+    const withTz = evaluate(
+      p({
+        visa_type: 'a5',
+        has_teudat_zehut: true,
+        teudat_zehut_confirmed: true,
+        foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 9, held_class: 'B', language: 'en' },
+        requested_class: 'B',
+        entered_israel: '2023-05',
+      }),
+      TODAY,
+    );
+    const theirs = withTz.roadmap.find((s) => s.step.id === 'cv.attend')!.documents.map((d) => d.id);
+    expect(theirs).not.toContain('doc.form_89');
+    expect(theirs).not.toContain('doc.translation');
+    expect(theirs).toContain('doc.record');
+  });
+
   it('matching numbers put no fix on the road at all', () => {
     const r = run({
       form_89_passport_number: 'AB1234567',

@@ -337,7 +337,47 @@ export const CONVERSION_STEPS: StepInput[] = [
     must_come_after: ['cv.book_appointment'],
     channel: 'licensing_office',
     requires_appointment: true,
-    requires_documents: ['doc.foreign_license', 'doc.passport', 'doc.visa'],
+    /**
+     * ⭐⭐ THE ONE VISIT WHERE HE HANDS EVERYTHING OVER, and it was asking for
+     * three documents out of nine.
+     *
+     * ⚠️ Found 30.8 by a coverage sweep, after Chaya asked for a critical pass
+     * over the whole system. Four documents were defined in documents.ts with
+     * full evidence and were required by NO step anywhere: doc.record,
+     * doc.translation, doc.entry_exit_form, doc.teudat_oleh. They existed and
+     * nobody was ever told to bring them.
+     *
+     * ⚠️ THE WORST OMISSION WAS doc.form_89. cv.doc_89 tells him to GO AND GET
+     * one, and this step never told him to BRING it — and for a person with no
+     * teudat zehut the 89 IS his identity for the entire licence process. He
+     * would arrive at his appointment holding a passport and a visa, without
+     * the document that identifies him.
+     *
+     * That is the wasted trip this product exists to prevent, sitting inside
+     * the product.
+     *
+     * ⚠️ doc.record was worse than absent: it appears in the checklist below as
+     * "הרקורד הגיע?" — a question about a document the list never told him to
+     * carry. It buys exemption from BOTH the control test and the eye test.
+     *
+     * ⭐ Listing all nine is safe, and that is the point of the 27.8 fix: every
+     * document declares its own applies_when, and the engine asks each one
+     * whether it applies to THIS person. The 89 disappears for a teudat zehut
+     * holder, the עולה certificate appears only for an עולה, the translation
+     * only when the licence is not in English. A step names everything the
+     * visit could need; the person decides what he actually sees.
+     */
+    requires_documents: [
+      'doc.identity',
+      'doc.passport',
+      'doc.visa',
+      'doc.form_89',
+      'doc.foreign_license',
+      'doc.record',
+      'doc.translation',
+      'doc.entry_exit_form',
+      'doc.teudat_oleh',
+    ],
     links: [{ label: { he: "הנוהל המלא", en: 'The full procedure' }, url: 'https://www.gov.il/he/pages/1961' }],
     checklist: [
       { he: "האשרה בתוקף היום? הזכאות נבחנת לרגע ההגשה.", en: 'Is your visa valid TODAY? Eligibility is judged at the moment you submit.' },
