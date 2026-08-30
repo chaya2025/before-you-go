@@ -429,6 +429,63 @@ function urgentIssues(
   }
 
   /**
+   * ⭐ Six consecutive months abroad — ס' 1(ב), and the THIRD answer found to
+   * be collected and then ignored.
+   *
+   * ⚠️ Found by the audit on 30.8, which reported this answer as inert for
+   * every persona. It was a Profile field, a Fact and a ConditionField, and no
+   * rule anywhere read it. A returning resident could answer honestly that he
+   * had spent four months abroad and see exactly the same screen as a man who
+   * had spent two years.
+   *
+   * ⭐ CHAYA CHOSE THE SOFT FORM, and gave the reason the engine already
+   * encodes elsewhere: a wrong block is worse than a missed one (F6 validation
+   * 1). If we tell him firmly that conversion is closed and we are wrong — he
+   * misremembered the dates, or the months are counted differently than we
+   * read them — we have sent him down the from-zero route for months, for
+   * nothing. A heads-up costs him a moment of doubt. A wrong "no" costs him
+   * half a year.
+   *
+   * So: advisory, it names the route that IS open to him, and it never says
+   * "you cannot". Same shape as the international-permit notice.
+   */
+  if (
+    facts.nohal_category === 'toshav_israel' &&
+    facts.track === 'conversion' &&
+    facts.lived_abroad_6_months_continuous === false
+  ) {
+    issues.push({
+      id: 'urgent.six_months_abroad',
+      severity: 'advisory',
+      title: {
+        he: 'ייתכן שמסלול ההמרה אינו פתוח בפניך',
+        en: 'The conversion route may not be open to you',
+      },
+      consequence: {
+        he: 'לפי ס׳ 1(ב) לנוהל, תושב ישראל ששב זכאי להמרה רק אם שהה מחוץ לישראל שישה חודשים רצופים לפחות אחרי קבלת הרישיון הלאומי. רצופים, לא במצטבר. לפי מה שענית, ייתכן שאינך עומד בתנאי הזה. זו אינה דחייה: הוצאת רישיון מאפס פתוחה בפניך במלואה, והשלבים למטה נכונים לה.',
+        en: 'Under clause 1(b), a returning Israeli resident may convert only after at least six CONSECUTIVE months abroad following the issue of the national licence. Consecutive, not cumulative. By your answer you may not meet that condition. This is not a rejection: issuing a licence from zero is fully open to you, and the steps below are correct for it.',
+      },
+      action: {
+        he: 'שווה לוודא את התאריכים המדויקים לפני שמוותרים על ההמרה — היא קצרה משמעותית. אם אכן שהית פחות משישה חודשים רצופים, המשך לפי המסלול מאפס.',
+        en: 'Worth checking your exact dates before giving up on conversion, because it is considerably shorter. If you were genuinely abroad for less than six consecutive months, follow the from-zero route.',
+      },
+      evidence: [
+        {
+          claim:
+            'תושב ישראל ששב זכאי להמרה רק בתנאי שישה חודשים רצופים בחו"ל אחרי קבלת הרישיון',
+          certainty: 'verified',
+          citation: "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · 15.2.2024 · ס' 1(ב)",
+          quote:
+            'תושב ישראל ששהה מחוץ לישראל שישה חודשים רצופים לפחות לאחר קבלת הרישיון הלאומי והגיש את בקשתו בתוך חמש שנים מיום שובו לישראל.',
+          url: 'https://www.gov.il/he/pages/1961',
+          last_verified_at: '2026-08-21',
+          variation_factors: [],
+        },
+      ],
+    });
+  }
+
+  /**
    * ⭐⭐ THE PASSPORT IS ABOUT TO EXPIRE, WHICH MEANS THE 89 IS ABOUT TO BREAK.
    *
    * ⚠️ Found by the audit on 30.8: passport_expires had been collected that
