@@ -128,10 +128,30 @@ export const UI = {
     en: 'A document from your home authority stating when your permanent licence was issued. This is what buys the exemption.',
   },
 
-  q_visa_valid: { he: 'האשרה שלך בתוקף כרגע?', en: 'Is your visa currently valid?' },
+  /**
+   * ⚠️ Chaya, 30.8: "it asks some questions which the next step will be asking
+   * anyway." The visa was asked TWICE — a yes/no here, and an expiry date on
+   * the documents screen. Two questions about one fact.
+   *
+   * ⭐ The date wins, because it is strictly more informative: it settles
+   * validity AND powers the reminder that renewal takes about a month. But the
+   * yes/no had a real reason to exist too — it is answerable from memory while
+   * standing in a queue, and a date is not.
+   *
+   * So: ask for the date, and let "I do not have it with me" fall back to the
+   * question that needs no document. One question for most people, two only
+   * for the person who genuinely cannot answer the first.
+   */
+  q_visa_expires: { he: 'עד מתי האשרה שלך בתוקף?', en: 'Until when is your visa valid?' },
+  q_visa_expires_help: {
+    he: 'הזכאות נבחנת ליום ההגשה, לא ליום הכניסה. חודש ושנה מספיקים.',
+    en: 'Eligibility is judged on the day you apply, not the day you entered. Month and year is enough.',
+  },
+  q_visa_no_doc: { he: 'האשרה לא מולי כרגע', en: 'I do not have it with me' },
+  q_visa_valid: { he: 'האם היא בתוקף, למיטב ידיעתך?', en: 'Is it valid, as far as you know?' },
   q_visa_valid_help: {
-    he: 'הזכאות נבחנת ליום ההגשה, לא ליום הכניסה.',
-    en: 'Eligibility is judged on the day you apply, not the day you entered.',
+    he: 'בלי תאריך מדויק, זה מספיק כדי להתחיל.',
+    en: 'Without an exact date, this is enough to get started.',
   },
 
   /* ⭐ ש4 is a CONFIRMATION, not a question. גיליון 11 שאלה 1 found that people

@@ -92,7 +92,10 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
   const [passportExpires, setPassportExpires] = useState('');
   const [passportName, setPassportName] = useState('');
 
+
   const [visaExpires, setVisaExpires] = useState('');
+  const [visaValid, setVisaValid] = useState<boolean | 'unknown' | null>(null);
+  const [noVisaDoc, setNoVisaDoc] = useState(false);
 
   const [licenceExpires, setLicenceExpires] = useState('');
   const [licenceName, setLicenceName] = useState('');
@@ -114,6 +117,7 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
       ...(passportExpires ? { passport_expires: passportExpires } : {}),
       ...(trimmed(passportName) ? { passport_name_latin: trimmed(passportName) } : {}),
       ...(visaExpires ? { visa_expires: visaExpires } : {}),
+      ...(visaValid !== null ? { visa_valid_now: visaValid } : {}),
       ...(converting
         ? {
             foreign_license: {
@@ -191,10 +195,57 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
       </Group>
 
       {/* ── the visa ─────────────────────────────────────────────────────── */}
+      {/*
+        ⚠️ Asked ONCE, and here rather than in the intake. Chaya, 30.8: "person
+        would have to enter the visa in the documents info anyway, so why does
+        he even ask?" It used to be a yes/no on the intake AND a date here: two
+        questions about one fact, on a screen built to remove friction.
+
+        ⭐ The DATE is the primary question, because it is strictly more
+        informative — it settles validity and it powers the reminder that
+        renewal takes about a month. But the yes/no had a real reason to exist
+        too: it can be answered from memory, and a date cannot. So it survives
+        as a fallback for the man who does not have the document in front of
+        him, and most people never see it.
+      */}
       <Group title={t('d_visa_title')} help={t('d_visa_help')}>
         <Field label={t('d_visa_expires')}>
-          <input type="month" value={visaExpires} onChange={(e) => setVisaExpires(e.target.value)} />
+          <input
+            type="month"
+            value={visaExpires}
+            onChange={(e) => {
+              setVisaExpires(e.target.value);
+              setNoVisaDoc(false);
+            }}
+          />
         </Field>
+        <button
+          type="button"
+          className="option"
+          aria-pressed={noVisaDoc}
+          onClick={() => {
+            setNoVisaDoc(true);
+            setVisaExpires('');
+          }}
+        >
+          <span>{t('q_visa_no_doc')}</span>
+        </button>
+        {noVisaDoc && (
+          <div className="stack-sm">
+            <p className="muted small">{t('q_visa_valid')}</p>
+            {([true, false, 'unknown'] as const).map((v) => (
+              <button
+                key={String(v)}
+                type="button"
+                className="option"
+                aria-pressed={visaValid === v}
+                onClick={() => setVisaValid(v)}
+              >
+                <span>{t(v === true ? 'yes' : v === false ? 'no' : 'unsure')}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </Group>
 
       {/* ── the foreign licence, conversion only ─────────────────────────── */}
