@@ -187,6 +187,17 @@ function report(result: Result, today: string, withSources: boolean): string {
     if (s.applies === 'unknown') {
       L.push(`     ❔ לא בטוח שהשלב הזה חל עליך. כדי לדעת, צריך לענות על: ${s.missing_answers.join(', ')}`);
     }
+    // ⚠️ Added 30.8. The CLI never printed the required documents at ALL, so a
+    // step asking for three documents and a step asking for nine read
+    // identically in the one tool used for reading real output. That is how
+    // cv.attend went weeks listing three of the nine it needs.
+    if (s.documents.length) {
+      L.push(`     📄 להביא: ${s.documents.map((d) => d.name.he).join(" · ")}`);
+      const originals = s.documents.filter((d) => d.must_be_original);
+      if (originals.length) {
+        L.push(`        ⚠️ במקור: ${originals.map((d) => d.name.he).join(" · ")}`);
+      }
+    }
     for (const check of s.checks_first) L.push(`     🔎 לפני השלב: ${check.name.he}`);
     for (const item of s.step.checklist) L.push(`     ☐ ${item.he}`);
 
