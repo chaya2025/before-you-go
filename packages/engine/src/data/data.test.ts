@@ -97,7 +97,13 @@ describe('traceability — hard rule 4, no exceptions', () => {
     // ⭐ Was four. fz.completion_in_person GRADUATED on 27.8 when the founder supplied
     // the gov.il text: the timing and the online-only channel are now quoted,
     // and her contrary experience sits beside them rather than alone.
+    // ⭐ Back to four on 30.8, and the newcomer is the clearest example the
+    // test has: NO official source anywhere documents that renewing a passport
+    // breaks the 89, or that the consequence is a test recorded as a FAILURE
+    // rather than a no-show. a real user lived it. Demanding a government citation
+    // would delete the single most expensive warning in the product.
     expect(fieldOnly.map((s) => s.id).sort()).toEqual([
+      'fix.update_89',
       'fz.permit_fee',
       'fz.permit_in_person',
       'fz.plastic_fee',
