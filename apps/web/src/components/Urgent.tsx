@@ -23,18 +23,31 @@ export function Urgent({ issues, lang }: { issues: UrgentIssue[]; lang: Lang }) 
 
   return (
     <div className="stack-sm">
-      {issues.map((issue) => (
+      {issues.map((issue) => {
+        /**
+         * ⚠️ the founder, 30.8. An advisory is NOT an alert.
+         *
+         * A visa expiring in three days does not stop him: he can go to the
+         * office today and be served. Rendering that with role="alert" and a
+         * warning triangle tells him to deal with it first, and a person who
+         * reads that may not go at all, losing the days he still had.
+         *
+         * So only a blocker gets the alert role, the triangle and the
+         * uncertain-colour edge. An advisory is quieter on purpose.
+         */
+        const blocking = issue.severity === 'blocking';
+        return (
         <section
           key={issue.id}
           className="card stack-sm"
-          role="alert"
+          role={blocking ? 'alert' : undefined}
           style={{
             borderInlineStartWidth: '4px',
-            borderInlineStartColor: 'var(--uncertain)',
+            borderInlineStartColor: blocking ? 'var(--uncertain)' : 'var(--muted)',
             background: 'var(--surface)',
           }}
         >
-          <h3>⚠️ {pick(issue.title, lang)}</h3>
+          <h3>{blocking ? '⚠️ ' : 'ℹ️ '}{pick(issue.title, lang)}</h3>
           <p>{pick(issue.consequence, lang)}</p>
           {/* The action is where he is standing now, so it earns the amber. */}
           <p
@@ -47,7 +60,8 @@ export function Urgent({ issues, lang }: { issues: UrgentIssue[]; lang: Lang }) 
             {pick(issue.action, lang)}
           </p>
         </section>
-      ))}
+        );
+      })}
     </div>
   );
 }
