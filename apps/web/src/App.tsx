@@ -4,6 +4,7 @@ import { fetchStatuses, fetchReadiness, ValidationError, type StatusesResponse }
 import { UI, pick, dirFor, type Lang } from './i18n';
 import { Intake, type Answers } from './components/Intake';
 import { Diagnosis, Blocked } from './components/Diagnosis';
+import { Documents } from './components/Documents';
 import { Roadmap } from './components/Roadmap';
 import { Urgent } from './components/Urgent';
 
@@ -12,16 +13,26 @@ import { Urgent } from './components/Urgent';
  * Before You Go
  * ============================================================================
  *
- * Three screens, in the order F1 lays out:
+ * Four screens:
  *
- *   intake → diagnosis → roadmap
+ *   intake → diagnosis → documents → roadmap
  *
- * The diagnosis step in the middle is not a nicety. F1 step 17 marks it חובה,
- * because "טעות באבחון מייצרת רודמאפ שגוי לגמרי" — so the user confirms what
- * the system concluded before he is shown a road built on it.
+ * The diagnosis step is not a nicety. F1 step 17 marks it חובה, because
+ * "טעות באבחון מייצרת רודמאפ שגוי לגמרי" — so the user confirms what the
+ * system concluded before he is shown a road built on it.
+ *
+ * ⭐ Documents was added 30.8, and its position is Chaya's:
+ *
+ *   AFTER the diagnosis, because only then do we know which documents his
+ *   route actually needs, and asking for the rest is friction for nothing.
+ *
+ *   BEFORE the roadmap, because a document that is wrong does not get a
+ *   warning printed beside the road — it BECOMES the first step on it. Her
+ *   words: "they realize that he has to change his name. That should be the
+ *   next step for him."
  */
 
-type Screen = 'intake' | 'diagnosis' | 'roadmap';
+type Screen = 'intake' | 'diagnosis' | 'documents' | 'roadmap';
 
 export function App() {
   const [lang, setLang] = useState<Lang>('he');
@@ -64,6 +75,46 @@ export function App() {
       setResult(r);
       // A blocked result has no roadmap to confirm a diagnosis for.
       setScreen(r.blocked ? 'roadmap' : 'diagnosis');
+    } catch (err) {
+      setError(
+        err instanceof ValidationError
+          ? err.issues.map((i) => `${i.field}: ${i.message}`).join(' · ')
+          : t('error_offline'),
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /**
+   * ⭐ The documents are not a separate thing the engine knows about. They are
+   * more answers on the same profile, so this merges and re-runs — which is why
+   * a mismatch can come back as a STEP rather than as a special kind of alert.
+   *
+   * ⚠️ foreign_license is merged rather than replaced. The intake already put
+   * `kind` and the seniority there, and overwriting it with only the expiry
+   * would silently throw away the answer that decides his entire route.
+   */
+  async function submitDocuments(documents: Answers) {
+    if (!answers) return;
+    const merged: Answers = {
+      ...answers,
+      ...documents,
+      ...(documents.foreign_license
+        ? {
+            foreign_license: {
+              ...(answers.foreign_license as object),
+              ...(documents.foreign_license as object),
+            },
+          }
+        : {}),
+    };
+    setBusy(true);
+    setError(null);
+    setAnswers(merged);
+    try {
+      setResult(await fetchReadiness({ ...merged, completed_steps: done }));
+      setScreen('roadmap');
     } catch (err) {
       setError(
         err instanceof ValidationError
@@ -171,8 +222,18 @@ export function App() {
         <Diagnosis
           result={result}
           lang={lang}
-          onConfirm={() => setScreen('roadmap')}
+          onConfirm={() => setScreen('documents')}
           onBack={restart}
+        />
+      )}
+
+      {screen === 'documents' && result && (
+        <Documents
+          lang={lang}
+          converting={result.diagnosis.track === 'conversion'}
+          onSubmit={submitDocuments}
+          onSkip={() => setScreen('roadmap')}
+          busy={busy}
         />
       )}
 

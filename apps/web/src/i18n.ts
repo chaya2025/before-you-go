@@ -130,6 +130,66 @@ export const UI = {
   },
   loading: { he: 'רגע…', en: 'One moment…' },
   back: { he: 'לא נכון, תקן', en: 'Not right, fix it' },
+
+  // ── the documents screen (ש7) ────────────────────────────────────────────
+  //
+  // ⭐ Chaya, 30.8: "don't drive the user crazy. Just tell them upload this,
+  // this, this, and the system would realize itself what is not valid."
+  //
+  // So every label here asks him to READ something, never to judge anything.
+  // He is never asked whether his documents agree. He is asked what they say.
+
+  docs_title: {
+    he: 'המסמכים שבידך',
+    en: 'The documents you are holding',
+  },
+  docs_intro: {
+    he: 'העתק מה שכתוב, בדיוק כפי שהוא מופיע. המערכת תשווה בין המסמכים ותגיד לך מה תקין ומה לא. אין חובה למלא הכול.',
+    en: 'Copy what is written, exactly as it appears. The system compares the documents and tells you what is in order and what is not. Nothing here is required.',
+  },
+  docs_privacy: {
+    // ⚠️ The promise the engine actually keeps: identity.ts compares and
+    // discards, the API logs route and status only, and no message ever prints
+    // a number back. Saying it here is the point of saying it at all.
+    he: '🔒 המספרים משמשים להשוואה בלבד. הם לא נשמרים, לא נרשמים ביומן, ולא מוצגים חזרה בשום הודעה.',
+    en: '🔒 The numbers are used for comparison only. They are not saved, not logged, and never printed back in any message.',
+  },
+  docs_skip: { he: 'דלג, המשך למפת הדרכים', en: 'Skip, go to the roadmap' },
+  docs_check: { he: 'בדוק את המסמכים שלי', en: 'Check my documents' },
+
+  d_89_title: { he: 'מסמך 89 ("הטופס הלבן")', en: 'The 89 document (the "white form")' },
+  d_89_help: {
+    // ⭐ The one line that explains why any of this matters, in his terms.
+    he: 'מסמך ה-89 והדרכון הם יחד תעודת הזהות שלך בכל תהליך הרישוי. מספר הדרכון שמודפס על ה-89 הוא זה שהצגת ביום שהוצאת אותו.',
+    en: 'Your 89 and your passport together are your identity for the whole licensing process. The passport number printed on the 89 is the one you showed on the day it was issued.',
+  },
+  d_89_number: { he: 'מספר המסמך (מתחיל ב-89)', en: 'Document number (starts with 89)' },
+  d_89_passport: { he: 'מספר הדרכון המודפס על המסמך', en: 'The passport number printed on it' },
+  d_89_name: { he: 'השם כפי שמופיע על המסמך', en: 'The name as it appears on it' },
+
+  d_passport_title: { he: 'הדרכון', en: 'Your passport' },
+  d_passport_help: {
+    he: 'הדרכון שבידך עכשיו — לא זה שהיה לך כשהוצאת את ה-89.',
+    en: 'The passport you hold now, not the one you had when the 89 was issued.',
+  },
+  d_passport_number: { he: 'מספר הדרכון', en: 'Passport number' },
+  d_passport_expires: { he: 'תוקף עד', en: 'Valid until' },
+  d_passport_name: { he: 'השם באותיות לטיניות, כפי שמופיע בדרכון', en: 'Name in Latin letters, as printed' },
+
+  d_visa_title: { he: 'האשרה', en: 'Your visa' },
+  d_visa_expires: { he: 'האשרה בתוקף עד', en: 'Visa valid until' },
+  d_visa_help: {
+    he: 'הזכאות נבחנת ליום ההגשה, ולכן התאריך הזה קובע יותר משנדמה.',
+    en: 'Eligibility is judged on the day you submit, so this date matters more than it looks.',
+  },
+
+  d_licence_title: { he: 'רישיון הנהיגה הזר', en: 'Your foreign driving licence' },
+  d_licence_expires: { he: 'תוקף עד', en: 'Valid until' },
+  d_licence_name: { he: 'השם כפי שמופיע ברישיון', en: 'The name as it appears on the licence' },
+  d_licence_lang: { he: 'באיזו שפה כתוב הרישיון?', en: 'What language is the licence written in?' },
+  d_lang_he: { he: 'עברית', en: 'Hebrew' },
+  d_lang_en: { he: 'אנגלית', en: 'English' },
+  d_lang_other: { he: 'שפה אחרת', en: 'Another language' },
   start_over: { he: 'להתחיל מחדש', en: 'Start over' },
 
   diagnosis_title: { he: 'זה מה שהבנו', en: 'This is what we understood' },

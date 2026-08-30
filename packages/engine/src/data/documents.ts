@@ -204,7 +204,17 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
   {
     id: 'doc.translation',
     name: { he: "תרגום נוטריוני", en: 'A notarised translation' },
-    applies_when: CONVERTING,
+    /**
+     * ⭐ Was CONVERTING alone, so it was shown to every person converting a
+     * licence regardless of what language it was written in. Nothing asked, so
+     * nothing could know. Fixed 30.8 once the documents screen collects it.
+     *
+     * ⚠️ "ne en" and NOT "eq other", deliberately. An unanswered language
+     * keeps the document on the list: the נוהל exempts English only, and
+     * quietly dropping a requirement because nobody asked is the failure this
+     * engine exists to avoid. Only a stated "it is in English" removes it.
+     */
+    applies_when: { all: [CONVERTING, { field: 'foreign_license_language', op: 'ne', value: 'en' }] },
     issued_by: { he: "עו\"ד או נוטריון דובר השפה", en: 'A lawyer or notary who speaks the language' },
     must_be_original: true,
     notes: {
