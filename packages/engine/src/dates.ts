@@ -89,3 +89,20 @@ export function addDays(from: IsoDate, days: number): IsoDate | null {
 export function startOfMonth(yearMonth: YearMonth): IsoDate | null {
   return isYearMonth(yearMonth) ? `${yearMonth}-01` : null;
 }
+
+/**
+ * Whole months from today until a YYYY-MM answer. Negative once it has passed.
+ *
+ * ⭐ Added 30.8, when the visa, the passport and the foreign licence all needed
+ * the same arithmetic. `monthsSince` counts forward from a past event; this
+ * counts down to a future one, and having both named makes the direction
+ * obvious at the call site instead of hiding it behind a minus sign.
+ *
+ * ⚠️ 'unknown' in gives 'unknown' out. A date nobody supplied can never make a
+ * document expired.
+ */
+export function monthsUntil(yearMonth: YearMonth | 'unknown', today: IsoDate): number | 'unknown' {
+  if (yearMonth === 'unknown') return 'unknown';
+  const elapsed = monthsSince(yearMonth, today);
+  return elapsed === null ? 'unknown' : -elapsed;
+}
