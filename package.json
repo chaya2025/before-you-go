@@ -13,7 +13,8 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "check": "npm run check --silent --workspace @byg/engine --",
     "dev:api": "npm run dev --workspace @byg/api",
-    "dev:web": "npm run dev --workspace @byg/web"
+    "dev:web": "npm run dev --workspace @byg/web",
+    "audit": "npm run audit --silent --workspace @byg/engine"
   },
   "devDependencies": {
     "typescript": "^7.0.2",
