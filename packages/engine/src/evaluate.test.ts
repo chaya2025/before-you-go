@@ -421,6 +421,62 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     expect(oleh.urgent.map((u) => u.id)).not.toContain('urgent.grade_above_ceiling');
   });
 
+  // ── the expiry date, which was also being collected and ignored ────────
+
+  it('an expiry month in the future settles a visa he was unsure about', () => {
+    const r = run({ visa_valid_now: 'unknown', visa_expires: '2027-06' });
+    expect(r.facts.visa_valid_now).toBe(true);
+    expect(r.facts.months_until_visa_expiry).toBe(10);
+  });
+
+  it('an expiry month already passed makes it expired, when he did not claim otherwise', () => {
+    const r = run({ visa_valid_now: 'unknown', visa_expires: '2026-02' });
+    expect(r.facts.visa_valid_now).toBe(false);
+    expect(r.urgent.map((u) => u.id)).toContain('urgent.visa_expired');
+  });
+
+  it('⭐ his own NO is never overruled by a date in the future', () => {
+    // A visa can be revoked, cancelled or surrendered long before it expires.
+    // He knows something the printed date cannot show.
+    const r = run({ visa_valid_now: false, visa_expires: '2027-06' });
+    expect(r.facts.visa_valid_now).toBe(false);
+    expect(r.urgent.map((u) => u.id)).toContain('urgent.visa_expired');
+  });
+
+  it('⭐ "valid" plus an expiry that has passed is answered with unknown, not a guess', () => {
+    // Two credible answers point opposite ways. Probably a renewed visa with
+    // the old date still typed in. The engine refuses to pick a side.
+    const r = run({ visa_valid_now: true, visa_expires: '2026-02' });
+    expect(r.facts.visa_valid_now).toBe('unknown');
+    expect(r.urgent.map((u) => u.id)).not.toContain('urgent.visa_expired');
+    expect(r.warnings.map((w) => w.field)).toContain('visa_expires');
+  });
+
+  it('in the expiry month itself the engine defers to him, because a month is not a day', () => {
+    expect(run({ visa_valid_now: true, visa_expires: '2026-08' }).facts.visa_valid_now).toBe(true);
+    expect(run({ visa_valid_now: 'unknown', visa_expires: '2026-08' }).facts.visa_valid_now).toBe('unknown');
+  });
+
+  it('no date given can never make a visa expired', () => {
+    expect(run({ visa_valid_now: 'unknown' }).facts.visa_valid_now).toBe('unknown');
+    expect(run({ visa_valid_now: 'unknown' }).urgent.map((u) => u.id)).not.toContain('urgent.visa_expired');
+  });
+
+  it('⭐ two months of runway is flagged, because one of them is the renewal', () => {
+    const soon = run({ visa_expires: '2026-10' });
+    expect(soon.urgent.map((u) => u.id)).toContain('urgent.visa_expiring_soon');
+    // Ten months is not a warning, it is just a date.
+    expect(run({ visa_expires: '2027-06' }).urgent.map((u) => u.id)).not.toContain(
+      'urgent.visa_expiring_soon',
+    );
+  });
+
+  it('an already-expired visa gets the expired notice, not the expiring-soon one', () => {
+    const ids = run({ visa_valid_now: false, visa_expires: '2026-02' }).urgent.map((u) => u.id);
+    expect(ids).toContain('urgent.visa_expired');
+    expect(ids).not.toContain('urgent.visa_expiring_soon');
+  });
+
   it('⭐ an IDP holder is routed from-zero AND told that is what happened', () => {
     // The routing was always right: an IDP is not a national licence, so
     // conversion is not open. But he was moved onto the LONGER route silently,

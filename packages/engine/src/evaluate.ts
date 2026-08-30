@@ -71,12 +71,68 @@ export function deriveFacts(profile: Profile, today: IsoDate): Facts {
   const age_years =
     profile.born === 'unknown' ? 'unknown' : (ageInYears(profile.born, today) ?? 'unknown');
 
+  /**
+   * ⚠️ `visa_expires` was collected and then ignored, exactly like the IDP
+   * answer. A user picked his expiry month and nothing in the output moved.
+   *
+   * Negative means the month has already passed.
+   */
+  const months_until_visa_expiry =
+    profile.visa_expires === 'unknown'
+      ? ('unknown' as const)
+      : (() => {
+          const elapsed = monthsSince(profile.visa_expires, today);
+          return elapsed === null ? ('unknown' as const) : -elapsed;
+        })();
+
+  /**
+   * ⭐ TWO ANSWERS THAT CAN DISAGREE, resolved without ever guessing.
+   *
+   * He is asked "is your visa valid?" and, separately, "when does it expire?".
+   * Four cases, and only one of them is obvious.
+   *
+   *   1. HE SAYS NO → no. Full stop, whatever the date says.
+   *      A visa can be revoked, cancelled or surrendered long before its
+   *      printed expiry. He knows something the date cannot show, and
+   *      overruling him with arithmetic would tell a man with no visa that he
+   *      is fine. The user's own "no" is never overridden.
+   *
+   *   2. DATE IS IN THE PAST, and he did not claim it is valid → expired.
+   *      Here the date is real evidence and it is allowed to decide.
+   *
+   *   3. DATE IS IN THE PAST but he says it IS valid → 'unknown', plus a
+   *      warning. Probably a renewed visa with the old date typed in, but
+   *      possibly a misread. Two credible answers point opposite ways, so the
+   *      engine says it does not know instead of picking a side. That is the
+   *      whole thesis of this product applied to its own inputs.
+   *
+   *   4. THE EXPIRY MONTH IS THIS MONTH → whatever he said.
+   *      The date is a MONTH, not a day, so we cannot tell whether the day has
+   *      passed. He can. We defer.
+   *
+   * ⚠️ Note what never happens: a missing date never makes a visa expired.
+   */
+  const visaDateSaysExpired = months_until_visa_expiry !== 'unknown' && months_until_visa_expiry < 0;
+  const visaDateSaysValid = months_until_visa_expiry !== 'unknown' && months_until_visa_expiry > 0;
+
+  const visa_valid_now: Trilean =
+    profile.visa_valid_now === false
+      ? false
+      : visaDateSaysExpired
+        ? profile.visa_valid_now === true
+          ? 'unknown'
+          : false
+        : visaDateSaysValid
+          ? true
+          : profile.visa_valid_now;
+
   return {
     visa_type: profile.visa_type,
     // ⚠️ The user's answer, never the visa's default. The default is only a
     // suggestion on the confirmation screen; א/5 proves why they must stay apart.
     has_teudat_zehut: profile.has_teudat_zehut,
-    visa_valid_now: profile.visa_valid_now,
+    visa_valid_now,
+    months_until_visa_expiry,
     foreign_license_kind: profile.foreign_license.kind,
     foreign_license_valid: profile.foreign_license.valid_now,
     foreign_license_years: profile.foreign_license.years_held_permanent,
@@ -334,6 +390,50 @@ function urgentIssues(
       action: {
         he: "חדש את האשרה לפחות חודש מראש. החידוש מקוון ואורך כחודש. רק אחר כך קבע תורים.",
         en: 'Renew your visa at least a month in advance. Renewal is online and takes about a month. Book appointments only after that.',
+      },
+      evidence: visaDoc ? visaDoc.evidence : [],
+    });
+  }
+
+  /**
+   * ⭐ Still valid, but not for long.
+   *
+   * ⚠️ The threshold is NOT invented. The renewal itself is online and takes
+   * about a month — the founder's own field report, 25.8, and it is already the
+   * advice given in the expired-visa notice above. So two months of runway is
+   * the point where "later" stops being true, because one of those months is
+   * the renewal.
+   *
+   * ⚠️ This is deliberately NOT "expiry versus the remaining length of the
+   * process". That would need a total process duration the research does not
+   * have, and inventing one to look precise is the failure this system exists
+   * to avoid. A floor grounded in a known fact beats a confident guess.
+   *
+   * Eligibility is judged on the day of submission, so a visa that lapses
+   * mid-process voids work already done. That is why this sits above the road
+   * rather than beside it.
+   */
+  if (
+    facts.months_until_visa_expiry !== 'unknown' &&
+    facts.months_until_visa_expiry >= 0 &&
+    facts.months_until_visa_expiry <= 2 &&
+    facts.visa_valid_now !== false
+  ) {
+    const visaDoc = ALL_DOCUMENTS.find((d) => d.id === 'doc.visa');
+    const m = facts.months_until_visa_expiry;
+    issues.push({
+      id: 'urgent.visa_expiring_soon',
+      title: {
+        he: m === 0 ? 'האשרה שלך פגה החודש' : `האשרה שלך פגה בעוד ${m} חודשים`,
+        en: m === 0 ? 'Your visa expires this month' : `Your visa expires in ${m} months`,
+      },
+      consequence: {
+        he: 'הזכאות נבחנת ליום ההגשה, ולא ליום שהתחלת. אשרה שתפוג באמצע התהליך מבטלת גם שלבים שכבר עברת, ותור שנקבע למועד שאחרי התפוגה לא יעזור לך.',
+        en: 'Eligibility is judged on the day you submit, not the day you started. A visa that lapses mid-process voids steps you have already completed, and an appointment booked for after it expires will not help you.',
+      },
+      action: {
+        he: 'חדש את האשרה עכשיו, לפני שתקבע תורים. החידוש מקוון ואורך כחודש, ולכן חודשיים הם כבר לוח זמנים צפוף ולא זמן פנוי.',
+        en: 'Renew the visa now, before booking appointments. Renewal is online and takes about a month, so two months is already a tight schedule rather than spare time.',
       },
       evidence: visaDoc ? visaDoc.evidence : [],
     });
