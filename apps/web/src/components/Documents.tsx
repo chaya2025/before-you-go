@@ -1,4 +1,11 @@
 import { useState } from 'react';
+import {
+  checkForm89Number,
+  checkPassportNumber,
+  checkLatinName,
+  checkExpiryMonth,
+  type FieldProblem,
+} from '@byg/engine';
 import { UI, pick, type Lang } from '../i18n';
 import type { Answers } from './Intake';
 
@@ -45,21 +52,98 @@ type Props = {
   busy: boolean;
 };
 
+/**
+ * ⭐ Added 31.8, at the founder's request: "a user can just input anything not
+ * relevant and it will go through normally and give wrong result."
+ *
+ * ⚠️ THE RULE ITSELF IS NOT HERE. It lives in @byg/engine/fields, next to its
+ * reasoning and in both languages, and the Profile schema enforces the same
+ * expressions — so the API cannot be handed what this form refuses. This file
+ * only decides how a problem LOOKS.
+ *
+ * ⭐ And it looks like the rest of the product, because it reuses her own
+ * severity axis from 30.8:
+ *   blocking  → red, announced to a screen reader, and the form will not submit
+ *   advisory  → amber, says its piece, and never stops him
+ */
+function Problem({ problem, lang }: { problem: FieldProblem; lang: Lang }) {
+  const blocking = problem.severity === 'blocking';
+  return (
+    <p
+      className="small"
+      role={blocking ? 'alert' : undefined}
+      style={{
+        margin: 0,
+        color: blocking ? 'var(--uncertain)' : 'var(--amber)',
+        fontWeight: 500,
+      }}
+    >
+      {blocking ? '⚠️ ' : 'ℹ️ '}
+      {pick(problem.message, lang)}
+    </p>
+  );
+}
+
 /** Matches Intake's Question, so the two screens read as one form. */
 function Field({
   label,
+  problem,
+  lang,
   children,
 }: {
   label: string;
+  problem?: FieldProblem | null;
+  lang?: Lang;
   children: React.ReactNode;
 }) {
   return (
     <label className="stack-sm" style={{ display: 'block' }}>
       <span className="small">{label}</span>
       {children}
+      {problem && lang && <Problem problem={problem} lang={lang} />}
     </label>
   );
 }
+
+/**
+ * ⚠️ Colour is never the only signal. A red border says nothing to a screen
+ * reader or to a colour-blind user, and this is the one form where being
+ * misunderstood costs somebody a day off work. So the border comes WITH
+ * aria-invalid, and the message underneath carries the actual words.
+ */
+const invalid = (problem: FieldProblem | null) =>
+  problem?.severity === 'blocking'
+    ? ({ borderColor: 'var(--uncertain)' } as const)
+    : undefined;
+
+const invalidAttr = (problem: FieldProblem | null) =>
+  problem?.severity === 'blocking' ? true : undefined;
+
+/**
+ * ⭐ the founder, 31.8: "just automatically make what the user inputs upper case."
+ *
+ * Right, and for a better reason than tidiness: this is how the documents
+ * themselves are printed, so the field ends up looking like the thing he is
+ * copying from, and a mistyped character is easier to spot against the page.
+ *
+ * ⚠️ It changes NOTHING about the comparison. identity.ts has always lowercased
+ * before comparing, so "ab1234567" and "AB1234567" already matched. This is
+ * legibility, not a fix — worth knowing, so nobody later assumes the comparison
+ * depends on it and removes the wrong one.
+ *
+ * ⚠️ Safe on a controlled input because upper-casing never changes the string
+ * length, so React leaves the cursor where it was. A transform that grew or
+ * shrank the value would jump the caret to the end on every keystroke.
+ */
+const upper = (value: string) => value.toUpperCase();
+
+/**
+ * The bounds `type="month"` never had. Deliberately generous: a passport that
+ * expired years ago is a REAL answer and precisely what this product exists to
+ * catch, so only the absurd ends are fenced off.
+ */
+const MONTH_MIN = '1950-01';
+const MONTH_MAX = String(new Date().getFullYear() + 20) + '-12';
 
 function Group({
   title,
@@ -102,12 +186,44 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
   const [licenceLang, setLicenceLang] = useState<'he' | 'en' | 'other' | null>(null);
 
   /**
+   * ⭐ Checked as he types, in the engine, in his language.
+   *
+   * ⚠️ `today` comes from the browser here and that is fine: it feeds a
+   * plausibility warning, not a rule. Everything that DECIDES anything takes
+   * `today` from the server, so a wrong clock on a laptop can never change an
+   * eligibility answer.
+   */
+  const today = new Date().toISOString().slice(0, 10);
+  const problems = {
+    form_89_number: checkForm89Number(form89Number),
+    form_89_passport_number: checkPassportNumber(form89Passport),
+    form_89_name_latin: checkLatinName(form89Name),
+    passport_number: checkPassportNumber(passportNumber),
+    passport_expires: checkExpiryMonth(passportExpires, today),
+    passport_name_latin: checkLatinName(passportName),
+    visa_expires: checkExpiryMonth(visaExpires, today),
+    licence_expires: checkExpiryMonth(licenceExpires, today),
+    licence_name: checkLatinName(licenceName),
+  };
+
+  /**
+   * ⚠️ Only a BLOCKING problem stops him. An advisory has said its piece and
+   * that is the end of its authority — F1 validation 2, "המערכת מבקשת אישור
+   * במקום לחסום". A man whose passport really does expire in 2049 must still be
+   * able to get his roadmap.
+   */
+  const blocked = Object.values(problems).some((p) => p?.severity === 'blocking');
+
+  /**
    * ⚠️ Only fields he actually filled are sent. An empty box is not an answer,
    * and a blank must never reach the engine as a value — numbersAgree and
    * namesAgree both return 'unknown' unless BOTH sides are present, which is
    * what stops a half-filled form inventing a mismatch.
    */
   function submit() {
+    // ⚠️ Refuses rather than sending something the engine would reject. The
+    // button is already disabled; this is the second lock, for the Enter key.
+    if (blocked) return;
     const trimmed = (v: string) => (v.trim() ? v.trim() : undefined);
     const documents: Answers = {
       ...(trimmed(form89Number) ? { form_89_number: trimmed(form89Number) } : {}),
@@ -141,55 +257,76 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
 
       {/* ── the 89 ───────────────────────────────────────────────────────── */}
       <Group title={t('d_89_title')} help={t('d_89_help')}>
-        <Field label={t('d_89_number')}>
+        <Field label={t('d_89_number')} problem={problems.form_89_number} lang={lang}>
           <input
             className="ltr"
             inputMode="numeric"
-            placeholder="89123456"
+            maxLength={20}
+            placeholder="891234567"
+            aria-invalid={invalidAttr(problems.form_89_number)}
+            style={invalid(problems.form_89_number)}
             value={form89Number}
             onChange={(e) => setForm89Number(e.target.value)}
           />
         </Field>
         {/* ⭐ The field this whole screen exists for. */}
-        <Field label={t('d_89_passport')}>
+        <Field label={t('d_89_passport')} problem={problems.form_89_passport_number} lang={lang}>
           <input
             className="ltr"
+            maxLength={25}
             placeholder="AB1234567"
+            aria-invalid={invalidAttr(problems.form_89_passport_number)}
+            style={invalid(problems.form_89_passport_number)}
             value={form89Passport}
-            onChange={(e) => setForm89Passport(e.target.value)}
+            onChange={(e) => setForm89Passport(upper(e.target.value))}
           />
         </Field>
-        <Field label={t('d_89_name')}>
+        <Field label={t('d_89_name')} problem={problems.form_89_name_latin} lang={lang}>
           <input
             className="ltr"
+            maxLength={60}
+            aria-invalid={invalidAttr(problems.form_89_name_latin)}
+            style={invalid(problems.form_89_name_latin)}
             value={form89Name}
-            onChange={(e) => setForm89Name(e.target.value)}
+            onChange={(e) => setForm89Name(upper(e.target.value))}
           />
         </Field>
       </Group>
 
       {/* ── the passport ─────────────────────────────────────────────────── */}
       <Group title={t('d_passport_title')} help={t('d_passport_help')}>
-        <Field label={t('d_passport_number')}>
+        <Field label={t('d_passport_number')} problem={problems.passport_number} lang={lang}>
           <input
             className="ltr"
+            maxLength={25}
             placeholder="AB1234567"
+            aria-invalid={invalidAttr(problems.passport_number)}
+            style={invalid(problems.passport_number)}
             value={passportNumber}
-            onChange={(e) => setPassportNumber(e.target.value)}
+            onChange={(e) => setPassportNumber(upper(e.target.value))}
           />
         </Field>
-        <Field label={t('d_passport_expires')}>
+        <Field label={t('d_passport_expires')} problem={problems.passport_expires} lang={lang}>
+          {/* ⚠️ min and max, which were missing entirely — "9999-12" used to be
+              accepted in silence and every date calculation after it was wrong. */}
           <input
             type="month"
+            min={MONTH_MIN}
+            max={MONTH_MAX}
+            aria-invalid={invalidAttr(problems.passport_expires)}
+            style={invalid(problems.passport_expires)}
             value={passportExpires}
             onChange={(e) => setPassportExpires(e.target.value)}
           />
         </Field>
-        <Field label={t('d_passport_name')}>
+        <Field label={t('d_passport_name')} problem={problems.passport_name_latin} lang={lang}>
           <input
             className="ltr"
+            maxLength={60}
+            aria-invalid={invalidAttr(problems.passport_name_latin)}
+            style={invalid(problems.passport_name_latin)}
             value={passportName}
-            onChange={(e) => setPassportName(e.target.value)}
+            onChange={(e) => setPassportName(upper(e.target.value))}
           />
         </Field>
       </Group>
@@ -209,9 +346,13 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
         him, and most people never see it.
       */}
       <Group title={t('d_visa_title')} help={t('d_visa_help')}>
-        <Field label={t('d_visa_expires')}>
+        <Field label={t('d_visa_expires')} problem={problems.visa_expires} lang={lang}>
           <input
             type="month"
+            min={MONTH_MIN}
+            max={MONTH_MAX}
+            aria-invalid={invalidAttr(problems.visa_expires)}
+            style={invalid(problems.visa_expires)}
             value={visaExpires}
             onChange={(e) => {
               setVisaExpires(e.target.value);
@@ -251,18 +392,25 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
       {/* ── the foreign licence, conversion only ─────────────────────────── */}
       {converting && (
         <Group title={t('d_licence_title')}>
-          <Field label={t('d_licence_expires')}>
+          <Field label={t('d_licence_expires')} problem={problems.licence_expires} lang={lang}>
             <input
               type="month"
+              min={MONTH_MIN}
+              max={MONTH_MAX}
+              aria-invalid={invalidAttr(problems.licence_expires)}
+              style={invalid(problems.licence_expires)}
               value={licenceExpires}
               onChange={(e) => setLicenceExpires(e.target.value)}
             />
           </Field>
-          <Field label={t('d_licence_name')}>
+          <Field label={t('d_licence_name')} problem={problems.licence_name} lang={lang}>
             <input
               className="ltr"
+              maxLength={60}
+              aria-invalid={invalidAttr(problems.licence_name)}
+              style={invalid(problems.licence_name)}
               value={licenceName}
-              onChange={(e) => setLicenceName(e.target.value)}
+              onChange={(e) => setLicenceName(upper(e.target.value))}
             />
           </Field>
           {/* Drives doc.translation, which existed in the data with no way to
@@ -286,7 +434,15 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
       )}
 
       <div className="stack-sm">
-        <button className="btn btn-primary" disabled={busy} onClick={submit}>
+        {/* ⚠️ Says WHY it is disabled. A greyed-out button with no explanation
+            is the most frustrating thing a form can do — he can see the red
+            message on the field, but not that it is what is stopping him. */}
+        {blocked && (
+          <p className="small" role="status" style={{ margin: 0, color: 'var(--uncertain)', fontWeight: 500 }}>
+            {t('docs_fix_first')}
+          </p>
+        )}
+        <button className="btn btn-primary" disabled={busy || blocked} onClick={submit}>
           {busy ? t('loading') : t('docs_check')}
         </button>
         {/* ⚠️ Skippable, and it has to be. F1 rule 6: the roadmap is built on

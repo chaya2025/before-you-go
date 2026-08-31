@@ -215,6 +215,12 @@ export const UI = {
   },
   docs_skip: { he: 'דלג, המשך למפת הדרכים', en: 'Skip, go to the roadmap' },
   docs_check: { he: 'בדוק את המסמכים שלי', en: 'Check my documents' },
+  /* ⚠️ Names what to do, not what went wrong. The field messages already say
+     what went wrong; this says why the button will not move. */
+  docs_fix_first: {
+    he: 'יש שדה שצריך תיקון לפני שאפשר להמשיך. הוא מסומן למעלה.',
+    en: 'One field needs fixing before you can continue. It is marked above.',
+  },
 
   d_89_title: { he: 'מסמך 89 ("הטופס הלבן")', en: 'The 89 document (the "white form")' },
   d_89_help: {
@@ -271,6 +277,23 @@ export const UI = {
   d_window: { he: 'עד מתי אפשר להגיש', en: 'Deadline to apply' },
   d_open_questions: { he: 'שאלות שעוד יחדדו את התשובה', en: 'Answers that would sharpen this' },
   urgent_first: { he: 'קודם כול', en: 'First things first' },
+
+  // ── the readiness report ─────────────────────────────────────────────────
+  //
+  // ⚠️ Chrome only. Every sentence ABOUT his documents is written in the engine,
+  // in both languages, next to the rule it came from — so the website cannot
+  // soften a warning or harden a maybe.
+  readiness_title: { he: 'מה המצב שלך', en: 'Where you stand' },
+  r_first_action: { he: 'הדבר הראשון לעשות', en: 'The first thing to do' },
+  r_why: { he: 'למה דווקא הוא', en: 'Why this one' },
+  r_needed_for: { he: 'נדרש ב', en: 'Needed for' },
+
+  /* ⚠️ Four headings, never merged. "לא שאלנו" and "אין לך" are different facts
+     about a person, and one heading over both makes the honest one frightening. */
+  r_mismatched: { he: 'בידך, ולא יעבור כמו שהוא', en: 'In your hands, and will not pass as it is' },
+  r_missing: { he: 'עוד לא בידך', en: 'Not in your hands yet' },
+  r_unconfirmed: { he: 'לא נבדק — לא שאלנו על זה', en: 'Not checked — we did not ask' },
+  r_ready: { he: 'בידך ותקין', en: 'In your hands and in order' },
 
   roadmap_title: { he: 'הדרך שלך', en: 'Your road' },
   steps_count: { he: 'שלבים', en: 'steps' },
