@@ -5,6 +5,11 @@
 *.pem
 credentials.json
 
+# ⚠️ ...but the TEMPLATE must be committed, or a new machine has no idea which
+# variables exist. `.env.*` above swallows it, so it needs an explicit escape.
+# It holds names only, never a value.
+!.env.example
+
 # USER DOCUMENTS — passports, visas, licences. NEVER commit.
 uploads/
 user-docs/
