@@ -41,6 +41,45 @@ export const UI = {
     en: 'No sign-up. Nothing is saved.',
   },
 
+  // ── the landing page ─────────────────────────────────────────────────────
+  //
+  // ⚠️ Professional and plain, per Chaya's ruling on 31.8. No reassurance about
+  // how hard bureaucracy is; the reassurance is knowing what you are in for.
+  hero_title: {
+    he: 'לבדוק שאתה מוכן, לפני שאתה מגיע',
+    en: 'Check that you are ready, before you go',
+  },
+  hero_lede: {
+    he: 'המערכת בודקת את המסמכים שברשותך מול הדרישות הרשמיות, ומראה מה תקין, מה חסר, ומה לעשות ראשון. מיועדת למי שחי בישראל בלי תעודת זהות כחולה.',
+    en: 'The system checks the documents you hold against the official requirements, and shows what is in order, what is missing, and what to do first. Built for people living in Israel without a blue teudat zehut.',
+  },
+
+  /* ⭐ Chaya's call, 31.8, and the most important block on the page. This
+     audience has learned to distrust official-looking things that are not
+     official. Saying it plainly is what earns the right to ask about a visa. */
+  not_gov_title: { he: 'זה אינו אתר ממשלתי', en: 'This is not a government website' },
+  not_gov_body: {
+    he: 'המערכת אינה מגישה בקשות ואינה מדברת עם אף רשות בשמך. היא מסבירה מה נדרש ובודקת מול מה שיש לך. אין הרשמה, ושום פרט שתזין אינו נשמר.',
+    en: 'It does not submit applications and does not contact any authority on your behalf. It explains what is required and checks it against what you have. There is no sign-up, and nothing you enter is saved.',
+  },
+
+  how_title: { he: 'איך זה עובד', en: 'How it works' },
+  beat_1: { he: 'כמה שאלות על המעמד שלך', en: 'A few questions about your status' },
+  beat_1_note: { he: 'שתי שאלות חובה. את השאר אפשר לדלג.', en: 'Two are required. The rest can be skipped.' },
+  beat_2: { he: 'מה כתוב על המסמכים שלך', en: 'What your documents say' },
+  beat_2_note: { he: 'מעתיקים את הפרטים; המערכת משווה ביניהם.', en: 'You copy the details; the system compares them.' },
+  beat_3: { he: 'הדרך שלך, והשלב הראשון', en: 'Your route, and the first step' },
+  beat_3_note: { he: 'כל שלב לפי הסדר, עם המקור לכל דרישה.', en: 'Every step in order, with the source for each requirement.' },
+
+  choose_title: { he: 'במה אפשר לעזור?', en: 'What do you need?' },
+  choose_note: {
+    he: 'תהליך אחד פעיל כרגע. נוספים בפיתוח.',
+    en: 'One process is available now. More are in development.',
+  },
+  status_live: { he: 'זמין', en: 'Available' },
+  status_planned: { he: 'בקרוב', en: 'Coming soon' },
+  at_authority: { he: 'מול', en: 'With' },
+
   q_status: { he: 'מה המעמד שלך בישראל?', en: 'What is your status in Israel?' },
   q_status_help: {
     he: 'זה מה שקובע לאיזה מסלול אתה שייך, כמה זמן יש לך, ואילו דרגות פתוחות בפניך.',

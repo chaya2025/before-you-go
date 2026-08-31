@@ -1,6 +1,6 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
-import { Profile, evaluate, ALL_VISA_PROFILES, LicenseClass } from '@byg/engine';
+import { Profile, evaluate, ALL_VISA_PROFILES, ALL_PROCESSES, LicenseClass } from '@byg/engine';
 import { explain, modelIsConfigured, type Lang } from './explain';
 
 /**
@@ -86,6 +86,18 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
     })),
     license_classes: LicenseClass.options,
   }));
+
+  /**
+   * ⭐ What this system can check you are ready for.
+   *
+   * ⚠️ Served rather than hardcoded in the website, for exactly the reason the
+   * visa list is: apps/web holds no domain knowledge. When a second process
+   * becomes real, the landing page changes without the website being touched.
+   *
+   * `status` is honest — a 'planned' process is rendered as not-yet-available
+   * and is not clickable.
+   */
+  app.get('/api/v1/processes', async () => ({ processes: ALL_PROCESSES }));
 
   /**
    * The one endpoint that matters. A profile in, a readiness answer out.

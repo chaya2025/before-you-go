@@ -6,6 +6,7 @@ import { BLOCKERS } from './blockers';
 import { CLOCKS } from './clocks';
 import { CONTINUOUS_CONDITIONS } from './continuous';
 import { DOCUMENTS } from './documents';
+import { PROCESSES, Process, type Process as ProcessType } from './processes';
 import {
   Step,
   CheckedStep,
@@ -100,6 +101,19 @@ ${JSON.stringify(parsed.error.issues, null, 2)}`);
   return parsed.data;
 });
 
+/**
+ * ⚠️ Parsed at import time like everything else. A malformed process fails the
+ * build rather than reaching a landing page.
+ */
+export const ALL_PROCESSES: ProcessType[] = PROCESSES.map((p) => {
+  const parsed = Process.safeParse(p);
+  if (!parsed.success) {
+    throw new Error(`Process "${p.id}" is not valid:
+${JSON.stringify(parsed.error.issues, null, 2)}`);
+  }
+  return parsed.data;
+});
+
 /** Look-ups the evaluator uses constantly. */
 export const visaProfileFor = (visaType: string) =>
   ALL_VISA_PROFILES.find((v) => v.visa_type === visaType);
@@ -119,5 +133,7 @@ export {
   CLOCKS,
   CONTINUOUS_CONDITIONS,
   DOCUMENTS,
+  PROCESSES,
 };
 export * from './sources';
+export * from './processes';

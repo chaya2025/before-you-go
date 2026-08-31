@@ -1,4 +1,4 @@
-import type { Result, Text, NohalCategory } from '@byg/engine';
+import type { Result, Text, NohalCategory, Process } from '@byg/engine';
 
 /**
  * ============================================================================
@@ -127,3 +127,11 @@ export async function fetchExplanation(
 
 /** Is the plain-language layer switched on where this is deployed? */
 export const fetchCapabilities = () => get<{ plain_language: boolean }>('/api/v1/capabilities');
+
+/**
+ * What this system can check you are ready for.
+ *
+ * ⚠️ Asked, not hardcoded — the same rule as the visa list. When a second
+ * process becomes real, the landing page changes without this app being edited.
+ */
+export const fetchProcesses = () => get<{ processes: Process[] }>('/api/v1/processes');
