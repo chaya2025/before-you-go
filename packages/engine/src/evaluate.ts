@@ -554,12 +554,12 @@ function urgentIssues(
         en: m === 0 ? 'Your passport expires this month, and that will break your 89' : `Your passport expires in ${m} months, and that will break your 89`,
       },
       consequence: {
-        he: 'זו אינה חסימה, ואפשר להמשיך בתהליך היום כרגיל. אבל דרכון מחודש מקבל מספר חדש, ואילו מסמך ה-89 ימשיך לשאת את המספר הישן. אי-התאמה ביניהם מונעת את קיום הטסט, והוא נרשם ככישלון ולא כאי-התייצבות: שילמת אגרה, המתנת, ונרשם לך כישלון על מבחן שלא התקיים.',
-        en: 'This is not a blocker and you can carry on today as normal. But a renewed passport gets a new number, while your 89 keeps carrying the old one. A mismatch between them stops the test from happening, and it is recorded as a failure rather than a no-show: fee paid, time waited, and a failure registered for a test that never took place.',
+        he: 'זו אינה חסימה, וניתן להמשיך בתהליך כרגיל. עם זאת, דרכון מחודש מקבל מספר חדש, ואילו מסמך ה-89 ימשיך לשאת את המספר הישן. אי-התאמה ביניהם מונעת את קיום הטסט, והוא נרשם ככישלון ולא כאי-התייצבות.',
+        en: 'This is not a blocker and you can continue as normal. However, a renewed passport is issued with a new number, while your 89 continues to carry the old one. A mismatch between them prevents the test from taking place, and it is recorded as a failure rather than a no-show.',
       },
       action: {
-        he: 'תכנן שתי פעולות ולא אחת: חידוש הדרכון, ואחריו תור למשרד הרישוי לעדכון מסמך ה-89. מספר ה-89 עצמו לא משתנה — מתעדכן רק הקישור לדרכון החדש. עדיף לסדר את זה לפני שקובעים טסט.',
-        en: 'Plan two things, not one: renew the passport, then book a licensing office appointment to update the 89. The 89 number itself does not change; only its link to the new passport does. Better done before booking a test.',
+        he: 'יש לתכנן שתי פעולות: חידוש הדרכון, ולאחריו תור במשרד הרישוי לעדכון מסמך ה-89. מספר ה-89 עצמו אינו משתנה; מתעדכן רק הקישור לדרכון החדש. מומלץ להשלים זאת לפני קביעת טסט.',
+        en: 'Plan two actions: renew the passport, then book a licensing office appointment to update the 89. The 89 number itself does not change; only its link to the new passport does. Complete this before booking a test.',
       },
       evidence: [
         {
@@ -609,12 +609,12 @@ function urgentIssues(
         en: m === 0 ? 'Your visa is valid to the end of this month. Worth starting the renewal' : `Your visa is valid for ${m} more months. Worth starting the renewal`,
       },
       consequence: {
-        he: 'זו אינה חסימה. האשרה בתוקף, ואפשר להמשיך בתהליך היום כרגיל — לקבוע תורים, להגיש ולהתייצב. מה שכן חשוב לדעת: הזכאות נבחנת ליום ההגשה, ולכן תור שנקבע למועד שאחרי התפוגה לא יעזור לך.',
-        en: 'This is not a blocker. Your visa is valid and you can carry on with the process today as normal: book appointments, submit, attend. What is worth knowing: eligibility is judged on the day you submit, so an appointment booked for after the expiry will not help you.',
+        he: 'זו אינה חסימה. האשרה בתוקף, וניתן להמשיך בתהליך כרגיל: לקבוע תורים, להגיש ולהתייצב. חשוב לדעת שהזכאות נבחנת ליום ההגשה, ולכן תור שנקבע למועד שלאחר התפוגה לא יסייע.',
+        en: 'This is not a blocker. Your visa is valid and you can continue as normal: book appointments, submit, attend. Note that eligibility is assessed on the day of submission, so an appointment booked after the expiry date will not help.',
       },
       action: {
-        he: 'התחל את חידוש האשרה במקביל, בלי לעצור שום דבר אחר. החידוש מקוון ואורך כחודש, ולכן עדיף להתחיל אותו לפני שנשאר פחות מחודש.',
-        en: 'Start the visa renewal in parallel, without pausing anything else. It is done online and takes about a month, so it is better begun before less than a month is left.',
+        he: 'יש להתחיל את חידוש האשרה במקביל, בלי לעצור שלבים אחרים. החידוש מקוון ואורך כחודש, ולכן מומלץ להתחיל אותו בעוד נותר יותר מחודש.',
+        en: 'Start the visa renewal in parallel, without pausing other steps. It is done online and takes about a month, so begin it while more than a month remains.',
       },
       evidence: visaDoc ? visaDoc.evidence : [],
     });
@@ -795,7 +795,11 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
     clocks: ALL_CLOCKS.map((c) => computeClock(c, profile, facts, today))
       .filter((c) => evaluateCondition(c.clock.applies_when, facts) !== false)
       // ⭐ A clock gated on a step stays out of sight until he has done it.
-      .filter((c) => !c.clock.activated_by || profile.completed_steps.includes(c.clock.activated_by)),
+      .filter(
+        (c) =>
+          c.clock.activated_by.length === 0 ||
+          c.clock.activated_by.some((id) => profile.completed_steps.includes(id)),
+      ),
     standing_conditions: ALL_CONTINUOUS_CONDITIONS.filter(
       (c) => evaluateCondition(c.applies_when, facts) !== false,
     ),

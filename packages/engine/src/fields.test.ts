@@ -52,7 +52,7 @@ describe('the 89 number', () => {
     const short = checkForm89Number('89123456');
     expect(short?.severity).toBe('blocking');
     expect(short?.message.en).toContain('nine digits');
-    expect(short?.message.en).toContain('has 8');
+    expect(short?.message.en).toContain('entered 8');
   });
 
   /** Documents print numbers with spaces in them, and he is copying what he sees. */

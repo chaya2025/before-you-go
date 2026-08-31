@@ -380,18 +380,18 @@ export const FROM_ZERO_STEPS: StepInput[] = [
       },
       {
         // ⭐ the founder, 31.8. A reminder on the day, not a document to verify.
-        he: "אם אתה מרכיב משקפיים או עדשות מגע — אל תשכח להביא אותם.",
-        en: 'If you wear glasses or contact lenses, do not forget to bring them.',
+        he: "מרכיבי משקפיים או עדשות מגע — יש להביא אותם לטסט.",
+        en: 'If you wear glasses or contact lenses, bring them to the test.',
       },
     ],
     notes: [
       {
         he:
           "אגרת הטסט משולמת מקוון, ומי שקובע לך את הטסט רואה את התשלום במערכת וקובע על סמכו. אין צורך להגיע עם אישור מודפס.\n" +
-          "⚠️ הרשימה הרשמית עדיין מזכירה אישור תשלום, ולכן צילום מסך של התשלום בטלפון לא עולה כלום.",
+          "⚠️ הרשימה הרשמית עדיין מזכירה אישור תשלום, ולכן מומלץ לשמור צילום מסך של התשלום.",
         en:
           'The test fee is paid online, and whoever books your test sees the payment in the system and books it on that basis. You do not need to arrive with a printed receipt.\n' +
-          '⚠️ The official list still mentions a payment receipt, so a screenshot of the payment on your phone costs nothing.',
+          '⚠️ The official list still mentions a payment receipt, so keep a screenshot of the payment.',
       },
     ],
     cost: {
@@ -767,29 +767,99 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     ],
   },
 
+  /**
+   * ⭐⭐ THE DUPLICATE, SPLIT BY CHANNEL — the founder, 31.8.
+   *
+   *   "the כפל רישיון when the licence don't arrive is valid to everyone who
+   *    doesn't get it. but the difference is with the ID. the regular way for
+   *    someone who has an ID is [the gov.il service] and he doesn't have to
+   *    actually go to משרד הרישוי או דואר, and someone who doesn't have an ID
+   *    has to do that with booking the appointments etc."
+   *
+   * ⭐ This is גיליון F0's central finding, and the step was contradicting it:
+   * "ת״ז אינה משנה זכאות, היא משנה ערוץ." The entitlement to a replacement is
+   * identical for everybody whose card never arrives. What changes is that an
+   * online service becomes an appointment, a queue and a post office.
+   *
+   * It was one step, scoped to EVERYONE, describing only the physical route —
+   * so a person holding a teudat zehut was told to book an appointment and pay
+   * at a post office for something he can do from his sofa.
+   *
+   * ⚠️ track: 'both'. A converted licence arrives by post too, and can fail to
+   * arrive in exactly the same way. `must_come_after` names the receive step of
+   * each route; only the one actually on his road can hold him up.
+   */
   {
-    id: 'fz.duplicate',
-    track: 'from_zero',
-    title: { he: "הכרטיס לא הגיע — מסלול שחזור", en: 'The card never arrived: how to get a replacement' },
+    id: 'duplicate.online',
+    track: 'both',
+    title: { he: "הכרטיס לא הגיע — הוצאת העתק מקוונת", en: 'The card never arrived: online replacement' },
+    action: {
+      he:
+        "הגש בקשה להוצאת העתק רישיון באתר משרד התחבורה. אין צורך בתור, ואין צורך להגיע למשרד הרישוי או לסניף דואר.\n\n" +
+        "לאחר התשלום, ותוך 48 שעות — היכנס ל-fastdl.co.il ובחר את אופן המסירה: איסוף עצמי בדפוס בארי (ללא תשלום), שליח עד הבית, דואר, נתב\"ג, דואר רשום או מעברי גבול.",
+      en:
+        'Submit a duplicate licence request on the Ministry of Transport website. No appointment is needed, and there is no need to attend a licensing office or a post office.\n\n' +
+        'After payment, within 48 hours, go to fastdl.co.il and choose the delivery method: self-collection at Defus Bari (free), courier, post, Ben Gurion airport, registered post or border crossings.',
+    },
+    applies_when: { field: 'has_teudat_zehut', op: 'eq', value: true },
+    sequence_position: 16,
+    must_come_after: ['fz.receive_card', 'cv.receive'],
+    channel: 'online',
+    requires_appointment: false,
+    links: [
+      { label: { he: "הוצאת העתק רישיון", en: 'Duplicate licence service' }, url: 'https://www.gov.il/he/service/duplicate_drivers_license_in_case_of_loss' },
+      { label: { he: "בחירת אופן המסירה", en: 'Choose delivery' }, url: 'https://fastdl.co.il/' },
+    ],
+    fallback: {
+      he: "אין לך כתובת רשומה? בחר איסוף עצמי בדפוס בארי — ללא תשלום, ואינו תלוי בכתובת.",
+      en: 'No registered address? Choose self-collection at Defus Bari. It is free and does not depend on an address.',
+    },
+    /**
+     * ⚠️ NO cost block, deliberately. The 23 ₪ is a field report from the
+     * POST OFFICE route, and whether the online channel charges the same is not
+     * something anybody checked. Restating it here would turn an observation
+     * about one channel into a claim about another.
+     */
+    evidence: [
+      official(
+        'דף "הוצאת העתק רישיון נהיגה", משרד התחבורה',
+        "השירות מוצע כשירות מקוון, וחלון שינוי אופן המסירה מתועד",
+        "ביום שאחרי ביצוע התשלום ועד 2 ימי עסקים, ניתן לשנות את אופן קבלת הרישיון ואת יעד המסירה.",
+        'https://www.gov.il/he/service/duplicate_drivers_license_in_case_of_loss',
+        LAST_VERIFIED_LATE,
+      ),
+      fieldReport(
+        "מי שברשותו תעודת זהות מבצע את הבקשה מקוון ואינו נדרש להגיע למשרד הרישוי או לסניף דואר",
+        { last_verified_at: '2026-08-31' },
+      ),
+      notChecked("גובה האגרה בערוץ המקוון — לא אומת. 23 ₪ נצפו בערוץ הפיזי בלבד"),
+    ],
+  },
+
+  {
+    id: 'duplicate.in_person',
+    track: 'both',
+    title: { he: "הכרטיס לא הגיע — הוצאת העתק בהגעה אישית", en: 'The card never arrived: replacement in person' },
     action: {
       he:
         "קבע תור למשרד הרישוי ובקש הוצאת כפל רישיון. שלם 23 ₪ בסניף דואר.\n\n" +
         "תוך 48 שעות מהתשלום — היכנס ל-fastdl.co.il ובחר איך לקבל את הרישיון:\n" +
-        "· איסוף עצמי בדפוס בארי — חינם, ואינו דורש כתובת רשומה\n" +
+        "· איסוף עצמי בדפוס בארי — ללא תשלום, ואינו דורש כתובת רשומה\n" +
         "· שליח עד הבית — בתשלום\n" +
         "· דואר לכתובת\n" +
         "· וגם: נתב\"ג · דואר רשום · מעברי גבול",
       en:
-        'Book a licensing office appointment and ask for a duplicate licence. Pay 23 ILS at a post office.\n\n' +
+        'Book a licensing office appointment and request a duplicate licence. Pay 23 ILS at a post office.\n\n' +
         'Within 48 hours of paying, go to fastdl.co.il and choose how to receive the licence:\n' +
-        '· Collect it yourself at Defus Bari — free, no registered address needed\n' +
+        '· Self-collection at Defus Bari — free, no registered address needed\n' +
         '· Courier to your door — paid\n' +
         '· Post to an address\n' +
         '· Also: Ben Gurion airport · registered post · border crossings',
     },
-    applies_when: EVERYONE,
+    // ⚠️ The SAME entitlement as the step above. Only the channel differs.
+    applies_when: NO_TEUDAT_ZEHUT,
     sequence_position: 16,
-    must_come_after: ['fz.receive_card'],
+    must_come_after: ['fz.receive_card', 'cv.receive'],
     channel: 'licensing_office',
     requires_appointment: true,
     links: [
@@ -798,12 +868,12 @@ export const FROM_ZERO_STEPS: StepInput[] = [
       { label: { he: "זימון תור", en: 'Book an appointment' }, url: 'https://www.gov.il/he/Departments/General/govisit' },
     ],
     fallback: {
-      he: "אין לך כתובת רשומה? בחר איסוף עצמי בדפוס בארי — חינם, ואינו תלוי בכתובת.",
+      he: "אין לך כתובת רשומה? בחר איסוף עצמי בדפוס בארי — ללא תשלום, ואינו תלוי בכתובת.",
       en: 'No registered address? Choose self-collection at Defus Bari. It is free and does not depend on an address.',
     },
     cost: {
       amount_ils: 23,
-      note: { he: "ייתכן תשלום נוסף לפי אופן המשלוח שתבחר.", en: 'There may be an extra charge depending on the delivery method you choose.' },
+      note: { he: "ייתכן תשלום נוסף לפי אופן המשלוח שתבחר.", en: 'There may be an extra charge depending on the delivery method chosen.' },
       evidence: [fieldReport("אגרת הפקת כפל רישיון 23 ₪, משולמת בסניף דואר", { last_verified_at: LAST_VERIFIED_LATE })],
     },
     evidence: [
@@ -824,10 +894,6 @@ export const FROM_ZERO_STEPS: StepInput[] = [
       fieldReport("המסלול נמסר על ידי מנהלת במוקד *4515 ופקידה במשרד הרישוי", {
         last_verified_at: LAST_VERIFIED_LATE,
       }),
-      // ⚠️ Precise, because the distinction matters: the manager said not to miss
-      // the window. She did not say what happens if you do. An earlier draft had guessed
-      // "probably reverts to ordinary post" earlier and removed it — this
-      // records that the guess was his, not hers.
       notChecked(
         "מה קורה למי שמפספס את חלון 48 השעות — לא אותר מקור. ההערכה היא שהרישיון יישלח בדואר",
       ),

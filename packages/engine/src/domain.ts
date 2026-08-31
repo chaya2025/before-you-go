@@ -397,7 +397,14 @@ export const Clock = z.object({
    * This is the first piece of her larger idea: the system should know where the
    * person actually is, and show him that.
    */
-  activated_by: z.string().optional(),
+  /**
+   * ⚠️ A LIST since 31.8. The same clock can be started by either channel of
+   * one action — the duplicate licence is requested online by a person with a
+   * teudat zehut and in person by someone without one, and the 48-hour delivery
+   * window opens either way. With a single id the clock could only ever follow
+   * one of the two, so half the population would never see it.
+   */
+  activated_by: z.array(z.string()).default([]),
 
   evidence: Evidence,
 });
