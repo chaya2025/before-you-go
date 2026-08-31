@@ -1,0 +1,53 @@
+# =============================================================================
+# Render — the demo deploy
+# =============================================================================
+#
+# ⚠️ THIS IS A DEMO DEPLOY, NOT A PRODUCTION ONE. It exists so a link can be
+# sent to Matan on 1.9.2026 instead of a laptop being carried into a meeting.
+# The real hosting decision is AWS and is his call; nothing here presumes it.
+#
+# ⭐ Why Render and not Vercel, which was the first instinct:
+#
+# This app is ONE Node server that serves the API and the website together —
+# a deliberate design, and apprunner.yaml states the reason: one origin, so no
+# CORS and no API address to keep in sync. Vercel does not run servers; it runs
+# static files plus serverless functions, so going there means restructuring
+# the API into a function AND getting a bundler to compile @byg/engine, whose
+# entry point is raw TypeScript inside a workspace. Render runs the Dockerfile
+# that already exists and is already tested.
+#
+# ⚠️ The Dockerfile is used deliberately rather than Render's Node runtime.
+# Managed Node runtimes usually set NODE_ENV=production, and npm reads that as
+# "skip devDependencies" — where BOTH vite (which builds the site) and tsx
+# (which runs the server) live. The build would fail with "command not found".
+# The Dockerfile controls its own environment, so that trap cannot fire.
+# The same warning is written into apprunner.yaml; it has bitten this project
+# once already.
+
+services:
+  - type: web
+    name: before-you-go
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: frankfurt # Closest to the users. Israel has no Render region.
+    healthCheckPath: /health
+
+    envVars:
+      # ⚠️ Inside a container, 127.0.0.1 means "this container only", so the
+      # health check is refused and the deploy fails with no useful error.
+      # 0.0.0.0 means "any interface". Same note as in server.ts.
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 3001
+
+      # ⚠️ NOT set here, on purpose. `sync: false` means Render asks for it in
+      # the dashboard and keeps it out of the repository. A key committed to git
+      # is a key that has to be rotated.
+      #
+      # ⭐ Optional. Without it the site works exactly as it did all week: the
+      # readiness report and the roadmap are deterministic, and the plain
+      # language panel falls back to a summary assembled from the rules.
+      - key: ANTHROPIC_API_KEY
+        sync: false
