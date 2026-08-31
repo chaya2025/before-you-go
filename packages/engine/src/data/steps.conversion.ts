@@ -434,7 +434,26 @@ export const CONVERSION_STEPS: StepInput[] = [
     ],
     links: [{ label: { he: "הנוהל המלא", en: 'The full procedure' }, url: 'https://www.gov.il/he/pages/1961' }],
     checklist: [
-      { he: "האשרה בתוקף היום? הזכאות נבחנת לרגע ההגשה.", en: 'Is your visa valid TODAY? Eligibility is judged at the moment you submit.' },
+      {
+        he: "האשרה בתוקף היום? הזכאות נבחנת לרגע ההגשה.",
+        en: 'Is your visa valid TODAY? Eligibility is judged at the moment you submit.',
+        /**
+         * ⚠️ SCOPED 31.8, found by the founder. It had no `when`, so a returning
+         * Israeli resident with a teudat zehut was asked whether his visa was
+         * valid today. He has no visa. Same failure as the 89 line on 27.8 —
+         * "the 89 has nothing to do with him."
+         *
+         * ⭐ The condition is cc.visa_valid's, not doc.visa's, and the
+         * difference is her ruling of 30.8: an א/5 holds a teudat zehut and IS
+         * asked, because his card rests on the visa behind it.
+         */
+        when: {
+          any: [
+            { field: 'has_teudat_zehut', op: 'eq', value: false },
+            { field: 'nohal_category', op: 'eq', value: 'toshav_medinat_chutz' },
+          ],
+        },
+      },
       { he: "הרישיון הזר בתוקף — לא רק קיים?", en: 'Is your foreign licence valid, not merely in your possession?' },
       { he: "כל המסמכים במקור?", en: 'Are all documents originals?' },
       { he: "הרקורד הגיע?", en: 'Has the record arrived?' },

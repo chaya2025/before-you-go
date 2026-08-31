@@ -1248,6 +1248,95 @@ describe('⭐ the system follows where the person actually is', () => {
     expect(step.action.he).toContain('אין צורך');
   });
 
+  /**
+   * ⭐⭐ FOUND BY THE FOUNDER, 31.8: "if I choose a Toshav Israel that has a driving
+   * license... when the input documents field shows the visa, he doesn't have a
+   * visa if he's Israeli."
+   *
+   * ⚠️ And it was worse than she saw. The same screen also asked him for his 89
+   * number — a document he was correctly never told to obtain. The form scoped
+   * only the foreign licence and showed everything else to everybody.
+   *
+   * The engine decides now, by asking each document its own applies_when.
+   */
+  it('⭐ a returning Israeli resident is asked about neither a visa nor an 89', () => {
+    const toshav = evaluate(
+      p({
+        visa_type: 'citizen',
+        has_teudat_zehut: true,
+        teudat_zehut_confirmed: true,
+        foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 8, held_class: 'B', language: 'en' },
+        requested_class: 'B',
+        returned_to_israel: '2024-03',
+        born: '1990-05',
+      }),
+      TODAY,
+    );
+    const q = toshav.diagnosis.document_questions;
+    expect(q.visa).toBe(false);
+    expect(q.form_89).toBe(false);
+    expect(q.passport).toBe(false);
+    // ⭐ But he IS converting, so the licence is still asked about.
+    expect(q.foreign_license).toBe(true);
+
+    // ⚠️ And the same must hold on the checklist he reads at the desk.
+    const attend = toshav.roadmap.find((s) => s.step.id === 'cv.attend');
+    expect(attend!.checklist.some((c) => c.he.includes('האשרה'))).toBe(false);
+  });
+
+  it('a foreign resident with no teudat zehut is asked about all of them', () => {
+    const worker = evaluate(
+      p({
+        visa_type: 'b1',
+        has_teudat_zehut: false,
+        teudat_zehut_confirmed: true,
+        foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 8, held_class: 'B' },
+        requested_class: 'B',
+        entered_israel: '2024-01',
+      }),
+      TODAY,
+    );
+    const q = worker.diagnosis.document_questions;
+    expect(q.visa).toBe(true);
+    expect(q.form_89).toBe(true);
+    expect(q.passport).toBe(true);
+    expect(q.foreign_license).toBe(true);
+  });
+
+  /**
+   * ⭐ Her ruling of 30.8, holding at the form as well as in the engine. An א/5
+   * HOLDS a teudat zehut, so the visa document does not apply to him — but his
+   * card rests on the visa behind it, and she chose to flag rather than ignore.
+   * Asking only where doc.visa applies would skip the exact person she widened
+   * the rule for.
+   */
+  it('⭐ an א/5 holds a teudat zehut and is still asked about his visa', () => {
+    const a5 = evaluate(
+      p({
+        visa_type: 'a5',
+        has_teudat_zehut: true,
+        teudat_zehut_confirmed: true,
+        foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 9, held_class: 'B' },
+        requested_class: 'B',
+        entered_israel: '2023-05',
+      }),
+      TODAY,
+    );
+    expect(a5.diagnosis.has_teudat_zehut).toBe(true);
+    expect(a5.diagnosis.document_questions.visa).toBe(true);
+  });
+
+  /** ⚠️ Unknown means ASK. Skipping a question loses the answer silently. */
+  it('⚠️ asks when it cannot tell, rather than skipping the question', () => {
+    const unsure = evaluate(
+      p({ visa_type: 'b1', foreign_license: { kind: 'none' } }),
+      TODAY,
+    );
+    expect(unsure.diagnosis.has_teudat_zehut).toBe('unknown');
+    expect(unsure.diagnosis.document_questions.form_89).toBe(true);
+    expect(unsure.diagnosis.document_questions.visa).toBe(true);
+  });
+
   it('the 48-hour window is not shown to someone who has not lost a card', () => {
     expect(withSteps([]).clocks.map((c) => c.clock.id)).not.toContain(
       'clock.duplicate_delivery_choice',
