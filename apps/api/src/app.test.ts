@@ -192,3 +192,68 @@ describe('privacy — hard rule 1', () => {
     expect(res.body).not.toMatch(/"(session|user_id|tracking_id)"\s*:/);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('the readiness report survives the trip through HTTP', () => {
+  /** a real case: a stale 89 and a visa that has lapsed. */
+  const stale = {
+    today: '2026-08-31',
+    visa_type: 'a2',
+    has_teudat_zehut: false,
+    teudat_zehut_confirmed: true,
+    visa_valid_now: false,
+    foreign_license: { kind: 'none' },
+    form_89_number: '891234567',
+    form_89_passport_number: 'AB1234567',
+    passport_number: 'CD7654321',
+    born: '2005-03',
+  };
+
+  it('comes back with a verdict, a headline and one thing to do first', async () => {
+    const res = await post(stale);
+    expect(res.statusCode).toBe(200);
+    const r = res.json().readiness;
+    expect(r.verdict).toBe('mismatch');
+    expect(r.headline.he).toBeTruthy();
+    expect(r.headline.en).toBeTruthy();
+    expect(r.first_action.step_id).toBe('fix.renew_visa');
+  });
+
+  it('carries all four buckets, so the website never has to infer one', async () => {
+    const r = (await post(stale)).json().readiness;
+    for (const bucket of ['ready', 'mismatched', 'missing', 'unconfirmed']) {
+      expect(Array.isArray(r[bucket])).toBe(true);
+    }
+    expect(r.mismatched.map((i: { id: string }) => i.id)).toContain('doc.form_89');
+  });
+
+  /**
+   * ⚠️ PRIVACY, hard rule 1, checked at the edge as well as in the engine. The
+   * report is the newest thing that handles document numbers, and it is also
+   * the most quotable part of the answer — a mismatch that named the number
+   * would put it in every screenshot a user sends to a friend.
+   */
+  it('never echoes back a number he typed', async () => {
+    const body = (await post(stale)).body;
+    expect(body).not.toContain('891234567');
+    expect(body).not.toContain('AB1234567');
+    expect(body).not.toContain('CD7654321');
+  });
+
+  /**
+   * ⚠️ NULL for a blocked person, not an empty report. Four empty lists would
+   * compute the verdict 'ready' and tell a man who cannot proceed at all that
+   * he is good to go.
+   */
+  it('is absent for a blocked person rather than empty', async () => {
+    const res = await post({
+      today: '2026-08-31',
+      visa_type: 'section_2a5',
+      has_teudat_zehut: false,
+      foreign_license: { kind: 'none' },
+    });
+    expect(res.json().blocked).not.toBeNull();
+    expect(res.json().readiness).toBeNull();
+  });
+});
