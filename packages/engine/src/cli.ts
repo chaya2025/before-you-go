@@ -242,7 +242,24 @@ function report(result: Result, today: string, withSources: boolean): string {
       }
     }
     for (const check of s.checks_first) L.push(`     🔎 לפני השלב: ${check.name.he}`);
-    for (const item of s.step.checklist) L.push(`     ☐ ${item.he}`);
+    /**
+     * ⚠️ s.checklist and s.notes, NOT s.step.* — the engine has already removed
+     * the lines that do not apply to this person, and the raw arrays have not.
+     *
+     * ⭐ Found 31.8, and it is the 30.8 lesson repeating: the CLI was printing
+     * the RAW checklist, so it asked a citizen "have you booked the permit
+     * appointment?" — a question scoped to people with no teudat zehut, who are
+     * the only ones for whom that appointment exists. Roadmap.tsx has read the
+     * filtered list since 27.8; this had not caught up.
+     *
+     * ⚠️ And notes were never printed here AT ALL, which is exactly how
+     * cv.attend spent weeks asking for three documents of nine. A finding that
+     * cannot be seen in the tool used for reading real output does not exist.
+     */
+    for (const note of s.notes) {
+      for (const line of note.he.split('\n')) if (line) L.push(`     ${line}`);
+    }
+    for (const item of s.checklist) L.push(`     ☐ ${item.he}`);
 
     if (s.step.cost?.amount_ils !== undefined) {
       const c = s.step.cost;
