@@ -68,6 +68,9 @@ const NUMBERS_DISAGREE: Condition = knownAndFalse('passport_89_number_match');
 export const FIX_STEPS: StepInput[] = [
   {
     id: 'fix.renew_visa',
+    // Renewing the visa also repairs "דרכון עם אשרת שהייה בתוקף", which is
+    // broken by a lapsed visa as surely as by an expired passport.
+    repairs_documents: ['doc.visa', 'doc.passport'],
     track: 'both',
     title: { he: "חידוש האשרה", en: 'Renew your visa' },
     action: {
@@ -112,6 +115,7 @@ export const FIX_STEPS: StepInput[] = [
 
   {
     id: 'fix.update_89',
+    repairs_documents: ['doc.form_89'],
     track: 'both',
     title: { he: "עדכון מסמך ה-89 לדרכון הנוכחי", en: 'Update your 89 document to your current passport' },
     action: {
@@ -162,6 +166,7 @@ export const FIX_STEPS: StepInput[] = [
 
   {
     id: 'fix.name_on_89',
+    repairs_documents: ['doc.form_89'],
     track: 'both',
     title: { he: "בדיקת השם במסמך ה-89 מול הדרכון", en: 'Check the name on your 89 against your passport' },
     action: {
@@ -190,6 +195,7 @@ export const FIX_STEPS: StepInput[] = [
 
   {
     id: 'fix.name_on_license',
+    repairs_documents: ['doc.foreign_license'],
     track: 'conversion',
     title: { he: "בדיקת השם ברישיון הזר מול הדרכון", en: 'Check the name on your foreign licence against your passport' },
     action: {
