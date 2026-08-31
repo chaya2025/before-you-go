@@ -78,6 +78,7 @@ export const CONVERSION_STEPS: StepInput[] = [
   {
     id: 'cv.record',
     track: 'conversion',
+    produces_document: 'doc.record',
     title: { he: "השגת \"רקורד\" ממדינת המוצא", en: 'Get your "record" from your home country' },
     action: {
       he: "בקש מהרשות המוסמכת במדינת המוצא אסמכתה המציינת את המועד שבו הוצא לך רישיון הנהיגה הקבוע. מתקבל גם בדוא\"ל — אפשר להתחיל מרחוק היום.",
@@ -147,6 +148,7 @@ export const CONVERSION_STEPS: StepInput[] = [
   {
     id: 'cv.doc_89',
     track: 'conversion',
+    produces_document: 'doc.form_89',
     title: { he: "הוצאת מספר מזהה 89", en: 'Get your 89 identity number' },
     action: {
       he: "הגע למשרד הרישוי עם דרכון מקורי ואשרת שהייה בתוקף וקבל מספר מזהה שמתחיל ב-89.",
@@ -194,6 +196,7 @@ export const CONVERSION_STEPS: StepInput[] = [
   {
     id: 'cv.entry_exit_form',
     track: 'conversion',
+    produces_document: 'doc.entry_exit_form',
     title: { he: "טופס כניסות ויציאות", en: 'Entries and exits form' },
     action: {
       he: "הוצא טופס כניסות ויציאות מרשות האוכלוסין. הראשון ביום — חינם.",
@@ -231,12 +234,33 @@ export const CONVERSION_STEPS: StepInput[] = [
   {
     id: 'cv.translation',
     track: 'conversion',
+    produces_document: 'doc.translation',
     title: { he: "תרגום מסמכים שאינם באנגלית", en: 'Translate documents that are not in English' },
     action: {
       he: "רשות הרישוי רשאית לדרוש תרגום של הרישיון הלאומי או של כל מסמך אחר שאינו באנגלית. התרגום מתבצע על ידי עו\"ד או נוטריון דובר השפה.",
       en: 'The licensing authority may require a translation of your licence or any other document not in English, done by a lawyer or notary who speaks the language.',
     },
-    applies_when: EVERYONE,
+    /**
+     * ⚠️ Was EVERYONE, which made the STEP broader than the DOCUMENT it produces.
+     * doc.translation has been scoped to a non-English licence since 30.8; this
+     * was not, so two things went wrong at once. An English-licence holder was
+     * told to go and translate documents that need no translation, and — found
+     * by reading the readiness report on 31.8 — a person who had not yet said
+     * what language his licence is in was told outright that he was MISSING a
+     * notarised translation. Nobody had asked. That is "unknown rendered as no",
+     * the failure this engine exists to avoid, arriving through the back door of
+     * a summary rather than a rule.
+     *
+     * ⭐ Same condition as the document now, quite deliberately: `ne 'en'` and
+     * not `eq 'other'`, so an unanswered language leaves this UNCERTAIN rather
+     * than quietly dropping a requirement the נוהל may well impose.
+     */
+    applies_when: {
+      all: [
+        { field: 'track', op: 'eq', value: 'conversion' },
+        { field: 'foreign_license_language', op: 'ne', value: 'en' },
+      ],
+    },
     sequence_position: 5,
     channel: 'unknown',
     authority: "עו\"ד או נוטריון",

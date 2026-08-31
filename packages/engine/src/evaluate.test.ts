@@ -424,7 +424,7 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
   // ── the documents, and the order they have to be fixed in ──────────────
 
   const DOCS = {
-    form_89_number: '89123456',
+    form_89_number: '891234567',
     form_89_passport_number: 'AB1234567',
     passport_number: 'CD7654321', // renewed. A different passport entirely.
   };
@@ -494,7 +494,7 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
   it('any one of the three 89 fields is enough evidence that he holds it', () => {
     // He may know the number, or only recognise the name printed on it.
     for (const field of ['form_89_number', 'form_89_passport_number', 'form_89_name_latin']) {
-      const r = run({ [field]: field === 'form_89_name_latin' ? 'John Smith' : '89123456' });
+      const r = run({ [field]: field === 'form_89_name_latin' ? 'John Smith' : '891234567' });
       const doc89 = r.roadmap.find((s) => s.step.id === 'cv.doc_89')!;
       expect(doc89.state, field).toBe('done');
     }

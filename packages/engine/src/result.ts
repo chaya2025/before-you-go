@@ -175,6 +175,125 @@ export type Diagnosis = {
 };
 
 /**
+ * ============================================================================
+ * READINESS — the question the product is named after
+ * ============================================================================
+ *
+ * The roadmap answers "what is the whole way from here?".
+ * This answers the narrower and more useful one: **"if I walked in tomorrow,
+ * would what I am carrying actually work?"**
+ *
+ * ⭐ The unit is the DOCUMENT, not the step. That is deliberate. A step is
+ * something he does; a document is something he holds, and holding the wrong
+ * one is what turns a day off work into a wasted trip. Chaya's own two trips
+ * were both document problems, not step problems.
+ *
+ * ⚠️ Nothing here is recomputed. Every item is read off the roadmap that was
+ * already built, so the summary at the top of the screen can never contradict
+ * the steps printed underneath it. Same discipline as `Diagnosis.exemption`.
+ */
+
+/**
+ * ⭐ FOUR buckets, not three, and the fourth is the honest one.
+ *
+ * The POC plan asked for ready / missing / mismatched. Building it exposed a
+ * fourth state that those three quietly swallow: **we never asked**. A person
+ * who skips the documents screen has not told us he is missing his passport —
+ * he has told us nothing, and folding that into "missing" is principle 8
+ * ("אל תציגי 'לא ידוע' כ'לא'") pointed at his documents. It would also produce
+ * the exact harm Chaya caught on 30.8: a frightening screen for a man with no
+ * problem at all.
+ *
+ *   'ready'        — he has it, and it checks out.
+ *   'mismatched'   — ⚠️ he has it and it will NOT work. The wasted trip.
+ *   'missing'      — he does not have it. Either he said so, or his own roadmap
+ *                    still carries the step to go and obtain it.
+ *   'unconfirmed'  — nobody asked. Not a problem, not a promise.
+ */
+export type ReadinessBucket = 'ready' | 'mismatched' | 'missing' | 'unconfirmed';
+
+export type ReadinessItem = {
+  /** The document id, the same one used in ALL_DOCUMENTS and in requires_documents. */
+  id: string;
+  bucket: ReadinessBucket;
+  title: Text;
+  /** Why it is in this bucket, in his terms rather than the engine's. */
+  detail: Text;
+  /** What to do about it. ⚠️ Absent only on 'ready', where there is nothing to do. */
+  action?: Text;
+
+  /**
+   * The document's own note, where it has one. Carried, not rewritten: it holds
+   * the qualifications that keep the report honest — the glasses are only for
+   * people who wear them, and the 89 has no expiry date at all.
+   */
+  note?: Text;
+
+  /** Steps on HIS road that need it in hand. Never empty: that is how it got here. */
+  needed_for: string[];
+
+  /**
+   * The step on his road that obtains or repairs it, when there is one. Lets the
+   * report point at the road instead of restating it.
+   */
+  resolved_by?: string;
+
+  /** Hard rule 4. The document's own sources travel with it. */
+  evidence: SourcePart[];
+};
+
+/**
+ * ⭐ ONE thing to do next.
+ *
+ * ⚠️ Not a list. גיליון 13 principle 3 and the whole failure this product exists
+ * to replace — "אחרי הטסט אף אחד לא אמר מה השלב הבא" — are about a person who
+ * has information and still does not know what to do on Monday morning. A
+ * roadmap of fourteen steps with three of them actionable is still that person.
+ *
+ * `why` is not decoration. A user who is told to do something out of order will
+ * assume the system is wrong unless it says why this one comes first.
+ */
+export type FirstAction = {
+  step_id: string;
+  title: Text;
+  action: Text;
+  why: Text;
+};
+
+/**
+ * ⚠️ A verdict about the DOCUMENTS, never about the person.
+ *
+ * "Not ready" is not a thing this system says. A man on step one of fourteen is
+ * not failing at anything, and telling him so is the same harm as putting an
+ * advisory in a red box: it is discouraging, it is not true, and it is the
+ * reason he does not go.
+ *
+ *   'ready'    — everything his road needs is in his hand and checks out.
+ *   'mismatch' — ⚠️ something he holds will be rejected. Worst case, so it wins.
+ *   'gaps'     — there are documents still to obtain. Ordinary, and expected.
+ *   'unknown'  — we have not been told enough to say. The default, honestly.
+ */
+export type ReadinessVerdict = 'ready' | 'mismatch' | 'gaps' | 'unknown';
+
+export type Readiness = {
+  verdict: ReadinessVerdict;
+  /** The verdict in words, written once here so every surface says the same thing. */
+  headline: Text;
+
+  ready: ReadinessItem[];
+  /** ⚠️ First, always. This is the bucket that costs a day off work. */
+  mismatched: ReadinessItem[];
+  missing: ReadinessItem[];
+  unconfirmed: ReadinessItem[];
+
+  first_action: FirstAction | null;
+
+  /** ⭐ "התקדמות נמדדת קדימה" — how much is done, never how much is left. */
+  steps_done: number;
+  steps_total: number;
+};
+
+/**
  * ⚠️ A blocked result still carries a diagnosis and an explanation. F6 rule 3:
  * "אסור לדלג על השאלות הבאות בלי הסבר. משתמש שנחסם חייב לדעת למה ומכוח מה."
  */
@@ -200,6 +319,16 @@ export type Result = {
 
   roadmap: RoadmapStep[];
   clocks: ClockState[];
+
+  /**
+   * ⭐ "Am I ready?" — the roadmap judged against what he is actually holding.
+   *
+   * ⚠️ NULL when he is blocked, and that is not laziness. A blocked person has
+   * no roadmap, so there is nothing to be ready FOR, and a readiness object with
+   * four empty lists would compute the verdict 'ready' and tell a man who cannot
+   * proceed at all that he is good to go. Absent is the only honest value.
+   */
+  readiness: Readiness | null;
 
   /**
    * Conditions that must hold throughout, shown as a standing warning at the top

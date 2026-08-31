@@ -15,6 +15,7 @@ import {
 } from './data';
 import type { Result, RoadmapStep, ClockState, Diagnosis, StepState, UrgentIssue } from './result';
 import { numbersAgree, namesAgree, resolveValidity } from './identity';
+import { buildReadiness } from './readiness';
 import { monthsSince, monthsUntil, ageInYears, startOfMonth, addDays, daysBetween, type IsoDate } from './dates';
 
 /**
@@ -115,6 +116,18 @@ export function deriveFacts(profile: Profile, today: IsoDate): Facts {
     profile.passport_name_latin,
   );
 
+  /**
+   * ⭐ Holding the 89 is proved by knowing what is printed on it. Was an inline
+   * Boolean inside buildRoadmap, where only that one function could see it; the
+   * readiness report needs the same conclusion, so it is a fact now.
+   *
+   * ⚠️ true or 'unknown', never false. He may simply have skipped the screen.
+   */
+  const holds_form_89: Trilean =
+    profile.form_89_number || profile.form_89_passport_number || profile.form_89_name_latin
+      ? true
+      : 'unknown';
+
   return {
     visa_type: profile.visa_type,
     // ⚠️ The user's answer, never the visa's default. The default is only a
@@ -129,6 +142,7 @@ export function deriveFacts(profile: Profile, today: IsoDate): Facts {
     passport_license_name_match,
     months_until_license_expiry,
     foreign_license_language: profile.foreign_license.language,
+    holds_form_89,
     foreign_license_kind: profile.foreign_license.kind,
     foreign_license_valid,
     foreign_license_years: profile.foreign_license.years_held_permanent,
@@ -268,10 +282,7 @@ function buildRoadmap(facts: Facts, profile: Profile): RoadmapStep[] {
    * He came to check his documents and the system worked out where he already
    * stands.
    */
-  const holdsForm89 = Boolean(
-    profile.form_89_number || profile.form_89_passport_number || profile.form_89_name_latin,
-  );
-  if (holdsForm89) {
+  if (facts.holds_form_89 === true) {
     done.add('fz.doc_89');
     done.add('cv.doc_89');
   }
@@ -711,6 +722,12 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
       urgent: urgentIssues(facts, ceiling),
       roadmap: [],
       clocks: [],
+      /**
+       * ⚠️ NULL, not an empty report. A blocked person has no road, so there is
+       * nothing to be ready FOR, and four empty lists would compute the verdict
+       * 'ready' and tell a man who cannot proceed at all that he is good to go.
+       */
+      readiness: null,
       standing_conditions: [],
       warnings: checkProfile(profile, today),
     };
@@ -744,6 +761,11 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
     blocked: null,
     urgent: urgentIssues(facts, ceiling),
     roadmap,
+    /**
+     * ⭐ Built from the finished roadmap, never alongside it. The report is a
+     * READING of the road, so it cannot contradict what is printed below it.
+     */
+    readiness: buildReadiness(facts, roadmap),
     clocks: ALL_CLOCKS.map((c) => computeClock(c, profile, facts, today))
       .filter((c) => evaluateCondition(c.clock.applies_when, facts) !== false)
       // ⭐ A clock gated on a step stays out of sight until he has done it.
