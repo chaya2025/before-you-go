@@ -1185,20 +1185,92 @@ describe('⭐ the system follows where the person actually is', () => {
   const withSteps = (completed: string[]) =>
     evaluate(p({ ...base, completed_steps: completed }), TODAY);
 
+  /**
+   * ⭐⭐ THE TWO-AXIS MODEL, ON THE LAST STEP OF THE ROAD. Chaya, 31.8:
+   *
+   *   "the כפל רישיון when the licence don't arrive is valid to everyone who
+   *    doesn't get it. but the difference is with the ID."
+   *
+   * ⚠️ It was ONE step scoped to EVERYONE, describing only the physical route —
+   * so a man holding a teudat zehut was told to book an appointment and pay at
+   * a post office for something he can do online. גיליון F0: "ת״ז אינה משנה
+   * זכאות, היא משנה ערוץ", contradicted by the step that closes the roadmap.
+   */
+  it('⭐ everyone whose card never arrives can replace it — only the channel differs', () => {
+    const person = (teudatZehut: boolean, license: Record<string, unknown>) =>
+      evaluate(
+        p({
+          visa_type: teudatZehut ? 'citizen' : 'a2',
+          has_teudat_zehut: teudatZehut,
+          teudat_zehut_confirmed: true,
+          foreign_license: license,
+          entered_israel: '2024-01',
+          born: '1990-05',
+        }),
+        TODAY,
+      );
+
+    // Four people: both routes, with and without a teudat zehut.
+    const cases = [
+      { r: person(true, { kind: 'none' }), online: true },
+      { r: person(false, { kind: 'none' }), online: false },
+      { r: person(true, { kind: 'national', valid_now: true, years_held_permanent: 7, held_class: 'B' }), online: true },
+      { r: person(false, { kind: 'national', valid_now: true, years_held_permanent: 7, held_class: 'B' }), online: false },
+    ];
+
+    for (const { r, online } of cases) {
+      const ids = r.roadmap.map((s) => s.step.id);
+      // ⭐ ENTITLEMENT: everybody gets exactly one replacement route.
+      const mine = ids.filter((id) => id.startsWith('duplicate.'));
+      expect(mine.length).toBe(1);
+      // ⚠️ CHANNEL: and which one is decided by the teudat zehut alone.
+      expect(mine[0]).toBe(online ? 'duplicate.online' : 'duplicate.in_person');
+    }
+  });
+
+  it('⚠️ the online channel never sends him to a queue or a post office', () => {
+    const citizen = evaluate(
+      p({ visa_type: 'citizen', has_teudat_zehut: true, teudat_zehut_confirmed: true, foreign_license: { kind: 'none' }, born: '1990-05' }),
+      TODAY,
+    );
+    const step = citizen.roadmap.find((s) => s.step.id === 'duplicate.online')!.step;
+    expect(step.channel).toBe('online');
+    expect(step.requires_appointment).toBe(false);
+
+    /**
+     * ⚠️ Assert the INSTRUCTION, not the words. The first version of this test
+     * failed on "אין צורך להגיע למשרד הרישוי או לסניף דואר" — a sentence that
+     * tells him he does NOT have to go, which is the single most useful line on
+     * the step. A naive not-contains check punishes the helpful negation.
+     */
+    expect(step.action.he).not.toContain('קבע תור למשרד הרישוי');
+    expect(step.action.he).not.toContain('שלם 23 ₪ בסניף דואר');
+    expect(step.action.he).toContain('אין צורך');
+  });
+
   it('the 48-hour window is not shown to someone who has not lost a card', () => {
     expect(withSteps([]).clocks.map((c) => c.clock.id)).not.toContain(
       'clock.duplicate_delivery_choice',
     );
   });
 
-  it('⭐ and starts the moment he says he is in the duplicate route', () => {
-    const inDuplicate = withSteps(['fz.duplicate']);
-    expect(inDuplicate.clocks.map((c) => c.clock.id)).toContain('clock.duplicate_delivery_choice');
+  /**
+   * ⭐ EITHER CHANNEL starts it. Chaya, 31.8: the replacement is open to
+   * everybody whose card never arrives; what the teudat zehut changes is
+   * whether the request is made online or in a queue. With a single
+   * `activated_by` the clock could only follow one of the two, so half the
+   * population would never have seen the shortest deadline in the system.
+   */
+  it('⭐ and starts the moment he says he is in the duplicate route, either channel', () => {
+    for (const channel of ['duplicate.online', 'duplicate.in_person']) {
+      const inDuplicate = withSteps([channel]);
+      expect(inDuplicate.clocks.map((c) => c.clock.id)).toContain('clock.duplicate_delivery_choice');
+    }
   });
 
   it('the clock is kept in the data, not deleted — it is the shortest one there is', () => {
     // Two days. Nothing else in the research is close.
-    const c = withSteps(['fz.duplicate']).clocks.find(
+    const c = withSteps(['duplicate.in_person']).clocks.find(
       (x) => x.clock.id === 'clock.duplicate_delivery_choice',
     )!;
     expect(c.clock.duration_days).toBe(2);

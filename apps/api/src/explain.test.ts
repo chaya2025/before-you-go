@@ -187,7 +187,7 @@ describe('the deterministic text is a real answer, not an apology', () => {
       TODAY,
     );
     expect(withAdvisory.urgent.some((u) => u.severity === 'advisory')).toBe(true);
-    expect(deterministicSummary(withAdvisory, 'he')).toContain('לא עוצר אותך');
+    expect(deterministicSummary(withAdvisory, 'he')).toContain('אינו עוצר אותך');
   });
 
   it('says nothing about a person it has nothing to say about', () => {

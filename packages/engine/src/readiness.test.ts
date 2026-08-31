@@ -137,8 +137,8 @@ describe('a document he holds that will not work', () => {
   it('⭐ never tells him to obtain a document he is already holding', () => {
     const lapsed = readinessOf(p({ ...CONVERTER, visa_valid_now: false, passport_expires: '2029-04' }));
     for (const item of lapsed.mismatched) {
-      expect(item.action!.he).not.toContain('השג אותו');
-      expect(item.action!.en).not.toContain('Obtain it');
+      expect(item.action!.he).not.toContain('להנפקה יש לפנות');
+      expect(item.action!.en).not.toContain('To obtain it');
     }
   });
 });
@@ -266,7 +266,7 @@ describe('the first thing to do', () => {
   it('a repair outranks the long-lead step, and says so', () => {
     const r = readinessOf(p({ ...CONVERTER, visa_valid_now: false }));
     expect(r.first_action!.step_id).toBe('fix.renew_visa');
-    expect(r.first_action!.why.he).toContain('קודם לכול');
+    expect(r.first_action!.why.he).toContain('ראשון');
   });
 });
 
@@ -310,11 +310,11 @@ describe('the verdict is about the documents, never about him', () => {
 
     expect(one.mismatched.length).toBe(1);
     expect(one.headline.he).toContain('מסמך אחד');
-    expect(one.headline.he).toContain('לא יעבור');
+    expect(one.headline.he).toContain('לא יתקבל');
     expect(one.headline.en).toContain('One document');
 
     expect(many.mismatched.length).toBeGreaterThan(1);
-    expect(many.headline.he).toContain('לא יעברו');
+    expect(many.headline.he).toContain('לא יתקבלו');
     expect(many.headline.en).toContain('documents');
   });
 });
@@ -334,7 +334,7 @@ describe('honesty where the research stops', () => {
     expect(record.detail.he).toContain('שאלה פתוחה');
     expect(record.detail.en).toContain('open question');
     // ⚠️ And it must not read as a rejection: the route is still fully his.
-    expect(record.detail.he).toContain('המסלול פתוח בפניך');
+    expect(record.detail.he).toContain('המסלול נותר פתוח');
   });
 
   it('treats a record already being chased as its own answer', () => {
