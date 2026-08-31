@@ -329,13 +329,44 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     track: 'from_zero',
     title: { he: "מבחן מעשי (טסט)", en: 'Practical driving test' },
     action: {
-      he: "הגע לטסט עם תעודה מזהה, אישור תשלום האגרה, ומשקפיים אם אתה מרכיב.",
-      en: 'Bring photo ID, proof of fee payment, and glasses or lenses if you wear them.',
+      // ⚠️ NAMES NO DOCUMENT, and that is not vagueness. A citizen on this
+      // route has no 89 and never will, so spelling one out here would tell him
+      // to bring a document he was correctly never told to obtain — the exact
+      // bug Chaya found on 27.8. The engine already filters `requires_documents`
+      // per person, so the list is built for the reader instead of guessed here.
+      he: "הגע לטסט עם המסמכים שברשימה למטה.",
+      en: 'Come to the test with the documents listed below.',
     },
     applies_when: EVERYONE,
     sequence_position: 9,
     channel: 'test_center',
-    requires_documents: ['doc.identity', 'doc.passport', 'doc.form_89', 'doc.payment_receipt', 'doc.glasses'],
+    /**
+     * ⚠️ THE FEE RECEIPT AND THE GLASSES WERE BOTH TAKEN OFF THIS LIST ON 31.8,
+     * and for two completely different reasons. Chaya, reading the readiness
+     * report:
+     *
+     *   "i did the test and was never asked to show the payment - u do it
+     *    online and then your tester sees it and orders the test for u based on
+     *    that. and the same with the glasses - just say before the test that
+     *    the user shouldn't forget to bring the glasses if he has"
+     *
+     * ⭐ THE RECEIPT is a stale official requirement. This is her SECOND report
+     * on it — on 27.8 she said only "never heard about that", and it stayed
+     * because the gov.il list quotes it. This time she gave the mechanism: the
+     * fee is paid online and whoever books the test sees it in the system. That
+     * explains WHY nobody asks, which is a much stronger thing than not having
+     * been asked, and גיליון 13's "מי סמכותי למה" is explicit that for what
+     * actually happens at the desk, the field report is the authority. The
+     * official quote is not deleted — it stays in the evidence below, and the
+     * advice carries its own recovery in the note.
+     *
+     * ⭐ THE GLASSES were never a document at all, and that was my modelling
+     * error, not a stale source. The readiness report was asking a person to
+     * confirm that his spectacles were "in his possession and valid", which is
+     * close to meaningless. They are a thing to remember on the day, so they
+     * are a checklist line — which is exactly what `checklist` is for.
+     */
+    requires_documents: ['doc.identity', 'doc.passport', 'doc.form_89'],
     // ⚠️ The passport-number check was here AND in cc.passport_number_match,
     // which runs before this step anyway. The copy is gone.
     checklist: [
@@ -346,6 +377,21 @@ export const FROM_ZERO_STEPS: StepInput[] = [
         // permit arrives online within 72 hours. The whole reason this question
         // exists is the channel difference.
         when: NO_TEUDAT_ZEHUT,
+      },
+      {
+        // ⭐ Chaya, 31.8. A reminder on the day, not a document to verify.
+        he: "אם אתה מרכיב משקפיים או עדשות מגע — אל תשכח להביא אותם.",
+        en: 'If you wear glasses or contact lenses, do not forget to bring them.',
+      },
+    ],
+    notes: [
+      {
+        he:
+          "אגרת הטסט משולמת מקוון, ומי שקובע לך את הטסט רואה את התשלום במערכת וקובע על סמכו. אין צורך להגיע עם אישור מודפס.\n" +
+          "⚠️ הרשימה הרשמית עדיין מזכירה אישור תשלום, ולכן צילום מסך של התשלום בטלפון לא עולה כלום.",
+        en:
+          'The test fee is paid online, and whoever books your test sees the payment in the system and books it on that basis. You do not need to arrive with a printed receipt.\n' +
+          '⚠️ The official list still mentions a payment receipt, so a screenshot of the payment on your phone costs nothing.',
       },
     ],
     cost: {
@@ -370,13 +416,20 @@ export const FROM_ZERO_STEPS: StepInput[] = [
       fieldReport(
         "אי-התאמה בין מספר הדרכון שבמסמך ה-89 לדרכון שבידך מונעת את קיום הטסט, והוא נרשם ככישלון",
       ),
-      // ⚠️ Chaya, 27.8: "אישור תשלום האגרה — never heard about that."
-      // It IS on the official list, quoted above, so it stays. But her own
-      // experience is that nobody asked for it, and under her own rule that
-      // observation is evidence too. Both are shown; neither is hidden.
+      /**
+       * ⚠️ SUPERSEDES the 27.8 report, which said only "never heard about that"
+       * and left the receipt on the list. On 31.8 Chaya gave the MECHANISM —
+       * the fee is paid online and whoever books the test sees it in the system
+       * — which explains why nobody asks and makes the official list stale
+       * rather than merely inconsistently enforced.
+       *
+       * ⬜ One thing deliberately NOT resolved: she wrote "your tester", and it
+       * is not settled whether that is the מורה who books the test or the בוחן
+       * who conducts it. The note is worded so it does not have to be.
+       */
       fieldReport(
-        "בפועל לא התבקש אישור תשלום האגרה בטסט. הוא מופיע ברשימה הרשמית, ולכן עדיף להביא — אבל ייתכן שלא יבקשו",
-        { last_verified_at: '2026-08-27' },
+        "אגרת הטסט משולמת מקוון ונראית במערכת למי שקובע את הטסט; בפועל לא מתבקש אישור תשלום מודפס בטסט",
+        { reports: 2, generalizability: 'corroborated', last_verified_at: '2026-08-31' },
       ),
     ],
   },

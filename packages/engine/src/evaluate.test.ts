@@ -976,11 +976,59 @@ describe('⭐ everything shown belongs to the person shown it (27.8 sweep)', () 
     expect(card.step.action.he).toContain('חודש');
   });
 
-  it('the fee-receipt requirement keeps the official quote AND the counter-observation', () => {
-    // On the official list, yet nobody asked for it. Both shown, neither hidden.
+  /**
+   * ⭐ REWRITTEN 31.8, because the DECISION changed and the test encoded the old
+   * one. On 27.8 Chaya said only "never heard about that", so the receipt
+   * stayed on the bring-list with her observation beside it. On 31.8 she gave
+   * the mechanism — the fee is paid online and whoever books the test sees it
+   * in the system — which explains why nobody asks, and makes the official list
+   * stale rather than inconsistently enforced.
+   *
+   * ⚠️ The source is NOT deleted. That is the point of the certainty model: a
+   * field report can outrank an official page on what happens at the desk
+   * without the page being hidden.
+   */
+  it('the fee receipt is off the bring-list, and both sources are still shown', () => {
     const test = noId.roadmap.find((s) => s.step.id === 'fz.test')!;
+
+    // He is no longer told to bring it.
+    expect(test.documents.map((d) => d.id)).not.toContain('doc.payment_receipt');
+    // ⚠️ But the official quote survives, and so does the observation that beat it.
     expect(test.step.evidence.some((e) => e.quote?.includes('אישור על תשלום האגרה'))).toBe(true);
-    expect(test.step.evidence.some((e) => e.claim.includes('לא התבקש אישור תשלום'))).toBe(true);
+    expect(test.step.evidence.some((e) => e.claim.includes('לא מתבקש אישור תשלום'))).toBe(true);
+    // And he is told what IS true, with the screenshot as its own recovery.
+    expect(test.notes.some((n) => n.he.includes('מקוון'))).toBe(true);
+  });
+
+  /**
+   * ⭐ Chaya, 31.8: "the same with the glasses — just say before the test that
+   * the user shouldn't forget to bring the glasses if he has."
+   *
+   * ⚠️ They were never a document. The readiness report was asking a man to
+   * confirm his spectacles were "in your possession and valid", which is close
+   * to meaningless. A thing to remember on the day is a checklist line.
+   */
+  /**
+   * ⚠️ The scoping the CLI was ignoring until 31.8. A citizen has no permit
+   * APPOINTMENT — his permit arrives online within 72 hours — so the question
+   * is scoped to people with no teudat zehut. The engine filtered it correctly
+   * all along; the CLI was printing the raw list and asking him anyway.
+   */
+  it('a citizen is not asked about a permit appointment that does not exist for him', () => {
+    const citizen = evaluate(
+      p({ visa_type: 'citizen', has_teudat_zehut: true, teudat_zehut_confirmed: true, foreign_license: { kind: 'none' }, born: '2004-07' }),
+      TODAY,
+    );
+    const test = citizen.roadmap.find((s) => s.step.id === 'fz.test')!;
+    expect(test.checklist.some((c) => c.he.includes('היתר'))).toBe(false);
+    // ⭐ But the glasses reminder is for everybody.
+    expect(test.checklist.some((c) => c.he.includes('משקפיים'))).toBe(true);
+  });
+
+  it('⭐ the glasses are a reminder on the day, not a document to verify', () => {
+    const test = noId.roadmap.find((s) => s.step.id === 'fz.test')!;
+    expect(test.documents.map((d) => d.id)).not.toContain('doc.glasses');
+    expect(test.checklist.some((c) => c.he.includes('משקפיים'))).toBe(true);
   });
 });
 
