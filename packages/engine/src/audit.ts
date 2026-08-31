@@ -94,7 +94,7 @@ const PERSONAS: Record<string, Record<string, unknown>> = {
     teudat_zehut_confirmed: true,
     visa_valid_now: false,
     foreign_license: { kind: 'none' },
-    form_89_number: '89123456',
+    form_89_number: '891234567',
     form_89_passport_number: 'AB1234567',
     passport_number: 'CD7654321',
     born: '2005-03',
@@ -178,6 +178,71 @@ function invariants(persona: string, r: Result, raw: Record<string, unknown>): F
     }
   }
 
+  // ── 8. the readiness report must not contradict the road it was read off ──
+  //
+  // ⚠️ The report is a SUMMARY. A summary that disagrees with the detail below
+  // it is worse than no summary, because the user believes the short version.
+  if (r.readiness) {
+    const rd = r.readiness;
+    const all = [...rd.ready, ...rd.mismatched, ...rd.missing, ...rd.unconfirmed];
+
+    const seen = new Set<string>();
+    for (const item of all) {
+      if (seen.has(item.id)) add(`readiness lists ${item.id} in two buckets at once`);
+      seen.add(item.id);
+
+      if (!item.evidence.length) add(`readiness item ${item.id} cites nothing (hard rule 4)`);
+      if (item.bucket !== 'ready' && !item.action?.he?.trim()) {
+        add(`readiness item ${item.id} states a problem with no action`);
+      }
+      if (item.bucket === 'ready' && item.action) {
+        add(`readiness item ${item.id} is fine and still carries a chore`);
+      }
+      for (const need of item.needed_for) {
+        if (!ids.has(need)) add(`readiness item ${item.id} is needed for ${need}, not on his roadmap`);
+        if (doneIds.has(need)) add(`readiness item ${item.id} is needed for ${need}, already done`);
+      }
+      if (item.resolved_by && !ids.has(item.resolved_by)) {
+        add(`readiness item ${item.id} points at ${item.resolved_by}, not on his roadmap`);
+      }
+    }
+
+    // ⭐ 31.8. You never tell somebody to go and obtain a document he is holding.
+    for (const item of rd.mismatched) {
+      if (item.action?.he.includes('השג אותו')) {
+        add(`readiness tells him to OBTAIN ${item.id}, a document he is holding`);
+      }
+    }
+
+    // ⭐ A document cannot be in order while a step to repair it stands unfinished.
+    for (const step of r.roadmap) {
+      if (step.state === 'done') continue;
+      for (const id of step.step.repairs_documents) {
+        if (rd.ready.some((i) => i.id === id)) {
+          add(`readiness calls ${id} in order while ${step.step.id} is still waiting to repair it`);
+        }
+      }
+      if (step.step.produces_document && rd.ready.some((i) => i.id === step.step.produces_document)) {
+        add(`readiness calls ${step.step.produces_document} in hand while ${step.step.id} still says to obtain it`);
+      }
+    }
+
+    if (rd.first_action) {
+      const next = r.roadmap.find((s) => s.step.id === rd.first_action!.step_id);
+      if (!next) add(`first_action points at ${rd.first_action.step_id}, not on his roadmap`);
+      else if (next.state !== 'do_now') add(`first_action is "${next.state}", so he cannot actually do it`);
+    } else if (r.roadmap.some((s) => s.state === 'do_now')) {
+      add('there is an actionable step and the report names nothing to do first');
+    }
+
+    // ⚠️ 'ready' is a strong claim. It may not be made while anything is unknown.
+    if (rd.verdict === 'ready' && (rd.missing.length || rd.mismatched.length || rd.unconfirmed.length)) {
+      add('readiness says ready while something is missing, broken or unchecked');
+    }
+  } else if (!r.blocked) {
+    add('an unblocked person got no readiness report');
+  }
+
   return out;
 }
 
@@ -195,6 +260,15 @@ function visible(r: Result): string {
     clocks: r.clocks.map((c) => [c.clock.id, c.status, c.days_left]),
     standing: r.standing_conditions.map((c) => c.id),
     warnings: r.warnings.map((w) => w.field),
+    // ⚠️ Added 31.8 with the report. Without this the sweep is blind to it, and
+    // an answer that moves only the readiness buckets would be reported as
+    // thrown away — the exact false negative this tool exists to avoid.
+    readiness: r.readiness && [
+      r.readiness.verdict,
+      r.readiness.first_action?.step_id ?? null,
+      [...r.readiness.ready, ...r.readiness.mismatched, ...r.readiness.missing, ...r.readiness.unconfirmed]
+        .map((i) => [i.id, i.bucket]),
+    ],
   });
 }
 
