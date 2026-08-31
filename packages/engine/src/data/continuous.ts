@@ -138,8 +138,8 @@ export const CONTINUOUS_CONDITIONS: ContinuousConditionInput[] = [
     consequence_if_invalid: {
       // ⚠️ The most expensive trap in the research. Not "you are turned away" —
       // the test is RECORDED AS A FAILURE, with the fee paid and the wait wasted.
-      he: "⚠️ אי-התאמה מונעת את קיום הטסט, והוא נרשם ככישלון מלא — לא כ\"לא התייצב\". שילמת אגרה, המתנת, ונרשם לך כישלון על מבחן שלא התקיים. אפשר לערער, אבל הערעור חוסם הרשמה לטסט חדש עד שהוא מסתיים.",
-      en: '⚠️ A mismatch stops the test from happening, and it is recorded as a full failure, not as "did not attend". You paid the fee, you waited, and a failure is registered for a test that never took place. You can appeal, but appealing blocks you from booking a new test until it concludes.',
+      he: "⚠️ אי-התאמה מונעת את קיום הטסט, והוא נרשם ככישלון מלא ולא כ\"לא התייצב\", למרות שהמבחן לא התקיים. ניתן לערער, אך הערעור חוסם הרשמה לטסט חדש עד להכרעתו.",
+      en: '⚠️ A mismatch prevents the test from taking place, and it is recorded as a full failure rather than "did not attend", even though the test never happened. You can appeal, but an appeal blocks you from booking a new test until it is decided.',
     },
     remedy: {
       he: "חידשת דרכון? קבע תור למשרד הרישוי ועדכן את מסמך ה-89 לפני הטסט. ⚠️ מספר ה-89 עצמו קבוע ואינו משתנה — מעדכנים רק את הקישור לדרכון החדש. שים לב: העדכון מחייב תור, בניגוד להנפקה הראשונה.",

@@ -174,12 +174,13 @@ WHAT YOU MUST NEVER DO
 
 HOW TO WRITE
 - Speak directly to the person as "you".
-- Short paragraphs. No headings, no bullet lists, no markdown. Flowing prose a nervous person can read on a phone.
-- State the rule and the action. Never tell an anecdote, never speculate about what a clerk might feel.
-- Lead with where he actually stands, then the one thing to do first, then what is coming.
-- If something he is holding will not pass, say so plainly and immediately — that is what saves him the wasted trip — and follow it at once with what puts it right.
-- If money comes up, frame it as planning and progress. Never total it up into a discouraging number.
-- Encouraging, never cheerful. This is a real process and it is genuinely tiring. Respect that.
+- Short paragraphs. No headings, no bullet lists, no markdown.
+- PROFESSIONAL, SIMPLE, CLEAR. This is official guidance, not a story. State the rule and the action, and stop.
+- Do not dramatise a consequence. "The test is recorded as a failure" is the fact; "after a day off work and a queue" is colour, and it does not belong here.
+- Do not reassure, console, or comment on how the person might feel. No "don't worry", no "it's not your fault", no "this is tiring". Respect is shown by being clear and brief, not by sympathising.
+- Lead with where the person stands, then the first step, then what follows.
+- If something he holds will not be accepted, say so plainly and immediately, followed by what puts it right.
+- If money comes up, frame it as planning. Never total it into a discouraging number.
 - 150 words or fewer. This sits above a detailed roadmap he can already read; you are the orientation, not the manual.`;
 
 const PROMPT: Record<Lang, string> = {
@@ -219,8 +220,8 @@ export function deterministicSummary(result: Result, lang: Lang): string {
   if (r?.first_action) {
     parts.push(
       lang === 'he'
-        ? `הדבר הראשון לעשות: ${pick(r.first_action.title, lang)}. ${pick(r.first_action.action, lang)}`
-        : `The first thing to do: ${pick(r.first_action.title, lang)}. ${pick(r.first_action.action, lang)}`,
+        ? `השלב הראשון: ${pick(r.first_action.title, lang)}. ${pick(r.first_action.action, lang)}`
+        : `First step: ${pick(r.first_action.title, lang)}. ${pick(r.first_action.action, lang)}`,
     );
   }
 
@@ -228,7 +229,7 @@ export function deterministicSummary(result: Result, lang: Lang): string {
   const advisory = result.urgent.filter((u) => u.severity === 'advisory');
   for (const u of advisory) {
     parts.push(
-      (lang === 'he' ? 'לא עוצר אותך, אבל כדאי לדעת: ' : 'This does not stop you, but worth knowing: ') +
+      (lang === 'he' ? 'אינו עוצר אותך, אך חשוב לדעת: ' : 'This does not stop you, but is worth knowing: ') +
         pick(u.consequence, lang),
     );
   }

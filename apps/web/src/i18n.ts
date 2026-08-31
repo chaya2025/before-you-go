@@ -203,8 +203,8 @@ export const UI = {
     en: 'The documents you are holding',
   },
   docs_intro: {
-    he: 'העתק מה שכתוב, בדיוק כפי שהוא מופיע. המערכת תשווה בין המסמכים ותגיד לך מה תקין ומה לא. אין חובה למלא הכול.',
-    en: 'Copy what is written, exactly as it appears. The system compares the documents and tells you what is in order and what is not. Nothing here is required.',
+    he: 'יש להעתיק את הפרטים כפי שהם מופיעים על המסמכים. המערכת משווה ביניהם ומדווחת מה תקין ומה לא. אין חובה למלא את כל השדות.',
+    en: 'Enter the details exactly as they appear on the documents. The system compares them and reports what is in order and what is not. No field is mandatory.',
   },
   docs_privacy: {
     // ⚠️ The promise the engine actually keeps: identity.ts compares and
@@ -218,8 +218,8 @@ export const UI = {
   /* ⚠️ Names what to do, not what went wrong. The field messages already say
      what went wrong; this says why the button will not move. */
   docs_fix_first: {
-    he: 'יש שדה שצריך תיקון לפני שאפשר להמשיך. הוא מסומן למעלה.',
-    en: 'One field needs fixing before you can continue. It is marked above.',
+    he: 'יש שדה הדורש תיקון לפני המשך. הוא מסומן למעלה.',
+    en: 'A field requires correction before continuing. It is marked above.',
   },
 
   d_89_title: { he: 'מסמך 89 ("הטופס הלבן")', en: 'The 89 document (the "white form")' },
@@ -286,38 +286,38 @@ export const UI = {
   // ── the plain-language layer ─────────────────────────────────────────────
   plain_title: { he: 'במילים פשוטות', en: 'In plain words' },
   plain_intro: {
-    he: 'לסיכום קצר של כל מה שלמטה, במשפטים רגילים. התשובה עצמה כבר חושבה — זה רק ניסוח שלה.',
-    en: 'A short summary of everything below, in ordinary sentences. The answer itself is already worked out; this only puts it into words.',
+    he: 'סיכום קצר של כל מה שמופיע למטה. התשובה עצמה כבר חושבה; זהו ניסוח שלה.',
+    en: 'A short summary of everything below. The answer itself is already determined; this is a wording of it.',
   },
   plain_offline: {
     // ⚠️ Says the layer is switched off, not that something broke. Different
     // sentence, different meaning, and the user deserves the true one.
-    he: 'הניסוח האוטומטי כבוי כרגע. תקבל סיכום שנכתב מראש מתוך הכללים עצמם.',
-    en: 'Automatic wording is switched off right now. You will get a summary assembled from the rules themselves.',
+    he: 'הניסוח האוטומטי אינו פעיל. יוצג סיכום המורכב מתוך הכללים עצמם.',
+    en: 'Automatic wording is not active. A summary assembled from the rules themselves will be shown.',
   },
-  plain_ask: { he: 'הסבר לי במילים פשוטות', en: 'Explain this in plain words' },
+  plain_ask: { he: 'הצג סיכום במילים פשוטות', en: 'Show a plain-language summary' },
   /* ⚠️ Attribution, always. A person reading a government answer is entitled to
      know which sentences a language model wrote. */
   plain_by_model: {
-    he: '✍️ הניסוח נכתב על ידי מודל שפה, מתוך התשובה שכבר חושבה. הוא לא הוסיף, הסיר או שינה שום שלב — כל הפרטים המדויקים נמצאים למטה.',
-    en: '✍️ Worded by a language model from the answer already worked out. It did not add, remove or change a single step; the exact detail is below.',
+    he: '✍️ הניסוח נכתב על ידי מודל שפה על בסיס התשובה שכבר חושבה. לא נוספו, הוסרו או שונו שלבים. הפירוט המדויק מופיע למטה.',
+    en: '✍️ Worded by a language model from the answer already determined. No step was added, removed or changed. The exact detail appears below.',
   },
   plain_by_rules: {
-    he: '📋 הסיכום הזה מורכב מהכללים עצמם, בלי מודל שפה.',
-    en: '📋 This summary is assembled from the rules themselves, with no language model involved.',
+    he: '📋 סיכום זה מורכב מהכללים עצמם, ללא מודל שפה.',
+    en: '📋 This summary is assembled from the rules themselves, without a language model.',
   },
 
-  readiness_title: { he: 'מה המצב שלך', en: 'Where you stand' },
+  readiness_title: { he: 'סטטוס המסמכים', en: 'Document status' },
   r_first_action: { he: 'הדבר הראשון לעשות', en: 'The first thing to do' },
   r_why: { he: 'למה דווקא הוא', en: 'Why this one' },
   r_needed_for: { he: 'נדרש ב', en: 'Needed for' },
 
   /* ⚠️ Four headings, never merged. "לא שאלנו" and "אין לך" are different facts
      about a person, and one heading over both makes the honest one frightening. */
-  r_mismatched: { he: 'בידך, ולא יעבור כמו שהוא', en: 'In your hands, and will not pass as it is' },
-  r_missing: { he: 'עוד לא בידך', en: 'Not in your hands yet' },
-  r_unconfirmed: { he: 'לא נבדק — לא שאלנו על זה', en: 'Not checked — we did not ask' },
-  r_ready: { he: 'בידך ותקין', en: 'In your hands and in order' },
+  r_mismatched: { he: 'ברשותך, אך לא יתקבל במצבו הנוכחי', en: 'In your possession, but not acceptable as it is' },
+  r_missing: { he: 'אינו ברשותך', en: 'Not in your possession' },
+  r_unconfirmed: { he: 'טרם נבדק', en: 'Not yet checked' },
+  r_ready: { he: 'ברשותך ותקין', en: 'In your possession and in order' },
 
   roadmap_title: { he: 'הדרך שלך', en: 'Your road' },
   steps_count: { he: 'שלבים', en: 'steps' },

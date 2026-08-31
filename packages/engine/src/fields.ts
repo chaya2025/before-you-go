@@ -131,14 +131,14 @@ export function checkForm89Number(value: string): FieldProblem | null {
   if (!v) return null;
   if (/[^0-9]/.test(v)) {
     return blocking(
-      'מספר המסמך מכיל ספרות בלבד. העתק אותו בדיוק כפי שהוא מודפס.',
-      'The document number is digits only. Copy it exactly as it is printed.',
+      'מספר המסמך מורכב מספרות בלבד. יש להעתיק אותו כפי שהוא מודפס.',
+      'The document number is digits only. Enter it exactly as printed.',
     );
   }
   if (!v.startsWith('89')) {
     return blocking(
-      'מספר המסמך מתחיל תמיד בספרות 89. אם המספר שלפניך לא מתחיל כך, כנראה שזה לא מסמך ה-89.',
-      'This number always begins with the digits 89. If the one in front of you does not, it is probably not your 89 document.',
+      'מספר מסמך 89 מתחיל תמיד בספרות 89. אם המספר שלפניך אינו מתחיל כך, ייתכן שאינו מסמך ה-89.',
+      'An 89 document number always begins with the digits 89. If the number in front of you does not, it may not be your 89 document.',
     );
   }
   if (!FORM_89_NUMBER.test(v)) {
@@ -149,8 +149,8 @@ export function checkForm89Number(value: string): FieldProblem | null {
      * digit he dropped in a second.
      */
     return blocking(
-      `במסמך ה-89 יש תשע ספרות, וכאן יש ${v.length}. ודא שהעתקת את כל המספר.`,
-      `An 89 number has nine digits, and this has ${v.length}. Check you copied the whole number.`,
+      `מספר מסמך 89 מורכב מתשע ספרות. הוזנו ${v.length}.`,
+      `An 89 document number has nine digits. You entered ${v.length}.`,
     );
   }
   return null;
@@ -161,22 +161,22 @@ export function checkPassportNumber(value: string): FieldProblem | null {
   if (!v) return null;
   if (/[^A-Z0-9]/.test(v)) {
     return blocking(
-      'מספר דרכון מורכב מאותיות באנגלית ומספרות בלבד.',
-      'A passport number is made up of English letters and digits only.',
+      'מספר דרכון מורכב מאותיות לטיניות ומספרות בלבד.',
+      'A passport number contains Latin letters and digits only.',
     );
   }
   if (v.length < 5 || v.length > 20) {
     return blocking(
-      'זה לא נראה כמו מספר דרכון. העתק אותו בדיוק כפי שהוא מודפס בדרכון.',
-      'That does not look like a passport number. Copy it exactly as printed in the passport.',
+      'האורך אינו תואם מספר דרכון. יש להעתיק אותו כפי שהוא מודפס בדרכון.',
+      'That length does not match a passport number. Enter it exactly as printed in the passport.',
     );
   }
   if (!/\d/.test(v)) {
     // ⚠️ The heuristic. See PASSPORT_NUMBER above for what it is, and for what
     // it is not: a verified claim about every passport on earth.
     return blocking(
-      'מספר דרכון כולל ספרות. ודא שהעתקת את המספר עצמו ולא פרט אחר מהעמוד.',
-      'A passport number contains digits. Check you copied the number itself and not something else from the page.',
+      'מספר דרכון כולל ספרות. יש לוודא שהוזן המספר עצמו ולא פרט אחר מהעמוד.',
+      'A passport number contains digits. Check that you entered the number itself and not another detail from the page.',
     );
   }
   return null;
@@ -187,8 +187,8 @@ export function checkLatinName(value: string): FieldProblem | null {
   if (!v) return null;
   if (!LATIN_NAME.test(v)) {
     return blocking(
-      'כתוב את השם באותיות לטיניות, בדיוק כפי שהוא מודפס על המסמך. רק כך אפשר להשוות בין המסמכים.',
-      'Write the name in Latin letters, exactly as printed on the document. That is the only way the documents can be compared.',
+      'יש להזין את השם באותיות לטיניות, כפי שהוא מודפס על המסמך. ההשוואה בין המסמכים מתבצעת על סמך כתיב זה.',
+      'Enter the name in Latin letters, as printed on the document. The comparison between documents is made on that spelling.',
     );
   }
   return null;
@@ -237,14 +237,14 @@ export function checkExpiryMonth(value: string, today: IsoDate): FieldProblem | 
 
   if (months > 240) {
     return advisory(
-      'התאריך רחוק במיוחד — יותר מעשרים שנה מהיום. שווה לבדוק שהשנה הוקלדה נכון.',
-      'That date is unusually far away, more than twenty years from now. Worth checking the year was typed correctly.',
+      'התאריך רחוק ביותר מעשרים שנה מהיום. יש לוודא שהשנה הוזנה נכון.',
+      'That date is more than twenty years from now. Check that the year was entered correctly.',
     );
   }
   if (months < -600) {
     return advisory(
-      'התאריך רחוק במיוחד לאחור. שווה לבדוק שהשנה הוקלדה נכון.',
-      'That date is unusually far in the past. Worth checking the year was typed correctly.',
+      'התאריך רחוק מאוד בעבר. יש לוודא שהשנה הוזנה נכון.',
+      'That date is far in the past. Check that the year was entered correctly.',
     );
   }
   return null;

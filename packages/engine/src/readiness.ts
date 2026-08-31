@@ -125,8 +125,8 @@ function detailFor(
   switch (bucket) {
     case 'mismatched':
       return {
-        he: 'המסמך הזה בידך, אבל במצבו הנוכחי הוא לא יתקבל. זה בדיוק סוג הדבר שמתגלה בדלפק — אחרי יום חופש ואחרי תור.',
-        en: 'You are holding this one, but as it stands it will not be accepted. This is exactly the kind of thing that surfaces at the desk, after a day off work and a queue.',
+        he: 'המסמך ברשותך, אך במצבו הנוכחי לא יתקבל.',
+        en: 'You have this document, but in its current state it will not be accepted.',
       };
 
     case 'missing': {
@@ -139,30 +139,30 @@ function detailFor(
        */
       if (doc.id === 'doc.record' && facts.has_record_document === 'origin_country_does_not_issue') {
         return {
-          he: 'אמרת שמדינת המוצא אינה מנפיקה מסמך כזה. הנוהל אינו אומר מה עושים במקרה הזה, ואיננו יודעים — זו שאלה פתוחה. מה שכן ידוע: הרקורד קונה רק את הפטור ממבחן שליטה ומבדיקת ראייה. בלעדיו המסלול פתוח בפניך בדיוק כמו קודם, פשוט עם שתי הבדיקות האלה בתוכו.',
-          en: 'You said your home country does not issue one. The procedure does not say what happens then, and neither do we — it is an open question. What is known: the record only ever buys exemption from the control test and the eye test. Without it your route is open exactly as before, just with those two tests in it.',
+          he: 'ציינת שמדינת המוצא אינה מנפיקה מסמך כזה. הנוהל אינו מתייחס למקרה הזה, ואין לנו תשובה מאומתת — זו שאלה פתוחה. הידוע: הרקורד נדרש רק לצורך פטור ממבחן שליטה ומבדיקת ראייה. בלעדיו המסלול נותר פתוח, בתוספת שתי הבדיקות.',
+          en: 'You indicated that your home country does not issue one. The procedure does not address this case and we have no verified answer — it is an open question. What is known: the record is required only for exemption from the control test and the eye test. Without it the route remains open, with those two tests included.',
         };
       }
       if (doc.id === 'doc.record' && facts.has_record_document === 'in_progress') {
         return {
-          he: 'אמרת שהתחלת לטפל בזה. הוא מגיע מרשות זרה ולכן הוא הדבר האיטי ביותר בדרך שלך — שווה לרדוף אחריו עכשיו ולא בסוף.',
-          en: 'You said you have started on it. It comes from a foreign authority, which makes it the slowest thing on your road — worth chasing now rather than at the end.',
+          he: 'ציינת שהתחלת בתהליך. המסמך מונפק על ידי רשות זרה, ולכן זמן ההמתנה לו הארוך ביותר במסלול. מומלץ להמשיך לטפל בו במקביל לשלבים האחרים.',
+          en: 'You indicated that you have started the process. The document is issued by a foreign authority and has the longest waiting time in the route. Continue pursuing it alongside the other steps.',
         };
       }
       return {
-        he: 'עוד לא בידך, והדרך שלך דורשת אותו.',
-        en: 'Not in your hands yet, and your road needs it.',
+        he: 'המסמך אינו ברשותך, והמסלול דורש אותו.',
+        en: 'You do not have this document, and your route requires it.',
       };
     }
 
     case 'ready': {
       const original =
         doc.must_be_original === true
-          ? { he: ' ⚠️ להביא את המקור, לא צילום.', en: ' ⚠️ Bring the original, not a copy.' }
+          ? { he: ' יש להציג מקור, לא צילום.', en: ' Present the original, not a copy.' }
           : { he: '', en: '' };
       return {
-        he: `לפי מה שמסרת, המסמך הזה בידך ותקין.${original.he}`,
-        en: `From what you told us, you have this one and it is in order.${original.en}`,
+        he: `לפי הפרטים שמסרת, המסמך תקין.${original.he}`,
+        en: `Based on the details you gave, this document is in order.${original.en}`,
       };
     }
 
@@ -174,11 +174,11 @@ function detailFor(
        */
       return {
         he: firstNeed
-          ? `לא שאלנו על זה, ולכן איננו יודעים. זו אינה בעיה — רק דבר לוודא לפני "${firstNeed.he}".`
-          : 'לא שאלנו על זה, ולכן איננו יודעים. זו אינה בעיה — רק דבר לוודא לפני שיוצאים.',
+          ? `לא שאלנו על המסמך הזה, ולכן מצבו אינו ידוע. יש לוודא אותו לפני "${firstNeed.he}".`
+          : 'לא שאלנו על המסמך הזה, ולכן מצבו אינו ידוע. יש לוודא אותו לפני ההגעה.',
         en: firstNeed
-          ? `We did not ask, so we do not know. Not a problem — just something to check before "${firstNeed.en}".`
-          : 'We did not ask, so we do not know. Not a problem — just something to check before you go.',
+          ? `We did not ask about this document, so its status is unknown. Check it before "${firstNeed.en}".`
+          : 'We did not ask about this document, so its status is unknown. Check it before you go.',
       };
   }
 }
@@ -204,10 +204,10 @@ function actionFor(
     const issuer =
       doc.issued_by.he === '—'
         ? { he: '', en: '' }
-        : { he: ` מנפיק: ${doc.issued_by.he}.`, en: ` Issued by: ${doc.issued_by.en}.` };
+        : { he: ` גורם מנפיק: ${doc.issued_by.he}.`, en: ` Issued by: ${doc.issued_by.en}.` };
     return {
-      he: `ודא שהוא בידך ובתוקף.${issuer.he}`,
-      en: `Check you have it and that it is valid.${issuer.en}`,
+      he: `ודא שהמסמך ברשותך ובתוקף.${issuer.he}`,
+      en: `Confirm you have the document and that it is valid.${issuer.en}`,
     };
   }
 
@@ -225,14 +225,14 @@ function actionFor(
    */
   if (bucket === 'mismatched') {
     return {
-      he: 'בדוק איזה מהפרטים שמסרת כבר אינו בתוקף, וסדר אותו לפני שאתה קובע תור. ההתראות שלמעלה מפרטות מה בדיוק נשבר.',
-      en: 'Work out which of the details you gave is no longer valid and put it right before booking an appointment. The notices above spell out exactly what broke.',
+      he: 'בדוק אילו מהפרטים שמסרת אינם בתוקף, וטפל בהם לפני קביעת תור. ההתראות שלמעלה מפרטות.',
+      en: 'Check which of the details you gave are no longer valid and deal with them before booking an appointment. The notices above give the detail.',
     };
   }
 
   return {
-    he: `השג אותו מול ${doc.issued_by.he}.`,
-    en: `Obtain it from ${doc.issued_by.en}.`,
+    he: `להנפקה יש לפנות אל ${doc.issued_by.he}.`,
+    en: `To obtain it, apply to ${doc.issued_by.en}.`,
   };
 }
 
@@ -260,13 +260,13 @@ function firstAction(roadmap: RoadmapStep[]): FirstAction | null {
   let why: Text;
   if (next.step.repairs_documents.length > 0) {
     why = {
-      he: 'מסמך שאינו תקין עוצר את כל מה שבא אחריו, ולכן הוא קודם לכול — גם לשלבים שנראים דחופים יותר.',
-      en: 'A document that is not in order stops everything behind it, so it comes first, ahead of steps that look more urgent.',
+      he: 'מסמך שאינו תקין מעכב את השלבים שאחריו, ולכן יש לטפל בו ראשון.',
+      en: 'A document that is not in order holds up the steps behind it, so deal with it first.',
     };
   } else if (next.start_now) {
     why = {
-      he: 'השלב עצמו מגיע בהמשך הדרך, אבל הוא תלוי בגורם חיצוני ולוקח זמן. מי שמתחיל אותו כשמגיעים אליו — כבר איחר.',
-      en: 'The step itself comes later on the road, but it depends on somebody else and it takes time. Anyone who starts it when he reaches it has already left it too late.',
+      he: 'השלב מופיע בהמשך המסלול, אך הוא תלוי בגורם חיצוני וזמן הטיפול בו ארוך. מומלץ להתחיל אותו כעת.',
+      en: 'The step appears later in the route, but it depends on an external body and takes time. Start it now.',
     };
   } else if (dependents.length > 0) {
     why = {
@@ -275,8 +275,8 @@ function firstAction(roadmap: RoadmapStep[]): FirstAction | null {
     };
   } else {
     why = {
-      he: 'זה הראשון בדרך שלך ששום דבר לא מעכב.',
-      en: 'It is the first thing on your road that nothing is holding up.',
+      he: 'זהו השלב הראשון במסלול שאינו מעוכב.',
+      en: 'This is the first step in your route that nothing is holding up.',
     };
   }
 
@@ -370,12 +370,12 @@ export function buildReadiness(facts: Facts, roadmap: RoadmapStep[]): Readiness 
     headline = plural(
       mismatched.length,
       {
-        he: 'מסמך אחד שבידך לא יעבור בדלפק כמו שהוא. זה מה שהופך תור ליום מבוזבז, ואפשר לסדר אותו מראש.',
-        en: 'One document in your hands will not pass at the desk as it stands. That is what turns an appointment into a wasted day, and it can be sorted out beforehand.',
+        he: 'מסמך אחד שברשותך לא יתקבל במצבו הנוכחי. ניתן לטפל בכך מראש.',
+        en: 'One document you hold will not be accepted in its current state. This can be dealt with in advance.',
       },
       {
-        he: '{n} מסמכים שבידך לא יעברו בדלפק כמו שהם. זה מה שהופך תור ליום מבוזבז, ואפשר לסדר אותם מראש.',
-        en: '{n} documents in your hands will not pass at the desk as they stand. That is what turns an appointment into a wasted day, and it can be sorted out beforehand.',
+        he: '{n} מסמכים שברשותך לא יתקבלו במצבם הנוכחי. ניתן לטפל בכך מראש.',
+        en: '{n} documents you hold will not be accepted in their current state. This can be dealt with in advance.',
       },
     );
   } else if (missing.length > 0) {
@@ -383,12 +383,12 @@ export function buildReadiness(facts: Facts, roadmap: RoadmapStep[]): Readiness 
     headline = plural(
       missing.length,
       {
-        he: 'מסמך אחד עוד חסר לך. שום דבר ממה שכבר בידך אינו שבור — זו פשוט הדרך, לפי הסדר.',
-        en: 'One document is still missing. Nothing you already hold is broken — this is simply the road, in order.',
+        he: 'חסר מסמך אחד. כל מה שכבר ברשותך תקין.',
+        en: 'One document is missing. Everything you already hold is in order.',
       },
       {
-        he: '{n} מסמכים עוד חסרים לך. שום דבר ממה שכבר בידך אינו שבור — זו פשוט הדרך, לפי הסדר.',
-        en: '{n} documents are still missing. Nothing you already hold is broken — this is simply the road, in order.',
+        he: 'חסרים {n} מסמכים. כל מה שכבר ברשותך תקין.',
+        en: '{n} documents are missing. Everything you already hold is in order.',
       },
     );
   } else if (unconfirmed.length > 0) {
@@ -396,19 +396,19 @@ export function buildReadiness(facts: Facts, roadmap: RoadmapStep[]): Readiness 
     headline = plural(
       unconfirmed.length,
       {
-        he: 'מסמך אחד שהדרך שלך דורשת עוד לא נבדק, כי לא שאלנו עליו. מילוי פרטי המסמכים ייתן תשובה ברורה.',
-        en: 'One document your road needs has not been checked, because we did not ask. Filling in your document details gives a clear answer.',
+        he: 'מסמך אחד שהמסלול דורש טרם נבדק. מילוי פרטי המסמכים ייתן תשובה מלאה.',
+        en: 'One document your route requires has not been checked. Filling in your document details gives a complete answer.',
       },
       {
-        he: '{n} מסמכים שהדרך שלך דורשת עוד לא נבדקו, כי לא שאלנו עליהם. מילוי פרטי המסמכים ייתן תשובה ברורה.',
-        en: '{n} documents your road needs have not been checked, because we did not ask. Filling in your document details gives a clear answer.',
+        he: '{n} מסמכים שהמסלול דורש טרם נבדקו. מילוי פרטי המסמכים ייתן תשובה מלאה.',
+        en: '{n} documents your route requires have not been checked. Filling in your document details gives a complete answer.',
       },
     );
   } else if (ready.length > 0) {
     verdict = 'ready';
     headline = {
-      he: 'לפי מה שמסרת, כל מה שהדרך שלך דורשת נמצא אצלך ותקין.',
-      en: 'From what you told us, everything your road needs is in your hands and in order.',
+      he: 'לפי הפרטים שמסרת, כל המסמכים שהמסלול דורש ברשותך ותקינים.',
+      en: 'Based on the details you gave, every document your route requires is in your possession and in order.',
     };
   } else {
     /**
@@ -417,8 +417,8 @@ export function buildReadiness(facts: Facts, roadmap: RoadmapStep[]): Readiness 
      */
     verdict = 'unknown';
     headline = {
-      he: 'אין כרגע מסמך שממתין לך בשלבים שנותרו.',
-      en: 'Nothing on the steps you have left is waiting on a document.',
+      he: 'אין מסמכים נדרשים בשלבים שנותרו.',
+      en: 'No documents are required in the steps that remain.',
     };
   }
 
