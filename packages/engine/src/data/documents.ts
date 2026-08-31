@@ -356,41 +356,26 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
     ],
   },
 
-  {
-    id: 'doc.payment_receipt',
-    name: { he: "אישור תשלום אגרה", en: 'Proof of fee payment' },
-    applies_when: { field: 'track', op: 'eq', value: 'from_zero' },
-    issued_by: { he: "שירות התשלומים הממשלתי או סניף דואר", en: 'The government payment service or a post office' },
-    must_be_original: false,
-    notes: {
-      he: "חובה להביא לטסט. כדאי לשמור צילום של כל אישור תשלום לאורך התהליך.",
-      en: 'Required at the test. Worth keeping a photo of every payment receipt through the process.',
-    },
-    evidence: [
-      servicePage(
-        "מה להביא למבחן המעשי (טסט)",
-        "אישור על תשלום האגרה נדרש בטסט",
-        "תעודת זהות, דרכון או רישיון נהיגה · אישור על תשלום האגרה · משקפיים או עדשות מגע, אם יש צורך.",
-      ),
-    ],
-  },
-
-  {
-    id: 'doc.glasses',
-    name: { he: "משקפיים או עדשות מגע", en: 'Glasses or contact lenses' },
-    applies_when: { field: 'track', op: 'eq', value: 'from_zero' },
-    issued_by: { he: "—", en: '—' },
-    must_be_original: false,
-    notes: {
-      he: "רק למי שמרכיב. \"אם יש צורך\" — לא חובה גורפת.",
-      en: 'Only if you wear them. "If needed" — not a blanket requirement.',
-    },
-    evidence: [
-      servicePage(
-        "מה להביא למבחן המעשי (טסט)",
-        "משקפיים או עדשות נדרשים רק למי שמרכיב",
-        "משקפיים או עדשות מגע, אם יש צורך.",
-      ),
-    ],
-  },
+  /**
+   * ⚠️ doc.payment_receipt and doc.glasses were REMOVED on 31.8, and the two
+   * removals are not the same kind of thing.
+   *
+   * ⭐ THE FEE RECEIPT was a stale official requirement. gov.il still lists it,
+   * but the founder has now reported twice that nobody asks — and the second time she
+   * gave the mechanism: the fee is paid online and whoever books the test sees
+   * it in the system. גיליון 13's "מי סמכותי למה" is explicit that for what
+   * happens at the desk, the field report is the authority. Nothing was lost:
+   * the official quote is still on fz.test's evidence, and what the user is
+   * actually told now lives in a note there, with the screenshot as its
+   * built-in recovery.
+   *
+   * ⭐ THE GLASSES were never a document, and that one was my modelling error.
+   * The readiness report was asking a man to confirm that his spectacles were
+   * "in your possession and valid". They are a thing to remember on the day, so
+   * they are now a checklist line on fz.test — which is what `checklist` is for.
+   *
+   * ⚠️ Both were found by the founder reading the readiness report on the day it
+   * shipped. The report did not create either problem; it made two old ones
+   * legible for the first time by printing every required document in one list.
+   */
 ];
