@@ -135,6 +135,49 @@ function report(result: Result, today: string, withSources: boolean): string {
   urgentBlock(blocking, `❗ לטפל בזה קודם  ·  ${blocking.length}`, 'מה זה עוצר:');
   urgentBlock(advisory, `ℹ️  כדאי לדעת — לא עוצר אותך  ·  ${advisory.length}`, 'מה זה אומר: ');
 
+  // ── readiness ──────────────────────────────────────────────────────────
+  //
+  // ⭐ The answer to the question the product is named after, so it sits above
+  // the clocks and above the road. Everything below it is detail.
+  //
+  // ⚠️ The four buckets are printed under four SEPARATE headings, for the same
+  // reason blocking and advisory were split on 30.8: "we never asked about this"
+  // and "you do not have this" mean completely different things to the person
+  // reading, and one heading over both would make the honest one frightening.
+  if (result.readiness) {
+    const r = result.readiness;
+    L.push('', '');
+    rule('─');
+    L.push(`מוכנות  ·  ${r.headline.he}`);
+    rule('─');
+
+    if (r.first_action) {
+      L.push('');
+      L.push(`  ⭐ הדבר הראשון לעשות:  ${r.first_action.title.he}`);
+      for (const line of r.first_action.action.he.split('\n')) if (line) L.push(`        ${line}`);
+      L.push(`     למה דווקא הוא:  ${r.first_action.why.he}`);
+    }
+
+    const bucket = (items: typeof r.ready, heading: string) => {
+      if (!items.length) return;
+      L.push('', `  ${heading}  ·  ${items.length}`);
+      for (const item of items) {
+        L.push(`     ${item.title.he}`);
+        L.push(`        ${item.detail.he}`);
+        if (item.action) {
+          for (const line of item.action.he.split('\n')) if (line) L.push(`        ← ${line}`);
+        }
+        if (item.note) L.push(`        ${item.note.he}`);
+        L.push(`        · נדרש ב: ${item.needed_for.join(', ')}`);
+      }
+    };
+
+    bucket(r.mismatched, '⚠️  בידך, ולא יעבור כמו שהוא');
+    bucket(r.missing, '○  עוד לא בידך');
+    bucket(r.unconfirmed, '❔ לא נבדק — לא שאלנו על זה');
+    bucket(r.ready, '✅ בידך ותקין');
+  }
+
   // ── clocks ─────────────────────────────────────────────────────────────
   if (result.clocks.length) {
     L.push('', '');
@@ -272,7 +315,22 @@ function summary(result: Result, outPath: string): string {
       const days = c.days_left === null ? '' : `${c.days_left} days`;
       L.push(`  ${colour}${c.status.padEnd(12)}${RESET} ${days.padStart(11)}  ${GREY}${c.clock.id}${RESET}`);
     }
-    L.push('');
+    // ⭐ The readiness verdict, in the terminal too. A finding that cannot be
+    // seen in the tool used for reading real output does not exist — 30.8.
+    if (result.readiness) {
+      const r = result.readiness;
+      const colour =
+        r.verdict === 'mismatch' ? RED : r.verdict === 'ready' ? GREEN : r.verdict === 'gaps' ? YELLOW : GREY;
+      L.push(
+        `  ${colour}${BOLD}${r.verdict.toUpperCase().padEnd(9)}${RESET}` +
+          `${GREY}mismatched=${RESET}${r.mismatched.length}  ` +
+          `${GREY}missing=${RESET}${r.missing.length}  ` +
+          `${GREY}unconfirmed=${RESET}${r.unconfirmed.length}  ` +
+          `${GREY}ready=${RESET}${r.ready.length}  ` +
+          `${GREY}first=${RESET}${r.first_action?.step_id ?? '—'}`,
+      );
+      L.push('');
+    }
     for (const s of result.roadmap) {
       const colour = s.state === 'uncertain' ? YELLOW : s.state === 'do_now' ? GREEN : GREY;
       const flags = [
