@@ -1,6 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import { Profile, evaluate, ALL_VISA_PROFILES, LicenseClass } from '@byg/engine';
+import { explain, modelIsConfigured, type Lang } from './explain';
 
 /**
  * ============================================================================
@@ -121,6 +122,58 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
 
     return evaluate(parsed.data, asOf);
   });
+
+  /**
+   * ⭐ THE LANGUAGE LAYER. The finished decision, said in plain words.
+   *
+   * ⚠️ ITS OWN ENDPOINT, and that is a cost decision as much as a design one.
+   * Ticking a step on the roadmap re-runs the whole engine; folding this into
+   * /readiness would fire a paid model call on every checkbox click. The
+   * deterministic path stays free, and this is asked for once, on purpose.
+   *
+   * ⚠️ It takes a PROFILE and evaluates it here rather than accepting a Result
+   * from the browser. A Result posted by a client is a Result a client could
+   * have edited, and this endpoint would then be putting friendly words around
+   * a decision the engine never made.
+   *
+   * ⚠️ Never returns an error for a model failure. No key, no credit, no
+   * network — all of them come back 200 with the deterministic text and
+   * `source: "deterministic"`, because the product has to work with the model
+   * switched off.
+   */
+  app.post('/api/v1/explain', async (request, reply) => {
+    const body = request.body as Record<string, unknown> | null;
+    if (!body || typeof body !== 'object') {
+      return reply.status(400).send({ error: 'expected a JSON object' });
+    }
+
+    const { today, lang, ...profileInput } = body as { today?: string; lang?: string };
+
+    const parsed = Profile.safeParse(profileInput);
+    if (!parsed.success) {
+      return reply.status(422).send({
+        error: 'invalid profile',
+        issues: parsed.error.issues.map((i) => ({
+          field: i.path.join('.') || '(root)',
+          message: i.message,
+        })),
+      });
+    }
+
+    const asOf =
+      typeof today === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(today)
+        ? today
+        : new Date().toISOString().slice(0, 10);
+
+    const result = evaluate(parsed.data, asOf);
+    return explain(result, lang === 'en' ? 'en' : ('he' as Lang));
+  });
+
+  /**
+   * So the website can tell the difference between "the plain-language layer is
+   * switched off here" and "it failed". Different sentences belong on screen.
+   */
+  app.get('/api/v1/capabilities', async () => ({ plain_language: modelIsConfigured() }));
 
   return app;
 }

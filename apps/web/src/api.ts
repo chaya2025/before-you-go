@@ -90,3 +90,40 @@ export async function fetchReadiness(
 
   return res.json() as Promise<Result>;
 }
+
+/**
+ * ⭐ The plain-language layer. Asked for ON DEMAND, never automatically.
+ *
+ * ⚠️ This is the only paid call in the product, and every other screen must
+ * stay free. Ticking a step re-runs the engine; if this were folded into
+ * fetchReadiness it would spend money on every checkbox click.
+ *
+ * ⚠️ It sends the PROFILE, not the Result. A Result posted from a browser is a
+ * Result a browser could have edited, and the server would then be wrapping
+ * friendly words around a decision the engine never made.
+ *
+ * ⚠️ It never throws for a model failure. No key, no credit, no network — all
+ * come back 200 with the deterministic text and `source: "deterministic"`.
+ */
+export type Explanation = {
+  text: string;
+  source: 'model' | 'deterministic';
+  reason?: 'no_key' | 'call_failed' | 'empty_response';
+};
+
+export async function fetchExplanation(
+  profile: Record<string, unknown>,
+  lang: 'he' | 'en',
+  today?: string,
+): Promise<Explanation> {
+  const res = await fetch(`${BASE}/api/v1/explain`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...profile, lang, ...(today ? { today } : {}) }),
+  });
+  if (!res.ok) throw new Error(`the server returned ${res.status}`);
+  return res.json() as Promise<Explanation>;
+}
+
+/** Is the plain-language layer switched on where this is deployed? */
+export const fetchCapabilities = () => get<{ plain_language: boolean }>('/api/v1/capabilities');

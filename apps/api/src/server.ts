@@ -1,7 +1,26 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import fastifyStatic from '@fastify/static';
-import { buildApp } from './app';
+
+/**
+ * ⭐ Load .env BEFORE anything else imports explain.ts, which reads the key at
+ * module load. An import moved below this line would silently start the server
+ * with no model configured.
+ *
+ * ⚠️ Node's own loader, so there is no dotenv dependency and nothing new to
+ * audit for a file that will hold a secret. Absent .env is the NORMAL case —
+ * Days 1 to 4 ran that way — so it is caught and ignored, not reported.
+ *
+ * ⚠️ .env is in .gitignore, alongside uploads/ and user-docs/. The key never
+ * enters the repository and is never logged.
+ */
+try {
+  process.loadEnvFile(join(import.meta.dirname, '../../../.env'));
+} catch {
+  // No .env. The plain-language layer stays off; everything else works.
+}
+
+const { buildApp } = await import('./app');
 
 /**
  * Starts the API. The only job of this file.
