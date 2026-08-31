@@ -31,6 +31,8 @@
      links, not for decoration, and never for certainty. */
   --amber: #c8781e;
   --amber-soft: #fdf3e6;
+  /* Text placed ON the amber. See the note beside .btn-primary. */
+  --on-amber: #ffffff;
 
   /* ---- the certainty scale -------------------------------------------
      ⚠️ "סולם הוודאות נפרד לחלוטין מצבעי המותג, ובמכוון: הוא מידע ולא עיצוב.
@@ -195,6 +197,12 @@ select {
 }
 
 .btn {
+  /* ⚠️ Was unset, so alignment properties on button contents silently did
+     nothing. Flex here makes an icon, a label and a count sit on one baseline. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-xs);
   min-height: var(--touch);
   padding: 0 var(--gap-lg);
   border: 1px solid var(--ink);
@@ -216,7 +224,7 @@ select {
 .btn-primary {
   background: var(--amber);
   border-color: var(--amber);
-  color: #fff;
+  color: var(--on-amber);
 }
 
 .btn-quiet {
@@ -296,3 +304,317 @@ select {
 .chip-uncertain { color: var(--uncertain); }
 .chip-in_litigation { color: var(--in-litigation); }
 .chip-unchecked { color: var(--unchecked); }
+
+/* ==========================================================================
+   Night — added 31.8
+   ==========================================================================
+   ⚠️ NOT a slate-grey inversion. The whole concept in the PRD is "נייר חמים"
+   against the cold blue of a government office, and a cold dark mode would
+   throw that away after dark — which is exactly when a person is most likely
+   to be checking this from bed, worrying about tomorrow's appointment.
+
+   So night is the SAME brand: a deep green-black ground and warm paper-toned
+   text. Every token is redefined; no component is styled inside this block, so
+   nothing can end up with one theme's text on the other theme's ground.
+
+   Three states, not two: an explicit choice stamps data-theme, and the default
+   "system" setting stamps nothing at all.
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ink: #ece5d8;
+    --paper: #12211f;
+    --surface: #182b28;
+    --line: #2c433f;
+    --muted: #93a49d;
+
+    --amber: #e09a4a;
+    --amber-soft: #26201a;
+    --on-amber: #12211f;
+
+    --verified: #5fae87;
+    --likely: #cfa441;
+    --first-hand: #74aac6;
+    --uncertain: #dd8b77;
+    --in-litigation: #a98ad4;
+    --unchecked: #98a3a0;
+
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+}
+
+:root[data-theme='dark'] {
+  --ink: #ece5d8;
+  --paper: #12211f;
+  --surface: #182b28;
+  --line: #2c433f;
+  --muted: #93a49d;
+
+  --amber: #e09a4a;
+  --amber-soft: #26201a;
+  --on-amber: #12211f;
+
+  --verified: #5fae87;
+  --likely: #cfa441;
+  --first-hand: #74aac6;
+  --uncertain: #dd8b77;
+  --in-litigation: #a98ad4;
+  --unchecked: #98a3a0;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* ⚠️ Text ON the amber, as a TOKEN rather than a component override.
+   White on the light amber, the dark ground on the lifted night amber — where
+   white would be far too low a contrast. Styling .btn-primary inside a theme
+   block instead would leave it undefined in the un-stamped "system" state,
+   which is the state most viewers are actually in. */
+
+
+/* ==========================================================================
+   Type scale
+   ==========================================================================
+   ⭐ "ההיררכיה נבנית ממשקל וגודל ולא מריבוי גופנים", and Suez One is marked
+   LARGE ONLY. So the display face gets exactly ONE moment per screen — the
+   screen's own title — and everything else is Heebo by weight. Sprinkling a
+   display face is what makes a page look decorated rather than designed.
+   ========================================================================== */
+
+h1 { font-size: clamp(1.75rem, 5.5vw, 2.35rem); letter-spacing: -0.01em; }
+h2 { font-size: clamp(1.25rem, 3.6vw, 1.5rem); }
+
+h1, h2, h3 { text-wrap: balance; }
+
+/* Small uppercase label. Latin only — Hebrew has no case, so the letter-spacing
+   does the work there instead. */
+.label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ==========================================================================
+   Where you are — the four screens
+   ==========================================================================
+   ⚠️ Added 31.8. The flow is intake -> אבחון -> מסמכים -> הדרך, and until now
+   the person could not tell which of the four he was on or how many were left.
+   For an audience the PRD describes as "כבר נדחו, כבר בזבזו יום עבודה", an
+   unmarked multi-step form is its own small anxiety.
+
+   ⚠️ Marks, not numbers in a row — it must stay legible at 320px in RTL.
+   ========================================================================== */
+
+.progress {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-xs);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.progress li {
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.progress li[data-state='done'] { background: var(--muted); }
+
+/* ⭐ Amber marks where you are standing. Nowhere else. */
+.progress li[data-state='here'] { background: var(--amber); }
+
+/* ==========================================================================
+   The road
+   ==========================================================================
+   ⭐ It is called "הדרך שלך", and until now it rendered as a stack of cards.
+   A spine with a marker per step makes the metaphor real, and — the actual
+   point — makes "where am I" answerable at a glance rather than by reading.
+
+   ⚠️ Logical properties throughout, so the spine sits on the correct side when
+   the document flips to English. inset-inline-start, never left.
+   ========================================================================== */
+
+.road { position: relative; }
+
+/* The line itself. Behind the cards, and it stops at the last marker rather
+   than running past it into empty space. */
+.road::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 7px;
+  inset-block: 1.35rem;
+  width: 2px;
+  background: var(--line);
+  border-radius: 999px;
+}
+
+.road > * { position: relative; margin-inline-start: 1.75rem; }
+.road > * + * { margin-block-start: var(--gap); }
+
+/* The marker. Sits ON the spine, level with the step's title. */
+.road > [data-state]::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: -1.75rem;
+  inset-block-start: 1.35rem;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 2px solid var(--line);
+}
+
+/* ⚠️ NO transform, deliberately. translateX is a PHYSICAL move and does not
+   flip with direction, so centring the marker that way needs a second rule for
+   English and silently misaligns the moment one of them is edited.
+   The arithmetic instead: the card is inset 1.75rem (28px) from the road, so
+   -1.75rem puts the marker's inline-start edge exactly on the road's edge; a
+   16px marker then centres on the 2px spine at 8px. Logical insets flip on
+   their own, so this is correct in both directions with one rule. */
+
+.road > [data-state='done']::before {
+  background: var(--verified);
+  border-color: var(--verified);
+}
+
+/* ⭐ Amber, and only amber, marks where you are standing. The ring makes the
+   current step findable on a phone without reading a word. */
+.road > [data-state='do_now']::before {
+  background: var(--amber);
+  border-color: var(--amber);
+  box-shadow: 0 0 0 4px var(--amber-soft);
+}
+
+.road > [data-state='uncertain']::before { border-color: var(--unchecked); }
+.road > [data-state='waiting_on']::before { border-style: dashed; }
+
+/* ==========================================================================
+   Readiness buckets
+   ==========================================================================
+   ⚠️ Was inline styles in Readiness.tsx. Four states that mean four different
+   things deserve to be one system, not four hand-written borders — and a
+   bucket's colour must be settable in one place when it turns out to be wrong.
+   ========================================================================== */
+
+.bucket {
+  border-inline-start: 3px solid var(--bucket, var(--line));
+  padding-inline-start: var(--gap-sm);
+  padding-block: var(--gap-xs);
+}
+
+/* ⚠️ Named tokens, not colours written twice. The heading and the edge of a
+   bucket must never be able to disagree, and each one resolves through the
+   certainty scale so it follows the theme without a second definition. */
+:root {
+  --bucket-mismatched: var(--uncertain);
+  --bucket-missing: var(--amber);
+  --bucket-unconfirmed: var(--unchecked);
+  --bucket-ready: var(--verified);
+}
+
+.bucket-mismatched  { --bucket: var(--bucket-mismatched); }
+.bucket-missing     { --bucket: var(--bucket-missing); }
+.bucket-unconfirmed { --bucket: var(--bucket-unconfirmed); }
+.bucket-ready       { --bucket: var(--bucket-ready); }
+
+/* ==========================================================================
+   One reveal
+   ==========================================================================
+   ⚠️ ONE orchestrated moment, on the screen where the answer arrives, and
+   nothing anywhere else. The person has been filling in a form about a process
+   that has already gone wrong for him once; scattered micro-animations would
+   read as a toy, and this product must not read as a toy.
+   ========================================================================== */
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.reveal > * {
+  animation: rise 380ms cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+
+.reveal > *:nth-child(1) { animation-delay: 0ms; }
+.reveal > *:nth-child(2) { animation-delay: 60ms; }
+.reveal > *:nth-child(3) { animation-delay: 120ms; }
+.reveal > *:nth-child(4) { animation-delay: 180ms; }
+.reveal > *:nth-child(n + 5) { animation-delay: 240ms; }
+
+/* ⚠️ Not a nicety. Motion can trigger real symptoms, and this audience has no
+   spare capacity for a page that moves when they did not ask it to. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Paper
+   ==========================================================================
+   ⭐ THE ONE FEATURE THIS AUDIENCE ACTUALLY NEEDS AND NOBODY BUILDS.
+
+   They are walking into a government office. Phones die, data runs out, and a
+   clerk will not wait while a page reloads. The whole point of the product is
+   arriving prepared, so it has to be possible to arrive holding it on paper.
+
+   Everything interactive disappears; what is left is the answer and the list
+   of what to bring. Sources are kept — a person arguing with a clerk about a
+   requirement needs the clause, and that is the moment it matters most.
+   ========================================================================== */
+
+@media print {
+  :root {
+    --paper: #fff;
+    --surface: #fff;
+    --ink: #000;
+    --muted: #444;
+    --line: #999;
+    --shadow: none;
+  }
+
+  body { background: #fff; }
+
+  .page { max-width: none; padding: 0; }
+
+  /* Controls, navigation and anything that only exists to be pressed. */
+  button,
+  .btn,
+  .progress,
+  input,
+  select {
+    display: none !important;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #999;
+    /* A step must not be split across two sheets — half an instruction is
+       worse than none when you are reading it at a counter. */
+    break-inside: avoid;
+  }
+
+  /* Print the URL after every link, or a printed page loses every reference. */
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.75em;
+    color: #444;
+    word-break: break-all;
+  }
+
+  /* Folded sources are unfoldable on paper, so they are opened. */
+  details { display: block; }
+  details > summary { font-weight: 700; }
+
+  .reveal > * { animation: none; }
+}

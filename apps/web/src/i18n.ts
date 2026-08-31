@@ -29,6 +29,8 @@ export const dirFor = (lang: Lang): 'rtl' | 'ltr' => (lang === 'he' ? 'rtl' : 'l
 export const UI = {
   brand: { he: 'Before You Go', en: 'Before You Go' },
   tagline: { he: 'לדעת לפני שמגיעים', en: 'Know before you go' },
+  /* Names the progress rail for a screen reader; the marks carry no text. */
+  progress_label: { he: 'התקדמות בשאלון', en: 'Progress through the questions' },
 
   intro: {
     he: 'כמה שאלות קצרות, ואז מפת הדרכים שלך — כל השלבים לפי הסדר, מה נדרש בכל אחד, ומה כדאי להתחיל כבר עכשיו.',
