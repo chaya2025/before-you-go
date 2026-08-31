@@ -81,6 +81,32 @@ describe('⭐ what the model is allowed to see', () => {
     }
   });
 
+  /**
+   * ⭐ REGRESSION, 31.8, found by reading the first real Opus answer. The
+   * exemption exists only on the conversion route, so the engine reports
+   * 'unknown' for everyone going from zero — and sending that made the model
+   * tell a from-zero applicant that we did not know whether he was exempt from
+   * an eye test that has nothing to do with his route.
+   */
+  it('⭐ does not mention the exemption to somebody going from zero', () => {
+    expect(result.diagnosis.track).toBe('from_zero');
+    expect(payload).not.toContain('exempt from');
+  });
+
+  it('but does mention it to somebody converting, where it is real', () => {
+    const converting = evaluate(
+      Profile.parse({
+        visa_type: 'b1',
+        has_teudat_zehut: false,
+        foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 7, held_class: 'B' },
+        requested_class: 'B',
+        entered_israel: '2024-01',
+      }),
+      TODAY,
+    );
+    expect(distill(converting, 'he')).toContain('exempt from');
+  });
+
   it('carries the readiness verdict and the one thing to do first', () => {
     expect(payload).toContain('READINESS');
     expect(payload).toContain('THE ONE THING TO DO FIRST');
