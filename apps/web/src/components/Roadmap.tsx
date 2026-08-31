@@ -92,12 +92,11 @@ function Step({
   return (
     <article
       className="card stack-sm"
-      style={{
-        opacity: dimmed ? 0.62 : 1,
-        // ⭐ Amber, and only amber, marks where you are standing.
-        borderInlineStartWidth: item.state === 'do_now' ? '4px' : '1px',
-        borderInlineStartColor: item.state === 'do_now' ? 'var(--amber)' : 'var(--line)',
-      }}
+      // ⭐ The marker on the spine reads this. Amber, and only amber, marks
+      // where you are standing — now as a dot ON the road rather than an edge
+      // beside it, so it is findable without reading.
+      data-state={item.state}
+      style={{ opacity: dimmed ? 0.62 : 1 }}
     >
       <div style={{ display: 'flex', gap: 'var(--gap-sm)', alignItems: 'baseline' }}>
         <span aria-hidden="true">
@@ -326,7 +325,9 @@ export function Roadmap({
         )}
       </div>
 
-      <div className="stack">
+      {/* ⭐ A road, not a stack. The spine and its markers live in theme.css;
+          each step publishes its state so the marker can colour itself. */}
+      <div className="road">
         {result.roadmap.map((item) => (
           <Step key={item.step.id} item={item} lang={lang} onToggle={onToggle} />
         ))}
