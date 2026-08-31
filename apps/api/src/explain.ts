@@ -83,7 +83,28 @@ export function distill(result: Result, lang: Lang): string {
   L.push(`- category in the procedure: ${d.nohal_category}`);
   L.push(`- holds an Israeli teudat zehut: ${d.has_teudat_zehut}`);
   if (d.grade_ceiling) L.push(`- may be issued grades under regulations ${d.grade_ceiling.from}-${d.grade_ceiling.to}`);
-  L.push(`- exempt from the control test and eye test: ${d.exemption}`);
+  /**
+   * ⚠️ CONVERSION ONLY, and this was wrong in the first version — found by
+   * reading a real Opus answer on 31.8.
+   *
+   * The exemption is from מבחן שליטה and בדיקת ראייה, and it exists only on the
+   * conversion route; the engine therefore reports 'unknown' for everybody
+   * going from zero. Sending that unconditionally made the model write, quite
+   * faithfully, "we still do not know whether you are exempt from the eye
+   * test" to a man for whom the question does not exist. An open question
+   * invented out of a field that simply did not apply.
+   *
+   * ⭐ The model was not at fault: it reported exactly what it was given. The
+   * screen already gates this row on `track === 'conversion'`; this did not.
+   *
+   * ⚠️ And it is the SAME failure as 27.8 and 30.8 — conversion concepts
+   * leaking onto the from-zero route, where the six months abroad and the
+   * entries-and-exits form both got to first. It is this codebase's recurring
+   * bug, and it now has a test on this side too.
+   */
+  if (d.track === 'conversion') {
+    L.push(`- exempt from the control test and eye test: ${d.exemption}`);
+  }
 
   if (result.urgent.length) {
     L.push('', 'NOTICES (the severity of each is decided, do not change it)');
