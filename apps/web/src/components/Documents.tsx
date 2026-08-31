@@ -7,6 +7,7 @@ import {
   type FieldProblem,
 } from '@byg/engine';
 import { UI, pick, type Lang } from '../i18n';
+import type { Diagnosis } from '@byg/engine';
 import type { Answers } from './Intake';
 
 /**
@@ -45,8 +46,18 @@ import type { Answers } from './Intake';
 
 type Props = {
   lang: Lang;
-  /** Conversion only. There is no foreign licence to ask about otherwise. */
-  converting: boolean;
+  /**
+   * ⭐ WHICH SECTIONS TO SHOW, decided by the engine and not by this file.
+   *
+   * ⚠️ Added 31.8, found by the founder: a returning Israeli resident converting a
+   * licence was asked for his visa expiry, and for his 89 number. He has
+   * neither. The screen was showing every section to everybody and scoping only
+   * the foreign licence.
+   *
+   * The website is not allowed to know which documents belong to which person.
+   * The engine reads each document's own `applies_when` and sends the answer.
+   */
+  questions: Diagnosis['document_questions'];
   onSubmit: (documents: Answers) => void;
   onSkip: () => void;
   busy: boolean;
@@ -163,7 +174,7 @@ function Group({
   );
 }
 
-export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
+export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
 
   // ⚠️ The 89 first, deliberately. It is the document that carries the number
@@ -234,7 +245,7 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
       ...(trimmed(passportName) ? { passport_name_latin: trimmed(passportName) } : {}),
       ...(visaExpires ? { visa_expires: visaExpires } : {}),
       ...(visaValid !== null ? { visa_valid_now: visaValid } : {}),
-      ...(converting
+      ...(questions.foreign_license
         ? {
             foreign_license: {
               ...(licenceExpires ? { expires: licenceExpires } : {}),
@@ -256,6 +267,7 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
       </div>
 
       {/* ── the 89 ───────────────────────────────────────────────────────── */}
+      {questions.form_89 && (
       <Group title={t('d_89_title')} help={t('d_89_help')}>
         <Field label={t('d_89_number')} problem={problems.form_89_number} lang={lang}>
           <input
@@ -292,8 +304,10 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
           />
         </Field>
       </Group>
+      )}
 
       {/* ── the passport ─────────────────────────────────────────────────── */}
+      {questions.passport && (
       <Group title={t('d_passport_title')} help={t('d_passport_help')}>
         <Field label={t('d_passport_number')} problem={problems.passport_number} lang={lang}>
           <input
@@ -330,6 +344,7 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
           />
         </Field>
       </Group>
+      )}
 
       {/* ── the visa ─────────────────────────────────────────────────────── */}
       {/*
@@ -345,6 +360,7 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
         as a fallback for the man who does not have the document in front of
         him, and most people never see it.
       */}
+      {questions.visa && (
       <Group title={t('d_visa_title')} help={t('d_visa_help')}>
         <Field label={t('d_visa_expires')} problem={problems.visa_expires} lang={lang}>
           <input
@@ -388,9 +404,10 @@ export function Documents({ lang, converting, onSubmit, onSkip, busy }: Props) {
           </div>
         )}
       </Group>
+      )}
 
       {/* ── the foreign licence, conversion only ─────────────────────────── */}
-      {converting && (
+      {questions.foreign_license && (
         <Group title={t('d_licence_title')}>
           <Field label={t('d_licence_expires')} problem={problems.licence_expires} lang={lang}>
             <input

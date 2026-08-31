@@ -280,10 +280,14 @@ export function App() {
         />
       )}
 
+      {/* ⭐ The engine decides which document sections to ask about. This was
+          `converting={track === 'conversion'}` — the website's last piece of
+          domain knowledge, and the reason a returning Israeli resident was
+          asked for a visa and an 89 he does not have. Found by the founder, 31.8. */}
       {screen === 'documents' && result && (
         <Documents
           lang={lang}
-          converting={result.diagnosis.track === 'conversion'}
+          questions={result.diagnosis.document_questions}
           onSubmit={submitDocuments}
           onSkip={() => setScreen('roadmap')}
           busy={busy}
