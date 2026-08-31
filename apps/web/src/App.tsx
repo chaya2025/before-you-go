@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { Result } from '@byg/engine';
-import { fetchStatuses, fetchReadiness, fetchCapabilities, ValidationError, type StatusesResponse } from './api';
+import type { Result, Process } from '@byg/engine';
+import { fetchStatuses, fetchReadiness, fetchCapabilities, fetchProcesses, ValidationError, type StatusesResponse } from './api';
 import { UI, pick, dirFor, type Lang } from './i18n';
 import { Intake, type Answers } from './components/Intake';
 import { Diagnosis, Blocked } from './components/Diagnosis';
@@ -9,6 +9,7 @@ import { Roadmap } from './components/Roadmap';
 import { Urgent } from './components/Urgent';
 import { Readiness } from './components/Readiness';
 import { PlainWords } from './components/PlainWords';
+import { Welcome } from './components/Welcome';
 
 /**
  * ============================================================================
@@ -41,11 +42,17 @@ import { PlainWords } from './components/PlainWords';
  */
 const SCREENS = ['intake', 'diagnosis', 'documents', 'roadmap'] as const;
 
-type Screen = (typeof SCREENS)[number];
+/**
+ * ⚠️ 'welcome' is deliberately OUTSIDE that list. The rail measures progress
+ * through the questions, and the landing page is before the questions start —
+ * counting it would tell a person he is a fifth of the way through a form he
+ * has not begun.
+ */
+type Screen = (typeof SCREENS)[number] | 'welcome';
 
 export function App() {
   const [lang, setLang] = useState<Lang>('he');
-  const [screen, setScreen] = useState<Screen>('intake');
+  const [screen, setScreen] = useState<Screen>('welcome');
   const [statuses, setStatuses] = useState<StatusesResponse | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   /** Kept so ticking a step can re-run the engine with the same answers. */
@@ -55,6 +62,8 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   /** Whether the plain-language layer is switched on where this is deployed. */
   const [plainLanguage, setPlainLanguage] = useState(false);
+  /** What the system can check readiness for. Served, never hardcoded here. */
+  const [processes, setProcesses] = useState<Process[]>([]);
 
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
 
@@ -78,6 +87,9 @@ export function App() {
     fetchCapabilities()
       .then((c) => setPlainLanguage(c.plain_language))
       .catch(() => setPlainLanguage(false));
+    fetchProcesses()
+      .then((p) => setProcesses(p.processes))
+      .catch(() => setProcesses([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -146,7 +158,9 @@ export function App() {
     setResult(null);
     setAnswers(null);
     setDone([]);
-    setScreen('intake');
+    // ⚠️ Back to the landing page, not into the visa question. Starting over
+    // should not drop somebody straight back into the coldest screen.
+    setScreen('welcome');
     setError(null);
   }
 
@@ -214,6 +228,7 @@ export function App() {
           an unmarked multi-step form is its own small anxiety.
           Marks rather than numbered labels, so it stays legible at 320px and
           mirrors correctly in both directions. */}
+      {screen !== 'welcome' && (
       <ol className="progress" aria-label={t('progress_label')}>
         {SCREENS.map((s, i) => {
           const at = SCREENS.indexOf(screen);
@@ -223,6 +238,11 @@ export function App() {
           );
         })}
       </ol>
+      )}
+
+      {screen === 'welcome' && (
+        <Welcome processes={processes} lang={lang} onStart={() => setScreen('intake')} />
+      )}
 
       {screen === 'intake' && (
         <p className="muted">
