@@ -7,6 +7,7 @@ import { Diagnosis, Blocked } from './components/Diagnosis';
 import { Documents } from './components/Documents';
 import { Roadmap } from './components/Roadmap';
 import { Urgent } from './components/Urgent';
+import { Readiness } from './components/Readiness';
 
 /**
  * ============================================================================
@@ -246,6 +247,11 @@ export function App() {
               {/* ⚠️ Above the road, not beside it. A roadmap built on a lapsed
                   visa describes a process he cannot currently start. */}
               <Urgent issues={result.urgent} lang={lang} />
+              {/* ⭐ Between the notices and the road. The notices say what is in
+                  the way; this says whether what he is CARRYING will work, and
+                  names the one thing to do next. The road is the detail under
+                  it. */}
+              <Readiness result={result} lang={lang} />
               <Roadmap result={result} lang={lang} onToggle={toggleStep} />
               <button className="btn btn-quiet" onClick={restart}>
                 {t('start_over')}
