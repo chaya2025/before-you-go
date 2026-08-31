@@ -172,6 +172,35 @@ export type Diagnosis = {
   exemption: 'exempt' | 'tests_required' | 'unknown';
   /** Everything he left unanswered that the roadmap actually wanted. */
   unanswered: ConditionField[];
+
+  /**
+   * ⭐ WHICH DOCUMENT QUESTIONS ARE WORTH ASKING THIS PERSON.
+   *
+   * ⚠️ Added 31.8, found by Chaya: "if I choose a Toshav Israel that has a
+   * driving license... when the input documents field shows the visa, he
+   * doesn't have a visa if he's Israeli."
+   *
+   * She was right, and it was worse than she saw — the same screen also asked
+   * him for his 89 number, a document he was correctly never told to obtain.
+   * The form was showing every section to everybody and scoping only the
+   * foreign licence.
+   *
+   * ⭐ THE FIX IS ARCHITECTURAL, not four `if`s in a form. The website is not
+   * allowed to know which documents belong to which person — that is the rule
+   * that has held since 27.8 and the one the ANCHOR_FIELD_BY_CATEGORY bug on
+   * 30.8 was about. So the ENGINE decides, by asking each document its own
+   * `applies_when`, and the form renders what it is told.
+   *
+   * ⚠️ Unknown means ASK. For a question the arithmetic is the opposite of a
+   * requirement: asking one he does not need costs him a moment, while skipping
+   * one he does need loses the answer entirely and silently.
+   */
+  document_questions: {
+    form_89: boolean;
+    passport: boolean;
+    visa: boolean;
+    foreign_license: boolean;
+  };
 };
 
 /**

@@ -388,6 +388,15 @@ function buildRoadmap(facts: Facts, profile: Profile): RoadmapStep[] {
  * away — worse than not asking, because a user reasonably concludes that an
  * answer which changed nothing did not matter.
  */
+/**
+ * Does this document apply to him at all? Unknown counts as yes — see the note
+ * on Diagnosis.document_questions for why the default flips for a QUESTION.
+ */
+function documentApplies(id: string, facts: Facts): boolean {
+  const doc = ALL_DOCUMENTS.find((d) => d.id === id);
+  return doc ? evaluateCondition(doc.applies_when, facts) !== false : false;
+}
+
 function urgentIssues(
   facts: Facts,
   ceiling: { from: number; to: number } | null,
@@ -733,6 +742,33 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
       : {}),
     exemption: 'unknown',
     unanswered: [],
+
+    /**
+     * ⭐ Which document questions this person should be asked. Read off the
+     * documents' OWN conditions, so the form can never drift from the rules —
+     * add a document with an `applies_when` and the question follows it.
+     *
+     * ⚠️ `!== false` throughout: unknown means ASK. Skipping a question we are
+     * unsure about loses the answer silently, which is the expensive direction
+     * here — the opposite default from a requirement, and for the same reason.
+     */
+    document_questions: {
+      form_89: documentApplies('doc.form_89', facts),
+      passport: documentApplies('doc.passport', facts),
+      /**
+       * ⚠️ The WIDER of the two conditions, deliberately. doc.visa is scoped to
+       * people with no teudat zehut, but Chaya widened cc.visa_valid on 30.8 to
+       * cover א/5 as well — he holds a teudat zehut and his card rests on the
+       * visa behind it. Asking only where the document applies would skip
+       * exactly the person she widened the rule for.
+       */
+      visa:
+        documentApplies('doc.visa', facts) ||
+        ALL_CONTINUOUS_CONDITIONS.some(
+          (c) => c.id === 'cc.visa_valid' && evaluateCondition(c.applies_when, facts) !== false,
+        ),
+      foreign_license: facts.track !== 'from_zero',
+    },
   };
 
   if (hit) {
