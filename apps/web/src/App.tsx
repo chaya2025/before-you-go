@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Result } from '@byg/engine';
-import { fetchStatuses, fetchReadiness, ValidationError, type StatusesResponse } from './api';
+import { fetchStatuses, fetchReadiness, fetchCapabilities, ValidationError, type StatusesResponse } from './api';
 import { UI, pick, dirFor, type Lang } from './i18n';
 import { Intake, type Answers } from './components/Intake';
 import { Diagnosis, Blocked } from './components/Diagnosis';
@@ -8,6 +8,7 @@ import { Documents } from './components/Documents';
 import { Roadmap } from './components/Roadmap';
 import { Urgent } from './components/Urgent';
 import { Readiness } from './components/Readiness';
+import { PlainWords } from './components/PlainWords';
 
 /**
  * ============================================================================
@@ -45,6 +46,8 @@ export function App() {
   const [done, setDone] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Whether the plain-language layer is switched on where this is deployed. */
+  const [plainLanguage, setPlainLanguage] = useState(false);
 
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
 
@@ -63,6 +66,11 @@ export function App() {
     fetchStatuses()
       .then(setStatuses)
       .catch(() => setError(t('error_offline')));
+    // ⚠️ Asked, not assumed. "Switched off here" and "it failed" are different
+    // sentences and the user gets the true one.
+    fetchCapabilities()
+      .then((c) => setPlainLanguage(c.plain_language))
+      .catch(() => setPlainLanguage(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -246,6 +254,10 @@ export function App() {
             <>
               {/* ⚠️ Above the road, not beside it. A roadmap built on a lapsed
                   visa describes a process he cannot currently start. */}
+              {/* ⭐ Above everything, and it REPLACES nothing. If the model
+                  ever wrote something wrong, every exact step is still below
+                  it, unedited. */}
+              <PlainWords profile={answers ? { ...answers, completed_steps: done } : null} lang={lang} available={plainLanguage} />
               <Urgent issues={result.urgent} lang={lang} />
               {/* ⭐ Between the notices and the road. The notices say what is in
                   the way; this says whether what he is CARRYING will work, and

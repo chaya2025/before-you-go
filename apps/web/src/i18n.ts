@@ -283,6 +283,30 @@ export const UI = {
   // ⚠️ Chrome only. Every sentence ABOUT his documents is written in the engine,
   // in both languages, next to the rule it came from — so the website cannot
   // soften a warning or harden a maybe.
+  // ── the plain-language layer ─────────────────────────────────────────────
+  plain_title: { he: 'במילים פשוטות', en: 'In plain words' },
+  plain_intro: {
+    he: 'לסיכום קצר של כל מה שלמטה, במשפטים רגילים. התשובה עצמה כבר חושבה — זה רק ניסוח שלה.',
+    en: 'A short summary of everything below, in ordinary sentences. The answer itself is already worked out; this only puts it into words.',
+  },
+  plain_offline: {
+    // ⚠️ Says the layer is switched off, not that something broke. Different
+    // sentence, different meaning, and the user deserves the true one.
+    he: 'הניסוח האוטומטי כבוי כרגע. תקבל סיכום שנכתב מראש מתוך הכללים עצמם.',
+    en: 'Automatic wording is switched off right now. You will get a summary assembled from the rules themselves.',
+  },
+  plain_ask: { he: 'הסבר לי במילים פשוטות', en: 'Explain this in plain words' },
+  /* ⚠️ Attribution, always. A person reading a government answer is entitled to
+     know which sentences a language model wrote. */
+  plain_by_model: {
+    he: '✍️ הניסוח נכתב על ידי מודל שפה, מתוך התשובה שכבר חושבה. הוא לא הוסיף, הסיר או שינה שום שלב — כל הפרטים המדויקים נמצאים למטה.',
+    en: '✍️ Worded by a language model from the answer already worked out. It did not add, remove or change a single step; the exact detail is below.',
+  },
+  plain_by_rules: {
+    he: '📋 הסיכום הזה מורכב מהכללים עצמם, בלי מודל שפה.',
+    en: '📋 This summary is assembled from the rules themselves, with no language model involved.',
+  },
+
   readiness_title: { he: 'מה המצב שלך', en: 'Where you stand' },
   r_first_action: { he: 'הדבר הראשון לעשות', en: 'The first thing to do' },
   r_why: { he: 'למה דווקא הוא', en: 'Why this one' },
