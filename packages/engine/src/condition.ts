@@ -98,6 +98,19 @@ export const ConditionField = z.enum([
   'passport_license_name_match',
   'months_until_license_expiry',
   'foreign_license_language',
+
+  /**
+   * ⭐ Does he physically hold the 89?
+   *
+   * ⚠️ Was an inline `Boolean(...)` inside buildRoadmap, where only that one
+   * function could see it. The readiness report needs the same conclusion —
+   * "is this document in his hand?" — so it becomes a fact, computed once.
+   *
+   * ⚠️ It is true or 'unknown', and NEVER false. Not typing an 89 number is not
+   * evidence that he has none; he may simply have skipped the screen. Rendering
+   * that silence as "you do not have it" is principle 8 pointed at a document.
+   */
+  'holds_form_89',
 ]);
 export type ConditionField = z.infer<typeof ConditionField>;
 
@@ -204,6 +217,14 @@ export type Facts = {
 
   /** Drives doc.translation, which existed with no way to know it applied. */
   foreign_license_language: 'he' | 'en' | 'other' | 'unknown';
+
+  /**
+   * ⭐ Transcribing anything off the 89 proves he is holding one. You cannot
+   * know your 89 number without the document in front of you.
+   *
+   * ⚠️ true or 'unknown' only. Silence is not a "no" — see the enum above.
+   */
+  holds_form_89: Trilean;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

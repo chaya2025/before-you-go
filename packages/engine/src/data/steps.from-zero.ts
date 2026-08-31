@@ -55,6 +55,7 @@ export const FROM_ZERO_STEPS: StepInput[] = [
   {
     id: 'fz.doc_89',
     track: 'from_zero',
+    produces_document: 'doc.form_89',
     title: { he: "הוצאת מספר מזהה 89 (\"הטופס הלבן\")", en: 'Get your 89 identity number (the "white form")' },
     action: {
       he:
