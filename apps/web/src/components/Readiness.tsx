@@ -21,14 +21,11 @@ import { UI, pick, type Lang } from '../i18n';
  */
 
 /** The visual weight of each bucket. Only a real problem gets the alert colour. */
-const BUCKET: Record<
-  ReadinessBucket,
-  { mark: string; colour: string; key: keyof typeof UI }
-> = {
-  mismatched: { mark: '⚠️', colour: 'var(--uncertain)', key: 'r_mismatched' },
-  missing: { mark: '○', colour: 'var(--amber)', key: 'r_missing' },
-  unconfirmed: { mark: '❔', colour: 'var(--unchecked)', key: 'r_unconfirmed' },
-  ready: { mark: '✅', colour: 'var(--verified)', key: 'r_ready' },
+const BUCKET: Record<ReadinessBucket, { mark: string; key: keyof typeof UI }> = {
+  mismatched: { mark: '⚠️', key: 'r_mismatched' },
+  missing: { mark: '○', key: 'r_missing' },
+  unconfirmed: { mark: '❔', key: 'r_unconfirmed' },
+  ready: { mark: '✅', key: 'r_ready' },
 };
 
 function Item({
@@ -43,14 +40,10 @@ function Item({
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
   const meta = BUCKET[item.bucket];
 
+  // ⚠️ The colour comes from the stylesheet, not from here. Four states that
+  // mean four different things are one system, settable in one place.
   return (
-    <div
-      style={{
-        borderInlineStart: `3px solid ${meta.colour}`,
-        paddingInlineStart: 'var(--gap-sm)',
-        paddingBlock: 'var(--gap-xs)',
-      }}
-    >
+    <div className={`bucket bucket-${item.bucket}`}>
       <div style={{ fontWeight: 500 }}>
         <span aria-hidden="true">{meta.mark}</span> {pick(item.title, lang)}
       </div>
@@ -119,7 +112,7 @@ function Bucket({
         onClick={() => setOpen((v) => !v)}
       >
         <span aria-hidden="true">{BUCKET[bucket].mark}</span>{' '}
-        <strong>{t(BUCKET[bucket].key)}</strong>{' '}
+        <strong style={{ color: `var(--bucket-${bucket})` }}>{t(BUCKET[bucket].key)}</strong>{' '}
         <span className="num">{items.length}</span>
       </button>
       {open && (

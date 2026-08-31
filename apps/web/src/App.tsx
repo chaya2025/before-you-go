@@ -34,7 +34,14 @@ import { PlainWords } from './components/PlainWords';
  *   next step for him."
  */
 
-type Screen = 'intake' | 'diagnosis' | 'documents' | 'roadmap';
+/**
+ * ⚠️ ONE list, in order, so the flow and the progress rail cannot disagree.
+ * A second hardcoded array in the header would drift the first time a screen
+ * is added, and the rail would quietly point at the wrong mark.
+ */
+const SCREENS = ['intake', 'diagnosis', 'documents', 'roadmap'] as const;
+
+type Screen = (typeof SCREENS)[number];
 
 export function App() {
   const [lang, setLang] = useState<Lang>('he');
@@ -200,6 +207,23 @@ export function App() {
         </div>
       </header>
 
+      {/* ⭐ Where you are, in four marks. Added 31.8.
+          The flow is intake → אבחון → מסמכים → הדרך, and until now a person
+          could not tell which of the four he was on, or how many were left.
+          For an audience the PRD describes as "כבר נדחו, כבר בזבזו יום עבודה",
+          an unmarked multi-step form is its own small anxiety.
+          Marks rather than numbered labels, so it stays legible at 320px and
+          mirrors correctly in both directions. */}
+      <ol className="progress" aria-label={t('progress_label')}>
+        {SCREENS.map((s, i) => {
+          const at = SCREENS.indexOf(screen);
+          const state = i < at ? 'done' : i === at ? 'here' : 'ahead';
+          return (
+            <li key={s} data-state={state} aria-current={state === 'here' ? 'step' : undefined} />
+          );
+        })}
+      </ol>
+
       {screen === 'intake' && (
         <p className="muted">
           {t('intro')} <strong>{t('privacy')}</strong>
@@ -251,13 +275,17 @@ export function App() {
           {result.blocked ? (
             <Blocked result={result} lang={lang} onBack={restart} />
           ) : (
-            <>
+            /* ⭐ ONE orchestrated reveal, on the screen where the answer
+               arrives, and nothing else in the product moves. This is the
+               moment the person filled in the whole form for. Scattered
+               animation elsewhere would make it read as a toy, and a tool for
+               people who have already been failed by an office must not. */
+            <div className="stack reveal">
+              {/* ⭐ First, and it REPLACES nothing. If the model ever wrote
+                  something wrong, every exact step is still below it. */}
+              <PlainWords profile={answers ? { ...answers, completed_steps: done } : null} lang={lang} available={plainLanguage} />
               {/* ⚠️ Above the road, not beside it. A roadmap built on a lapsed
                   visa describes a process he cannot currently start. */}
-              {/* ⭐ Above everything, and it REPLACES nothing. If the model
-                  ever wrote something wrong, every exact step is still below
-                  it, unedited. */}
-              <PlainWords profile={answers ? { ...answers, completed_steps: done } : null} lang={lang} available={plainLanguage} />
               <Urgent issues={result.urgent} lang={lang} />
               {/* ⭐ Between the notices and the road. The notices say what is in
                   the way; this says whether what he is CARRYING will work, and
@@ -268,7 +296,7 @@ export function App() {
               <button className="btn btn-quiet" onClick={restart}>
                 {t('start_over')}
               </button>
-            </>
+            </div>
           )}
         </>
       )}
