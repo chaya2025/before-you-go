@@ -78,10 +78,16 @@ describe('the 48-hour window is the shortest thing in the system', () => {
   it('is a choice of delivery method, and the step lists the options', () => {
     // Principle 21: state the rule and the action. What happens if he misses it
     // is not documented anywhere, so the copy does not speculate about it.
-    const step = ALL_STEPS.find((s) => s.id === 'fz.duplicate')!;
+    const step = ALL_STEPS.find((s) => s.id === 'duplicate.in_person')!;
     expect(step.action.he).toContain('בחר איך לקבל את הרישיון');
     expect(step.action.he).toContain('איסוף עצמי');
     expect(step.action.he).toContain('שליח עד הבית');
+    // ⭐ And the online channel offers the same delivery choice, because the
+    // choice is made at fastdl either way. Only the request differs.
+    const online = ALL_STEPS.find((s) => s.id === 'duplicate.online')!;
+    expect(online.action.he).toContain('איסוף עצמי');
+    expect(online.channel).toBe('online');
+    expect(online.requires_appointment).toBe(false);
     expect(clock('clock.duplicate_delivery_choice').on_expiry.he).toContain('לא ניתן לבחור');
   });
 });

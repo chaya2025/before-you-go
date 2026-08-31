@@ -210,8 +210,8 @@ export const FIX_STEPS: StepInput[] = [
     notes: [
       {
         // ⭐ The reason this exists at all, spelled out for the person it hits.
-        he: "⭐ זה קורה הכי הרבה כששם נכתב במקור באלפבית אחר — קירילי, אמהרי, ערבי, סיני. כל מסמך מתעתק אותו בנפרד, והתוצאות לא זהות. זו לא טעות שלך.",
-        en: '⭐ This happens most often when a name was originally written in another alphabet: Cyrillic, Amharic, Arabic, Chinese. Each document transliterates it separately and the results do not match. It is not a mistake you made.',
+        he: "הפרש כזה נפוץ כששם נכתב במקור באלפבית אחר — קירילי, אמהרי, ערבי או סיני. כל מסמך מתעתק אותו בנפרד, והתוצאות אינן זהות.",
+        en: 'A difference like this is common when a name was originally written in another alphabet: Cyrillic, Amharic, Arabic or Chinese. Each document transliterates it separately and the results do not match.',
       },
     ],
     evidence: [

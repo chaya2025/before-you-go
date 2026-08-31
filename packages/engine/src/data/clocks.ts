@@ -126,7 +126,7 @@ export const CLOCKS: ClockInput[] = [
     // ⚠️ Hidden until he tells us the card never arrived and he has started the
     // duplicate route. Until then it is a countdown on a thing that has not
     // happened, sitting next to two that have.
-    activated_by: 'fz.duplicate',
+    activated_by: ['duplicate.online', 'duplicate.in_person'],
     anchor: 'duplicate_fee_paid',
     /**
      * ⚠️ The shortest window in the entire research. Nothing else is close.
