@@ -170,6 +170,55 @@ describe('what his own road already says', () => {
     expect(bucketOf(r, 'doc.form_89')).toBe('ready');
   });
 
+  /**
+   * ⭐⭐ REGRESSION, 31.8, and the rule generalised beyond the 89.
+   *
+   * ⚠️ Found by reading a real Opus answer, not by any test. A man who answered
+   * that he HAS his רקורד was told, as the first thing to do, to go and obtain
+   * his רקורד — while the same result granted him the test exemption, which he
+   * can only have BECAUSE he has it. Two contradictory beliefs about one
+   * document, exactly the shape of the 30.8 obtain-and-update bug.
+   *
+   * Chaya's rule was never about the 89. It is about documents: a step that
+   * exists to obtain one is done when the document is held.
+   */
+  it('⭐ saying you hold the רקורד finishes the step that obtains it', () => {
+    const converting = {
+      visa_type: 'b1',
+      has_teudat_zehut: false,
+      teudat_zehut_confirmed: true,
+      foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 7, held_class: 'B', language: 'en' },
+      requested_class: 'B',
+      entered_israel: '2024-01',
+    };
+    const holdsIt = evaluate(p({ ...converting, has_record_document: 'yes' }), TODAY);
+    const record = holdsIt.roadmap.find((s) => s.step.id === 'cv.record');
+
+    expect(record?.state).toBe('done');
+    expect(bucketOf(holdsIt.readiness!, 'doc.record')).toBe('ready');
+    // ⚠️ And it must not be what he is told to do first.
+    expect(holdsIt.readiness!.first_action?.step_id).not.toBe('cv.record');
+
+    // ⚠️ The engine may not believe two things at once: it granted the
+    // exemption BECAUSE he has this, so it cannot also demand he obtain it.
+    expect(holdsIt.diagnosis.exemption).toBe('exempt');
+  });
+
+  it('⚠️ but not having it, or not being asked, leaves the step standing', () => {
+    const converting = {
+      visa_type: 'b1',
+      has_teudat_zehut: false,
+      teudat_zehut_confirmed: true,
+      foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 7, held_class: 'B', language: 'en' },
+      requested_class: 'B',
+      entered_israel: '2024-01',
+    };
+    for (const answer of ['no', 'in_progress', 'unknown']) {
+      const r = evaluate(p({ ...converting, has_record_document: answer }), TODAY);
+      expect(r.roadmap.find((s) => s.step.id === 'cv.record')?.state).not.toBe('done');
+    }
+  });
+
   /** Transcribing the number proves it just as well as ticking the box. */
   it('typing what is printed on it does the same', () => {
     const r = readinessOf(p({ ...fromZero, form_89_number: '891234567' }));

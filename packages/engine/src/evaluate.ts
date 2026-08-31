@@ -282,9 +282,35 @@ function buildRoadmap(facts: Facts, profile: Profile): RoadmapStep[] {
    * He came to check his documents and the system worked out where he already
    * stands.
    */
-  if (facts.holds_form_89 === true) {
-    done.add('fz.doc_89');
-    done.add('cv.doc_89');
+  /**
+   * ⭐⭐ AND ON 31.8 IT WAS GENERALISED, because it had only ever been true of
+   * ONE document.
+   *
+   * ⚠️ Found by reading a real Opus answer. A man who answered that he HAS his
+   * רקורד was told, as the very first thing to do, to go and obtain his רקורד —
+   * while the same result granted him the test exemption, which he can only
+   * have BECAUSE he has it. The engine believed both at once.
+   *
+   * That is precisely the bug Chaya found on 30.8, on a different document. The
+   * rule she gave was never about the 89; it is about documents. So it is now
+   * written once, over the data:
+   *
+   *   a step that exists to OBTAIN a document is done when the document is HELD.
+   *
+   * `produces_document` already says which step obtains what, and `held_when`
+   * already says how we know he holds it. Nothing is special-cased, and the
+   * next document to gain a `held_when` gets this for free.
+   *
+   * ⚠️ `=== true` only. 'unknown' must never mark a step done — that would
+   * delete a step from the road of somebody who simply was not asked.
+   */
+  for (const step of ALL_STEPS) {
+    const produced = step.produces_document;
+    if (!produced) continue;
+    const doc = ALL_DOCUMENTS.find((d) => d.id === produced);
+    if (doc?.held_when && evaluateCondition(doc.held_when, facts) === true) {
+      done.add(step.id);
+    }
   }
 
   // Steps that plainly do not apply are dropped. Steps we CANNOT PLACE are kept.
