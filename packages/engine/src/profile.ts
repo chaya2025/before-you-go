@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { FORM_89_NUMBER, PASSPORT_NUMBER, LATIN_NAME, stripPunctuation } from './fields';
 
 /**
  * ============================================================================
@@ -98,6 +99,34 @@ export const LicenseClass = z.enum([
 ]);
 export type LicenseClass = z.infer<typeof LicenseClass>;
 
+/**
+ * ⚠️ Case-INSENSITIVE on purpose, even though the form types in capitals.
+ *
+ * The form uppercases as he types, because that is how a passport prints it and
+ * it makes the field legible. But identity.ts has always normalised case before
+ * comparing, so a lowercase number was never a bug — and rejecting one at the
+ * API would be strictness with no benefit, on a field where being turned away
+ * costs a person his answer.
+ */
+const PassportNumber = z
+  .string()
+  .trim()
+  .refine(
+    (v) => PASSPORT_NUMBER.test(stripPunctuation(v)),
+    'A passport number is letters and digits, and contains at least one digit',
+  );
+
+/**
+ * ⚠️ Latin letters, and it has to be. namesAgree reduces a name to [a-z], so a
+ * name typed in Hebrew or Cyrillic becomes an empty string and the comparison
+ * silently does nothing at all. Refusing it is honest; accepting it and not
+ * checking is not.
+ */
+const LatinName = z
+  .string()
+  .trim()
+  .regex(LATIN_NAME, 'Write the name in Latin letters, as printed on the document');
+
 export const ForeignLicense = z.object({
   /**
    * ⚠️ 'idp_only' is its own answer, not a kind of licence.
@@ -157,7 +186,7 @@ export const ForeignLicense = z.object({
    * The holder's name as printed on the licence, in Latin letters.
    * Compared against the passport. See PASSPORT_NAME below for why.
    */
-  name_latin: z.string().min(1).optional(),
+  name_latin: LatinName.optional(),
 });
 export type ForeignLicense = z.infer<typeof ForeignLicense>;
 
@@ -275,8 +304,28 @@ export const Profile = z.object({
   // At MVP these same fields become the output of a scan. Nothing here is
   // thrown away when OCR arrives; the typing is replaced, not the model.
 
-  /** The number on the 89 document. Begins 89, and never changes once issued. */
-  form_89_number: z.string().min(1).optional(),
+  /**
+   * The number on the 89 document. Begins 89, and never changes once issued.
+   *
+   * ⚠️ VALIDATED HERE, not only in the form. Chaya, 31.8: "a user can just input
+   * anything not relevant and it will go through normally and give wrong
+   * result." The form is not a security boundary — anything it refuses must be
+   * refused here too, or the same garbage reaches the engine through the API.
+   *
+   * ⭐ And this field above all, because of what it does downstream:
+   * transcribing an 89 is treated as PROOF that he holds one, which marks the
+   * "go and get your 89" step done. Typing `i dont know` used to delete a real
+   * step from a real roadmap — the wasted trip this product exists to prevent,
+   * caused by a text box.
+   */
+  form_89_number: z
+    .string()
+    .trim()
+    .refine(
+      (v) => FORM_89_NUMBER.test(stripPunctuation(v)),
+      'An 89 document number is digits only and begins with 89',
+    )
+    .optional(),
 
   /**
    * ⭐ THE FIELD THIS WHOLE FEATURE EXISTS FOR.
@@ -293,10 +342,10 @@ export const Profile = z.object({
    * ⚠️ Nobody renews a passport and thinks it touches their driving licence.
    * That is precisely why the system has to notice instead of asking him to.
    */
-  form_89_passport_number: z.string().min(1).optional(),
+  form_89_passport_number: PassportNumber.optional(),
 
   /** The number in the passport he holds TODAY. Compared, never shown. */
-  passport_number: z.string().min(1).optional(),
+  passport_number: PassportNumber.optional(),
 
   passport_expires: YearMonthOrUnknown.default('unknown'),
 
@@ -314,10 +363,10 @@ export const Profile = z.object({
    * ask. What we CAN do is compare the documents he is holding against each
    * other, which is a real check and was never being run.
    */
-  passport_name_latin: z.string().min(1).optional(),
+  passport_name_latin: LatinName.optional(),
 
   /** The name printed on the 89, if it carries one. Compared to the passport. */
-  form_89_name_latin: z.string().min(1).optional(),
+  form_89_name_latin: LatinName.optional(),
 
   // ── mid-process entry (F0 feature 4.7) ───────────────────────────────────
   /**
@@ -395,6 +444,40 @@ export function checkProfile(profile: Profile, today: string): ProfileWarning[] 
       message_en: 'You said the visa is valid, but the expiry month you gave has already passed. If you renewed it, update the date.',
     });
   }
+
+  /**
+   * ⭐ THE DOCUMENT DATES, which nothing was checking at all until 31.8.
+   *
+   * ⚠️ `type="month"` in the form carried no bounds, so `9999-12` was accepted
+   * in silence and every piece of arithmetic downstream was quietly wrong. This
+   * catches the same thing on the API path, where there is no form at all.
+   *
+   * ⚠️ A WARNING, never a rejection. F1 validation 2 — "המערכת מבקשת אישור
+   * במקום לחסום". A long-expired passport is a REAL answer and exactly the
+   * situation this product exists to catch, so only the implausible far ends
+   * are flagged, and even then he is asked rather than blocked.
+   */
+  const year = Number(thisMonth.slice(0, 4));
+  const implausible = (value: string | 'unknown', field: string, label_he: string, label_en: string) => {
+    if (value === 'unknown') return;
+    const y = Number(value.slice(0, 4));
+    if (y > year + 20 || y < year - 50) {
+      warnings.push({
+        field,
+        message_he: `${label_he} רחוק במיוחד. שווה לבדוק שהשנה הוקלדה נכון.`,
+        message_en: `${label_en} is unusually far off. Worth checking the year was typed correctly.`,
+      });
+    }
+  };
+
+  implausible(profile.passport_expires, 'passport_expires', 'תוקף הדרכון שמסרת', 'The passport expiry you gave');
+  implausible(profile.visa_expires, 'visa_expires', 'תוקף האשרה שמסרת', 'The visa expiry you gave');
+  implausible(
+    profile.foreign_license.expires,
+    'foreign_license.expires',
+    'תוקף הרישיון הזר שמסרת',
+    'The foreign licence expiry you gave',
+  );
 
   return warnings;
 }
