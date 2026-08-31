@@ -25,6 +25,23 @@ const FOREIGN_RESIDENT: Condition = {
   value: 'toshav_medinat_chutz',
 };
 
+/**
+ * ⭐ `held_when` / `broken_when` — added 31.8 for the readiness report.
+ *
+ * `applies_when` answers "does this person need this document?".
+ * These two answer "and does he have it, and will it work?".
+ *
+ * ⚠️ Three answers, and the third is the one that matters. A document whose
+ * `held_when` comes back 'unknown' is NOT missing — nobody asked. It is reported
+ * as unconfirmed and stays visibly separate from the things he genuinely lacks,
+ * because telling a man he is missing a passport we never asked about is
+ * principle 8 ("אל תציגי 'לא ידוע' כ'לא'") pointed at his documents.
+ *
+ * ⚠️ Documents nothing in the profile can speak to declare NEITHER. The glasses
+ * and the payment receipt are honestly unconfirmed and it would be a lie to
+ * compute anything else about them.
+ */
+
 export const DOCUMENTS: RequiredDocumentInput[] = [
   {
     /**
@@ -42,6 +59,18 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
     notes: {
       he: "תעודת זהות, דרכון או רישיון נהיגה — כל אחד מהם מתקבל.",
       en: 'A teudat zehut, a passport or a driving licence — any of the three is accepted.',
+    },
+    /**
+     * Any ONE of the three is enough, which is what `any` is for: one true
+     * settles it, and only if none is true and something is unanswered does the
+     * whole thing come back unknown.
+     */
+    held_when: {
+      any: [
+        { field: 'has_teudat_zehut', op: 'eq', value: true },
+        { field: 'passport_valid_now', op: 'eq', value: true },
+        { field: 'foreign_license_valid', op: 'eq', value: true },
+      ],
     },
     evidence: [
       official(
@@ -64,6 +93,15 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
       he: "⚠️ לאומי בלבד — רישיון בין-לאומי (IDP) אינו מתקבל להמרה. ⚠️ ובתוקף, לא רק קיים.",
       en: '⚠️ National only. An International Driving Permit is not accepted for conversion. ⚠️ And valid, not merely in your possession.',
     },
+    /** He said he holds a national licence. That is the document itself. */
+    held_when: { field: 'foreign_license_kind', op: 'eq', value: 'national' },
+    /**
+     * ⭐ The quiet one. cc.foreign_license_valid names the scenario: the רקורד
+     * takes months and the licence can expire while he waits for it, so he
+     * arrives holding a document that is no longer convertible. It is his
+     * central document and nothing was checking it at the summary level.
+     */
+    broken_when: { field: 'foreign_license_valid', op: 'eq', value: false },
     evidence: [
       nohal(
         "פרק \"מסמכים נדרשים\" — מופיע בשלוש הרשימות",
@@ -88,6 +126,35 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
       he: "האשרה חייבת להיות בתוקף ברגע ההגשה — הזכאות נבחנת ליום ההגשה ולא ליום הכניסה.",
       en: 'The visa must be valid at the moment you submit. Eligibility is judged on the day you apply, not the day you entered.',
     },
+    /**
+     * ⚠️ Validity, not possession. Everyone holding this visa document holds a
+     * passport; what decides whether it works at the desk is the expiry date he
+     * transcribed. An unanswered expiry is genuinely unconfirmed.
+     */
+    held_when: {
+      all: [
+        { field: 'passport_valid_now', op: 'eq', value: true },
+        { field: 'visa_valid_now', op: 'eq', value: true },
+      ],
+    },
+    /**
+     * ⚠️ BOTH halves, and the visa half was missing until the readiness report
+     * was read on 31.8. This document is not "a passport"; it is named
+     * "דרכון עם אשרת שהייה בתוקף", and its own note says the visa must be valid
+     * at the moment of submission. Checking only the passport produced a screen
+     * that listed the visa as broken and, four lines below, this document as in
+     * order — two contradictory statements about the same piece of paper.
+     *
+     * ⭐ Exactly the shape of the bug the founder found on 30.8, where one roadmap
+     * told her both to obtain her 89 and to update it. A document is only in
+     * order when everything its own definition requires is in order.
+     */
+    broken_when: {
+      any: [
+        { field: 'passport_valid_now', op: 'eq', value: false },
+        { field: 'visa_valid_now', op: 'eq', value: false },
+      ],
+    },
     evidence: [
       nohal(
         "פרק \"מסמכים נדרשים\" ← \"תושב מדינת חוץ\", ס' 2",
@@ -107,6 +174,8 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
       he: "נדרשת בכל פעולה מול משרד הרישוי, לא רק בהגשה הראשונה.",
       en: 'Required at every interaction with the licensing office, not only at first submission.',
     },
+    held_when: { field: 'visa_valid_now', op: 'eq', value: true },
+    broken_when: { field: 'visa_valid_now', op: 'eq', value: false },
     evidence: [
       nohal(
         "ס' 1(ג)",
@@ -125,6 +194,20 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
     notes: {
       he: "דף A4 מודפס — מסמך נפרד שאפשר לאבד, לא חותמת בדרכון. ⚠️ המספר משמש אך ורק במשרד הרישוי: לא בביטוח לאומי, לא ברשות האוכלוסין, ולא בקופת חולים. ⭐ אין לו תאריך תפוגה: הדבר היחיד שיכול לשבור אותו הוא חידוש דרכון, שמשנה את מספר הדרכון שמודפס עליו.",
       en: 'A printed A4 sheet, a separate document you can lose, not a stamp in your passport. ⚠️ The number is used only at the licensing office: not at National Insurance, the Population Authority, or your health fund. ⭐ It has no expiry date: the only thing that can break it is renewing your passport, which changes the passport number printed on it.',
+    },
+    /** ⭐ You cannot know your 89 number without the document in front of you. */
+    held_when: { field: 'holds_form_89', op: 'eq', value: true },
+    /**
+     * ⭐⭐ THE MISMATCH THIS WHOLE PRODUCT IS BUILT AROUND, said once at the
+     * summary level. The 89 carries no expiry — the founder checked hers on 30.8 —
+     * so a stale passport number and a divergent name are the ONLY two ways it
+     * can break. This condition is therefore the complete list.
+     */
+    broken_when: {
+      any: [
+        { field: 'passport_89_number_match', op: 'eq', value: false },
+        { field: 'passport_89_name_match', op: 'eq', value: false },
+      ],
     },
     evidence: [
       servicePage(
@@ -150,6 +233,22 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
         "מסמך ה-89 אינו נושא תאריך תפוגה — הוא נושא את מספר ה-89 ואת מספר הדרכון בלבד",
         { last_verified_at: '2026-08-30' },
       ),
+      /**
+       * ⭐ ⬜ CLOSED 31.8, one day after it was opened. The input rule needed a
+       * length and the נוהל does not give one, so the first version capped it
+       * arbitrarily and said in writing that the cap was an anti-paste guard
+       * and NOT a claim about the document. The founder then read a real 89:
+       *
+       *   "there are 9 digits in the 89"
+       *
+       * ⭐ Which is also what you would expect from the other direction: the
+       * number substitutes for a teudat zehut number, and an Israeli identity
+       * number is nine digits. Two independent reasons, one answer.
+       */
+      fieldReport(
+        "מספר מסמך ה-89 בן תשע ספרות, ומתחיל בספרות 89",
+        { last_verified_at: '2026-08-31' },
+      ),
     ],
   },
 
@@ -166,6 +265,14 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
       he: "נדרש רק למי שרוצה פטור ממבחן שליטה ומבדיקת ראייה. מתקבל בדוא\"ל, אז אפשר להתחיל מרחוק היום. ⚠️ חייב לציין את מועד הוצאת הרישיון הקבוע — לא את מועד הנפקת הכרטיס הנוכחי.",
       en: 'Only needed if you want exemption from the control test and eye test. Accepted by email, so you can start remotely today. ⚠️ It must state when your PERMANENT licence was issued, not when your current card was printed.',
     },
+    /**
+     * ⚠️ The only document the user is asked about directly, and the only one
+     * with four possible answers rather than three. "I have started on it" and
+     * "my country does not issue one" both come back as not-held here, and the
+     * readiness report words them differently — the bucket is the same, the
+     * advice is not.
+     */
+    held_when: { field: 'has_record_document', op: 'eq', value: 'yes' },
     evidence: [
       nohal(
         "פרק \"מסמכים נדרשים\" — מופיע בשלוש הרשימות",

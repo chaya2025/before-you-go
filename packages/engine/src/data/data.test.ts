@@ -36,6 +36,7 @@ const veteranConverter: Facts = {
   passport_license_name_match: 'unknown',
   months_until_license_expiry: 'unknown',
   foreign_license_language: 'unknown',
+  holds_form_89: 'unknown',
 };
 
 /**

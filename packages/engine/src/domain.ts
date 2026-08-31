@@ -111,6 +111,41 @@ export const Step = z.object({
   requires_documents: z.array(z.string()).default([]),
 
   /**
+   * ⭐ The document id this step exists in order to OBTAIN.
+   *
+   * ⚠️ Added 31.8 for the readiness report, and it is one declaration rather
+   * than a rule in the engine. The report has to answer "which of the documents
+   * my route needs am I actually missing?", and the honest source of that answer
+   * is the road itself: if "go and get your 89" is standing on his roadmap and
+   * is not done, then he does not have an 89. The engine reads that instead of
+   * inferring absence from a form field he may simply have skipped.
+   *
+   * Same discipline as `exemption`, which is read off the roadmap rather than
+   * recomputed: the summary can never disagree with the steps beneath it.
+   */
+  produces_document: z.string().min(1).optional(),
+
+  /**
+   * ⭐ The document id this step exists in order to REPAIR.
+   *
+   * ⚠️ Separate from `produces_document`, and collapsing the two would produce
+   * a real lie. fix.name_on_license is on the road of a man who IS holding his
+   * foreign licence — the spelling of his name on it is what needs sorting out.
+   * Reading that step as "he does not have a licence" would file his central
+   * document under missing and tell him to go and obtain one he is carrying.
+   *
+   * obtains → missing. repairs → mismatched. Different bucket, different advice.
+   *
+   * ⚠️ A LIST, because one step really can put more than one document right.
+   * Renewing a lapsed visa repairs both `doc.visa` and `doc.passport` — the
+   * second is defined as "דרכון עם אשרת שהייה בתוקף", so the visa is half of it.
+   * With a single id, the readiness report had no step to point at for the
+   * passport and fell through to its generic advice, which told a man holding a
+   * perfectly good passport to go and obtain one. Found reading real output, 31.8.
+   */
+  repairs_documents: z.array(z.string().min(1)).default([]),
+
+  /**
    * Where he actually goes to do it. Added 2026-08-26 at the founder's request:
    * a roadmap that names a step and then makes him search for the form is
    * doing half the job.
@@ -405,6 +440,37 @@ export const RequiredDocument = z.object({
   must_be_original: z.union([z.boolean(), z.literal('unknown')]).default('unknown'),
   accepts_email: z.boolean().default(false),
   notes: Text.optional(),
+
+  /**
+   * ⭐ How we know he is holding this one.
+   *
+   * ⚠️ Added 31.8 with the readiness report, and it is deliberately DATA. "A
+   * typed 89 number proves an 89" and "a valid visa proves the visa" are claims
+   * about documents, so they belong beside the document with its sources, not in
+   * a switch statement in the evaluator that nobody can trace.
+   *
+   * Reads as a Trilean, and all three answers mean something different:
+   *   true     — he has it
+   *   false    — he told us he does not
+   *   unknown  — ⚠️ NOBODY ASKED. Never rendered as "missing".
+   *
+   * Omitted entirely on documents nothing in the profile can speak to (the
+   * glasses, the payment receipt). Those stay honestly unconfirmed.
+   */
+  held_when: Condition.optional(),
+
+  /**
+   * ⭐ He has it, and it will not work at the desk.
+   *
+   * The expensive case, and the whole reason this product exists: an 89 whose
+   * passport number went stale, a visa that lapsed, a foreign licence that
+   * expired while he waited for the רקורד. A document in this state is worse
+   * than one he knows he is missing, because he thinks he is ready.
+   *
+   * ⚠️ Checked BEFORE held_when, so a broken document is never reported as ready.
+   */
+  broken_when: Condition.optional(),
+
   evidence: Evidence,
 });
 export type RequiredDocument = z.infer<typeof RequiredDocument>;
