@@ -12,8 +12,14 @@ Chaya's flagship build: an AI agent that verifies whether a **non-citizen reside
 
 This is simultaneously her portfolio proof and a real product intended for real users.
 
+## Where This Lives (moved 2026-09-15)
+`C:\Users\1\Desktop\personal-os\projects\ai-readiness-agent\`, inside personal-os, so a session on this build already has the whole vault, her memories and every skill. Moved from `Desktop\ai-readiness-agent\`; verified identical (707 files, 385 tests, audit output unchanged). Its own git repo, gitignored by personal-os. Two ways in, both fine:
+- `claude` from **personal-os** (her default now): this file loads when you work on files in here. Its rules still win over the personal-os CLAUDE.md inside this folder.
+- `claude` from **this folder**: this repo's `.claude/settings.json` hook loads soul.md + status + tracker at start, and the personal-os CLAUDE.md loads above it.
+
 ## Read These Before Working
 Knowledge lives in the vault, not here. At session start, read:
+- `C:\Users\1\Desktop\personal-os\vault\projects\ai-readiness-agent\decisions\decision-log.md` — **every decision from day zero, with the why.** Read before proposing anything that might re-open one.
 - `C:\Users\1\Desktop\personal-os\vault\projects\ai-readiness-agent\status.md` — current phase, deadlines, risks
 - `C:\Users\1\Desktop\personal-os\vault\projects\ai-readiness-agent\concept.md` — full concept + architecture
 - `C:\Users\1\Desktop\personal-os\vault\projects\ai-readiness-agent\tracker.md` — task list
@@ -50,6 +56,9 @@ She is learning by building (FastAPI ~35% complete). **Do not hand her code she 
 ## After Meaningful Work
 Update `personal-os\vault\projects\ai-readiness-agent\status.md` and append to `personal-os\vault\log.md`. If it would be lost when the session ends, write it down.
 
+## Every Decision Gets Logged (she asked for this, 2026-09-15)
+**The same turn anything is decided**, append it to `personal-os\vault\projects\ai-readiness-agent\decisions\decision-log.md`: next D-number, date, the decision, **why** (her words when she gave them), who decided. Format and rules: `decisions\README.md`. Never rewrite an old entry; supersede it. Her corrections of Nick, and her overruling her own earlier calls, are decisions and get named as hers. Anything decided under uncertainty also goes into `decisions\open-questions.md`. The record lives in the vault, never in this repo.
+
 ## At The End Of Every Build Day (she asked for this, 2026-08-25)
 Write a build log to `personal-os\vault\projects\ai-readiness-agent\build-log\YYYY-MM-DD.md`. It must contain:
 1. **What was built, in plain words.** No jargon without a definition. She is new to development.
@@ -58,4 +67,4 @@ Write a build log to `personal-os\vault\projects\ai-readiness-agent\build-log\YY
 4. **⭐ The study list** — every new concept or tool that appeared in code today, in three tiers, each with one line on what it is and where it sits in *her* project. This is the point of the whole document: she goes and researches these so she can defend the build.
 5. What was not done, and what's next.
 
-Then add a pointer line to `vault\index.md`.
+Then add a pointer line to `vault\index.md`, and make sure every item in section 3 also has its D-number in `decisions\decision-log.md`.
