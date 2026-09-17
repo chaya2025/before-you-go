@@ -9,7 +9,7 @@
 # ⭐ Why Render and not Vercel, which was the first instinct:
 #
 # This app is ONE Node server that serves the API and the website together —
-# a deliberate design, and apprunner.yaml states the reason: one origin, so no
+# a deliberate design, for one reason: one origin, so no
 # CORS and no API address to keep in sync. Vercel does not run servers; it runs
 # static files plus serverless functions, so going there means restructuring
 # the API into a function AND getting a bundler to compile @byg/engine, whose
@@ -21,8 +21,7 @@
 # "skip devDependencies" — where BOTH vite (which builds the site) and tsx
 # (which runs the server) live. The build would fail with "command not found".
 # The Dockerfile controls its own environment, so that trap cannot fire.
-# The same warning is written into apprunner.yaml; it has bitten this project
-# once already.
+# It bit this project once already, on the earlier AWS App Runner attempt.
 
 services:
   - type: web

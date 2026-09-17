@@ -1,10 +1,9 @@
 # =============================================================================
-# FALLBACK ONLY. The live deploy uses apprunner.yaml, not this file.
+# How Before You Go is packaged. Render builds and runs this file (render.yaml).
 # =============================================================================
 #
-# Kept because App Runner's managed Node runtime is a convenience, not a
-# guarantee. If it ever refuses this project, `docker build .` produces the same
-# thing with no dependency on AWS at all, and runs identically on any host.
+# One container, one Node server serving both the website and the API. Nothing
+# here depends on a particular host: `docker build .` runs the same anywhere.
 #
 # A Dockerfile is a recipe for a whole computer: which Linux, which Node, which
 # files, which command. That is why "works on my machine" stops being a problem.
