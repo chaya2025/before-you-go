@@ -532,6 +532,8 @@ export const UI = {
   },
   before: { he: 'לפני', en: 'before' },
   waiting_for: { he: 'ממתין ל', en: 'Waiting for' },
+  /** On a step the order will not let him start yet, in place of the tick. */
+  locked_until: { he: 'אפשר לסמן רק אחרי:', en: 'Can be ticked only after:' },
   check_first: { he: 'לבדוק לפני', en: 'Check before this' },
   /**
    * ⭐ Replaces the standing conditions that used to be reprinted in full
