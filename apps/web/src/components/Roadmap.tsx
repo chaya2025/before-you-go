@@ -100,6 +100,7 @@ function Step({
   lang,
   titleOf,
   onToggle,
+  pending,
 }: {
   item: RoadmapStep;
   index: number;
@@ -107,6 +108,8 @@ function Step({
   /** An id turned back into the name of the step a person can see. */
   titleOf: (id: string) => string;
   onToggle?: (id: string, done: boolean) => void;
+  /** The id of the step whose tick is in flight, if any. */
+  pending?: string | null;
 }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
   const [open, setOpen] = useState(false);
@@ -145,15 +148,25 @@ function Step({
       {/* ⭐ Ticking a step re-runs the whole engine. That is what makes the map
           move with him instead of describing a stranger — and it is what starts
           the clocks that only exist once he is in a particular situation. */}
+      {/* ⚠️ The line saying the engine is running sits at the top of the page.
+          Photographed (evidence/m5-working), the tick that starts it is often
+          a screen and a half below it: he presses, and the only acknowledgement
+          is somewhere he cannot see. So the row he pressed says it too, and
+          takes no second press while the first is still in flight. */}
       {onToggle && (
-        <label className="step-tick">
+        <label className={`step-tick${pending === step.id ? ' step-tick-busy' : ''}`}>
           <input
             type="checkbox"
             checked={item.state === 'done'}
+            disabled={Boolean(pending)}
             onChange={(e) => onToggle(step.id, e.target.checked)}
           />
           <span className="small muted">
-            {item.state === 'done' ? t('marked_done') : t('mark_done')}
+            {pending === step.id
+              ? t('updating_road')
+              : item.state === 'done'
+                ? t('marked_done')
+                : t('mark_done')}
           </span>
         </label>
       )}
@@ -190,7 +203,13 @@ function Step({
         </p>
       ))}
 
-      {item.start_now && (
+      {/* ⚠️ `start_now` is the engine saying what KIND of step this is — one
+          that takes months and must be begun early — and it says it whatever
+          state the step is in. The sentence the website builds out of it is
+          an instruction for today. Found by ticking the whole road: every
+          finished step still carried an amber "התחל כבר היום". A step he has
+          already done is not a step to start. */}
+      {item.start_now && item.state !== 'done' && (
         <p className="flag">
           <span>
             <strong>{t('start_now')}</strong> — {t('start_now_why')}
@@ -386,16 +405,26 @@ export function Roadmap({
   result,
   lang,
   onToggle,
+  pending,
 }: {
   result: Result;
   lang: Lang;
   onToggle?: (id: string, done: boolean) => void;
+  /** The id of the step whose tick is in flight, if any. */
+  pending?: string | null;
 }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
 
   const now = result.roadmap.filter((s) => s.state === 'do_now');
   const done = result.roadmap.filter((s) => s.state === 'done');
   const later = result.roadmap.filter((s) => s.state !== 'do_now' && s.state !== 'done');
+
+  /* ⚠️ Two different empty "now" parts, and they were getting the same
+     sentence. Nothing startable WITH steps remaining means he is waiting on
+     something; nothing startable with NOTHING remaining means he is finished.
+     The old copy told a man who had ticked every step to go and open a part
+     of the page that is not there. */
+  const allDone = result.roadmap.length > 0 && done.length === result.roadmap.length;
 
   /* ⚠️ The number is the step's place in the WHOLE road, not in its part.
      Numbering each part from one would tell a person on step nine that he is
@@ -425,6 +454,7 @@ export function Roadmap({
           lang={lang}
           titleOf={titleOf}
           onToggle={onToggle}
+          pending={pending}
         />
       ))}
     </div>
@@ -443,7 +473,7 @@ export function Roadmap({
             {list(now)}
           </>
         ) : (
-          <p className="road-part-note">{t('road_empty_now')}</p>
+          <p className="road-part-note">{t(allDone ? 'road_all_done' : 'road_empty_now')}</p>
         )}
       </section>
 
@@ -461,7 +491,7 @@ export function Roadmap({
       {/* Nothing is hidden — principle 20 — a finished step is simply not what
           he came here to read, so it folds. */}
       {done.length > 0 && (
-        <details className="road-part road-part-done">
+        <details className="road-part road-part-done" open={allDone}>
           <summary>
             {t('road_done')} · <span className="num">{done.length}</span>
           </summary>

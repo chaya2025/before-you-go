@@ -1510,9 +1510,9 @@ h1, h2, h3 { text-wrap: balance; }
    ========================================================================== */
 
 /* ⭐ The shape of the form, before the form. Not a spinner: a spinner says
-   "something is happening somewhere". These say "the questions are coming,
-   and there are about four of them" — and the page does not jump, because the
-   real fields land in the same places. */
+   "something is happening somewhere". These say "a question is coming, and
+   it is answered by tapping one of a list" — the same card, the same heading,
+   the same 58px rows. */
 .skel-form { border-color: var(--line-soft); }
 
 .skel {
@@ -1525,7 +1525,10 @@ h1, h2, h3 { text-wrap: balance; }
 
 .skel-title { height: 1.35rem; width: 62%; border-radius: 6px; }
 .skel-line { height: 0.8rem; width: 84%; border-radius: 6px; }
-.skel-field { height: var(--touch); width: 100%; }
+
+/* ⚠️ 58px and var(--radius-sm) are .option's own numbers, not chosen here.
+   If the option row ever changes height, this changes with it. */
+.skel-option { min-height: 58px; width: 100%; }
 
 @keyframes skel {
   from { background-position: 100% 0; }
@@ -1539,6 +1542,28 @@ h1, h2, h3 { text-wrap: balance; }
 @media (prefers-reduced-motion: reduce) {
   .skel { background: #efe9de; }
 }
+
+/* The same admission, on the row he actually pressed. The dot is the one from
+   the line at the top of the page, so the two read as one event. */
+.step-tick-busy > span { color: var(--amber-ink); }
+
+.step-tick-busy > span::after {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-inline-start: 0.4rem;
+  border-radius: 50%;
+  background: var(--amber);
+  animation: pulse 1.1s var(--ease) infinite;
+}
+
+/* ⚠️ Still says it, still greys the box, just without the animation. */
+@media (prefers-reduced-motion: reduce) {
+  .step-tick-busy > span::after { opacity: 1; transform: none; }
+}
+
+.step-tick input:disabled { cursor: progress; }
 
 /* A quiet line, in the flow, saying the engine is running again. It replaces
    nothing and hides nothing: what he was reading stays exactly where it was
@@ -2230,6 +2255,17 @@ h1, h2, h3 { text-wrap: balance; }
   .clock-row,
   .note-list li,
   .first-action { break-inside: avoid; }
+
+  /* ⚠️ Found on the second real print: "עכשיו" sat alone at the foot of page
+     two and its one step went to page three. A heading whose section starts
+     on the next sheet is a heading about nothing. It goes where its steps go. */
+  .road-part-head,
+  .road-part-note { break-after: avoid; }
+
+  /* ⚠️ Same print, last page: two bullets of the standing conditions came out
+     alone on a twelfth sheet, with the heading that says what they are back
+     on page eleven. The whole note is short and means nothing in halves. */
+  .note { break-inside: avoid; }
 
   /* The asphalt lane, the dashed centre line and the diamond markers are ink
      this sheet cannot spend: on a home printer they are a grey smear behind
