@@ -119,6 +119,34 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * ⭐ FOUND WHEN THE ROAD BECAME ROWS, 22.9. A folded <details> does not
+   * print: the browser leaves its contents out of the printed document
+   * entirely. Fifteen of the sixteen steps are folded by default now, so the
+   * sheet a person carries into the office — the whole reason this product
+   * has a print view — would have come out with one step on it and no warning.
+   *
+   * Everything opens for the print and goes back to how he left it after,
+   * including a fold he opened himself.
+   */
+  useEffect(() => {
+    let reclose: Element[] = [];
+    const openAll = () => {
+      reclose = [...document.querySelectorAll('details:not([open])')];
+      for (const d of reclose) d.setAttribute('open', '');
+    };
+    const restore = () => {
+      for (const d of reclose) d.removeAttribute('open');
+      reclose = [];
+    };
+    window.addEventListener('beforeprint', openAll);
+    window.addEventListener('afterprint', restore);
+    return () => {
+      window.removeEventListener('beforeprint', openAll);
+      window.removeEventListener('afterprint', restore);
+    };
+  }, []);
+
   /** The visa list comes from the API, so this app holds no domain knowledge. */
   useEffect(() => {
     fetchStatuses()
