@@ -58,10 +58,7 @@ export function PlainWords({
   }
 
   return (
-    <section
-      className="card stack-sm"
-      style={{ borderInlineStartWidth: '4px', borderInlineStartColor: 'var(--amber)' }}
-    >
+    <section className="letter">
       <h2>{t('plain_title')}</h2>
 
       {!state && !failed && (
@@ -83,7 +80,7 @@ export function PlainWords({
 
           {/* ⚠️ Never a silent switch. The person is told, in one quiet line,
               who wrote what he just read. */}
-          <p className="muted small" style={{ borderBlockStart: '1px solid var(--line)', paddingBlockStart: 'var(--gap-sm)' }}>
+          <p className="letter-by">
             {state.source === 'model' ? t('plain_by_model') : t('plain_by_rules')}
           </p>
         </>

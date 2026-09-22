@@ -90,7 +90,8 @@ export function App() {
    */
   useEffect(() => {
     if (!import.meta.env.DEV) return;
-    if (!new URLSearchParams(window.location.search).has('demo')) return;
+    const demo = new URLSearchParams(window.location.search).get('demo');
+    if (demo === null) return;
     const persona = {
       language: 'he',
       visa_type: 'a2',
@@ -101,10 +102,15 @@ export function App() {
       born: '2005-01',
       entered_israel: '2010-06',
     } as unknown as Answers;
+    if (demo === 'intake') {
+      setScreen('intake');
+      return;
+    }
     setAnswers(persona);
     fetchReadiness(persona).then((r) => {
       setResult(r);
-      setScreen('roadmap');
+      /* ?demo=diagnosis · ?demo=documents · anything else lands on the road. */
+      setScreen(demo === 'diagnosis' || demo === 'documents' ? demo : 'roadmap');
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
