@@ -121,18 +121,10 @@ export const UI = {
 
   choose_kicker: { he: 'במה אנחנו מטפלים', en: 'What we cover' },
   choose_title: { he: 'התהליכים', en: 'The processes' },
-  choose_note: {
-    he: 'אחד פתוח כעת. נוספים בפיתוח, ויעבדו באותה שיטה.',
-    en: 'One is open now. More are in development, and will work the same way.',
-  },
   status_live: { he: 'פתוח כעת', en: 'Open now' },
   status_planned: { he: 'בפיתוח', en: 'In development' },
   process_cta: { he: 'לבדיקת המוכנות', en: 'Check my readiness' },
   process_closed: { he: 'טרם נפתח', en: 'Not yet open' },
-  process_closed_note: {
-    he: 'ייפתח לאחר שתהליך הרישיון יוכיח את עצמו',
-    en: 'Opens once the licence process has proven itself',
-  },
 
   // ── the closing call ─────────────────────────────────────────────────────
   close_title: {
