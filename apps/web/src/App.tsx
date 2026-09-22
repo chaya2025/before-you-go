@@ -60,6 +60,8 @@ export function App() {
   const [answers, setAnswers] = useState<Answers | null>(null);
   const [done, setDone] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  /** Which step's tick is in flight, so the row he pressed can say so. */
+  const [pendingStep, setPendingStep] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   /** Whether the plain-language layer is switched on where this is deployed. */
   const [plainLanguage, setPlainLanguage] = useState(false);
@@ -214,6 +216,7 @@ export function App() {
    */
   async function toggleStep(id: string, isDone: boolean) {
     if (!answers) return;
+    setPendingStep(id);
     /**
      * ⚠️ Found in M5, and it was not cosmetic. The tick was written into
      * `done` BEFORE the call, and on a failed call it stayed there. The
@@ -234,6 +237,7 @@ export function App() {
       setError(t('error_step'));
     } finally {
       setBusy(false);
+      setPendingStep(null);
     }
   }
 
@@ -444,7 +448,7 @@ export function App() {
               {/* ⭐ Whether what he is CARRYING will work, and the one thing to
                   do next. The road is the detail under it. */}
               <Readiness result={result} lang={lang} />
-              <Roadmap result={result} lang={lang} onToggle={toggleStep} />
+              <Roadmap result={result} lang={lang} onToggle={toggleStep} pending={pendingStep} />
 
               {/* ⭐ The paper sheet was built in M1 and had no door. This is
                   the door. It is the product's own thesis — they walk into an
@@ -554,16 +558,24 @@ export function App() {
         * until it lands there is no form to draw. Blank space reads as broken,
         * and this audience has been failed by enough websites already.
         *
-        * ⚠️ The shapes are the shapes of the real questions, so the page does
-        * not jump when the answer arrives.
+        * ⚠️ The shapes are the shapes of the real question: a heading, a line
+        * of explanation, and a list of answers to tap, each the height of a
+        * real one. Photographed against the real form (evidence/m5-waiting):
+        * the list that lands is longer than the list drawn, so the card grows
+        * — downward, under everything he was already reading, which does not
+        * move. An earlier version drew two short bars and the page tripled in
+        * height when the questions arrived.
         */}
       {screen === 'intake' && !statuses && !error && (
         <div className="card stack-sm skel-form" aria-busy="true" aria-live="polite">
           <p className="muted small">{t('loading_form')}</p>
           <span className="skel skel-title" />
-          <span className="skel skel-field" />
           <span className="skel skel-line" />
-          <span className="skel skel-field" />
+          <div className="options" aria-hidden="true">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <span className="skel skel-option" key={i} />
+            ))}
+          </div>
         </div>
       )}
 
