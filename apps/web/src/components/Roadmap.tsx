@@ -31,6 +31,8 @@ const ICON = {
   link: 'M10 13a4 4 0 005.7 0l2.6-2.6a4 4 0 10-5.7-5.7L11.5 6M14 11a4 4 0 00-5.7 0l-2.6 2.6a4 4 0 105.7 5.7L12.5 18',
   clip: 'M16.5 8.5l-6 6a2.5 2.5 0 003.5 3.5l6.5-6.5a4.5 4.5 0 10-6.4-6.4L6.5 12.2a6.5 6.5 0 009.2 9.2',
   wait: 'M12 21a9 9 0 100-18 9 9 0 000 18zm0-13.5V12l3 2',
+  /* A padlock. Used once, on a row the order will not let him start yet. */
+  lock: 'M7 11V8a5 5 0 0110 0v3M6 11h12a1 1 0 011 1v7a1 1 0 01-1 1H6a1 1 0 01-1-1v-7a1 1 0 011-1z',
 } as const;
 
 function Mark({ d }: { d: string }) {
@@ -155,11 +157,26 @@ function Step({
           <span className="step-where">{t(`ch_${step.channel}` as keyof typeof UI)}</span>
         )}
 
-        {/* ⚠️ Every row in "בהמשך הדרך" carried a chip reading "בהמשך" — the
-            heading said it once and then fifteen chips said it again. A state
-            is worth a word only when it is not the one the section already
-            announced: waiting on something, or unplaceable. */}
-        {!(compact && item.state === 'later') && (
+        {/* ⚠️ A state is worth a WORD only when it is not the one the section
+            already announced. Every row in "בהמשך הדרך" used to carry a chip
+            reading "בהמשך": the heading said it once and then fifteen chips
+            said it again. Declaring the real ordering chain on 22.9 made it
+            worse in the other direction — fourteen of fifteen rows became
+            "ממתין", which distinguishes nothing.
+
+            So on a row: the majority state is silent, a blocked step carries
+            a padlock rather than a sentence (the sentence is inside, on the
+            tick it replaces), and only a genuinely unplaceable step gets a
+            word, because that one is rare and strange. */}
+        {compact ? (
+          blocked ? (
+            <span className="step-lock" title={t('locked_until')} aria-label={t('locked_until')}>
+              <Mark d={ICON.lock} />
+            </span>
+          ) : item.state === 'uncertain' ? (
+            <span className="step-state step-state-uncertain">{t('state_uncertain')}</span>
+          ) : null
+        ) : (
           <span className={`step-state step-state-${item.state}`}>
             {t(`state_${item.state}` as keyof typeof UI)}
           </span>
