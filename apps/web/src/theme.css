@@ -307,8 +307,15 @@ select {
 .btn:hover { color: var(--paper); transform: translateY(-2px); }
 .btn:hover::before { transform: scaleX(1); }
 
-/* The arrow leans the way the reader is going. */
-.btn svg { transition: transform var(--t-move) var(--ease); }
+/* ⚠️ An icon inside a button gets its size HERE. An SVG with no width takes
+   the whole line box, which is exactly what happened to the paperclip on the
+   sources button: it rendered the size of the card. */
+.btn svg {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  transition: transform var(--t-move) var(--ease);
+}
 .btn:hover svg { transform: translateX(-4px); }
 :root[dir='ltr'] .btn:hover svg,
 [dir='ltr'] .btn:hover svg { transform: translateX(4px); }
@@ -673,47 +680,65 @@ h1, h2, h3 { text-wrap: balance; }
    A spine with a marker per step makes the metaphor real, and — the actual
    point — makes "where am I" answerable at a glance rather than by reading.
 
+   ⭐ Rebuilt 22.9 to the approved design. The spine is now asphalt: a pale
+   lane with a dashed centre line, and a diamond marker at each step. It is
+   the same graphic the landing page uses for its three beats, at full size,
+   so the person meets the road before he is asked a single question and then
+   walks it.
+
    ⚠️ Logical properties throughout, so the spine sits on the correct side when
    the document flips to English. inset-inline-start, never left.
    ========================================================================== */
 
 .road { position: relative; }
 
-/* The line itself. Behind the cards, and it stops at the last marker rather
-   than running past it into empty space. */
+/* The lane. Behind the cards, stopping at the last marker rather than running
+   past it into empty space. */
 .road::before {
   content: '';
   position: absolute;
-  inset-inline-start: 7px;
-  inset-block: 1.35rem;
-  width: 2px;
-  background: var(--line);
-  border-radius: 999px;
+  inset-inline-start: 2px;
+  inset-block: 1.5rem;
+  width: 12px;
+  border-radius: 6px;
+  background: #ece5d9;
 }
 
-.road > * { position: relative; margin-inline-start: 1.75rem; }
+/* The centre line, dashed like a road's. */
+.road::after {
+  content: '';
+  position: absolute;
+  inset-inline-start: 7px;
+  inset-block: 1.5rem;
+  width: 2px;
+  background: repeating-linear-gradient(to bottom, var(--line) 0 10px, transparent 10px 22px);
+}
+
+.road > * { position: relative; margin-inline-start: 2.6rem; }
 .road > * + * { margin-block-start: var(--gap); }
 
-/* The marker. Sits ON the spine, level with the step's title. */
+/* The marker. Sits ON the lane, level with the step's title. A diamond, not a
+   dot: at a glance it reads as a place on a map rather than a bullet. */
 .road > [data-state]::before {
   content: '';
   position: absolute;
-  inset-inline-start: -1.75rem;
-  inset-block-start: 1.35rem;
+  z-index: 1;
+  inset-inline-start: -2.6rem;
+  inset-block-start: 1.45rem;
   width: 16px;
   height: 16px;
-  border-radius: 999px;
   background: var(--surface);
   border: 2px solid var(--line);
+  transform: rotate(45deg);
+  transition: background var(--t-move) var(--ease), border-color var(--t-move) var(--ease), box-shadow var(--t-move) var(--ease);
 }
 
-/* ⚠️ NO transform, deliberately. translateX is a PHYSICAL move and does not
-   flip with direction, so centring the marker that way needs a second rule for
-   English and silently misaligns the moment one of them is edited.
-   The arithmetic instead: the card is inset 1.75rem (28px) from the road, so
-   -1.75rem puts the marker's inline-start edge exactly on the road's edge; a
-   16px marker then centres on the 2px spine at 8px. Logical insets flip on
-   their own, so this is correct in both directions with one rule. */
+/* ⚠️ NO translate to centre it. translateX is a PHYSICAL move and does not
+   flip with direction, so centring that way needs a second rule for English
+   and silently misaligns the moment one of them is edited. The arithmetic
+   instead: the card is inset 2.6rem from the road, and the marker's own inset
+   puts it back on the lane, which is correct in both directions with one rule.
+   The rotation is the diamond and never carries position. */
 
 .road > [data-state='done']::before {
   background: var(--verified);
@@ -725,11 +750,179 @@ h1, h2, h3 { text-wrap: balance; }
 .road > [data-state='do_now']::before {
   background: var(--amber);
   border-color: var(--amber);
-  box-shadow: 0 0 0 4px var(--amber-soft);
+  box-shadow: 0 0 0 5px var(--amber-soft);
 }
 
-.road > [data-state='uncertain']::before { border-color: var(--unchecked); }
+.road > [data-state='uncertain']::before { border-color: var(--unchecked); border-style: dashed; }
 .road > [data-state='waiting_on']::before { border-style: dashed; }
+
+/* ---- a step ------------------------------------------------------------- */
+
+.step { scroll-margin-block-start: 5rem; }
+
+/* A step that is not his turn yet is quieter, never hidden: "המפה המלאה תמיד
+   גלויה" — he is allowed to see what is coming. */
+.step-later { opacity: 0.66; }
+
+.step-head {
+  display: flex;
+  gap: var(--gap-sm);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.step-head h3 { margin: 0; flex: 1; }
+.step-done h3 { text-decoration: line-through; text-decoration-thickness: 1px; }
+
+/* The state, in a word. ⚠️ Never a colour on its own, and never an emoji
+   standing in for a word: an emoji is read out as its own name by a screen
+   reader and translated by nobody. */
+.step-state {
+  flex: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.step-state-done { color: var(--verified); }
+.step-state-do_now { color: var(--amber-ink); background: var(--amber-soft); border-color: #ead5b4; }
+.step-state-uncertain { color: var(--unchecked); }
+.step-state-waiting_on { color: var(--muted); }
+.step-state-later { color: var(--muted); }
+
+/* Ticking a step. Deliberately a full-width row rather than a bare checkbox:
+   it is the one control on the card and it is used standing up, one-handed. */
+.step-tick {
+  display: flex;
+  gap: var(--gap-sm);
+  align-items: center;
+  min-height: var(--touch);
+  padding: 0.4rem 0.65rem;
+  margin-inline-start: -0.65rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--t-quick) var(--ease);
+}
+
+.step-tick:hover { background: var(--amber-soft); }
+.step-tick input { width: 1.2rem; height: 1.2rem; accent-color: var(--amber); }
+
+/* ⭐ The one thing to do now, and the reason it comes first. Amber, because
+   this IS "where you are standing". */
+.flag {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  background: var(--amber-soft);
+  color: #6f4212;
+  font-size: 0.95rem;
+}
+
+.flag::before {
+  content: '';
+  flex: none;
+  width: 9px;
+  height: 9px;
+  margin-block-start: 0.42rem;
+  background: var(--amber);
+  transform: rotate(45deg);
+}
+
+.flag-quiet { background: #f2efe7; color: var(--muted); }
+.flag-quiet::before { background: var(--muted); }
+
+/* A line of practical detail: what to bring, what it costs, what to check
+   first. The icon is a fixed column so a stack of them lines up. */
+.meta-row {
+  display: grid;
+  grid-template-columns: 1.4rem 1fr;
+  gap: 0.5rem;
+  align-items: start;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.meta-row svg { width: 17px; height: 17px; color: var(--muted); margin-block-start: 0.15rem; }
+.meta-row a { color: var(--ink); }
+
+/* The checklist inside a step: boxes he ticks on paper, not in the product. */
+.step-checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+
+.step-checklist li {
+  display: grid;
+  grid-template-columns: 1.4rem 1fr;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  align-items: start;
+}
+
+.step-checklist li::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  margin-block-start: 0.28rem;
+  border: 1.5px solid var(--line);
+  border-radius: 3px;
+}
+
+/* The sources, folded. Nothing is hidden — principle 20 — they just stopped
+   shouting over the instruction. */
+.sources {
+  border-block-start: 1px solid var(--line-soft);
+  padding-block-start: var(--gap-sm);
+  display: grid;
+  gap: var(--gap-sm);
+}
+
+.sources-toggle {
+  min-height: auto;
+  padding: 0.4rem 0.9rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  align-self: start;
+}
+
+.source { display: grid; gap: 0.2rem; font-size: 0.88rem; }
+.source-citation { color: var(--muted); }
+
+/* ---- progress ----------------------------------------------------------- */
+
+.road-progress {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--line-soft);
+  overflow: hidden;
+}
+
+.road-progress span {
+  display: block;
+  height: 100%;
+  background: var(--amber);
+  border-radius: var(--radius-pill);
+  transition: width 0.6s var(--ease);
+}
+
+/* ---- the clocks --------------------------------------------------------- */
+
+.clock-row {
+  display: grid;
+  gap: 0.15rem;
+  padding-block: var(--gap-sm);
+  border-block-end: 1px dashed var(--line-soft);
+}
+
+.clock-row:last-child { border-block-end: 0; }
+.clock-name { font-weight: 500; }
+.clock-expired { color: var(--uncertain); font-weight: 700; }
+.clock-warning { color: var(--amber-ink); font-weight: 700; }
 
 /* ==========================================================================
    Readiness buckets

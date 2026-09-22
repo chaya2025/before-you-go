@@ -81,6 +81,34 @@ export function App() {
     document.documentElement.dir = dirFor(lang);
   }, [lang]);
 
+  /**
+   * ⚠️ DEVELOPMENT ONLY, and gated on import.meta.env.DEV so it cannot exist in
+   * a built site. `?demo` fills in the documented persona and jumps straight to
+   * the road, because reaching that screen otherwise means answering the whole
+   * form by hand every time it is looked at — and a screen nobody looks at is
+   * a screen nobody notices is broken.
+   */
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    if (!new URLSearchParams(window.location.search).has('demo')) return;
+    const persona = {
+      language: 'he',
+      visa_type: 'a2',
+      visa_valid_now: true,
+      foreign_license: { kind: 'none' },
+      has_teudat_zehut: false,
+      teudat_zehut_confirmed: true,
+      born: '2005-01',
+      entered_israel: '2010-06',
+    } as unknown as Answers;
+    setAnswers(persona);
+    fetchReadiness(persona).then((r) => {
+      setResult(r);
+      setScreen('roadmap');
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   /** The visa list comes from the API, so this app holds no domain knowledge. */
   useEffect(() => {
     fetchStatuses()
