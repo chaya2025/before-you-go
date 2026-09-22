@@ -315,7 +315,13 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     // ⭐ Sits at position 8 but must happen before step 9. This is exactly why
     // act_when exists separately from sequence_position.
     act_when: { before: 'fz.test' },
-    channel: 'licensing_office',
+    // ⚠️ the founder, 22.9: this said licensing_office, and it is wrong. The channel
+    // is where the STEP is done, not where the appointment it books is for.
+    // Booking is online (the link below is the gov.il booking page); the
+    // physical visit is fz.permit_in_person, which is a separate step and
+    // correctly marked. Invisible until the place went onto every row, which
+    // is the argument for putting it there.
+    channel: 'online',
     authority: "משרד הרישוי",
     requires_appointment: true,
     links: [{ label: { he: "זימון תור", en: 'Book an appointment' }, url: 'https://www.gov.il/he/Departments/General/govisit' }],
