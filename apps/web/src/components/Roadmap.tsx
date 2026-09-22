@@ -119,6 +119,8 @@ function Step({
   const { step } = item;
 
   const dimmed = item.state === 'later' || item.state === 'waiting_on';
+  /** The order says this one cannot be done yet, and it names what first. */
+  const blocked = item.state === 'waiting_on' && item.waiting_on.length > 0;
   const shown = attributions(step.evidence);
 
   // The count by mark: what kind of evidence is behind this, at a glance,
@@ -142,15 +144,27 @@ function Step({
         {index}
       </span>
       <h3>{pick(step.title, lang)}</h3>
-      {/* ⚠️ Every row in "בהמשך הדרך" carried a chip reading "בהמשך" — the
-          heading said it once and then fifteen chips said it again. A state
-          is worth a word only when it is not the one the section already
-          announced: waiting on something, or unplaceable. */}
-      {!(compact && item.state === 'later') && (
-        <span className={`step-state step-state-${item.state}`}>
-          {t(`state_${item.state}` as keyof typeof UI)}
-        </span>
-      )}
+      <span className="step-head-meta">
+        {/* ⭐ WHERE, on the row itself. Sixteen steps are spread over eight
+            different places — the population authority, a photo station, a
+            driving school, a test centre, the post office — and a person
+            planning a week needs to see that without opening anything. It is
+            the one piece of a step that differs on every single row, which is
+            what makes it worth the space and not more of the same words. */}
+        {compact && step.channel && step.channel !== 'unknown' && (
+          <span className="step-where">{t(`ch_${step.channel}` as keyof typeof UI)}</span>
+        )}
+
+        {/* ⚠️ Every row in "בהמשך הדרך" carried a chip reading "בהמשך" — the
+            heading said it once and then fifteen chips said it again. A state
+            is worth a word only when it is not the one the section already
+            announced: waiting on something, or unplaceable. */}
+        {!(compact && item.state === 'later') && (
+          <span className={`step-state step-state-${item.state}`}>
+            {t(`state_${item.state}` as keyof typeof UI)}
+          </span>
+        )}
+      </span>
     </>
   );
 
@@ -165,20 +179,35 @@ function Step({
           a screen and a half below it: he presses, and the only acknowledgement
           is somewhere he cannot see. So the row he pressed says it too, and
           takes no second press while the first is still in flight. */}
+      {/* ⭐ A STEP THE ENGINE SAYS IS BLOCKED CANNOT BE TICKED, 22.9.
+          the founder: "some steps can't come before others, it just doesn't make
+          sense, we have to force some rules". The engine already computes
+          this — `must_come_after` minus what is done becomes `waiting_on` —
+          and the road printed the answer and then handed him a tick box
+          anyway. Ticking it wrote a completed step the order says is
+          impossible, and every clock and every later state was then computed
+          off it. The box says what it is waiting for, and comes back the
+          moment that step is ticked. */}
       {onToggle && (
-        <label className={`step-tick${pending === step.id ? ' step-tick-busy' : ''}`}>
+        <label
+          className={`step-tick${pending === step.id ? ' step-tick-busy' : ''}${
+            blocked ? ' step-tick-blocked' : ''
+          }`}
+        >
           <input
             type="checkbox"
             checked={item.state === 'done'}
-            disabled={Boolean(pending)}
+            disabled={Boolean(pending) || blocked}
             onChange={(e) => onToggle(step.id, e.target.checked)}
           />
           <span className="small muted">
             {pending === step.id
               ? t('updating_road')
-              : item.state === 'done'
-                ? t('marked_done')
-                : t('mark_done')}
+              : blocked
+                ? `${t('locked_until')} ${item.waiting_on.map(titleOf).join(' · ')}`
+                : item.state === 'done'
+                  ? t('marked_done')
+                  : t('mark_done')}
           </span>
         </label>
       )}
