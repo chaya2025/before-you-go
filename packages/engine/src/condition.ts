@@ -106,9 +106,15 @@ export const ConditionField = z.enum([
    * function could see it. The readiness report needs the same conclusion —
    * "is this document in his hand?" — so it becomes a fact, computed once.
    *
-   * ⚠️ It is true or 'unknown', and NEVER false. Not typing an 89 number is not
-   * evidence that he has none; he may simply have skipped the screen. Rendering
-   * that silence as "you do not have it" is principle 8 pointed at a document.
+   * ⚠️ A BLANK FIELD NEVER MAKES THIS false, and that has not changed. Not
+   * typing an 89 number is not evidence that he has none; he may simply have
+   * skipped the screen, and rendering that silence as "you do not have it" is
+   * principle 8 pointed at a document.
+   *
+   * ⭐ Since 22.9 it CAN be false, from one source only: the screen now asks
+   * him outright whether he holds one before it shows him any field, because
+   * asking a man to copy a number off a document he has never been issued is a
+   * question with no answer. A `false` here is his own words.
    */
   'holds_form_89',
 ]);
@@ -242,7 +248,7 @@ export type Facts = {
    * ⭐ Transcribing anything off the 89 proves he is holding one. You cannot
    * know your 89 number without the document in front of you.
    *
-   * ⚠️ true or 'unknown' only. Silence is not a "no" — see the enum above.
+   * ⚠️ false only when he SAID so. Silence is not a "no" — see the enum above.
    */
   holds_form_89: Trilean;
 };

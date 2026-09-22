@@ -13,7 +13,15 @@ import {
   visaProfileFor,
   categoryRuleFor,
 } from './data';
-import type { Result, RoadmapStep, ClockState, Diagnosis, StepState, UrgentIssue } from './result';
+import type {
+  Result,
+  RoadmapStep,
+  ClockState,
+  Diagnosis,
+  DocumentQuestion,
+  StepState,
+  UrgentIssue,
+} from './result';
 import { numbersAgree, namesAgree, resolveValidity } from './identity';
 import { buildReadiness } from './readiness';
 import { monthsSince, monthsUntil, ageInYears, startOfMonth, addDays, daysBetween, type IsoDate } from './dates';
@@ -121,12 +129,21 @@ export function deriveFacts(profile: Profile, today: IsoDate): Facts {
    * Boolean inside buildRoadmap, where only that one function could see it; the
    * readiness report needs the same conclusion, so it is a fact now.
    *
-   * ⚠️ true or 'unknown', never false. He may simply have skipped the screen.
+   * ⚠️ IT CAN NOW BE false, AND ONLY FOR ONE REASON: he was asked and said no.
+   * It used to be true-or-unknown because nothing ever asked, so a blank was
+   * the only kind of silence there was — and reading silence as "you have no
+   * 89" is principle 8 ("אל תציגי 'לא ידוע' כ'לא'") pointed at a document.
+   * Since 22.9 the screen asks him outright before showing him a single field,
+   * so a `false` here is his own answer and not an inference from a blank box.
+   * Skipping the screen still leaves it 'unknown', exactly as before.
+   *
+   * ⚠️ The transcription still wins over the answer. If he typed a number off
+   * the document, he is holding the document, whatever he tapped a moment ago.
    */
   const holds_form_89: Trilean =
     profile.form_89_number || profile.form_89_passport_number || profile.form_89_name_latin
       ? true
-      : 'unknown';
+      : profile.holds_form_89;
 
   return {
     visa_type: profile.visa_type,
@@ -395,6 +412,64 @@ function buildRoadmap(facts: Facts, profile: Profile): RoadmapStep[] {
 function documentApplies(id: string, facts: Facts): boolean {
   const doc = ALL_DOCUMENTS.find((d) => d.id === id);
   return doc ? evaluateCondition(doc.applies_when, facts) !== false : false;
+}
+
+/**
+ * ⭐ IS THE LICENSING OFFICE STILL GOING TO ISSUE HIM THIS DOCUMENT?
+ *
+ * ⚠️ Added 22.9. `documentApplies` answers "does he need it", and the documents
+ * screen was treating that as "so he is holding one" — which is how an א/2 on
+ * the from-zero route ended up being asked to copy a number off an 89 that his
+ * own first roadmap step told him to go and obtain. The founder: "it gives him to
+ * fill in the 89 field which he doesn't even have one."
+ *
+ * ⭐ Read off the STEPS' own `produces_document`, never from a list of document
+ * ids kept here. A document nobody issues (his passport, his foreign licence)
+ * never trips this; add a step that issues one and its possession question
+ * appears on its own. Same architectural move as the 31.8 fix, one level down.
+ *
+ * ⚠️ `!== false`, so an unsure route still ASKS whether he has it. That is the
+ * safe direction for a question: one extra tap costs him a second, and assuming
+ * he holds a document he does not have costs him the whole answer.
+ *
+ * ⚠️ A step he has TICKED is not outstanding. Mid-process entry (F0 4.7): the
+ * man who collected his 89 last month is holding it, and he should be typing
+ * its number, not being asked again whether he has one.
+ */
+function issuedByAnOutstandingStep(id: string, facts: Facts, profile: Profile): boolean {
+  /**
+   * ⚠️ FIRST, the same sentence buildRoadmap already lives by: "a step that
+   * exists to OBTAIN a document is done when the document is HELD." Reusing it
+   * rather than restating it is what keeps this screen and the road underneath
+   * it from disagreeing — a man who has told us he holds his 89 must not be
+   * asked a second time whether he has one.
+   *
+   * ⚠️ `=== true` only, exactly as there. 'unknown' is not a yes.
+   */
+  const doc = ALL_DOCUMENTS.find((d) => d.id === id);
+  if (doc?.held_when && evaluateCondition(doc.held_when, facts) === true) return false;
+
+  return ALL_STEPS.some(
+    (step) =>
+      step.produces_document === id &&
+      !profile.completed_steps.includes(step.id) &&
+      // ⚠️ The SAME two filters buildRoadmap uses, and the track one is not
+      // optional: fz.doc_89 and cv.doc_89 are two steps issuing one document,
+      // scoped apart by track alone — both carry the identical `applies_when`.
+      // Without this, ticking the one on his road left the other one standing
+      // and the question was asked of a man who had already answered it.
+      (facts.track === 'unknown' || step.track === 'both' || step.track === facts.track) &&
+      evaluateCondition(step.applies_when, facts) !== false,
+  );
+}
+
+/**
+ * One section of the documents screen: whether to show it, and whether to ask
+ * "do you have this?" before asking what is printed on it. See DocumentQuestion.
+ */
+function documentQuestion(id: string, facts: Facts, profile: Profile): DocumentQuestion {
+  const ask = documentApplies(id, facts);
+  return { ask, confirm_possession: ask && issuedByAnOutstandingStep(id, facts, profile) };
 }
 
 function urgentIssues(
@@ -753,8 +828,8 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
      * here — the opposite default from a requirement, and for the same reason.
      */
     document_questions: {
-      form_89: documentApplies('doc.form_89', facts),
-      passport: documentApplies('doc.passport', facts),
+      form_89: documentQuestion('doc.form_89', facts, profile),
+      passport: documentQuestion('doc.passport', facts, profile),
       /**
        * ⚠️ The WIDER of the two conditions, deliberately. doc.visa is scoped to
        * people with no teudat zehut, but the founder widened cc.visa_valid on 30.8 to
@@ -762,12 +837,24 @@ export function evaluate(profile: Profile, today: IsoDate): Result {
        * visa behind it. Asking only where the document applies would skip
        * exactly the person she widened the rule for.
        */
-      visa:
-        documentApplies('doc.visa', facts) ||
-        ALL_CONTINUOUS_CONDITIONS.some(
-          (c) => c.id === 'cc.visa_valid' && evaluateCondition(c.applies_when, facts) !== false,
-        ),
-      foreign_license: facts.track !== 'from_zero',
+      visa: {
+        ask:
+          documentApplies('doc.visa', facts) ||
+          ALL_CONTINUOUS_CONDITIONS.some(
+            (c) => c.id === 'cc.visa_valid' && evaluateCondition(c.applies_when, facts) !== false,
+          ),
+        // Nobody issues him a visa as part of a licence. It is already in his
+        // passport, or he has no business being on this route at all.
+        confirm_possession: false,
+      },
+      /**
+       * ⚠️ NOT `documentQuestion` — the licence section is scoped by his ROUTE,
+       * not by a document condition. He told us on ש2 that he holds a national
+       * licence; from-zero means he told us he does not, and a man who said he
+       * has no licence must never be shown a box asking when his licence
+       * expires. That is the same rule as the 89, enforced one screen earlier.
+       */
+      foreign_license: { ask: facts.track !== 'from_zero', confirm_possession: false },
     },
   };
 
