@@ -101,6 +101,7 @@ function Step({
   titleOf,
   onToggle,
   pending,
+  compact,
 }: {
   item: RoadmapStep;
   index: number;
@@ -110,6 +111,8 @@ function Step({
   onToggle?: (id: string, done: boolean) => void;
   /** The id of the step whose tick is in flight, if any. */
   pending?: string | null;
+  /** A step that is not for today: one row, opened on a tap. */
+  compact?: boolean;
 }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
   const [open, setOpen] = useState(false);
@@ -125,25 +128,34 @@ function Step({
     counts.set(part.certainty, (counts.get(part.certainty) ?? 0) + 1);
   }
 
-  return (
-    <article
-      // ⭐ The marker on the spine reads this. Amber, and only amber, marks
-      // where you are standing — now as a diamond ON the road rather than an
-      // edge beside it, so it is findable without reading.
-      data-state={item.state}
-      className={`card stack-sm step${dimmed ? ' step-later' : ''}${item.state === 'done' ? ' step-done' : ''}`}
-    >
-      <div className="step-head">
-        {/* ⭐ The number a person uses to say where he is out loud — "I'm on
-            four". The order is what this whole product is about. */}
-        <span className="step-index" aria-hidden="true">
-          {index}
-        </span>
-        <h3>{pick(step.title, lang)}</h3>
+  /**
+   * ⭐ The head is the only part of a step that a person scanning the road
+   * actually needs: which number, what it is, where it stands. Everything
+   * else is what he needs once he has decided to do THIS one. On a step that
+   * is not for today, the head is the whole row and the rest opens on a tap.
+   */
+  const head = (
+    <>
+      {/* ⭐ The number a person uses to say where he is out loud — "I'm on
+          four". The order is what this whole product is about. */}
+      <span className="step-index" aria-hidden="true">
+        {index}
+      </span>
+      <h3>{pick(step.title, lang)}</h3>
+      {/* ⚠️ Every row in "בהמשך הדרך" carried a chip reading "בהמשך" — the
+          heading said it once and then fifteen chips said it again. A state
+          is worth a word only when it is not the one the section already
+          announced: waiting on something, or unplaceable. */}
+      {!(compact && item.state === 'later') && (
         <span className={`step-state step-state-${item.state}`}>
           {t(`state_${item.state}` as keyof typeof UI)}
         </span>
-      </div>
+      )}
+    </>
+  );
+
+  const body = (
+    <>
 
       {/* ⭐ Ticking a step re-runs the whole engine. That is what makes the map
           move with him instead of describing a stranger — and it is what starts
@@ -246,14 +258,23 @@ function Step({
         </p>
       )}
 
-      {item.checks_first.map((c) => (
-        <p key={c.id} className="meta-row">
+      {/* ⭐ Measured on the real answer page, 22.9: the four standing conditions
+          were reprinted inside step cards TEN more times, and "האשרה חייבת
+          להיות בתוקף" appeared six times on one screen. `checks_first` is by
+          construction a SUBSET of `standing_conditions` — the engine filters
+          the same list by which steps each one guards — so every one of those
+          sentences was already on the sticky note beside the road. Saying a
+          rule six times does not make it six rules; it makes the page unread.
+          One marker, and the note it points at keeps the wording. */}
+      {item.checks_first.length > 0 && (
+        <a className="step-standing" href="#standing">
           <Mark d={ICON.look} />
           <span>
-            {t('check_first')}: {pick(c.name, lang)}
+            {t('standing_here')} <span className="num">{item.checks_first.length}</span>
+            <span className="print-only"> · {t('standing_on_paper')}</span>
           </span>
-        </p>
-      ))}
+        </a>
+      )}
 
       {/* ⚠️ item.checklist, not step.checklist — the engine has already removed
           the lines that do not apply to this person. Rendering the raw list is
@@ -344,6 +365,39 @@ function Step({
           </div>
         )}
       </div>
+    </>
+  );
+
+  /**
+   * ⚠️ Sixteen open cards in one column is the page the founder walked and called
+   * "too much text" — 8,606px of it, about nine laptop screens. A step that
+   * is not for today is a LINE: number, title, state. Nothing is hidden,
+   * which is principle 20; it is folded, and the fold says what is inside.
+   */
+  if (compact) {
+    return (
+      <article
+        data-state={item.state}
+        className={`step step-row${dimmed ? ' step-later' : ''}${item.state === 'done' ? ' step-done' : ''}`}
+      >
+        <details>
+          <summary className="step-head">{head}</summary>
+          <div className="stack-sm step-row-body">{body}</div>
+        </details>
+      </article>
+    );
+  }
+
+  return (
+    <article
+      // ⭐ The marker on the spine reads this. Amber, and only amber, marks
+      // where you are standing — now as a diamond ON the road rather than an
+      // edge beside it, so it is findable without reading.
+      data-state={item.state}
+      className={`card stack-sm step${dimmed ? ' step-later' : ''}${item.state === 'done' ? ' step-done' : ''}`}
+    >
+      <div className="step-head">{head}</div>
+      {body}
     </article>
   );
 }
@@ -372,7 +426,9 @@ export function RoadSide({ result, lang }: { result: Result; lang: Lang }) {
           is what has to stay true for the whole road, and breaking it undoes
           work already done. Her word for it was a sticky note. */}
       {result.standing_conditions.length > 0 && (
-        <section className="note">
+        /* ⚠️ The id is the destination of the marker inside every step that
+           these conditions guard. They are written here, once. */
+        <section className="note" id="standing">
           <h3>{t('standing_title')}</h3>
           <p className="muted small">{t('standing_note')}</p>
           <ul className="note-list">
@@ -444,8 +500,8 @@ export function Roadmap({
   const titles = new Map(result.roadmap.map((item) => [item.step.id, pick(item.step.title, lang)]));
   const titleOf = (id: string) => titles.get(id) ?? id;
 
-  const list = (items: typeof result.roadmap) => (
-    <div className="road">
+  const list = (items: typeof result.roadmap, compact = false) => (
+    <div className={`road${compact ? ' road-rows' : ''}`}>
       {items.map((item) => (
         <Step
           key={item.step.id}
@@ -455,6 +511,7 @@ export function Roadmap({
           titleOf={titleOf}
           onToggle={onToggle}
           pending={pending}
+          compact={compact}
         />
       ))}
     </div>
@@ -462,7 +519,7 @@ export function Roadmap({
 
   return (
     <div className="stack">
-      <section className="road-part road-part-now">
+      <section className="road-part road-part-now" id="now">
         <div className="road-part-head">
           <h3>{t('road_now')}</h3>
           <span className="count num">{now.length}</span>
@@ -478,13 +535,13 @@ export function Roadmap({
       </section>
 
       {later.length > 0 && (
-        <section className="road-part">
+        <section className="road-part road-part-later">
           <div className="road-part-head">
             <h3>{t('road_next')}</h3>
             <span className="count num">{later.length}</span>
           </div>
           <p className="road-part-note">{t('road_next_note')}</p>
-          {list(later)}
+          {list(later, true)}
         </section>
       )}
 
@@ -495,7 +552,7 @@ export function Roadmap({
           <summary>
             {t('road_done')} · <span className="num">{done.length}</span>
           </summary>
-          {list(done)}
+          {list(done, true)}
         </details>
       )}
     </div>
