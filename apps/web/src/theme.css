@@ -15,22 +15,36 @@
       קריא בטלפון, בעמידה, בתור."
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&family=Suez+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@300;400;500;700&family=Amatic+SC:wght@700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root {
   /* ---- brand ---------------------------------------------------------- */
-  --ink: #14312e;      /* text, headings, structure. Deep green-black, warmer than black */
-  --paper: #faf6ef;    /* the page. A warm paper tone, not clinical white, not government grey */
-  --surface: #ffffff;  /* cards and forms, sitting above the paper */
-  --line: #e4ddd1;     /* borders and dividers */
-  --muted: #6b7a76;    /* secondary text, future steps */
+  --ink: #132e2b;      /* text, headings, structure. Deep green-black, warmer than black */
+  --ink-deep: #0c1f1d;  /* the footer, and anything that must sit below the ink */
+  --paper: #faf7f1;    /* the page. A warm paper tone, not clinical white, not government grey */
+  --surface: #fffdf9;  /* cards and forms, sitting above the paper */
+  --line: #dcd3c4;     /* borders and dividers */
+  --line-soft: #ece5d9; /* the quieter divider, inside a card or between rows */
+  --muted: #64736e;    /* secondary text, future steps */
+
+  /* ---- section grounds (approved mockup, 22.9) ------------------------
+     ⭐ Colour arrives as GROUND, never as meaning. A band of sand or sage
+     separates one section from the next; it never says anything about a
+     status, and it is never used on a control. That is what keeps amber
+     readable as "here" — see the note beside --amber. */
+  --sand: #f3e9d8;
+  --sage-top: #edf4ef;
+  --sage-bottom: #e4eee8;
 
   /* ⭐ THE ONLY ACCENT. "אינו משמש לשום דבר אחר, ולכן העין לומדת שענבר
      פירושו 'כאן'." Marks where you are standing: the open step, progress,
      the next action. Never used for anything else — not for errors, not for
      links, not for decoration, and never for certainty. */
   --amber: #c8781e;
-  --amber-soft: #fdf3e6;
+  /* Amber written ON paper, for small text and outlines that would fail
+     contrast at the brand amber. Same hue, darker, never a second accent. */
+  --amber-ink: #8a5011;
+  --amber-soft: #faead3;
   /* Text placed ON the amber. See the note beside .btn-primary. */
   --on-amber: #ffffff;
 
@@ -53,8 +67,20 @@
 
   /* ---- type -----------------------------------------------------------
      Two families only. "ההיררכיה נבנית ממשקל וגודל ולא מריבוי גופנים." */
-  --font-display: 'Suez One', Georgia, serif;   /* headings and logo, LARGE ONLY */
-  --font-body: 'Heebo', system-ui, sans-serif;  /* body, UI, numbers */
+  --font-display: 'Secular One', system-ui, sans-serif; /* headings, buttons, the wordmark */
+  --font-body: 'Rubik', system-ui, sans-serif;          /* body and UI */
+
+  /* ⭐ The script, approved 22.9, and deliberately fenced in. It carries the
+     tagline, a section kicker and a step's explanation — the places where the
+     product speaks in its own voice. It NEVER carries a control, a legal line,
+     a status or a regulation number: handwriting on a requirement reads as an
+     opinion, and every requirement here is quoted from a procedure. */
+  --font-script: 'Amatic SC', cursive;
+
+  /* Numbers, regulation references and document codes. A monospaced face makes
+     them read as quoted from a document rather than written by us, and the
+     tabular figures keep columns of dates aligned. */
+  --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
 
   /* 17px, deliberately larger than usual:
      "חלק מהקהל קורא עברית כשפה שנייה." */
@@ -66,13 +92,24 @@
   --gap: 1rem;
   --gap-lg: 1.75rem;
   --gap-xl: 2.75rem;
-  --radius: 10px;
-  --radius-sm: 6px;
+  --radius: 18px;      /* cards and photographs */
+  --radius-sm: 12px;   /* inputs and small surfaces */
+  --radius-pill: 999px; /* every button on the site */
 
   /* Minimum touch target. Accessibility line in the PRD: "יעדי מגע 44px ומעלה." */
   --touch: 44px;
 
-  --shadow: 0 1px 2px rgba(20, 49, 46, 0.05), 0 4px 16px rgba(20, 49, 46, 0.04);
+  --shadow: 0 1px 2px rgba(19, 46, 43, 0.04), 0 10px 30px rgba(19, 46, 43, 0.06);
+  /* The lift a card gets under the cursor. One step up, never a third level. */
+  --shadow-lift: 0 2px 4px rgba(19, 46, 43, 0.06), 0 26px 54px -34px rgba(19, 46, 43, 0.7);
+
+  /* ---- motion ---------------------------------------------------------
+     One easing curve for the whole product, so nothing feels borrowed from
+     somewhere else. Everything below is disabled wholesale for anyone who
+     asks their device for less motion; see the block at the end of the file. */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --t-quick: 0.18s;
+  --t-move: 0.35s;
 }
 
 /* ==========================================================================
@@ -134,7 +171,7 @@ h3 {
 
 h1 { font-size: 1.9rem; }
 h2 { font-size: 1.35rem; }
-h3 { font-size: 1.05rem; font-family: var(--font-body); font-weight: 700; }
+h3 { font-size: 1.18rem; font-family: var(--font-display); font-weight: 400; }
 
 p { margin: 0 0 var(--gap-sm); }
 
@@ -173,10 +210,40 @@ a {
 
 .card {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-soft);
   border-radius: var(--radius);
-  padding: var(--gap);
+  padding: var(--gap-lg) var(--gap);
   box-shadow: var(--shadow);
+  transition: transform var(--t-move) var(--ease),
+              box-shadow var(--t-move) var(--ease),
+              border-color var(--t-move) var(--ease);
+}
+
+/* ⚠️ Only a card you can DO something with lifts. A card that merely holds
+   text must not move under the cursor, or the page starts promising actions
+   it does not have. */
+.card-action:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--line);
+}
+
+/* A section ground. Sand for a warm band, sage for a cool one; both are
+   grounds only, never applied to a control. */
+.ground-sand { background: var(--sand); }
+.ground-sage { background: linear-gradient(180deg, var(--sage-top) 0%, var(--sage-bottom) 38%, var(--paper) 100%); }
+.ground-ink { background: var(--ink); color: var(--paper); }
+
+/* The script voice and the quoted-number voice, as classes, so no component
+   has to reach for the font tokens itself. */
+.script { font-family: var(--font-script); font-weight: 700; line-height: 1.15; }
+.num,
+.code {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
 }
 
 .stack > * + * { margin-block-start: var(--gap); }
@@ -199,40 +266,94 @@ select {
 .btn {
   /* ⚠️ Was unset, so alignment properties on button contents silently did
      nothing. Flex here makes an icon, a label and a count sit on one baseline. */
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--gap-xs);
+  gap: var(--gap-sm);
   min-height: var(--touch);
-  padding: 0 var(--gap-lg);
-  border: 1px solid var(--ink);
-  border-radius: var(--radius-sm);
-  background: var(--ink);
-  color: var(--paper);
-  font-weight: 500;
+  padding: 0.82rem var(--gap-lg);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1;
   cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color var(--t-move) var(--ease),
+              border-color var(--t-move) var(--ease),
+              transform var(--t-quick) var(--ease);
 }
+
+/* ⭐ The fill arrives from the side the language starts on, so the button
+   fills the way the sentence next to it reads. transform-origin takes a
+   logical keyword, which flips on its own when the document flips — no
+   second rule for English. */
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: inline-start;
+  transition: transform 0.42s var(--ease);
+}
+
+.btn:hover { color: var(--paper); transform: translateY(-2px); }
+.btn:hover::before { transform: scaleX(1); }
+
+/* The arrow leans the way the reader is going. */
+.btn svg { transition: transform var(--t-move) var(--ease); }
+.btn:hover svg { transform: translateX(-4px); }
+:root[dir='ltr'] .btn:hover svg,
+[dir='ltr'] .btn:hover svg { transform: translateX(4px); }
 
 .btn:disabled {
-  background: var(--line);
-  border-color: var(--line);
-  color: var(--muted);
+  opacity: 0.4;
   cursor: not-allowed;
+  transform: none;
 }
 
-/* ⭐ The primary action is where you are standing, so it earns the amber. */
+.btn:disabled::before { transform: scaleX(0); }
+.btn:disabled:hover { color: var(--ink); }
+
+/* ⭐ The primary action is where you are standing, so it earns the amber.
+   It starts in ink and fills amber, so the amber arrives on the action
+   rather than shouting from the page before it has been touched. */
 .btn-primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.btn-primary::before { background: var(--amber); }
+.btn-primary:hover { color: #1a1103; border-color: var(--amber); }
+
+/* The same action where the page around it is already quiet: amber first,
+   ink on hover. Used for the one action in a section, never twice on a screen. */
+.btn-amber {
   background: var(--amber);
   border-color: var(--amber);
-  color: var(--on-amber);
+  color: #1a1103;
 }
 
+.btn-amber::before { background: var(--ink); }
+.btn-amber:hover { color: var(--paper); border-color: var(--ink); }
+
+/* The secondary action. An outline that fills ink, so it can sit beside the
+   primary without competing with it. */
 .btn-quiet {
-  background: transparent;
   border-color: var(--line);
   color: var(--ink);
-  padding: 0 var(--gap);
+  padding-inline: var(--gap);
 }
+
+.btn-quiet:hover { border-color: var(--ink); }
 
 /* An answer option. Big enough to hit with a thumb while standing in a queue. */
 .option {
@@ -240,21 +361,29 @@ select {
   align-items: center;
   gap: var(--gap-sm);
   width: 100%;
-  min-height: var(--touch);
+  min-height: 52px;
   padding: var(--gap-sm) var(--gap);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--surface);
   text-align: start;
   cursor: pointer;
+  transition: border-color var(--t-quick) var(--ease),
+              background var(--t-quick) var(--ease),
+              transform var(--t-quick) var(--ease);
 }
 
-.option:hover { border-color: var(--muted); }
+.option:hover { border-color: var(--muted); transform: translateY(-1px); }
 
+/* ⚠️ Chosen is marked by the amber EDGE and the weight of the text, not by a
+   filled amber block: a filled option would put the "you are here" colour on
+   four answers at once and stop meaning anything. */
 .option[aria-pressed='true'] {
   border-color: var(--amber);
+  box-shadow: inset 3px 0 0 0 var(--amber);
   background: var(--amber-soft);
   font-weight: 500;
+  transform: none;
 }
 
 .option-note {
@@ -267,13 +396,33 @@ select {
 input[type='text'],
 input[type='number'],
 select {
-  min-height: var(--touch);
+  min-height: 52px;
   width: 100%;
-  padding: 0 var(--gap-sm);
+  padding: 0 var(--gap);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--surface);
+  transition: border-color var(--t-quick) var(--ease),
+              box-shadow var(--t-quick) var(--ease);
 }
+
+input[type='text']:hover,
+input[type='number']:hover,
+select:hover { border-color: var(--muted); }
+
+/* ⚠️ The focus ring is amber because focus IS "where you are standing" — the
+   same rule the road markers follow. It is drawn as a ring rather than a
+   colour swap so it survives a high-contrast setting. */
+input[type='text']:focus-visible,
+input[type='number']:focus-visible,
+select:focus-visible {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px var(--amber-soft);
+}
+
+/* Numbers, dates and document codes typed into a field read as quoted. */
+input[type='number'],
+input.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 /* ==========================================================================
    Certainty chips
@@ -306,71 +455,18 @@ select {
 .chip-unchecked { color: var(--unchecked); }
 
 /* ==========================================================================
-   Night — added 31.8
+   Light only — the night theme was REMOVED on 22.9
    ==========================================================================
-   ⚠️ NOT a slate-grey inversion. The whole concept in the PRD is "נייר חמים"
-   against the cold blue of a government office, and a cold dark mode would
-   throw that away after dark — which is exactly when a person is most likely
-   to be checking this from bed, worrying about tomorrow's appointment.
+   Chaya's call while choosing the design: every reference she picked is a
+   light page, and "נייר חמים" is a light idea to begin with. A second theme
+   is not free — it is a second set of decisions on every screen, forever —
+   and one theme done properly beats two done half.
 
-   So night is the SAME brand: a deep green-black ground and warm paper-toned
-   text. Every token is redefined; no component is styled inside this block, so
-   nothing can end up with one theme's text on the other theme's ground.
-
-   Three states, not two: an explicit choice stamps data-theme, and the default
-   "system" setting stamps nothing at all.
+   The tokens above are therefore the whole palette. Nothing below redefines
+   them, so no component can end up with one theme's text on another's ground.
+   If a dark theme ever returns it comes back as tokens here, never as colours
+   written inside a component.
    ========================================================================== */
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --ink: #ece5d8;
-    --paper: #12211f;
-    --surface: #182b28;
-    --line: #2c433f;
-    --muted: #93a49d;
-
-    --amber: #e09a4a;
-    --amber-soft: #26201a;
-    --on-amber: #12211f;
-
-    --verified: #5fae87;
-    --likely: #cfa441;
-    --first-hand: #74aac6;
-    --uncertain: #dd8b77;
-    --in-litigation: #a98ad4;
-    --unchecked: #98a3a0;
-
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 16px rgba(0, 0, 0, 0.25);
-  }
-}
-
-:root[data-theme='dark'] {
-  --ink: #ece5d8;
-  --paper: #12211f;
-  --surface: #182b28;
-  --line: #2c433f;
-  --muted: #93a49d;
-
-  --amber: #e09a4a;
-  --amber-soft: #26201a;
-  --on-amber: #12211f;
-
-  --verified: #5fae87;
-  --likely: #cfa441;
-  --first-hand: #74aac6;
-  --uncertain: #dd8b77;
-  --in-litigation: #a98ad4;
-  --unchecked: #98a3a0;
-
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 16px rgba(0, 0, 0, 0.25);
-}
-
-/* ⚠️ Text ON the amber, as a TOKEN rather than a component override.
-   White on the light amber, the dark ground on the lifted night amber — where
-   white would be far too low a contrast. Styling .btn-primary inside a theme
-   block instead would leave it undefined in the un-stamped "system" state,
-   which is the state most viewers are actually in. */
-
 
 /* ==========================================================================
    Type scale
@@ -381,8 +477,11 @@ select {
    display face is what makes a page look decorated rather than designed.
    ========================================================================== */
 
-h1 { font-size: clamp(1.75rem, 5.5vw, 2.35rem); letter-spacing: -0.01em; }
-h2 { font-size: clamp(1.25rem, 3.6vw, 1.5rem); }
+/* ⭐ Raised 22.9 to match the approved design. The old scale topped out at
+   2.35rem, which is why the pages read as unfinished next to the references:
+   a heading that never commits leaves the eye with nothing to land on. */
+h1 { font-size: clamp(2.2rem, 6.2vw, 4rem); letter-spacing: -0.01em; }
+h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); }
 
 h1, h2, h3 { text-wrap: balance; }
 
