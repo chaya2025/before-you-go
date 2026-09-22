@@ -35,10 +35,12 @@ export function Diagnosis({
   return (
     <div className="stack">
       <section className="card stack-sm">
-        <h2>{t('diagnosis_title')}</h2>
-        <p className="muted small">{t('diagnosis_check')}</p>
+        <div className="screen-head">
+          <h2>{t('diagnosis_title')}</h2>
+          <p>{t('diagnosis_check')}</p>
+        </div>
 
-        <dl className="stack-sm" style={{ margin: 0 }}>
+        <dl className="facts">
           <Row label={t('d_track')} value={trackLabel} />
           <Row label={t('d_category')} value={d.nohal_category} mono />
           <Row
@@ -65,7 +67,7 @@ export function Diagnosis({
             <Row
               label={t('d_requested')}
               value={
-                <span style={{ color: d.requested_class_status === 'above' ? 'var(--uncertain)' : undefined }}>
+                <span className={d.requested_class_status === 'above' ? 'clock-expired' : undefined}>
                   <span className="ltr">{d.requested_class}</span>
                   {d.requested_class_status === 'above' ? ' ⚠️' : ''}
                 </span>
@@ -92,7 +94,7 @@ export function Diagnosis({
             <Row
               label={t('d_window')}
               value={
-                <span className="num" style={{ color: windowClock.status === 'expired' ? 'var(--uncertain)' : undefined }}>
+                <span className={`num${windowClock.status === 'expired' ? ' clock-expired' : ''}`}>
                   {windowClock.deadline}
                 </span>
               }
@@ -103,8 +105,8 @@ export function Diagnosis({
         {/* ⚠️ Status-specific traps — the ב/2 short-visa one lives here, and the
             א/5 note that having a teudat zehut does NOT lift the grade ceiling. */}
         {d.caveat && (
-          <p style={{ borderInlineStart: '3px solid var(--amber)', paddingInlineStart: 'var(--gap-sm)' }}>
-            {pick(d.caveat, lang)}
+          <p className="flag">
+            <span>{pick(d.caveat, lang)}</span>
           </p>
         )}
 
@@ -142,11 +144,9 @@ export function Diagnosis({
 
 function Row({ label, value, mono }: { label: string; value: React.ReactNode; mono?: boolean }) {
   return (
-    <div style={{ display: 'flex', gap: 'var(--gap-sm)', justifyContent: 'space-between' }}>
-      <dt className="muted">{label}</dt>
-      <dd style={{ margin: 0, fontWeight: 500 }} className={mono ? 'ltr' : undefined}>
-        {value}
-      </dd>
+    <div className="facts-row">
+      <dt>{label}</dt>
+      <dd className={mono ? 'mono ltr' : undefined}>{value}</dd>
     </div>
   );
 }

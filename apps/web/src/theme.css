@@ -409,8 +409,13 @@ select {
   gap: 0.35rem;
 }
 
+/* ⚠️ Every field the product actually uses is listed. A type left out here —
+   date and month were, until 22.9 — keeps the browser's default box and sits
+   in the middle of a styled form looking like a mistake. */
 input[type='text'],
 input[type='number'],
+input[type='date'],
+input[type='month'],
 select {
   min-height: 54px;
   width: 100%;
@@ -428,6 +433,8 @@ input::placeholder { color: #a8b3af; }
 
 input[type='text']:hover,
 input[type='number']:hover,
+input[type='date']:hover,
+input[type='month']:hover,
 select:hover { border-color: var(--muted); }
 
 /* ⚠️ The focus ring is amber because focus IS "where you are standing" — the
@@ -436,6 +443,8 @@ select:hover { border-color: var(--muted); }
    does not change size when it takes focus. */
 input[type='text']:focus-visible,
 input[type='number']:focus-visible,
+input[type='date']:focus-visible,
+input[type='month']:focus-visible,
 select:focus-visible {
   outline: none;
   border-color: var(--amber);
@@ -456,6 +465,8 @@ select:disabled { background: #f4f0e8; color: var(--muted); cursor: not-allowed;
 /* Numbers, dates and document codes are quoted from a document, so they are
    set in the quoted face and their digits line up in a column. */
 input[type='number'],
+input[type='date'],
+input[type='month'],
 input.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 /* ⚠️ The native select arrow is drawn by the operating system and looks
@@ -923,6 +934,168 @@ h1, h2, h3 { text-wrap: balance; }
 .clock-name { font-weight: 500; }
 .clock-expired { color: var(--uncertain); font-weight: 700; }
 .clock-warning { color: var(--amber-ink); font-weight: 700; }
+
+/* ==========================================================================
+   The patterns the answer screens are made of
+   ==========================================================================
+   Added 22.9. Diagnosis, documents, readiness, the notices and the plain-words
+   letter were each carrying their own inline colours and borders, so the same
+   idea — "this is a warning", "this is a fact and its value" — looked slightly
+   different on every screen. One definition each, here.
+   ========================================================================== */
+
+/* A screen's own title, and the line under it saying what the screen is for. */
+.screen-head { display: grid; gap: 0.35rem; margin-block-end: var(--gap); }
+.screen-head h2 { margin: 0; font-size: clamp(1.5rem, 3.4vw, 2.1rem); }
+.screen-head p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+/* ---- a fact and its value ----------------------------------------------- */
+
+/* ⚠️ A definition list, not a table: these are facts about one person, and a
+   table implies rows that can be compared. Hairlines between them so the eye
+   can run down the values without the labels blurring into them. */
+.facts { margin: 0; display: grid; }
+
+.facts-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.6rem 1rem;
+  align-items: baseline;
+  padding-block: 0.6rem;
+  border-block-end: 1px dashed var(--line-soft);
+}
+
+.facts-row:last-child { border-block-end: 0; }
+.facts-row dt { color: var(--muted); font-size: 0.92rem; margin: 0; }
+.facts-row dd { margin: 0; font-weight: 500; text-align: end; }
+.facts-row dd.mono { font-family: var(--font-mono); font-size: 0.9rem; }
+
+/* ---- a notice ----------------------------------------------------------- */
+
+/* One shape for every "read this before you go further" block. The colour of
+   the edge says how serious it is; the words always say it too. */
+.notice {
+  border-inline-start: 4px solid var(--muted);
+  border-radius: var(--radius);
+  background: var(--surface);
+  border-block: 1px solid var(--line-soft);
+  border-inline-end: 1px solid var(--line-soft);
+  padding: var(--gap) var(--gap);
+  display: grid;
+  gap: var(--gap-sm);
+}
+
+.notice h2,
+.notice h3 { margin: 0; }
+.notice p { margin: 0; }
+
+/* ⚠️ Blocking and advisory are different things and must not look alike.
+   the founder, 30.8: an advisory notice in a red box frightens a person who has no
+   problem at all. Red is reserved for what actually stops him. */
+.notice-blocking { border-inline-start-color: var(--uncertain); }
+.notice-advisory { border-inline-start-color: var(--amber); }
+.notice-quiet { border-inline-start-color: var(--line); }
+
+/* ---- the one thing to do first ------------------------------------------ */
+
+/* ⭐ The whole readiness report exists to produce this block. Amber, because
+   it is where he is standing, and the reason is part of it: a person told to
+   do step nine before step two assumes the system is broken. */
+.first-action {
+  background: var(--amber-soft);
+  border: 1px solid #ead5b4;
+  border-radius: var(--radius);
+  padding: var(--gap);
+  display: grid;
+  gap: 0.35rem;
+}
+
+.first-action h3 { margin: 0; }
+.first-action p { margin: 0; }
+.first-action-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--amber-ink);
+}
+
+.first-action-label::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  background: var(--amber);
+  transform: rotate(45deg);
+}
+
+.first-action-why { color: #6f4212; font-size: 0.9rem; }
+
+/* ---- readiness buckets -------------------------------------------------- */
+
+.bucket-toggle {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  min-height: auto;
+  padding: 0.55rem 0.9rem;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.92rem;
+}
+
+.bucket-count {
+  margin-inline-start: auto;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.bucket-item { display: grid; gap: 0.15rem; }
+.bucket-item-title { font-weight: 500; display: flex; align-items: center; gap: 0.4rem; }
+.bucket-item p { margin: 0; font-size: 0.9rem; }
+.bucket-item .fix { font-weight: 500; }
+
+/* ---- the plain-words letter --------------------------------------------- */
+
+/* ⚠️ It reads like a letter, not a chat bubble: a wider measure, more line
+   height, and a quiet line saying a language model wrote the phrasing while
+   the rules decided the content. The product's whole argument is that those
+   are two different things. */
+.letter {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: var(--gap-lg) var(--gap);
+  display: grid;
+  gap: var(--gap-sm);
+  line-height: 1.75;
+}
+
+.letter p { margin: 0; max-width: 62ch; }
+
+.letter-by {
+  border-block-start: 1px solid var(--line-soft);
+  padding-block-start: var(--gap-sm);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* ---- documents ---------------------------------------------------------- */
+
+/* Each document is its own small form, and the space between them is what
+   stops a screen of twelve fields reading as one long wall. */
+.doc-group {
+  display: grid;
+  gap: var(--gap-sm);
+  padding-block-end: var(--gap);
+  border-block-end: 1px solid var(--line-soft);
+}
+
+.doc-group:last-of-type { border-block-end: 0; }
+.doc-group h3 { margin: 0; }
+.doc-group-note { margin: 0; color: var(--muted); font-size: 0.88rem; }
 
 /* ==========================================================================
    Readiness buckets

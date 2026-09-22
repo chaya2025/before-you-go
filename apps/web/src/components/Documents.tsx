@@ -108,8 +108,8 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="stack-sm" style={{ display: 'block' }}>
-      <span className="small">{label}</span>
+    <label className="field">
+      <span className="field-label">{label}</span>
       {children}
       {problem && lang && <Problem problem={problem} lang={lang} />}
     </label>
@@ -166,9 +166,9 @@ function Group({
   children: React.ReactNode;
 }) {
   return (
-    <section className="card stack-sm">
+    <section className="card doc-group">
       <h3>{title}</h3>
-      {help && <p className="muted small">{help}</p>}
+      {help && <p className="doc-group-note">{help}</p>}
       <div className="stack-sm">{children}</div>
     </section>
   );
@@ -455,7 +455,7 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
             is the most frustrating thing a form can do — he can see the red
             message on the field, but not that it is what is stopping him. */}
         {blocked && (
-          <p className="small" role="status" style={{ margin: 0, color: 'var(--uncertain)', fontWeight: 500 }}>
+          <p className="field-error" role="status">
             {t('docs_fix_first')}
           </p>
         )}
