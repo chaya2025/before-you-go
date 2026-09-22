@@ -533,6 +533,20 @@ export const UI = {
   before: { he: 'לפני', en: 'before' },
   waiting_for: { he: 'ממתין ל', en: 'Waiting for' },
   check_first: { he: 'לבדוק לפני', en: 'Check before this' },
+  /**
+   * ⭐ Replaces the standing conditions that used to be reprinted in full
+   * inside every step that they guard. It points at the list rather than
+   * repeating it, so the wording of a rule lives in exactly one place.
+   */
+  standing_here: { he: 'חלים כאן תנאים קבועים', en: 'Standing conditions apply here' },
+  /**
+   * ⚠️ On screen the marker is a link and one tap takes him to the list. On
+   * paper there is nothing to tap, so the sheet has to say where to look.
+   */
+  standing_on_paper: {
+    he: 'ברשימה "חייב להתקיים לאורך כל הדרך", בסוף הדף',
+    en: 'in the "must hold throughout" list, at the end of the sheet',
+  },
   bring: { he: 'לוודא', en: 'Make sure' },
   sources: { he: 'מקורות', en: 'sources' },
   show_sources: { he: 'הצג מקורות', en: 'Show sources' },

@@ -824,16 +824,46 @@ h1, h2, h3 { text-wrap: balance; }
 
 .road-part-note { margin: 0; color: var(--muted); font-size: 0.9rem; }
 
-/* The part he is on. A warm ground behind it, so the eye lands there first on
-   a page that otherwise has forty items on it. */
-.road-part-now {
-  background: linear-gradient(180deg, var(--amber-soft) 0%, rgba(250, 247, 241, 0) 78%);
+/* ⭐ THE ROAD IS THREE GROUNDS, 22.9, after the founder walked the finished page:
+   "there's so much going on on one page... it could be designed better".
+
+   The landing page works because it is a sequence of full-width grounds and
+   the change of ground is what separates one idea from the next. The answer
+   page was the opposite: one paper background, forty identical white cards,
+   every one the same weight, 8,606px tall. Nothing said "this is the thing".
+
+   So the same device, brought inside: now sits on warm sand, what is coming
+   sits on plain paper, what is behind sits on sage. No new colour was
+   invented — these are the section grounds already in the system — and none
+   of them means anything. Amber still means "you are here", and only that. */
+
+.road-part {
   border-radius: var(--radius);
-  padding: var(--gap) var(--gap-sm) var(--gap-sm);
-  margin-inline: calc(var(--gap-sm) * -1);
+  padding: var(--gap) clamp(0.9rem, 2.5vw, 1.5rem) clamp(1rem, 2.5vw, 1.4rem);
+  margin-inline: calc(clamp(0.9rem, 2.5vw, 1.5rem) * -1);
 }
 
-.road-part-now .road-part-head h3 { color: var(--amber-ink); }
+/* The part he is on. The warm ground, and the only part whose steps are
+   full cards. The eye lands here first because everything else is quieter. */
+.road-part-now {
+  background:
+    radial-gradient(120% 90% at 88% 0%, rgba(200, 120, 30, 0.09) 0%, rgba(200, 120, 30, 0) 62%),
+    linear-gradient(180deg, var(--sand) 0%, rgba(250, 247, 241, 0) 88%);
+}
+
+.road-part-now .road-part-head h3 {
+  color: var(--amber-ink);
+  font-size: clamp(1.35rem, 3.4vw, 1.7rem);
+}
+
+/* What is coming. Plain paper and no card chrome at all: a list, hairlines,
+   nothing competing with the part above it. */
+.road-part-later { background: none; padding-block-start: clamp(0.6rem, 2vw, 1rem); }
+
+/* What is behind. Sage, the system's other ground, and folded. */
+.road-part-done {
+  background: linear-gradient(180deg, var(--sage-top) 0%, var(--sage-bottom) 100%);
+}
 
 /* Finished steps fold away. Nothing is hidden — he can open it — but a
    completed step is not what he came here to read. */
@@ -1107,6 +1137,138 @@ h1, h2, h3 { text-wrap: balance; }
    גלויה" — he is allowed to see what is coming. */
 .step-later { opacity: 0.66; }
 
+/* ==========================================================================
+   A step that is not for today is a ROW
+   ==========================================================================
+   Sixteen open cards was the page she called too much. A row carries the
+   three things a person scanning the road needs — which number, what it is,
+   where it stands — and opens in place for the rest. Nothing is hidden
+   (principle 20): the fold is visible, labelled and one tap from everything.
+   ========================================================================== */
+
+/* ⚠️ The asphalt lane, its dashed centre line and the diamond markers belong
+   to a road of cards. Beside a list of rows they are ink with nothing to
+   attach to, and the first render had them floating in a column of their own. */
+.road-rows {
+  display: block;
+  position: relative;
+}
+
+.road-rows::after,
+.road-rows .step::before,
+.road-rows .step::after { display: none; content: none; }
+
+/* ⭐ The road, still a road. The asphalt lane and its diamonds belong to a
+   column of cards; against a list they were ink floating beside nothing. So
+   the rail survives as one hairline running behind the numbers — the thing
+   that makes this a sequence rather than a menu — and the numbers sit on it. */
+.road-rows::before {
+  content: '';
+  position: absolute;
+  inset-block: 1.4rem;
+  inset-inline-start: 1.05rem;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(200, 120, 30, 0.35) 0%,
+    var(--line) 22%,
+    var(--line) 78%,
+    rgba(220, 211, 196, 0) 100%
+  );
+}
+
+/* A fixed column so every number sits on the rail, one digit or two. */
+.step-row .step-index {
+  width: 2.1rem;
+  text-align: center;
+  position: relative;
+  background: var(--paper);
+  padding-block: 0.15rem;
+}
+
+/* The done part sits on sage, so the numbers there stand on sage. */
+.road-part-done .step-row .step-index { background: transparent; }
+
+.step-row {
+  border-block-end: 1px solid var(--line-soft);
+  opacity: 1;
+  scroll-margin-block-start: 5rem;
+}
+
+.step-row:last-child { border-block-end: none; }
+.step-row > details > summary { list-style: none; cursor: pointer; }
+.step-row > details > summary::-webkit-details-marker { display: none; }
+
+.step-row .step-head {
+  padding-block: 0.7rem;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  transition: background var(--t-quick) var(--ease);
+}
+
+.step-row .step-head:hover { background: rgba(19, 46, 43, 0.035); }
+.step-row > details > summary.step-head:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+/* Smaller than a card's, because a row is scanned and a card is read. */
+.step-row .step-index { font-size: 1.05rem; color: var(--muted); }
+.step-row .step-head h3 { font-size: 1.02rem; font-weight: 500; }
+
+/* The chevron. ⚠️ Drawn with PHYSICAL borders on purpose: a corner made from
+   `border-inline-end` flips with the text direction and then points the wrong
+   way, which is exactly what the first render showed — every closed row with
+   an arrow claiming it was already open. Down means closed in both languages. */
+.step-row .step-head::after {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-inline-start: 0.2rem;
+  margin-block-end: 3px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform var(--t-quick) var(--ease);
+}
+
+.step-row > details[open] > summary.step-head::after {
+  transform: rotate(225deg);
+  margin-block-end: -3px;
+}
+
+.step-row-body {
+  padding: 0 0 var(--gap);
+  padding-inline-start: 2.1rem;
+}
+
+/* ⭐ One marker instead of ten reprints. Measured on the real page: the four
+   standing conditions were restated inside step cards ten more times, and one
+   of them six times on a single screen. The wording lives on the note; this
+   says the rules apply here and takes him to them. */
+.step-standing {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: flex-start;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #6a5a3c;
+  background: var(--amber-soft);
+  border: 1px solid #ead5b4;
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.7rem;
+  text-decoration: none;
+}
+
+.step-standing:hover { background: #f6e0c0; color: var(--amber-ink); }
+.step-standing svg { width: 14px; height: 14px; }
+
+/* The note it points at, when he arrives. */
+#standing:target { box-shadow: 0 0 0 2px var(--amber); }
+
+
 .step-head {
   display: flex;
   gap: var(--gap-sm);
@@ -1363,6 +1525,36 @@ h1, h2, h3 { text-wrap: balance; }
 }
 
 .first-action-why { color: #6f4212; font-size: 0.9rem; }
+
+/* ⭐ The pointer that replaced the second copy of the first action. One line:
+   the label, the step by name as a link into the road, and the why. It keeps
+   the amber ground because this IS "you are here" — it is the only thing on
+   the page that says which of sixteen steps today belongs to. */
+.first-action-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.6rem;
+  margin: 0;
+  background: var(--amber-soft);
+  border: 1px solid #ead5b4;
+  border-radius: var(--radius);
+  padding: 0.8rem var(--gap);
+}
+
+.first-action-line > a {
+  font-family: var(--font-display);
+  font-size: 1.08rem;
+  color: var(--ink);
+  text-decoration-color: var(--amber);
+  text-underline-offset: 3px;
+}
+
+.first-action-line > a:hover { color: var(--amber-ink); }
+.first-action-line .first-action-why { flex-basis: 100%; }
+
+/* The road's now band, when the pointer above has just jumped him to it. */
+#now:target { box-shadow: 0 0 0 2px var(--amber); }
 
 /* ---- readiness buckets -------------------------------------------------- */
 
@@ -2310,6 +2502,10 @@ h1, h2, h3 { text-wrap: balance; }
   /* ⭐ Only on paper. A carried sheet is frozen on the day it was printed and
      the procedures behind it are not, so the sheet says when it was made. */
   .print-only { display: block !important; }
+  /* ⚠️ Inside the standing marker it is part of the sentence, not a block. */
+  .step-standing .print-only { display: inline !important; }
+  /* Paper has no hover and no destination; it is a note, not a control. */
+  .step-standing { background: none; border: none; padding: 0; color: #000; }
 
   .print-stamp {
     font-size: 8.5pt;
