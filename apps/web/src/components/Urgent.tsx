@@ -39,11 +39,9 @@ export function Urgent({ issues, lang }: { issues: UrgentIssue[]; lang: Lang }) 
         return (
         <section
           key={issue.id}
-          className="card stack-sm"
+          className={`notice ${blocking ? 'notice-blocking' : 'notice-advisory'}`}
           role={blocking ? 'alert' : undefined}
           style={{
-            borderInlineStartWidth: '4px',
-            borderInlineStartColor: blocking ? 'var(--uncertain)' : 'var(--muted)',
             background: 'var(--surface)',
           }}
         >

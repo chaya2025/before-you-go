@@ -44,19 +44,15 @@ function Item({
   // mean four different things are one system, settable in one place.
   return (
     <div className={`bucket bucket-${item.bucket}`}>
-      <div style={{ fontWeight: 500 }}>
+      <div className="bucket-item-title">
         <span aria-hidden="true">{meta.mark}</span> {pick(item.title, lang)}
       </div>
-      <p className="small" style={{ margin: 'var(--gap-xs) 0 0' }}>
-        {pick(item.detail, lang)}
-      </p>
+      <p className="small">{pick(item.detail, lang)}</p>
 
       {/* The document's own qualification, where it has one. This is what keeps
           "check you have your glasses" from reaching a man with perfect sight. */}
       {item.note && (
-        <p className="small muted" style={{ margin: 'var(--gap-xs) 0 0' }}>
-          {pick(item.note, lang)}
-        </p>
+        <p className="small muted">{pick(item.note, lang)}</p>
       )}
 
       {/* ⚠️ Never bad news alone. The action is where he is standing, so it
@@ -106,14 +102,13 @@ function Bucket({
     <section className="stack-sm">
       <button
         type="button"
-        className="btn btn-quiet small"
-        style={{ minHeight: 'auto', paddingBlock: '0.35rem', width: '100%', justifyContent: 'flex-start' }}
+        className="btn btn-quiet bucket-toggle"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
         <span aria-hidden="true">{BUCKET[bucket].mark}</span>{' '}
         <strong style={{ color: `var(--bucket-${bucket})` }}>{t(BUCKET[bucket].key)}</strong>{' '}
-        <span className="num">{items.length}</span>
+        <span className="bucket-count num">{items.length}</span>
       </button>
       {open && (
         <div className="stack-sm">
@@ -147,10 +142,9 @@ export function Readiness({ result, lang }: { result: Result; lang: Lang }) {
 
   return (
     <section
-      className="card stack"
+      className={`card stack notice ${alarming ? 'notice-blocking' : 'notice-quiet'}`}
       role={alarming ? 'alert' : undefined}
       style={{
-        borderInlineStartWidth: '4px',
         borderInlineStartColor: alarming
           ? 'var(--uncertain)'
           : r.verdict === 'ready'
@@ -158,9 +152,9 @@ export function Readiness({ result, lang }: { result: Result; lang: Lang }) {
             : 'var(--line)',
       }}
     >
-      <div>
+      <div className="screen-head">
         <h2>{t('readiness_title')}</h2>
-        <p style={{ margin: 'var(--gap-xs) 0 0' }}>{pick(r.headline, lang)}</p>
+        <p>{pick(r.headline, lang)}</p>
       </div>
 
       {/* ⭐ ONE thing to do next, and the reason it is that one. The whole
@@ -169,25 +163,22 @@ export function Readiness({ result, lang }: { result: Result; lang: Lang }) {
           Monday morning. */}
       {r.first_action && (
         <div
+          className="first-action"
           style={{
-            background: 'var(--amber-soft)',
-            borderRadius: 'var(--radius-sm)',
             padding: 'var(--gap)',
           }}
         >
-          <div className="small muted">⭐ {t('r_first_action')}</div>
-          <h3 style={{ margin: 'var(--gap-xs) 0' }}>{pick(r.first_action.title, lang)}</h3>
+          <div className="first-action-label">{t('r_first_action')}</div>
+          <h3>{pick(r.first_action.title, lang)}</h3>
           {pick(r.first_action.action, lang)
             .split('\n')
             .filter(Boolean)
             .map((line, i) => (
-              <p key={i} style={{ margin: '0 0 var(--gap-xs)' }}>
-                {line}
-              </p>
+              <p key={i}>{line}</p>
             ))}
           {/* ⚠️ A person told to do step nine before step two assumes the system
               is broken. Both surprising orderings here look wrong until read. */}
-          <p className="small muted" style={{ margin: 0 }}>
+          <p className="first-action-why">
             {t('r_why')}: {pick(r.first_action.why, lang)}
           </p>
         </div>
