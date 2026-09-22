@@ -5,7 +5,7 @@ import { UI, pick, dirFor, type Lang } from './i18n';
 import { Intake, type Answers } from './components/Intake';
 import { Diagnosis, Blocked } from './components/Diagnosis';
 import { Documents } from './components/Documents';
-import { Roadmap } from './components/Roadmap';
+import { Roadmap, RoadSide } from './components/Roadmap';
 import { Urgent } from './components/Urgent';
 import { Readiness } from './components/Readiness';
 import { PlainWords } from './components/PlainWords';
@@ -65,6 +65,8 @@ export function App() {
   const [plainLanguage, setPlainLanguage] = useState(false);
   /** What the system can check readiness for. Served, never hardcoded here. */
   const [processes, setProcesses] = useState<Process[]>([]);
+  /** The plain-words panel, opened from the button in the corner. */
+  const [asking, setAsking] = useState(false);
 
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
 
@@ -264,6 +266,167 @@ export function App() {
    * would cut every band in half. Everything past it is a form, and a form
    * belongs in a column.
    */
+  /**
+   * ⭐ The answer is a PAGE, not a column. The road is the main body and the
+   * things he must keep in mind while walking it — the clocks, the standing
+   * conditions — sit beside it and stay visible as he scrolls. Her note after
+   * walking the finished road: "it's just a long list of things to do".
+   */
+  if (screen === 'roadmap' && result && !result.blocked) {
+    return (
+      <>
+        {header}
+        <div className="answer">
+          <div className="answer-head">
+            <h2>{t('roadmap_title')}</h2>
+            <div className="answer-progress">
+              <span>
+                <span className="num">{result.roadmap.filter((s) => s.state === 'done').length}</span>{' '}
+                {t('progress')} {t('of')} <span className="num">{result.roadmap.length}</span>{' '}
+                {t('steps_count')}
+              </span>
+              <div className="road-progress" aria-hidden="true">
+                <span
+                  style={{
+                    width: `${(result.roadmap.filter((s) => s.state === 'done').length / Math.max(result.roadmap.length, 1)) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/**
+            * ⭐ The numbers that decide his week, her ask 22.9. Four at most,
+            * and each one is something he would otherwise have to work out by
+            * reading the whole page. A tile that merely counts something is
+            * decoration and does not belong here.
+            *
+            * ⚠️ Every figure is read off the engine's own result. Nothing here
+            * is computed a second way, because a figure that disagrees with the
+            * road underneath it destroys the trust the road is built on.
+            */}
+          {(() => {
+            const doneSteps = result.roadmap.filter((x) => x.state === 'done').length;
+            const running = result.clocks
+              .filter((c) => c.status === 'running' && typeof c.days_left === 'number')
+              .sort((a, b) => (a.days_left ?? 0) - (b.days_left ?? 0))[0];
+            const expired = result.clocks.find((c) => c.status === 'expired');
+            const r = result.readiness;
+            const problems = r ? r.missing.length + r.mismatched.length : 0;
+
+            return (
+              <div className="figures">
+                <div className={`figure${result.roadmap.length - doneSteps > 0 ? ' figure-now' : ''}`}>
+                  <b className="num">{result.roadmap.length - doneSteps}</b>
+                  <span>{t('fig_steps_left')}</span>
+                  <small>
+                    {t('fig_of')} <span className="num">{result.roadmap.length}</span>
+                  </small>
+                </div>
+
+                <div className={`figure${expired ? ' figure-bad' : running && (running.days_left ?? 0) < 60 ? ' figure-now' : ''}`}>
+                  {running ? (
+                    <>
+                      <b className="num">{running.days_left}</b>
+                      <span>
+                        {t('fig_days_left')} · {pick(running.clock.name, lang)}
+                      </span>
+                      {running.deadline && <small className="num">{running.deadline}</small>}
+                    </>
+                  ) : expired ? (
+                    <>
+                      <b>—</b>
+                      <span>{pick(expired.clock.name, lang)}</span>
+                      <small>{t('expired')}</small>
+                    </>
+                  ) : (
+                    <>
+                      <b>—</b>
+                      <span>{t('fig_no_clock')}</span>
+                    </>
+                  )}
+                </div>
+
+                <div className={`figure${r && r.ready.length > 0 ? ' figure-good' : ''}`}>
+                  <b className="num">{r ? r.ready.length : 0}</b>
+                  <span>{t('fig_docs_ok')}</span>
+                </div>
+
+                <div className={`figure${problems > 0 ? ' figure-bad' : ''}`}>
+                  <b className="num">{problems}</b>
+                  <span>{t('fig_docs_problem')}</span>
+                  <small>{t('fig_problem_note')}</small>
+                </div>
+              </div>
+            );
+          })()}
+
+          <div className="answer-cols">
+            {/* ⭐ ONE orchestrated reveal, on the screen where the answer
+                arrives, and nothing else in the product moves. */}
+            <div className="answer-main reveal">
+              {/* ⚠️ Above the road. A roadmap built on a lapsed visa describes
+                  a process he cannot currently start. */}
+              <Urgent issues={result.urgent} lang={lang} />
+              {/* ⭐ Whether what he is CARRYING will work, and the one thing to
+                  do next. The road is the detail under it. */}
+              <Readiness result={result} lang={lang} />
+              <Roadmap result={result} lang={lang} onToggle={toggleStep} />
+              <button className="btn btn-quiet" onClick={restart}>
+                {t('start_over')}
+              </button>
+            </div>
+
+            <aside className="answer-side">
+              <RoadSide result={result} lang={lang} />
+            </aside>
+          </div>
+
+          {/**
+            * ⭐ Her call, 22.9: this becomes a chat about his own case, so the
+            * way in is built now and the panel behind it does the one thing it
+            * can do today — say the finished answer in plain words.
+            *
+            * ⚠️ It REPLACES nothing, and nothing depends on it. The road and
+            * the report are complete before it is ever opened, and they stay
+            * exactly as they are if the model is switched off or wrong.
+            */}
+          {!asking && (
+            <button type="button" className="ask-fab" onClick={() => setAsking(true)}>
+              <svg className="seal" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                <circle cx="20" cy="20" r="18.25" stroke="currentColor" strokeWidth="2" />
+                <circle cx="20" cy="20" r="5" fill="var(--amber)" />
+              </svg>
+              {t('ask_open')}
+            </button>
+          )}
+
+          {asking && (
+            <aside className="ask-panel" role="dialog" aria-label={t('ask_open')}>
+              <div className="ask-head">
+                <h2>{t('ask_open')}</h2>
+                <button
+                  type="button"
+                  className="ask-close"
+                  aria-label={t('ask_close')}
+                  onClick={() => setAsking(false)}
+                >
+                  ×
+                </button>
+              </div>
+              <p className="ask-soon">{t('ask_soon')}</p>
+              <PlainWords
+                profile={answers ? { ...answers, completed_steps: done } : null}
+                lang={lang}
+                available={plainLanguage}
+              />
+            </aside>
+          )}
+        </div>
+      </>
+    );
+  }
+
   if (screen === 'welcome') {
     return (
       <>
@@ -344,35 +507,8 @@ export function App() {
         />
       )}
 
-      {screen === 'roadmap' && result && (
-        <>
-          {result.blocked ? (
-            <Blocked result={result} lang={lang} onBack={restart} />
-          ) : (
-            /* ⭐ ONE orchestrated reveal, on the screen where the answer
-               arrives, and nothing else in the product moves. This is the
-               moment the person filled in the whole form for. Scattered
-               animation elsewhere would make it read as a toy, and a tool for
-               people who have already been failed by an office must not. */
-            <div className="stack reveal">
-              {/* ⭐ First, and it REPLACES nothing. If the model ever wrote
-                  something wrong, every exact step is still below it. */}
-              <PlainWords profile={answers ? { ...answers, completed_steps: done } : null} lang={lang} available={plainLanguage} />
-              {/* ⚠️ Above the road, not beside it. A roadmap built on a lapsed
-                  visa describes a process he cannot currently start. */}
-              <Urgent issues={result.urgent} lang={lang} />
-              {/* ⭐ Between the notices and the road. The notices say what is in
-                  the way; this says whether what he is CARRYING will work, and
-                  names the one thing to do next. The road is the detail under
-                  it. */}
-              <Readiness result={result} lang={lang} />
-              <Roadmap result={result} lang={lang} onToggle={toggleStep} />
-              <button className="btn btn-quiet" onClick={restart}>
-                {t('start_over')}
-              </button>
-            </div>
-          )}
-        </>
+      {screen === 'roadmap' && result && result.blocked && (
+        <Blocked result={result} lang={lang} onBack={restart} />
       )}
     </div>
   );

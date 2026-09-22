@@ -320,6 +320,25 @@ export const UI = {
     en: 'A field requires correction before continuing. It is marked above.',
   },
 
+  /* ── "do you have it?", asked before any field ───────────────────────────
+     ⭐ Added 22.9. The founder: an א/2 with no teudat zehut and no licence "gives him
+     to fill in the 89 field which he doesn't even have one." The screen now
+     asks first and shows the boxes only on a yes.
+
+     ⚠️ The wording carries no blame and no alarm. Not having been issued a
+     document yet is the ordinary state of a person at the start of his route,
+     and it is precisely what step one of his roadmap is for. */
+  d_have_it: {
+    he: 'המסמך הזה ברשותך?',
+    en: 'Do you have this document?',
+  },
+  d_have_it_yes: { he: 'כן, הוא מולי', en: 'Yes, it is in front of me' },
+  d_have_it_no: { he: 'לא, טרם הוצאתי אותו', en: 'No, I have not been issued one' },
+  d_have_it_no_note: {
+    he: 'בסדר גמור. הוצאת המסמך מופיעה כשלב במפת הדרכים שלך, ולא נשאל עליו שום דבר נוסף.',
+    en: 'That is fine. Obtaining it is a step on your roadmap, and nothing further is asked about it here.',
+  },
+
   d_89_title: { he: 'מסמך 89 ("הטופס הלבן")', en: 'The 89 document (the "white form")' },
   d_89_help: {
     // ⭐ The one line that explains why any of this matters, in his terms.
@@ -416,6 +435,54 @@ export const UI = {
   r_missing: { he: 'אינו ברשותך', en: 'Not in your possession' },
   r_unconfirmed: { he: 'טרם נבדק', en: 'Not yet checked' },
   r_ready: { he: 'ברשותך ותקין', en: 'In your possession and in order' },
+
+  /* The road, cut into three named parts. "What do I do today" is the only
+     question this screen exists to answer, so the parts say it out loud. */
+  /* Where a step happens. The WHERE is what he plans his day around. */
+  ch_online: { he: 'אונליין', en: 'Online' },
+  ch_licensing_office: { he: 'במשרד הרישוי', en: 'At the licensing office' },
+  ch_post_office: { he: 'בסניף דואר', en: 'At a post office' },
+  ch_photo_station: { he: 'בתחנת צילום', en: 'At a photo station' },
+  ch_driving_school: { he: 'בבית ספר לנהיגה', en: 'At a driving school' },
+  ch_test_center: { he: 'במרכז בחינות', en: 'At a test centre' },
+  ch_population_authority: { he: 'ברשות האוכלוסין', en: 'At the Population Authority' },
+  ch_origin_country: { he: 'במדינת המוצא', en: 'In the country of origin' },
+  ch_mail: { he: 'מגיע בדואר', en: 'Arrives by post' },
+  ch_unknown: { he: 'לא ידוע היכן', en: 'Where is not known' },
+
+  /* The figures at the top of the answer. Each one is a number he would
+     otherwise have to work out by reading the whole page. */
+  fig_steps_left: { he: 'שלבים שנותרו', en: 'Steps left' },
+  fig_of: { he: 'מתוך', en: 'of' },
+  fig_days_left: { he: 'ימים', en: 'days' },
+  fig_no_clock: { he: 'אין שעון שרץ', en: 'No clock running' },
+  fig_docs_ok: { he: 'מסמכים תקינים', en: 'Documents in order' },
+  fig_docs_problem: { he: 'מסמכים לטפל בהם', en: 'Documents to deal with' },
+  fig_problem_note: { he: 'חסר או לא תואם', en: 'Missing or mismatched' },
+
+  /* Ask about your case. A chat, once it is one. */
+  ask_open: { he: 'שאלה על התיק שלך', en: 'Ask about your case' },
+  ask_close: { he: 'סגירה', en: 'Close' },
+  ask_soon: {
+    he: 'כרגע כאן אפשר לקבל סיכום במילים פשוטות. שאלות חופשיות יתווספו בהמשך.',
+    en: 'For now this gives a summary in plain words. Free questions will come later.',
+  },
+
+  road_now: { he: 'עכשיו', en: 'Now' },
+  road_now_note: {
+    he: 'מה שאפשר להתחיל בו היום. השאר ממתין לזה.',
+    en: 'What can be started today. The rest waits on it.',
+  },
+  road_next: { he: 'בהמשך הדרך', en: 'Further along' },
+  road_next_note: {
+    he: 'כל השלבים לפי הסדר, כדי שתדע למה לצפות.',
+    en: 'Every step in order, so you know what is coming.',
+  },
+  road_done: { he: 'שכבר ביצעת', en: 'Already done' },
+  road_empty_now: {
+    he: 'אין שלב שאפשר להתחיל בו כרגע — פתח את השלבים שבהמשך כדי לראות במה זה תלוי.',
+    en: 'Nothing can be started right now. Open the steps further along to see what it waits on.',
+  },
 
   roadmap_title: { he: 'הדרך שלך', en: 'Your road' },
   steps_count: { he: 'שלבים', en: 'steps' },
