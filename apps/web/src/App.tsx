@@ -10,6 +10,7 @@ import { Urgent } from './components/Urgent';
 import { Readiness } from './components/Readiness';
 import { PlainWords } from './components/PlainWords';
 import { Welcome } from './components/Welcome';
+import { useReveal } from './useReveal';
 
 /**
  * ============================================================================
@@ -66,6 +67,9 @@ export function App() {
   const [processes, setProcesses] = useState<Process[]>([]);
 
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
+
+  /* Motion, on the landing page only. Nothing past it moves. */
+  useReveal(screen === 'welcome', processes.length);
 
   /**
    * ⚠️ The direction of the whole document changes with the language, not just
@@ -186,40 +190,58 @@ export function App() {
     }
   }
 
+  const header = (
+    <header className="mast">
+      <div className="mast-in">
+        <div className="mark">
+          {/**
+           * ⭐ The seal. The PRD's own statement of the brand is
+           * "נקודת אור אחת בענבר שמסמנת היכן אתה עומד", drawn here as a stamp:
+           * a ruled circle, a dashed inner ring, the amber point at the centre,
+           * four marks at the compass points. Drawn rather than an image file,
+           * so it takes the ink colour and needs no load.
+           */}
+          <svg className="seal" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <circle cx="20" cy="20" r="18.25" stroke="currentColor" strokeWidth="1.5" />
+            <circle cx="20" cy="20" r="13.5" stroke="currentColor" strokeWidth="0.75" strokeDasharray="2 3" />
+            <circle cx="20" cy="20" r="4.6" fill="var(--amber)" />
+            <path d="M20 2.2v4M20 33.8v4M2.2 20h4M33.8 20h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          <span className="mark-txt">
+            <h1 className="ltr">{t('brand')}</h1>
+            <i>{t('tagline')}</i>
+          </span>
+        </div>
+
+        <button
+          className="btn btn-quiet"
+          onClick={() => setLang(lang === 'he' ? 'en' : 'he')}
+          aria-label={lang === 'he' ? 'Switch to English' : 'עבור לעברית'}
+        >
+          {lang === 'he' ? 'EN' : 'עב'}
+        </button>
+      </div>
+    </header>
+  );
+
+  /**
+   * ⚠️ The landing page is the one screen that is NOT inside the reading
+   * column: its grounds run the full width of the window, and a 46rem wrapper
+   * would cut every band in half. Everything past it is a form, and a form
+   * belongs in a column.
+   */
+  if (screen === 'welcome') {
+    return (
+      <>
+        {header}
+        <Welcome processes={processes} lang={lang} onStart={() => setScreen('intake')} />
+      </>
+    );
+  }
+
   return (
     <div className="page stack">
-      <header className="stack-sm">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 'var(--gap-sm)' }}>
-          <div>
-            {/* The logotype stands in for the mark, which the PRD says is not
-                needed before launch: "נדרש לפני ההשקה, לא לפני ה-POC." */}
-            <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span
-                aria-hidden="true"
-                style={{
-                  display: 'inline-block',
-                  width: '0.55rem',
-                  height: '0.55rem',
-                  borderRadius: '50%',
-                  background: 'var(--amber)',
-                }}
-              />
-              <span className="ltr">{t('brand')}</span>
-            </h1>
-            <p className="muted" style={{ margin: 0 }}>
-              {t('tagline')}
-            </p>
-          </div>
-
-          <button
-            className="btn btn-quiet"
-            onClick={() => setLang(lang === 'he' ? 'en' : 'he')}
-            aria-label={lang === 'he' ? 'Switch to English' : 'עבור לעברית'}
-          >
-            {lang === 'he' ? 'EN' : 'עב'}
-          </button>
-        </div>
-      </header>
+      {header}
 
       {/* ⭐ Where you are, in four marks. Added 31.8.
           The flow is intake → אבחון → מסמכים → הדרך, and until now a person
@@ -228,7 +250,6 @@ export function App() {
           an unmarked multi-step form is its own small anxiety.
           Marks rather than numbered labels, so it stays legible at 320px and
           mirrors correctly in both directions. */}
-      {screen !== 'welcome' && (
       <ol className="progress" aria-label={t('progress_label')}>
         {SCREENS.map((s, i) => {
           const at = SCREENS.indexOf(screen);
@@ -238,11 +259,6 @@ export function App() {
           );
         })}
       </ol>
-      )}
-
-      {screen === 'welcome' && (
-        <Welcome processes={processes} lang={lang} onStart={() => setScreen('intake')} />
-      )}
 
       {screen === 'intake' && (
         <p className="muted">

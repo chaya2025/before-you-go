@@ -858,6 +858,587 @@ h1, h2, h3 { text-wrap: balance; }
 }
 
 /* ==========================================================================
+   The masthead
+   ==========================================================================
+   Added 22.9. It stays with the reader rather than scrolling away, because on
+   a page of full-width bands there is otherwise no fixed point at all, and the
+   language switch has to stay reachable from anywhere on a long page.
+   ========================================================================== */
+
+.mast {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 50;
+  background: rgba(250, 247, 241, 0.9);
+  backdrop-filter: blur(12px);
+  border-block-end: 1px solid var(--line-soft);
+}
+
+.mast-in {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0.7rem clamp(1.15rem, 4vw, 3.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.mast .btn { padding: 0.5rem 1.1rem; min-height: 0; font-size: 0.9rem; }
+
+.mark { display: flex; align-items: center; gap: 0.7rem; color: var(--ink); }
+.seal { width: 34px; height: 34px; flex: none; }
+.mark-txt { display: flex; flex-direction: column; line-height: 1.05; }
+.mark-txt h1 { font-size: 1.05rem; letter-spacing: 0.01em; margin: 0; }
+
+/* ⭐ The tagline is the one place the script face appears on every screen.
+   It is the product's own name for itself, not information. */
+.mark-txt i {
+  font-style: normal;
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 1.22rem;
+  color: var(--amber-ink);
+  margin-block-start: 0.15rem;
+}
+
+/* A small line above a heading, naming who or what the section is for. */
+.eyebrow {
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  color: var(--amber-ink);
+  margin: 0;
+}
+
+/* ==========================================================================
+   The landing page
+   ==========================================================================
+   Rebuilt 22.9 to the design the founder approved:
+   project-notes/mvp-m0/mockup/
+
+   ⭐ The page is a sequence of full-width GROUNDS — paper, ink, sand, sage,
+   white — and the change of ground is what separates one idea from the next.
+   A landing page made of identical white cards in one column is what "looks
+   AI-generic" actually means, and it was her first note on the old one.
+
+   ⚠️ The grounds carry no meaning. Amber still means "you are here" and the
+   primary action, nowhere else, exactly as the PRD requires.
+   ========================================================================== */
+
+.stack-lg > * + * { margin-block-start: var(--gap-xl); }
+
+/* A full-width band with a readable column inside it. */
+.band { padding-block: clamp(3rem, 7.5vw, 5rem); }
+.band-in {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding-inline: clamp(1.15rem, 4vw, 3.5rem);
+}
+
+.band-head { max-width: 46rem; display: grid; gap: 0.7rem; }
+.band-head h2 { margin: 0; }
+.band-head p { margin: 0; color: var(--muted); font-size: 1.02rem; }
+
+/* The script kicker over a section heading: the product's own voice, one
+   line, never carrying information that is not repeated in the heading. */
+.kicker {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--amber-ink);
+  line-height: 1;
+  margin: 0 0 0.1rem;
+}
+
+/* ---- the hero ----------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  background: var(--sand);
+  isolation: isolate;
+  border-block-end: 1px solid var(--ink);
+}
+
+/* ⚠️ The photograph is inset beyond the section on every side and moved by
+   script as the page scrolls, so it can travel without ever exposing an edge. */
+.hero-photo {
+  position: absolute;
+  inset: -14% 0;
+  z-index: 0;
+  will-change: transform;
+}
+
+.hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 60% 45%; }
+
+/* ⚠️ Paper over the photograph, heaviest where the words are. The type is ink
+   on light, which is the only way this stays legible when the photograph is
+   replaced by a different one later. */
+/* ⚠️ The scrim is heaviest UNDER THE WORDS, which in Hebrew is the right-hand
+   side and in English the left. A fixed angle put the heavy end on the wrong
+   side the moment the page flipped, and the lede was left sitting on a lit
+   building. `to left` / `to right` are physical on purpose — they are pinned
+   to the direction they are written for. */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(to left, rgba(243, 233, 216, 0.15) 0%, rgba(250, 247, 241, 0.80) 30%, rgba(250, 247, 241, 0.97) 58%, rgba(250, 247, 241, 0.99) 100%);
+}
+
+[dir='ltr'] .hero::after {
+  background: linear-gradient(to right, rgba(243, 233, 216, 0.15) 0%, rgba(250, 247, 241, 0.80) 30%, rgba(250, 247, 241, 0.97) 58%, rgba(250, 247, 241, 0.99) 100%);
+}
+
+.hero-in {
+  position: relative;
+  z-index: 2;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: clamp(3rem, 9vw, 6rem) clamp(1.15rem, 4vw, 3.5rem) clamp(3rem, 7vw, 4.5rem);
+}
+
+.hero h2 {
+  font-size: clamp(2.2rem, 6.2vw, 4rem);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin-block: 1rem 0.3rem;
+  max-width: 16ch;
+}
+
+.hero h2 em { font-style: normal; color: var(--amber-ink); }
+
+/* The rule under the headline. Short, amber, and the only amber on the screen
+   until the button. */
+.hero-rule {
+  width: clamp(3rem, 9vw, 5.5rem);
+  height: 3px;
+  background: var(--amber);
+  margin-block-start: 1.3rem;
+}
+
+.hero-lede {
+  font-size: clamp(1.05rem, 1.7vw, 1.24rem);
+  font-weight: 300;
+  color: #31504b;
+  max-width: 46ch;
+  margin: 1.1rem 0 0;
+  line-height: 1.55;
+}
+
+.hero-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  align-items: center;
+  margin-block-start: 2rem;
+}
+
+.hero-meta { font-size: 0.9rem; color: #5c6d68; }
+
+/* ---- what the person actually receives ---------------------------------- */
+
+.gets { background: var(--ink); color: #e9f1ee; }
+
+.gets .kicker { color: var(--amber); }
+
+.gets-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-block-start: 0.6rem;
+}
+
+@media (min-width: 820px) {
+  .gets-grid { grid-template-columns: repeat(3, 1fr); gap: 2.4rem; }
+}
+
+.get { display: grid; grid-template-columns: auto 1fr; gap: 0.9rem; align-items: start; }
+.get svg { width: 26px; height: 26px; color: var(--amber); flex: none; margin-block-start: 0.15rem; }
+.get b {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.08rem;
+  color: #fff;
+}
+.get span { display: block; color: #a6bdb6; font-size: 0.92rem; margin-block-start: 0.2rem; }
+
+/* ---- the notice --------------------------------------------------------- */
+
+/* ⚠️ Quiet on purpose, and rebuilt 22.9 after the founder's note that a yellow block
+   here fought everything around it. A loud disclaimer reads as a warning about
+   the product; this is a statement of fact that happens to build trust. */
+.decl {
+  position: relative;
+  background: var(--paper);
+  border-block-end: 1px solid var(--line-soft);
+}
+
+.decl::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--amber) 0%, #e0a860 45%, rgba(200, 120, 30, 0.12) 100%);
+}
+
+.decl-in {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.1rem clamp(1.15rem, 4vw, 3.5rem);
+  display: grid;
+  gap: 0.55rem 1.6rem;
+}
+
+@media (min-width: 820px) {
+  .decl-in { grid-template-columns: auto 1fr; align-items: center; }
+}
+
+.decl-mark {
+  justify-self: start;
+  background: var(--amber-soft);
+  border: 1px solid #ead5b4;
+  border-radius: var(--radius-pill);
+  color: var(--amber-ink);
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  padding: 0.3rem 1rem;
+}
+
+.decl p { margin: 0; font-size: 0.95rem; color: #3e5854; }
+
+/* ---- how it works: three steps on a track ------------------------------- */
+
+.ground-sage-band {
+  background: linear-gradient(180deg, var(--sage-top) 0%, var(--sage-bottom) 38%, var(--paper) 100%);
+}
+
+.track { position: relative; margin-block-start: clamp(2rem, 4.5vw, 3rem); }
+
+/* The track itself: a dashed line between the three marks, and an amber line
+   that draws along it as the section arrives. The road, one section early. */
+.track::before,
+.track::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 31px;
+  height: 2px;
+  display: none;
+}
+
+.track::before {
+  inset-inline: 6%;
+  background: repeating-linear-gradient(to right, var(--line) 0 8px, transparent 8px 18px);
+}
+
+.track::after {
+  inset-inline-start: 6%;
+  width: 0;
+  background: var(--amber);
+  transition: width 1.5s var(--ease) 0.25s;
+}
+
+.track.in::after { width: 88%; }
+
+@media (min-width: 820px) {
+  .track::before,
+  .track::after { display: block; }
+}
+
+.beats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.1rem;
+}
+
+@media (min-width: 820px) {
+  .beats { grid-template-columns: repeat(3, 1fr); gap: 1.6rem; }
+}
+
+.beat { display: flex; flex-direction: column; gap: 0.7rem; }
+
+.beat-mark {
+  position: relative;
+  z-index: 2;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  border: 2px solid var(--line);
+  color: var(--amber-ink);
+  transition: border-color 0.5s var(--ease), transform 0.5s var(--ease);
+}
+
+.beat-mark svg { width: 28px; height: 28px; }
+
+/* The number rides on the mark rather than sitting beside it, so the icon can
+   say what the step is while the number says where it comes in the sequence. */
+.beat-mark em {
+  position: absolute;
+  inset-block-end: -6px;
+  inset-inline-end: -6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--sand);
+  color: var(--amber-ink);
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.72rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  transition: background 0.5s var(--ease), color 0.5s var(--ease), border-color 0.5s var(--ease);
+}
+
+.beat.in .beat-mark { border-color: var(--amber); transform: scale(1.02); }
+.beat.in .beat-mark em { background: var(--amber); color: #fff; border-color: var(--amber); }
+
+.beat-card {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  padding: 1.35rem 1.35rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: transform var(--t-move) var(--ease), box-shadow var(--t-move) var(--ease), border-color var(--t-move) var(--ease);
+}
+
+.beat:hover .beat-card {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--line);
+}
+
+.beat-card h3 { margin: 0; }
+
+/* ⭐ The step's explanation is the one paragraph on the site set in the script
+   face. It is the product talking, not the procedure. Anything quoted from a
+   procedure — a regulation, a document number — stays in the quoted face even
+   inside this sentence. */
+.beat-card p {
+  margin: 0;
+  color: #3e5854;
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 1.42rem;
+  line-height: 1.25;
+}
+
+.beat-card p .code { font-family: var(--font-mono); font-weight: 500; font-size: 0.85rem; }
+
+/* ---- the processes ------------------------------------------------------ */
+
+.services { background: var(--surface); border-block-start: 1px solid var(--line-soft); }
+
+.svc { padding-block: clamp(2.4rem, 6vw, 4rem); }
+.svc + .svc { border-block-start: 1px solid var(--line-soft); }
+
+.svc-in {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding-inline: clamp(1.15rem, 4vw, 3.5rem);
+  display: grid;
+  gap: clamp(1.6rem, 4vw, 3.4rem);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .svc-in { grid-template-columns: 1fr 1fr; }
+  .svc-flip .svc-art { order: -1; }
+}
+
+.svc-copy h3 { font-size: clamp(1.6rem, 3.2vw, 2.3rem); margin-block-start: 0.35rem; }
+.svc-copy > p { color: #3b5652; margin: 0.8rem 0 0; max-width: 40ch; }
+
+/* The state line over a service name: a dot and a word, never colour alone. */
+.svc-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 600;
+  font-size: 0.82rem;
+  letter-spacing: 0.09em;
+  color: var(--amber-ink);
+}
+
+.svc-state::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+}
+
+.svc-state-soon { color: var(--muted); }
+.svc-state-soon::before { background: var(--muted); }
+
+.svc-where { margin-block-start: 1rem; font-size: 0.88rem; color: var(--muted); }
+
+.svc-cta { margin-block-start: 1.6rem; display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; }
+.svc-note { font-size: 0.88rem; color: var(--muted); }
+
+.svc-art { position: relative; isolation: isolate; }
+
+/* A tinted plate behind the photograph, offset to the side. It gives the
+   photograph weight without a border or a drop shadow. */
+.svc-art::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset-block: 8%;
+  inset-inline: -14px;
+  border-radius: 26px;
+  background: var(--sand);
+  opacity: 0.55;
+  transition: opacity 0.5s var(--ease);
+}
+
+.svc-art.in::after { opacity: 1; }
+.svc-flip .svc-art::after { background: var(--sage-bottom); }
+
+.svc-photo {
+  position: relative;
+  margin: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--sand);
+}
+
+.svc-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.14);
+  transition: transform 1.6s var(--ease);
+  will-change: transform;
+}
+
+.svc-art.in .svc-photo img { transform: scale(1); }
+.svc-art:hover .svc-photo img { transform: scale(1.06); }
+
+/* ⚠️ A process that does not exist yet keeps its photograph but loses its
+   colour, and says so in words. Nothing on this page may look ready when it
+   is not — that is the same rule the engine follows about a requirement. */
+.svc-photo-soon img { filter: grayscale(0.6) brightness(1.05); }
+
+.svc-tag {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 14px;
+  inset-inline-start: 14px;
+  background: rgba(250, 247, 241, 0.96);
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.9rem;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.svc-tag::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+
+/* ---- the closing call --------------------------------------------------- */
+
+.close { background: var(--ink); color: #e6eeeb; padding-block: clamp(3rem, 8vw, 5rem); }
+
+.close-in {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding-inline: clamp(1.15rem, 4vw, 3.5rem);
+  display: grid;
+  gap: 1.7rem;
+}
+
+@media (min-width: 860px) {
+  .close-in { grid-template-columns: 1.25fr auto; align-items: center; }
+}
+
+.close .script { color: var(--amber); font-size: clamp(1.6rem, 3vw, 2.1rem); display: block; margin-block-end: 0.4rem; }
+.close h2 { color: #fff; margin: 0; }
+.close p { margin: 0.85rem 0 0; color: #a6bdb6; max-width: 46ch; }
+
+.close .btn { border-color: var(--amber); background: var(--amber); color: #1a1103; }
+.close .btn::before { background: var(--paper); }
+.close .btn:hover { color: var(--ink); border-color: var(--paper); }
+
+/* ---- reveal on arrival -------------------------------------------------- */
+
+/* ⚠️ Everything starts visible and is hidden by script only when the browser
+   can actually observe it arriving. A page that parks its content at zero
+   opacity and waits for JavaScript shows nothing at all when the script fails
+   — and this audience is exactly the one on an old phone and a poor line. */
+.js-reveal .rise { opacity: 0; transform: translateY(22px); }
+
+.rise {
+  transition: opacity 0.85s var(--ease), transform 0.85s var(--ease);
+}
+
+.rise.in { opacity: 1; transform: none; }
+.rise-1 { transition-delay: 0.09s; }
+.rise-2 { transition-delay: 0.18s; }
+.rise-3 { transition-delay: 0.27s; }
+
+@media print {
+  :root {
+    --paper: #fff;
+    --surface: #fff;
+    --ink: #000;
+    --muted: #444;
+    --line: #999;
+    --shadow: none;
+  }
+
+  body { background: #fff; }
+
+  .page { max-width: none; padding: 0; }
+
+  /* Controls, navigation and anything that only exists to be pressed. */
+  button,
+  .btn,
+  .progress,
+  input,
+  select {
+    display: none !important;
+  }
+
+  .card {
+    box-shadow: none;
+    border: 1px solid #999;
+    /* A step must not be split across two sheets — half an instruction is
+       worse than none when you are reading it at a counter. */
+    break-inside: avoid;
+  }
+
+  /* Print the URL after every link, or a printed page loses every reference. */
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.75em;
+    color: #444;
+    word-break: break-all;
+  }
+
+  /* Folded sources are unfoldable on paper, so they are opened. */
+  details { display: block; }
+  details > summary { font-weight: 700; }
+
+  .reveal > * { animation: none; }
+}
+
+/* ==========================================================================
    The landing page
    ==========================================================================
    ⭐ אור ראשון means "first light", and the hero takes the brand name
@@ -878,150 +1459,10 @@ h1, h2, h3 { text-wrap: balance; }
   isolation: isolate;
 }
 
-/* First light. Sits behind the type, never over it. */
-.hero::before {
-  content: '';
-  position: absolute;
-  z-index: -1;
-  inset-block-start: -35%;
-  inset-inline-start: -12%;
-  width: 22rem;
-  max-width: 120%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--amber-soft) 0%, transparent 68%);
-  opacity: 0.9;
-  pointer-events: none;
-}
-
-/* Hero scale on an h2, so the landing page has exactly one h1 — the wordmark
-   in the header — and still gets its large display moment. */
-.hero h2 {
-  font-size: clamp(1.9rem, 6vw, 2.6rem);
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  margin-block: 0 var(--gap-sm);
-  max-width: 18ch;
-}
-
-.hero-lede {
-  font-size: 1.075rem;
-  font-weight: 300;
-  color: var(--muted);
-  max-width: 46ch;
-  margin: 0;
-}
-
-/* ⚠️ Quiet on purpose. A loud disclaimer reads as a warning about the product;
-   this is a statement of fact that happens to build trust. */
-.disclaimer {
-  border-inline-start: 3px solid var(--muted);
-}
-
-.disclaimer-title {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  font-weight: 700;
-  margin-block-end: var(--gap-xs);
-}
-
-/* ---- how it works ------------------------------------------------------- */
-
-.beats {
-  list-style: none;
-  counter-reset: beat;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: var(--gap-sm);
-}
-
-.beats li {
-  counter-increment: beat;
-  display: grid;
-  grid-template-columns: 1.75rem 1fr;
-  gap: 0 var(--gap-sm);
-  align-items: baseline;
-}
-
-/* ⭐ Numbered because it genuinely IS a sequence — you cannot do these in
-   another order. Numbering something that is not a sequence is decoration. */
-.beats li::before {
-  content: counter(beat);
-  grid-row: span 2;
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  color: var(--amber);
-  line-height: 1.4;
-}
-
-.beats li span { grid-column: 2; }
-
-/* ---- the processes ------------------------------------------------------ */
-
-.processes {
-  display: grid;
-  gap: var(--gap-sm);
-}
-
-@media (min-width: 640px) {
-  .processes { grid-template-columns: 1fr 1fr; }
-}
-
-.process {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--gap-xs);
-  width: 100%;
-  padding: var(--gap);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  text-align: start;
-  font: inherit;
-  color: inherit;
-}
-
-.process-name {
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 1.05rem;
-  line-height: 1.3;
-}
-
-.process-status {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.process-authority { color: var(--muted); }
-
-/* The one that works. Amber marks where you can act — the same rule as
-   everywhere else in the product. */
-.process-live {
-  cursor: pointer;
-  border-color: var(--amber);
-  box-shadow: var(--shadow);
-}
-
-.process-live .process-status { color: var(--amber); }
-
-.process-live:hover { background: var(--amber-soft); }
-
-/* ⚠️ Visibly not-yet, and not a button at all. Muted rather than greyed to
-   near-invisibility: the point is that these are real and named, so they must
-   stay readable. */
-.process-planned {
-  opacity: 0.72;
-  border-style: dashed;
-  cursor: default;
-}
-
 @media print {
-  .hero::before { display: none; }
-  .process-planned { display: none; }
+  .hero-photo,
+  .hero::after { display: none; }
+  .svc-art,
+  .gets,
+  .close { display: none; }
 }
