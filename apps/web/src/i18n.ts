@@ -501,6 +501,17 @@ export const UI = {
     he: 'אין שלב שאפשר להתחיל בו כרגע — פתח את השלבים שבהמשך כדי לראות במה זה תלוי.',
     en: 'Nothing can be started right now. Open the steps further along to see what it waits on.',
   },
+  /**
+   * ⚠️ The road with every step ticked. Until M5 it got road_empty_now, which
+   * sends him to "the steps further along" — a part that is not on the page,
+   * because there are none left. This is the one screen in the product that
+   * gets to say a thing is finished, and it still has to say what to do if
+   * the world changed, because these procedures do.
+   */
+  road_all_done: {
+    he: 'סימנת את כל השלבים בדרך הזאת. אם משהו השתנה או לא יצא — בטל סימון של שלב והדרך תיבנה מחדש.',
+    en: 'Every step on this road is ticked. If something changed or did not work out, untick a step and the road is rebuilt.',
+  },
 
   roadmap_title: { he: 'הדרך שלך', en: 'Your road' },
   steps_count: { he: 'שלבים', en: 'steps' },
