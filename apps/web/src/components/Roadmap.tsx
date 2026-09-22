@@ -18,6 +18,29 @@ import { UI, pick, type Lang } from '../i18n';
  *   · every certainty chip carries a symbol AND a word, never colour alone
  */
 
+/**
+ * The small marks beside a line of practical detail. Drawn rather than emoji:
+ * an emoji is a different picture on every device, is read out as its own name
+ * by a screen reader, and is the single fastest way to make a serious page
+ * look improvised.
+ */
+const ICON = {
+  bag: 'M8 7V6a4 4 0 118 0v1m-9 0h10a2 2 0 012 2v9a2 2 0 01-2 2H7a2 2 0 01-2-2V9a2 2 0 012-2z',
+  coin: 'M12 21a9 9 0 100-18 9 9 0 000 18zm0-13v10m2.5-7.5H10.8a1.7 1.7 0 000 3.4h2.4a1.7 1.7 0 010 3.4H9.5',
+  look: 'M10.5 17a6.5 6.5 0 100-13 6.5 6.5 0 000 13zm4.8 1.8L20 21',
+  link: 'M10 13a4 4 0 005.7 0l2.6-2.6a4 4 0 10-5.7-5.7L11.5 6M14 11a4 4 0 00-5.7 0l-2.6 2.6a4 4 0 105.7 5.7L12.5 18',
+  clip: 'M16.5 8.5l-6 6a2.5 2.5 0 003.5 3.5l6.5-6.5a4.5 4.5 0 10-6.4-6.4L6.5 12.2a6.5 6.5 0 009.2 9.2',
+  wait: 'M12 21a9 9 0 100-18 9 9 0 000 18zm0-13.5V12l3 2',
+} as const;
+
+function Mark({ d }: { d: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d={d} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 /** ⭐ "ודאות היא אלמנט עיצובי... היושרה של המוצר חייבת להיראות, לא רק להיכתב." */
 function Chip({ mark, lang }: { mark: CertaintyMark; lang: Lang }) {
   const meta = CERTAINTY_META[mark];
@@ -37,7 +60,7 @@ function Clock({ clock, lang }: { clock: ClockState; lang: Lang }) {
   if (clock.status === 'expired') {
     detail = (
       <>
-        <strong style={{ color: 'var(--uncertain)' }}>{t('expired')}</strong>
+        <strong className="clock-expired">{t('expired')}</strong>
         {/* ⭐ The whole point of the two-clock split: an expired driving clock
             is NOT the end of the conversion window, and it says so. */}
         <div className="small">{pick(clock.clock.on_expiry, lang)}</div>
@@ -45,7 +68,7 @@ function Clock({ clock, lang }: { clock: ClockState; lang: Lang }) {
     );
   } else if (clock.status === 'running') {
     detail = (
-      <strong style={{ color: clock.warning ? 'var(--amber)' : 'var(--ink)' }}>
+      <strong className={clock.warning ? 'clock-warning' : undefined}>
         <span className="num">{clock.days_left}</span> {t('days_left')}
       </strong>
     );
@@ -56,12 +79,10 @@ function Clock({ clock, lang }: { clock: ClockState; lang: Lang }) {
   }
 
   return (
-    <div style={{ paddingBlock: 'var(--gap-xs)' }}>
-      <div>{name}</div>
+    <div className="clock-row">
+      <div className="clock-name">{name}</div>
       {detail}
-      {clock.deadline && (
-        <div className="muted small num">{clock.deadline}</div>
-      )}
+      {clock.deadline && <div className="muted small num">{clock.deadline}</div>}
     </div>
   );
 }
@@ -91,40 +112,28 @@ function Step({
 
   return (
     <article
-      className="card stack-sm"
       // ⭐ The marker on the spine reads this. Amber, and only amber, marks
-      // where you are standing — now as a dot ON the road rather than an edge
-      // beside it, so it is findable without reading.
+      // where you are standing — now as a diamond ON the road rather than an
+      // edge beside it, so it is findable without reading.
       data-state={item.state}
-      style={{ opacity: dimmed ? 0.62 : 1 }}
+      className={`card stack-sm step${dimmed ? ' step-later' : ''}${item.state === 'done' ? ' step-done' : ''}`}
     >
-      <div style={{ display: 'flex', gap: 'var(--gap-sm)', alignItems: 'baseline' }}>
-        <span aria-hidden="true">
-          {item.state === 'done' ? '✅' : item.state === 'uncertain' ? '❔' : item.state === 'waiting_on' ? '⏸️' : '•'}
+      <div className="step-head">
+        <h3>{pick(step.title, lang)}</h3>
+        <span className={`step-state step-state-${item.state}`}>
+          {t(`state_${item.state}` as keyof typeof UI)}
         </span>
-        <h3 style={{ flex: 1, textDecoration: item.state === 'done' ? 'line-through' : undefined }}>
-          {pick(step.title, lang)}
-        </h3>
       </div>
 
       {/* ⭐ Ticking a step re-runs the whole engine. That is what makes the map
           move with him instead of describing a stranger — and it is what starts
           the clocks that only exist once he is in a particular situation. */}
       {onToggle && (
-        <label
-          style={{
-            display: 'flex',
-            gap: 'var(--gap-sm)',
-            alignItems: 'center',
-            minHeight: 'var(--touch)',
-            cursor: 'pointer',
-          }}
-        >
+        <label className="step-tick">
           <input
             type="checkbox"
             checked={item.state === 'done'}
             onChange={(e) => onToggle(step.id, e.target.checked)}
-            style={{ width: '1.15rem', height: '1.15rem', accentColor: 'var(--amber)' }}
           />
           <span className="small muted">
             {item.state === 'done' ? t('marked_done') : t('mark_done')}
@@ -148,26 +157,33 @@ function Step({
       ))}
 
       {item.start_now && (
-        <p style={{ color: 'var(--amber)', fontWeight: 500 }}>
-          ⭐ {t('start_now')} — <span className="muted">{t('start_now_why')}</span>
+        <p className="flag">
+          <span>
+            <strong>{t('start_now')}</strong> — {t('start_now_why')}
+          </span>
         </p>
       )}
 
       {item.must_precede && (
-        <p style={{ color: 'var(--amber)', fontWeight: 500 }}>
-          ⭐ {t('before')} <span className="ltr">{item.must_precede}</span>
+        <p className="flag">
+          <span>
+            {t('before')} <span className="ltr">{item.must_precede}</span>
+          </span>
         </p>
       )}
 
       {item.waiting_on.length > 0 && (
-        <p className="muted small">
-          ⏸ {t('waiting_for')}: <span className="ltr">{item.waiting_on.join(', ')}</span>
+        <p className="meta-row">
+          <Mark d={ICON.wait} />
+          <span>
+            {t('waiting_for')}: <span className="ltr">{item.waiting_on.join(', ')}</span>
+          </span>
         </p>
       )}
 
       {/* ⭐ Chaya's rule: thin evidence gets advice with its recovery built in,
           never a hedge. "לך בלי תור, ואם דוחים — קבע תור באותו רגע." */}
-      {step.fallback && <p>↩ {pick(step.fallback, lang)}</p>}
+      {step.fallback && <p className="flag flag-quiet"><span>{pick(step.fallback, lang)}</span></p>}
 
       {/* An unplaceable step stays, and says which answer would settle it. */}
       {item.applies === 'unknown' && (
@@ -178,39 +194,54 @@ function Step({
       )}
 
       {item.checks_first.map((c) => (
-        <p key={c.id} className="small">
-          🔎 {t('check_first')}: {pick(c.name, lang)}
+        <p key={c.id} className="meta-row">
+          <Mark d={ICON.look} />
+          <span>
+            {t('check_first')}: {pick(c.name, lang)}
+          </span>
         </p>
       ))}
 
       {/* ⚠️ item.checklist, not step.checklist — the engine has already removed
           the lines that do not apply to this person. Rendering the raw list is
           how a citizen ended up being asked about his 89 document. */}
-      {item.checklist.map((c, i) => (
-        <p key={i} className="small">
-          ☐ {pick(c, lang)}
-        </p>
-      ))}
+      {item.checklist.length > 0 && (
+        <ul className="step-checklist">
+          {item.checklist.map((c, i) => (
+            <li key={i}>
+              <span>{pick(c, lang)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {/* What to physically carry, resolved against who he actually is. */}
       {item.documents.length > 0 && (
-        <p className="small">
-          🎒 {t('bring')}:{' '}
-          {item.documents.map((d) => pick(d.name, lang)).join(' · ')}
+        <p className="meta-row">
+          <Mark d={ICON.bag} />
+          <span>
+            {t('bring')}: {item.documents.map((d) => pick(d.name, lang)).join(' · ')}
+          </span>
         </p>
       )}
 
       {step.cost?.amount_ils !== undefined && (
-        <p className="small">
-          ₪ <span className="num">{step.cost.amount_ils}
-          {step.cost.max_ils ? `–${step.cost.max_ils}` : ''}</span>
-          {step.cost.note ? ` · ${pick(step.cost.note, lang)}` : ''}
+        <p className="meta-row">
+          <Mark d={ICON.coin} />
+          <span>
+            ₪{' '}
+            <span className="num">
+              {step.cost.amount_ils}
+              {step.cost.max_ils ? `–${step.cost.max_ils}` : ''}
+            </span>
+            {step.cost.note ? ` · ${pick(step.cost.note, lang)}` : ''}
+          </span>
         </p>
       )}
 
       {step.links.map((l) => (
-        <p key={l.url} className="small">
-          🔗{' '}
+        <p key={l.url} className="meta-row">
+          <Mark d={ICON.link} />
           <a href={l.url} target="_blank" rel="noreferrer">
             {pick(l.label, lang)}
           </a>
@@ -220,15 +251,15 @@ function Step({
       {/* ── the sources, folded ──────────────────────────────────────────
           Nothing is hidden — principle 20 — the sources just stopped
           shouting over the instruction. */}
-      <div className="stack-sm" style={{ borderBlockStart: '1px solid var(--line)', paddingBlockStart: 'var(--gap-sm)' }}>
+      <div className="sources">
         <button
           type="button"
-          className="btn btn-quiet small"
-          style={{ minHeight: 'auto', paddingBlock: '0.35rem' }}
+          className="btn btn-quiet sources-toggle"
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
         >
-          📎 <span className="num">{step.evidence.length}</span> {t('sources')}{' '}
+          <Mark d={ICON.clip} />
+          <span className="num">{step.evidence.length}</span> {t('sources')}{' '}
           {[...counts.entries()].map(([mark, n]) => (
             <span key={mark} aria-hidden="true">
               {CERTAINTY_META[mark].symbol}
@@ -241,11 +272,13 @@ function Step({
         {open && (
           <div className="stack-sm small">
             {[...shown.official, ...shown.reported].map((a, i) => (
-              <div key={i}>
-                <Chip mark={a.mark} lang={lang} />{' '}
-                {a.lead_in[lang] ? `${a.lead_in[lang]}: ` : ''}
-                {a.claim}
-                {a.citation && <div className="muted">{a.citation}</div>}
+              <div key={i} className="source">
+                <span>
+                  <Chip mark={a.mark} lang={lang} />{' '}
+                  {a.lead_in[lang] ? `${a.lead_in[lang]}: ` : ''}
+                  {a.claim}
+                </span>
+                {a.citation && <div className="source-citation">{a.citation}</div>}
                 {a.url && (
                   <div>
                     <a className="ltr" href={a.url} target="_blank" rel="noreferrer">
@@ -310,17 +343,8 @@ export function Roadmap({
           <span className="num">{result.roadmap.length}</span> {t('steps_count')}
         </p>
         {doneCount > 0 && (
-          <div
-            aria-hidden="true"
-            style={{ height: 6, borderRadius: 999, background: 'var(--line)', overflow: 'hidden' }}
-          >
-            <div
-              style={{
-                width: `${(doneCount / result.roadmap.length) * 100}%`,
-                height: '100%',
-                background: 'var(--amber)',
-              }}
-            />
+          <div className="road-progress" aria-hidden="true">
+            <span style={{ width: `${(doneCount / result.roadmap.length) * 100}%` }} />
           </div>
         )}
       </div>

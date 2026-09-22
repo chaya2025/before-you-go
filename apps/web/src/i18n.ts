@@ -447,6 +447,14 @@ export const UI = {
   },
   uncertain_answer: { he: 'כדי לדעת, צריך לענות על', en: 'To know, answer' },
   done: { he: 'הושלם', en: 'Done' },
+  /* The state of a step, in a word. ⚠️ A word, never an emoji on its own: a
+     screen reader reads an emoji out as its own name, and nobody translates it. */
+  state_done: { he: 'בוצע', en: 'Done' },
+  state_do_now: { he: 'עכשיו', en: 'Now' },
+  state_uncertain: { he: 'לא ודאי', en: 'Not certain' },
+  state_waiting_on: { he: 'ממתין', en: 'Waiting' },
+  state_later: { he: 'בהמשך', en: 'Later' },
+
   mark_done: { he: 'סמן שביצעת', en: 'Mark as done' },
   marked_done: { he: 'ביצעת', en: 'Done' },
   progress: { he: 'הושלמו', en: 'completed' },
