@@ -98,11 +98,14 @@ function Step({
   item,
   index,
   lang,
+  titleOf,
   onToggle,
 }: {
   item: RoadmapStep;
   index: number;
   lang: Lang;
+  /** An id turned back into the name of the step a person can see. */
+  titleOf: (id: string) => string;
   onToggle?: (id: string, done: boolean) => void;
 }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
@@ -198,7 +201,7 @@ function Step({
       {item.must_precede && (
         <p className="flag">
           <span>
-            {t('before')} <span className="ltr">{item.must_precede}</span>
+            {t('before')} {titleOf(item.must_precede)}
           </span>
         </p>
       )}
@@ -207,7 +210,7 @@ function Step({
         <p className="meta-row">
           <Mark d={ICON.wait} />
           <span>
-            {t('waiting_for')}: <span className="ltr">{item.waiting_on.join(', ')}</span>
+            {t('waiting_for')}: {item.waiting_on.map(titleOf).join(' · ')}
           </span>
         </p>
       )}
@@ -400,6 +403,18 @@ export function Roadmap({
      manufacture. */
   const position = new Map(result.roadmap.map((item, i) => [item.step.id, i + 1]));
 
+  /**
+   * ⚠️ An id is not a sentence. This screen printed "ממתין ל: fz.doc_89"
+   * straight at the reader, and on the printed sheet he carries into the
+   * office it is the same. The readiness report already resolved ids to
+   * titles and left a note saying the roadmap did not; it does now.
+   *
+   * A step can wait on something outside this road, so an id with no step
+   * behind it falls back to itself rather than disappearing.
+   */
+  const titles = new Map(result.roadmap.map((item) => [item.step.id, pick(item.step.title, lang)]));
+  const titleOf = (id: string) => titles.get(id) ?? id;
+
   const list = (items: typeof result.roadmap) => (
     <div className="road">
       {items.map((item) => (
@@ -408,6 +423,7 @@ export function Roadmap({
           item={item}
           index={position.get(item.step.id) ?? 0}
           lang={lang}
+          titleOf={titleOf}
           onToggle={onToggle}
         />
       ))}
