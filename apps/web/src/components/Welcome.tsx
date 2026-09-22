@@ -218,7 +218,6 @@ export function Welcome({
           <div className="band-head rise">
             <p className="kicker">{t('choose_kicker')}</p>
             <h2>{t('choose_title')}</h2>
-            <p>{t('choose_note')}</p>
           </div>
         </div>
 
@@ -252,12 +251,9 @@ export function Welcome({
                         {arrow}
                       </button>
                     ) : (
-                      <>
-                        <button type="button" className="btn" disabled>
-                          {t('process_closed')}
-                        </button>
-                        <span className="svc-note">{t('process_closed_note')}</span>
-                      </>
+                      <button type="button" className="btn" disabled>
+                        {t('process_closed')}
+                      </button>
                     )}
                   </div>
                 </div>
