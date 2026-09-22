@@ -1,5 +1,5 @@
 import type { Result } from '@byg/engine';
-import { CERTAINTY_META } from '@byg/engine';
+import { CERTAINTY_META, NOHAL_CATEGORY_LABEL, type NohalCategory } from '@byg/engine';
 import { UI, pick, type Lang } from '../i18n';
 import { Urgent } from './Urgent';
 
@@ -42,7 +42,14 @@ export function Diagnosis({
 
         <dl className="facts">
           <Row label={t('d_track')} value={trackLabel} />
-          <Row label={t('d_category')} value={d.nohal_category} mono />
+          {/* ⚠️ The label, never the code. See NOHAL_CATEGORY_LABEL: a person
+              asked to confirm `toshav_medinat_chutz` cannot confirm anything. */}
+          <Row
+            label={t('d_category')}
+            value={
+              NOHAL_CATEGORY_LABEL[d.nohal_category as NohalCategory]?.[lang] ?? d.nohal_category
+            }
+          />
           <Row
             label={t('d_ceiling')}
             value={
