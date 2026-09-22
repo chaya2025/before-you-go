@@ -87,12 +87,21 @@ function Clock({ clock, lang }: { clock: ClockState; lang: Lang }) {
   );
 }
 
+/* The three shapes a "where" can take: a screen, a counter, a postbox. */
+const CHANNEL_ICON: Record<string, string> = {
+  online: 'M4 5h16v10H4zM9 19h6M12 15v4',
+  mail: 'M4 7h16v10H4zM4 8l8 5 8-5',
+  default: 'M12 21s7-5.3 7-11a7 7 0 10-14 0c0 5.7 7 11 7 11z',
+};
+
 function Step({
   item,
+  index,
   lang,
   onToggle,
 }: {
   item: RoadmapStep;
+  index: number;
   lang: Lang;
   onToggle?: (id: string, done: boolean) => void;
 }) {
@@ -119,6 +128,11 @@ function Step({
       className={`card stack-sm step${dimmed ? ' step-later' : ''}${item.state === 'done' ? ' step-done' : ''}`}
     >
       <div className="step-head">
+        {/* ⭐ The number a person uses to say where he is out loud — "I'm on
+            four". The order is what this whole product is about. */}
+        <span className="step-index" aria-hidden="true">
+          {index}
+        </span>
         <h3>{pick(step.title, lang)}</h3>
         <span className={`step-state step-state-${item.state}`}>
           {t(`state_${item.state}` as keyof typeof UI)}
@@ -139,6 +153,23 @@ function Step({
             {item.state === 'done' ? t('marked_done') : t('mark_done')}
           </span>
         </label>
+      )}
+
+      {/* Where it happens, as a chip: the WHERE is what he plans his day
+          around, and it should be findable without reading the paragraph. */}
+      {step.channel && step.channel !== 'unknown' && (
+        <span className={`step-channel${step.channel === 'online' ? ' step-channel-online' : ''}`}>
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d={CHANNEL_ICON[step.channel] ?? CHANNEL_ICON.default}
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          {t(`ch_${step.channel}` as keyof typeof UI)}
+        </span>
       )}
 
       {pick(step.action, lang)
@@ -295,6 +326,59 @@ function Step({
   );
 }
 
+/**
+ * ⭐ What he has to keep in mind while walking the road: the clocks, and the
+ * conditions that must stay true the whole way. Split out of the roadmap on
+ * 22.9 so they can sit BESIDE the road and stay visible while he scrolls —
+ * in the middle of a list of forty steps, a deadline is just another item.
+ */
+export function RoadSide({ result, lang }: { result: Result; lang: Lang }) {
+  const t = (k: keyof typeof UI) => pick(UI[k], lang);
+
+  return (
+    <>
+      {result.clocks.length > 0 && (
+        <section className="note note-clocks">
+          <h3>{t('clocks_title')}</h3>
+          {result.clocks.map((c) => (
+            <Clock key={c.clock.id} clock={c} lang={lang} />
+          ))}
+        </section>
+      )}
+
+      {/* ⚠️ A standing condition is not a step and must not look like one: it
+          is what has to stay true for the whole road, and breaking it undoes
+          work already done. Her word for it was a sticky note. */}
+      {result.standing_conditions.length > 0 && (
+        <section className="note">
+          <h3>{t('standing_title')}</h3>
+          <p className="muted small">{t('standing_note')}</p>
+          <ul className="note-list">
+            {result.standing_conditions.map((c) => (
+              <li key={c.id}>
+                <details>
+                  <summary>{pick(c.name, lang)}</summary>
+                  <p className="small">{pick(c.consequence_if_invalid, lang)}</p>
+                  <p className="small">
+                    <strong>{pick(c.remedy, lang)}</strong>
+                  </p>
+                </details>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </>
+  );
+}
+
+/**
+ * The road itself, in three named parts.
+ *
+ * ⚠️ The grouping is read off the state the ENGINE gave each step. The website
+ * does not decide what is doable now — that is a rule about visas and clocks,
+ * and it belongs where every other such rule lives.
+ */
 export function Roadmap({
   result,
   lang,
@@ -305,57 +389,69 @@ export function Roadmap({
   onToggle?: (id: string, done: boolean) => void;
 }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
-  const doneCount = result.roadmap.filter((s) => s.state === 'done').length;
+
+  const now = result.roadmap.filter((s) => s.state === 'do_now');
+  const done = result.roadmap.filter((s) => s.state === 'done');
+  const later = result.roadmap.filter((s) => s.state !== 'do_now' && s.state !== 'done');
+
+  /* ⚠️ The number is the step's place in the WHOLE road, not in its part.
+     Numbering each part from one would tell a person on step nine that he is
+     on step one, which is precisely the reassurance this product must not
+     manufacture. */
+  const position = new Map(result.roadmap.map((item, i) => [item.step.id, i + 1]));
+
+  const list = (items: typeof result.roadmap) => (
+    <div className="road">
+      {items.map((item) => (
+        <Step
+          key={item.step.id}
+          item={item}
+          index={position.get(item.step.id) ?? 0}
+          lang={lang}
+          onToggle={onToggle}
+        />
+      ))}
+    </div>
+  );
 
   return (
     <div className="stack">
-      {result.clocks.length > 0 && (
-        <section className="card stack-sm">
-          <h2>{t('clocks_title')}</h2>
-          {result.clocks.map((c) => (
-            <Clock key={c.clock.id} clock={c} lang={lang} />
-          ))}
-        </section>
-      )}
-
-      {result.standing_conditions.length > 0 && (
-        <section className="card stack-sm" style={{ borderInlineStartWidth: '4px', borderInlineStartColor: 'var(--uncertain)' }}>
-          <h2>⚠️ {t('standing_title')}</h2>
-          <p className="muted small">{t('standing_note')}</p>
-          {result.standing_conditions.map((c) => (
-            <details key={c.id}>
-              <summary>{pick(c.name, lang)}</summary>
-              <p className="small">{pick(c.consequence_if_invalid, lang)}</p>
-              <p className="small">
-                <strong>{pick(c.remedy, lang)}</strong>
-              </p>
-            </details>
-          ))}
-        </section>
-      )}
-
-      <div>
-        <h2>{t('roadmap_title')}</h2>
-        {/* ⭐ "התקדמות נמדדת קדימה. מוצג כמה כבר הושלם, לא כמה נותר." */}
-        {/* ⭐ "התקדמות נמדדת קדימה. מוצג כמה כבר הושלם, לא כמה נותר." */}
-        <p className="muted small">
-          <span className="num">{doneCount}</span> {t('progress')} {t('of')}{' '}
-          <span className="num">{result.roadmap.length}</span> {t('steps_count')}
-        </p>
-        {doneCount > 0 && (
-          <div className="road-progress" aria-hidden="true">
-            <span style={{ width: `${(doneCount / result.roadmap.length) * 100}%` }} />
-          </div>
+      <section className="road-part road-part-now">
+        <div className="road-part-head">
+          <h3>{t('road_now')}</h3>
+          <span className="count num">{now.length}</span>
+        </div>
+        {now.length > 0 ? (
+          <>
+            <p className="road-part-note">{t('road_now_note')}</p>
+            {list(now)}
+          </>
+        ) : (
+          <p className="road-part-note">{t('road_empty_now')}</p>
         )}
-      </div>
+      </section>
 
-      {/* ⭐ A road, not a stack. The spine and its markers live in theme.css;
-          each step publishes its state so the marker can colour itself. */}
-      <div className="road">
-        {result.roadmap.map((item) => (
-          <Step key={item.step.id} item={item} lang={lang} onToggle={onToggle} />
-        ))}
-      </div>
+      {later.length > 0 && (
+        <section className="road-part">
+          <div className="road-part-head">
+            <h3>{t('road_next')}</h3>
+            <span className="count num">{later.length}</span>
+          </div>
+          <p className="road-part-note">{t('road_next_note')}</p>
+          {list(later)}
+        </section>
+      )}
+
+      {/* Nothing is hidden — principle 20 — a finished step is simply not what
+          he came here to read, so it folds. */}
+      {done.length > 0 && (
+        <details className="road-part road-part-done">
+          <summary>
+            {t('road_done')} · <span className="num">{done.length}</span>
+          </summary>
+          {list(done)}
+        </details>
+      )}
     </div>
   );
 }
