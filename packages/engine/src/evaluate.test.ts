@@ -1273,11 +1273,11 @@ describe('⭐ the system follows where the person actually is', () => {
       TODAY,
     );
     const q = toshav.diagnosis.document_questions;
-    expect(q.visa).toBe(false);
-    expect(q.form_89).toBe(false);
-    expect(q.passport).toBe(false);
+    expect(q.visa.ask).toBe(false);
+    expect(q.form_89.ask).toBe(false);
+    expect(q.passport.ask).toBe(false);
     // ⭐ But he IS converting, so the licence is still asked about.
-    expect(q.foreign_license).toBe(true);
+    expect(q.foreign_license.ask).toBe(true);
 
     // ⚠️ And the same must hold on the checklist he reads at the desk.
     const attend = toshav.roadmap.find((s) => s.step.id === 'cv.attend');
@@ -1297,10 +1297,20 @@ describe('⭐ the system follows where the person actually is', () => {
       TODAY,
     );
     const q = worker.diagnosis.document_questions;
-    expect(q.visa).toBe(true);
-    expect(q.form_89).toBe(true);
-    expect(q.passport).toBe(true);
-    expect(q.foreign_license).toBe(true);
+    expect(q.visa.ask).toBe(true);
+    expect(q.form_89.ask).toBe(true);
+    expect(q.passport.ask).toBe(true);
+    expect(q.foreign_license.ask).toBe(true);
+
+    /**
+     * ⚠️ And his 89 is gated, because cv.doc_89 is still on his road. He is
+     * asked WHETHER he has one before he is asked what is printed on it.
+     */
+    expect(q.form_89.confirm_possession).toBe(true);
+    // Nobody issues him a passport, a visa or a foreign licence on this route.
+    expect(q.passport.confirm_possession).toBe(false);
+    expect(q.visa.confirm_possession).toBe(false);
+    expect(q.foreign_license.confirm_possession).toBe(false);
   });
 
   /**
@@ -1323,7 +1333,7 @@ describe('⭐ the system follows where the person actually is', () => {
       TODAY,
     );
     expect(a5.diagnosis.has_teudat_zehut).toBe(true);
-    expect(a5.diagnosis.document_questions.visa).toBe(true);
+    expect(a5.diagnosis.document_questions.visa.ask).toBe(true);
   });
 
   /** ⚠️ Unknown means ASK. Skipping a question loses the answer silently. */
@@ -1333,8 +1343,8 @@ describe('⭐ the system follows where the person actually is', () => {
       TODAY,
     );
     expect(unsure.diagnosis.has_teudat_zehut).toBe('unknown');
-    expect(unsure.diagnosis.document_questions.form_89).toBe(true);
-    expect(unsure.diagnosis.document_questions.visa).toBe(true);
+    expect(unsure.diagnosis.document_questions.form_89.ask).toBe(true);
+    expect(unsure.diagnosis.document_questions.visa.ask).toBe(true);
   });
 
   it('the 48-hour window is not shown to someone who has not lost a card', () => {
@@ -1380,5 +1390,150 @@ describe('⭐ the system follows where the person actually is', () => {
 
   it('a step that is not ticked never silently becomes done', () => {
     expect(withSteps(['fz.doc_89']).roadmap.filter((s) => s.state === 'done')).toHaveLength(1);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * ============================================================================
+ * ⭐⭐ ONLY ASK FOR WHAT HE CAN ACTUALLY PROVIDE (Chaya, 22.9)
+ * ============================================================================
+ *
+ * Her bug, in her words: an א/2 "doesn't have an israli id and doesn't have his
+ * licence — then it takes him to the document input field and then gives him to
+ * fill in the 89 field which he doesn't even have one."
+ *
+ * And it was worse than a stray text box. His own roadmap, on the very next
+ * screen, opened with "go to the licensing office and get your 89". The product
+ * told him to obtain a document and to transcribe it at the same time.
+ *
+ * ⚠️ These tests are written against the RULE, not against the 89. If a step is
+ * ever added that issues another document, its section inherits the gate, and
+ * the last test in here is the one that will catch it if it does not.
+ */
+describe('⭐⭐ a person is only asked for what he can provide (22.9)', () => {
+  const HER = {
+    visa_type: 'a2',
+    visa_valid_now: true,
+    foreign_license: { kind: 'none' },
+    has_teudat_zehut: false,
+    teudat_zehut_confirmed: true,
+    born: '2005-01',
+    entered_israel: '2010-06',
+  };
+
+  it('⭐ THE BUG: an א/2 starting from zero is not handed a box for an 89 he has never been issued', () => {
+    const r = evaluate(p(HER), TODAY);
+
+    // His road still says go and get one...
+    const issuing = r.roadmap.find((s) => s.step.produces_document === 'doc.form_89');
+    expect(issuing).toBeDefined();
+    expect(issuing!.state).not.toBe('done');
+
+    // ...so the screen asks whether he has one before it asks what it says.
+    expect(r.diagnosis.document_questions.form_89.ask).toBe(true);
+    expect(r.diagnosis.document_questions.form_89.confirm_possession).toBe(true);
+  });
+
+  it('⚠️ the two statements can never be made at once — issuing step and ungated fields', () => {
+    /**
+     * ⚠️ THE INVARIANT, checked across every persona rather than for one of
+     * them. "Go and obtain this document" and "type what is printed on it" are
+     * contradictory instructions, and no profile may produce both.
+     */
+    const people = [
+      HER,
+      { ...HER, visa_type: 'b1' },
+      { ...HER, foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 8, held_class: 'B' }, requested_class: 'B' },
+      { visa_type: 'citizen', has_teudat_zehut: true, teudat_zehut_confirmed: true, foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 8, held_class: 'B', language: 'en' }, requested_class: 'B', returned_to_israel: '2024-03', born: '1990-05' },
+      { visa_type: 'a5', has_teudat_zehut: true, teudat_zehut_confirmed: true, foreign_license: { kind: 'national', valid_now: true, years_held_permanent: 9, held_class: 'B' }, requested_class: 'B', entered_israel: '2023-05' },
+    ];
+
+    for (const person of people) {
+      const r = evaluate(p(person), TODAY);
+      const stillToObtain = new Set(
+        r.roadmap
+          .filter((s) => s.step.produces_document && s.state !== 'done' && s.applies !== false)
+          .map((s) => s.step.produces_document!),
+      );
+      const q = r.diagnosis.document_questions;
+      if (q.form_89.ask && stillToObtain.has('doc.form_89')) {
+        expect(q.form_89.confirm_possession).toBe(true);
+      }
+    }
+  });
+
+  it('⭐ a man who already collected his 89 is asked for its number, not asked again whether he has one', () => {
+    /**
+     * Mid-process entry (F0 4.7). Ticking the step that issues the document is
+     * him saying "I did that", so the gate steps out of the way.
+     */
+    const r = evaluate(p({ ...HER, completed_steps: ['fz.doc_89'] }), TODAY);
+    expect(r.diagnosis.document_questions.form_89.ask).toBe(true);
+    expect(r.diagnosis.document_questions.form_89.confirm_possession).toBe(false);
+  });
+
+  it('⭐ once he says he has one, he is not asked a second time', () => {
+    /**
+     * ⚠️ The gate and the roadmap must agree, and they do by construction: both
+     * read "a step that obtains a document is done when the document is held"
+     * off the same `held_when`. A screen that kept asking after he answered
+     * would be the 30.8 bug again — one product saying two things about one
+     * document.
+     */
+    const r = evaluate(p({ ...HER, holds_form_89: true }), TODAY);
+    expect(r.diagnosis.document_questions.form_89.confirm_possession).toBe(false);
+    expect(r.roadmap.find((x) => x.step.id === 'fz.doc_89')!.state).toBe('done');
+  });
+
+  it('⚠️ "I have not been issued one" is recorded as his answer, and a blank still is not', () => {
+    const said_no = deriveFacts(p({ ...HER, holds_form_89: false }), TODAY);
+    expect(said_no.holds_form_89).toBe(false);
+
+    // ⚠️ Principle 8. Skipping the screen is silence, and silence is not a no.
+    const said_nothing = deriveFacts(p(HER), TODAY);
+    expect(said_nothing.holds_form_89).toBe('unknown');
+  });
+
+  it('⚠️ transcribing a number overrules a stale "I do not have one"', () => {
+    /**
+     * He tapped "no", then found the document in a drawer and typed its number.
+     * You cannot know your 89 number without the document in front of you, so
+     * the evidence wins over the tap.
+     */
+    const facts = deriveFacts(
+      p({ ...HER, holds_form_89: false, form_89_number: '891234567' }),
+      TODAY,
+    );
+    expect(facts.holds_form_89).toBe(true);
+  });
+
+  it('⚠️ a document nobody issues him is never gated — his passport is in his pocket', () => {
+    const r = evaluate(p({ ...HER, visa_type: 'b1' }), TODAY);
+    expect(r.diagnosis.document_questions.passport.ask).toBe(true);
+    expect(r.diagnosis.document_questions.passport.confirm_possession).toBe(false);
+    expect(r.diagnosis.document_questions.visa.confirm_possession).toBe(false);
+  });
+
+  it('⚠️ a man who said he holds no driving licence is never asked when his licence expires', () => {
+    // The same rule, one screen earlier: ש2 already told us, so the section goes.
+    expect(evaluate(p(HER), TODAY).diagnosis.document_questions.foreign_license.ask).toBe(false);
+    expect(
+      evaluate(p({ ...HER, foreign_license: { kind: 'idp_only' } }), TODAY).diagnosis
+        .document_questions.foreign_license.ask,
+    ).toBe(false);
+  });
+
+  it('⭐ saying no leaves the 89 in "missing", never in "we did not ask"', () => {
+    /**
+     * ⚠️ The point of collecting the answer at all. Before this, a man who had
+     * no 89 and said so had told the report nothing, and his own document came
+     * back as unconfirmed — "nobody asked" — when in fact he had just answered.
+     */
+    const r = evaluate(p({ ...HER, holds_form_89: false }), TODAY);
+    const all = [...r.readiness!.missing, ...r.readiness!.unconfirmed, ...r.readiness!.ready];
+    const eightyNine = all.find((i) => i.id === 'doc.form_89');
+    expect(eightyNine?.bucket).toBe('missing');
   });
 });

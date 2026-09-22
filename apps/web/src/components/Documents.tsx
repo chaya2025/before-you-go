@@ -7,7 +7,7 @@ import {
   type FieldProblem,
 } from '@byg/engine';
 import { UI, pick, type Lang } from '../i18n';
-import type { Diagnosis } from '@byg/engine';
+import type { Diagnosis, DocumentQuestion } from '@byg/engine';
 import type { Answers } from './Intake';
 
 /**
@@ -174,8 +174,95 @@ function Group({
   );
 }
 
+/**
+ * ============================================================================
+ * ⭐⭐ THE RULE OF THIS SCREEN, IN ONE COMPONENT
+ * ============================================================================
+ *
+ * **A person is only ever asked for something he can actually provide.**
+ *
+ * ⚠️ Chaya, 22.9: an א/2 with no teudat zehut and no driving licence reached
+ * this screen and was handed a box for his 89 number — while step one of the
+ * roadmap printed on the very next screen told him to go to the licensing
+ * office and OBTAIN an 89. The form asked him to copy a number off a document
+ * that does not exist yet.
+ *
+ * Every document section now passes through here, and there are exactly three
+ * outcomes. Both of the first two are decided by the ENGINE, never by this file:
+ *
+ *   ask === false            → the section does not exist for him. A citizen
+ *                              has no visa and no 89. (Her 31.8 fix.)
+ *   confirm_possession       → it is his kind of document, but his own route
+ *                              still says GO AND GET ONE. So ask whether he has
+ *                              it, and show the fields only on a yes.
+ *   otherwise                → he is holding it. Straight to the fields, as
+ *                              this screen has always worked.
+ *
+ * ⭐ Routing all four sections through one component is the point. The 89 is
+ * the only one gated today; the day a step is written that issues another
+ * document, the engine flips the flag and this screen already behaves.
+ */
+function Section({
+  question,
+  title,
+  help,
+  lang,
+  held,
+  onHeld,
+  children,
+}: {
+  question: DocumentQuestion;
+  title: string;
+  help?: string;
+  lang: Lang;
+  /**
+   * ⚠️ Only a section the engine gates needs these, so they are optional — but
+   * a gated section without them would silently show its fields again, which is
+   * the bug this component exists to kill. So a missing handler keeps the
+   * fields HIDDEN rather than revealing them: if this is ever wired wrong, it
+   * fails towards asking nothing, never towards asking the unanswerable.
+   */
+  held?: boolean | null;
+  onHeld?: (held: boolean) => void;
+  children: React.ReactNode;
+}) {
+  const t = (k: keyof typeof UI) => pick(UI[k], lang);
+  if (!question.ask) return null;
+  if (!question.confirm_possession) {
+    return (
+      <Group title={title} help={help}>
+        {children}
+      </Group>
+    );
+  }
+  return (
+    <Group title={title} help={help}>
+      <p className="muted small">{t('d_have_it')}</p>
+      <div className="stack-sm">
+        <button type="button" className="option" aria-pressed={held === true} onClick={() => onHeld?.(true)}>
+          <span>{t('d_have_it_yes')}</span>
+        </button>
+        <button type="button" className="option" aria-pressed={held === false} onClick={() => onHeld?.(false)}>
+          <span>{t('d_have_it_no')}</span>
+        </button>
+      </div>
+      {held === true && <div className="stack-sm">{children}</div>}
+      {/* ⚠️ Never a warning colour. Not yet holding a document he has not been
+          issued is the ordinary state of somebody at the start of his route. */}
+      {held === false && <p className="small muted">{t('d_have_it_no_note')}</p>}
+    </Group>
+  );
+}
+
 export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
+
+  /**
+   * ⭐ "Do you have an 89 at all?" — null until he says. See Section: the
+   * question is only put to him when the ENGINE says his own route still has a
+   * step that issues one, so he can be holding nothing.
+   */
+  const [holdsForm89, setHoldsForm89] = useState<boolean | null>(null);
 
   // ⚠️ The 89 first, deliberately. It is the document that carries the number
   // everything else gets checked against, and Chaya named this order.
@@ -237,6 +324,16 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
     if (blocked) return;
     const trimmed = (v: string) => (v.trim() ? v.trim() : undefined);
     const documents: Answers = {
+      /**
+       * ⚠️ Sent ONLY when he was actually asked and actually answered. An
+       * unanswered gate stays out of the payload entirely, so the engine sees
+       * 'unknown' — which is what skipping this screen has always meant, and
+       * the difference between "he told us he has none" and "nobody asked" is
+       * the whole of principle 8.
+       */
+      ...(questions.form_89.confirm_possession && holdsForm89 !== null
+        ? { holds_form_89: holdsForm89 }
+        : {}),
       ...(trimmed(form89Number) ? { form_89_number: trimmed(form89Number) } : {}),
       ...(trimmed(form89Passport) ? { form_89_passport_number: trimmed(form89Passport) } : {}),
       ...(trimmed(form89Name) ? { form_89_name_latin: trimmed(form89Name) } : {}),
@@ -245,7 +342,7 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
       ...(trimmed(passportName) ? { passport_name_latin: trimmed(passportName) } : {}),
       ...(visaExpires ? { visa_expires: visaExpires } : {}),
       ...(visaValid !== null ? { visa_valid_now: visaValid } : {}),
-      ...(questions.foreign_license
+      ...(questions.foreign_license.ask
         ? {
             foreign_license: {
               ...(licenceExpires ? { expires: licenceExpires } : {}),
@@ -267,8 +364,27 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
       </div>
 
       {/* ── the 89 ───────────────────────────────────────────────────────── */}
-      {questions.form_89 && (
-      <Group title={t('d_89_title')} help={t('d_89_help')}>
+      {/* ⚠️ The one section that is gated on possession today, and it is not
+          gated HERE — the engine sets confirm_possession because fz.doc_89 /
+          cv.doc_89 are still on his road. See Section. */}
+      <Section
+        question={questions.form_89}
+        title={t('d_89_title')}
+        help={t('d_89_help')}
+        lang={lang}
+        held={holdsForm89}
+        onHeld={(has) => {
+          setHoldsForm89(has);
+          // ⚠️ Changing his mind to "no" clears what he typed. Otherwise a
+          // number entered a moment ago would still be posted, still be read as
+          // proof that he holds the document, and still overrule the answer.
+          if (!has) {
+            setForm89Number('');
+            setForm89Passport('');
+            setForm89Name('');
+          }
+        }}
+      >
         <Field label={t('d_89_number')} problem={problems.form_89_number} lang={lang}>
           <input
             className="ltr"
@@ -303,12 +419,15 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
             onChange={(e) => setForm89Name(upper(e.target.value))}
           />
         </Field>
-      </Group>
-      )}
+      </Section>
 
       {/* ── the passport ─────────────────────────────────────────────────── */}
-      {questions.passport && (
-      <Group title={t('d_passport_title')} help={t('d_passport_help')}>
+      <Section
+        question={questions.passport}
+        title={t('d_passport_title')}
+        help={t('d_passport_help')}
+        lang={lang}
+      >
         <Field label={t('d_passport_number')} problem={problems.passport_number} lang={lang}>
           <input
             className="ltr"
@@ -343,8 +462,7 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
             onChange={(e) => setPassportName(upper(e.target.value))}
           />
         </Field>
-      </Group>
-      )}
+      </Section>
 
       {/* ── the visa ─────────────────────────────────────────────────────── */}
       {/*
@@ -360,8 +478,12 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
         as a fallback for the man who does not have the document in front of
         him, and most people never see it.
       */}
-      {questions.visa && (
-      <Group title={t('d_visa_title')} help={t('d_visa_help')}>
+      <Section
+        question={questions.visa}
+        title={t('d_visa_title')}
+        help={t('d_visa_help')}
+        lang={lang}
+      >
         <Field label={t('d_visa_expires')} problem={problems.visa_expires} lang={lang}>
           <input
             type="month"
@@ -403,12 +525,14 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
             ))}
           </div>
         )}
-      </Group>
-      )}
+      </Section>
 
       {/* ── the foreign licence, conversion only ─────────────────────────── */}
-      {questions.foreign_license && (
-        <Group title={t('d_licence_title')}>
+      <Section
+        question={questions.foreign_license}
+        title={t('d_licence_title')}
+        lang={lang}
+      >
           <Field label={t('d_licence_expires')} problem={problems.licence_expires} lang={lang}>
             <input
               type="month"
@@ -447,8 +571,7 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
               ))}
             </div>
           </Field>
-        </Group>
-      )}
+      </Section>
 
       <div className="stack-sm">
         {/* ⚠️ Says WHY it is disabled. A greyed-out button with no explanation

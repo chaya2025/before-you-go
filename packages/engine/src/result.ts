@@ -138,6 +138,49 @@ export type UrgentIssue = {
   evidence: SourcePart[];
 };
 
+/**
+ * ⭐ ONE DOCUMENT SECTION OF THE FORM, AND THE TWO SEPARATE THINGS IT HAS TO KNOW.
+ *
+ * ⚠️ Added 22.9, found by Chaya: an א/2 with no teudat zehut and no licence was
+ * sent to the documents screen and asked for his 89 number — while the very
+ * first step of the roadmap printed underneath told him to go to the licensing
+ * office and OBTAIN an 89. The same screen said both things at once.
+ *
+ * ⭐ Her rule, and it is now the rule of this whole screen:
+ *   **a person is only ever asked for something he can actually provide.**
+ *
+ * Which needs two questions, not one, because they fail in different ways:
+ *
+ *   `ask`  — does this document belong to a person like him at all? A citizen
+ *            has no visa and no 89, and that was fixed on 31.8.
+ *
+ *   `confirm_possession` — it belongs to him, but does he HOLD one yet? A
+ *            document his own route still tells him to go and get is a document
+ *            he does not have, and a text box asking him to copy a number off
+ *            it is a question with no answer. So the section asks whether he
+ *            has it BEFORE it asks what is printed on it.
+ *
+ * ⭐ The product already worked this way once and nobody noticed it was a rule:
+ * the רקורד is never transcribed until `q_record` has asked whether he has one.
+ * This makes that pattern the default rather than an accident of one question.
+ *
+ * ⚠️ Both are decided HERE, never in the website. The form is not allowed to
+ * know which documents belong to which person, nor which ones the licensing
+ * office is going to issue him — add a step that produces a document and the
+ * possession question follows it on its own.
+ */
+export type DocumentQuestion = {
+  /** Show this section at all. */
+  ask: boolean;
+  /**
+   * Ask "do you have it?" first, and reveal the fields only on a yes.
+   *
+   * True when a step that ISSUES this document is still on his road — so he may
+   * well be holding nothing, and the fields would be unanswerable.
+   */
+  confirm_possession: boolean;
+};
+
 /** Whether the grade he asked for is available to his category at all. */
 export type CeilingStatus = 'within' | 'above' | 'unknown';
 
@@ -196,10 +239,10 @@ export type Diagnosis = {
    * one he does need loses the answer entirely and silently.
    */
   document_questions: {
-    form_89: boolean;
-    passport: boolean;
-    visa: boolean;
-    foreign_license: boolean;
+    form_89: DocumentQuestion;
+    passport: DocumentQuestion;
+    visa: DocumentQuestion;
+    foreign_license: DocumentQuestion;
   };
 };
 
