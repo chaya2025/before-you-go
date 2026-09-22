@@ -318,6 +318,21 @@ export const Profile = z.object({
    * step from a real roadmap — the wasted trip this product exists to prevent,
    * caused by a text box.
    */
+  /**
+   * ⭐ "Do you have an 89 at all?" — asked BEFORE the three fields below, and
+   * added 22.9 for the bug the founder found: an א/2 with no teudat zehut and no
+   * licence was handed a box for his 89 number while step one of his own
+   * roadmap told him to go to the licensing office and get one.
+   *
+   * ⚠️ This is the only thing that may turn `holds_form_89` into a `false`. A
+   * blank number field must never do it — see the fact's own note. Unanswered
+   * stays 'unknown', which is what skipping the screen means.
+   *
+   * ⚠️ Whether it is even asked is the ENGINE's call, not the form's:
+   * Diagnosis.document_questions.form_89.confirm_possession.
+   */
+  holds_form_89: Tristate.default('unknown'),
+
   form_89_number: z
     .string()
     .trim()
