@@ -123,6 +123,26 @@ export const NohalCategory = z.enum([
 export type NohalCategory = z.infer<typeof NohalCategory>;
 
 /**
+ * ⭐ WHAT TO CALL A CATEGORY ON SCREEN, and the clause it comes from.
+ *
+ * ⚠️ Added 22.9, because the diagnosis screen was printing `toshav_medinat_chutz`
+ * at a person and asking him to confirm it. An internal identifier shown to a
+ * user is not a detail: this product's whole claim is that it explains the
+ * procedure in words a person can check, and a code he cannot look up anywhere
+ * is the opposite of that.
+ *
+ * ⚠️ It lives HERE, beside the enum, so a category can never be added without
+ * a name — a label kept in the website would go missing the first time the
+ * engine gained a fifth category.
+ */
+export const NOHAL_CATEGORY_LABEL: Record<NohalCategory, { he: string; en: string }> = {
+  oleh_chadash: { he: 'עולה חדש · ס׳ 1(א)', en: 'New immigrant · clause 1(a)' },
+  toshav_israel: { he: 'תושב ישראל ששב לארץ · ס׳ 1(ב)', en: 'Returning Israeli resident · clause 1(b)' },
+  toshav_medinat_chutz: { he: 'תושב מדינת חוץ · ס׳ 1(ג)', en: 'Resident of a foreign state · clause 1(c)' },
+  not_defined_in_nohal: { he: 'מעמד שאינו מוגדר בנוהל', en: 'A status the procedure does not define' },
+};
+
+/**
  * ⭐ WHICH DATE EACH CATEGORY COUNTS FROM. One definition, exported, because it
  * was being made twice.
  *
