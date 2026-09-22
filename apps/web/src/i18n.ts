@@ -286,6 +286,24 @@ export const UI = {
     en: 'Answer the first two questions. The rest can be skipped.',
   },
   loading: { he: 'רגע…', en: 'One moment…' },
+
+  /* ── the states nobody designs ─────────────────────────────────────────
+     Waiting, failing, and being handed a sheet of paper. A product is judged
+     on these far more than on the screen where everything went right. */
+  loading_form: { he: 'טוענים את השאלות…', en: 'Loading the questions…' },
+  updating_road: { he: 'מעדכנים את הדרך…', en: 'Updating the road…' },
+  retry: { he: 'נסה שוב', en: 'Try again' },
+  error_step: {
+    he: 'לא הצלחנו לעדכן את השלב, והסימון בוטל. שום דבר לא נשמר.',
+    en: 'We could not update the step, so the tick was undone. Nothing was saved.',
+  },
+  print_page: { he: 'הדפסה, לקחת איתך', en: 'Print it, take it with you' },
+  printed_on: { he: 'הודפס בתאריך', en: 'Printed on' },
+  printed_note: {
+    he: 'הנהלים משתנים. אם עברו שבועות מאז ההדפסה, כדאי להיכנס שוב ולבדוק.',
+    en: 'Procedures change. If weeks have passed since this was printed, come back and check.',
+  },
+  print_tick: { he: 'בוצע', en: 'Done' },
   back: { he: 'לא נכון, תקן', en: 'Not right, fix it' },
 
   // ── the documents screen (ש7) ────────────────────────────────────────────
@@ -543,7 +561,7 @@ export const UI = {
 
   error_title: { he: 'משהו השתבש', en: 'Something went wrong' },
   error_offline: {
-    he: 'לא הצלחנו להגיע לשרת. ודא שהוא רץ על פורט 3001.',
-    en: 'We could not reach the server. Check that it is running on port 3001.',
+    he: 'לא הצלחנו להגיע לשרת. בדוק את החיבור לאינטרנט ונסה שוב. שום דבר שענית לא אבד.',
+    en: 'We could not reach the server. Check your connection and try again. Nothing you answered was lost.',
   },
 } as const;
