@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Before You Go — הרכיבים</title>
+  <!--
+    The element sheet. Every control the product is built from, on one page,
+    so a change to a token can be judged against all of them at once instead
+    of being discovered three screens later.
+
+    Not part of the app: no import into the build, no route. Open it directly
+    (npm run dev:web then /elements.html) or render it headless.
+  -->
+  <link rel="stylesheet" href="./src/theme.css">
+  <style>
+    body { padding: var(--gap-lg) var(--gap); max-width: 60rem; margin: 0 auto; }
+    section { margin-block-end: var(--gap-xl); }
+    h2 { margin-block-end: var(--gap); }
+    .row { display: flex; flex-wrap: wrap; gap: var(--gap-sm); align-items: center; }
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: var(--gap-sm); }
+    .sw { border: 1px solid var(--line-soft); border-radius: var(--radius-sm); overflow: hidden; }
+    .sw i { display: block; height: 54px; }
+    .sw b { display: block; padding: 0.4rem 0.6rem; font-size: 0.78rem; font-weight: 500; }
+    .sw span { display: block; padding: 0 0.6rem 0.5rem; font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); }
+    .ground-block { padding: var(--gap-lg) var(--gap); border-radius: var(--radius); margin-block-end: var(--gap-sm); }
+  </style>
+</head>
+<body>
+
+  <section>
+    <p class="script" style="font-size:2rem;color:var(--amber-ink);margin:0">לדעת לפני שמגיעים</p>
+    <h1>הרכיבים של Before You Go</h1>
+    <p class="muted">גיליון הרכיבים. כל מה שממנו בנויים המסכים, במקום אחד.</p>
+  </section>
+
+  <section>
+    <h2>צבעים</h2>
+    <div class="swatches">
+      <div class="sw"><i style="background:var(--ink)"></i><b>דיו</b><span>--ink</span></div>
+      <div class="sw"><i style="background:var(--ink-deep)"></i><b>דיו עמוק</b><span>--ink-deep</span></div>
+      <div class="sw"><i style="background:var(--paper)"></i><b>נייר</b><span>--paper</span></div>
+      <div class="sw"><i style="background:var(--surface)"></i><b>משטח</b><span>--surface</span></div>
+      <div class="sw"><i style="background:var(--sand)"></i><b>חול</b><span>--sand</span></div>
+      <div class="sw"><i style="background:var(--sage-bottom)"></i><b>מרווה</b><span>--sage-bottom</span></div>
+      <div class="sw"><i style="background:var(--amber)"></i><b>ענבר</b><span>--amber</span></div>
+      <div class="sw"><i style="background:var(--amber-ink)"></i><b>ענבר כהה</b><span>--amber-ink</span></div>
+      <div class="sw"><i style="background:var(--line)"></i><b>קו</b><span>--line</span></div>
+      <div class="sw"><i style="background:var(--muted)"></i><b>מעומעם</b><span>--muted</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>סולם הוודאות</h2>
+    <div class="row">
+      <span class="chip chip-verified">🟢 מאומת</span>
+      <span class="chip chip-likely">🟡 סביר</span>
+      <span class="chip chip-first_hand">🔵 דיווח מהשטח</span>
+      <span class="chip chip-uncertain">🔴 לא ודאי</span>
+      <span class="chip chip-in_litigation">⏳ בשינוי</span>
+      <span class="chip chip-unchecked">⬜ לא נבדק</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>טיפוגרפיה</h2>
+    <h1>כותרת ראשית</h1>
+    <h2>כותרת משנית</h2>
+    <h3>כותרת שלישית</h3>
+    <p>טקסט רגיל, 17 פיקסל. חלק מהקהל קורא עברית כשפה שנייה, ולכן הבסיס גדול מהרגיל.</p>
+    <p class="script" style="font-size:1.42rem">הקול הכתוב ביד — רק לתגיות ולהסברים, אף פעם לא על כפתור או על דרישה.</p>
+    <p>מספרים וסעיפים נשארים בגופן מכונת־כתיבה: תקנות <span class="code">176-181</span>, מסמך <span class="code">89</span>, אשרה <span class="code">א/5</span>.</p>
+    <p class="muted small">טקסט משני, קטן ומעומעם.</p>
+  </section>
+
+  <section>
+    <h2>כפתורים</h2>
+    <div class="row">
+      <button class="btn btn-primary" type="button">פעולה ראשית
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="btn btn-amber" type="button">פעולה בענבר</button>
+      <button class="btn" type="button">פעולה רגילה</button>
+      <button class="btn btn-quiet" type="button">פעולה שקטה</button>
+      <button class="btn" type="button" disabled>טרם נפתח</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>שדות ואפשרויות</h2>
+    <div class="stack" style="max-width:28rem">
+      <label class="stack-sm" style="display:block">
+        <span class="small muted">מספר דרכון</span>
+        <input type="text" placeholder="כפי שרשום במסמך">
+      </label>
+      <label class="stack-sm" style="display:block">
+        <span class="small muted">תאריך תפוגה</span>
+        <input type="text" class="num" value="2029-04-17">
+      </label>
+      <label class="stack-sm" style="display:block">
+        <span class="small muted">סוג האשרה</span>
+        <select><option>א/2</option><option>א/5</option><option>ב/1</option></select>
+      </label>
+      <button class="option" type="button" aria-pressed="true">
+        <span>יש לי רישיון נהיגה זר<span class="option-note">נבחר</span></span>
+      </button>
+      <button class="option" type="button" aria-pressed="false">
+        <span>אין לי רישיון נהיגה<span class="option-note">מסלול מאפס</span></span>
+      </button>
+    </div>
+  </section>
+
+  <section>
+    <h2>כרטיסים ורקעים</h2>
+    <div class="ground-block ground-sand">רקע חול — פס מקדים</div>
+    <div class="ground-block ground-sage">רקע מרווה — פס שמתמזג לנייר</div>
+    <div class="ground-block ground-ink">רקע דיו — פס כהה</div>
+    <div class="row" style="align-items:stretch">
+      <div class="card" style="flex:1 1 16rem">
+        <h3>כרטיס רגיל</h3>
+        <p class="muted small" style="margin:0">מחזיק תוכן. אינו זז מתחת לסמן.</p>
+      </div>
+      <div class="card card-action" style="flex:1 1 16rem">
+        <h3>כרטיס שאפשר ללחוץ</h3>
+        <p class="muted small" style="margin:0">מתרומם בריחוף, כי יש מאחוריו פעולה.</p>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
