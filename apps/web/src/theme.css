@@ -737,11 +737,14 @@ h1, h2, h3 { text-wrap: balance; }
   /* ⚠️ Sticky, not fixed: it scrolls with the page until it reaches the top
      and then stays, so the clocks are readable from anywhere on a long road
      without covering anything on a phone, where it simply sits above. */
+  /* ⚠️ No max-height and no overflow here. Those two lines put a scrollbar
+     down the inside of the rail — a grey slider running beside the sticky
+     notes, which is the founder's note of 22.9: "remove this slide moving bar that
+     is around the sticky notes and the clocks, it's pretty ugly". A rail that
+     holds two short notes never needed to scroll inside itself. */
   .answer-side {
     position: sticky;
     inset-block-start: 5.2rem;
-    max-height: calc(100vh - 6.5rem);
-    overflow-y: auto;
   }
 }
 
@@ -1158,6 +1161,13 @@ h1, h2, h3 { text-wrap: balance; }
 .road-rows .step::before,
 .road-rows .step::after { display: none; content: none; }
 
+/* ⚠️ `.road > *` is pushed 2.6rem clear of the asphalt lane. With no lane
+   there is nothing to clear, and the inherited margin was holding every row
+   41px off the rail that is supposed to run behind its numbers. Measured,
+   not guessed: the rail sat at the container edge and the numbers 44px in. */
+.road-rows > * { margin-inline-start: 0; }
+.road-rows > * + * { margin-block-start: 0; }
+
 /* ⭐ The road, still a road. The asphalt lane and its diamonds belong to a
    column of cards; against a list they were ink floating beside nothing. So
    the rail survives as one hairline running behind the numbers — the thing
@@ -1214,6 +1224,37 @@ h1, h2, h3 { text-wrap: balance; }
 
 /* Smaller than a card's, because a row is scanned and a card is read. */
 .step-row .step-index { font-size: 1.05rem; color: var(--muted); }
+
+/* The chips at the far end of a row, kept together so the titles stay a
+   clean column and the eye can run down the places on their own. */
+.step-head-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: none;
+  margin-inline-start: auto;
+}
+
+/* ⭐ WHERE, on the row. The one fact that differs on every step: population
+   authority, photo station, driving school, test centre, post office. Quiet
+   enough not to compete with the title, present enough to plan a week from. */
+.step-where {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: #5c6b66;
+  background: #f1efe7;
+  border-radius: var(--radius-pill);
+  padding: 0.15rem 0.6rem;
+  white-space: nowrap;
+}
+
+.step-row-body .step-channel { display: none; }
+
+/* A tick the order will not allow yet. Not hidden and not silent: it says
+   which step has to come first, and it comes back the moment that is ticked. */
+.step-tick-blocked { opacity: 0.85; }
+.step-tick-blocked input { cursor: not-allowed; }
+.step-tick-blocked > span { color: var(--muted); font-style: normal; }
 .step-row .step-head h3 { font-size: 1.02rem; font-weight: 500; }
 
 /* The chevron. ⚠️ Drawn with PHYSICAL borders on purpose: a corner made from
