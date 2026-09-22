@@ -45,13 +45,47 @@ export const UI = {
   //
   // ⚠️ Professional and plain, per Chaya's ruling on 31.8. No reassurance about
   // how hard bureaucracy is; the reassurance is knowing what you are in for.
-  hero_title: {
-    he: 'לבדוק שאתה מוכן, לפני שאתה מגיע',
-    en: 'Check that you are ready, before you go',
+  hero_eyebrow: {
+    he: 'שירות עצמאי · אינו גוף ממשלתי',
+    en: 'An independent service · not a government body',
   },
+  hero_title: {
+    he: 'חי בישראל בלי תעודת זהות ישראלית?',
+    en: 'Living in Israel without an Israeli ID?',
+  },
+  /* ⭐ The second half of the headline, in amber. Kept as its own string so a
+     translator can move it to where the sentence actually turns. */
+  hero_title_em: { he: 'תגיע מוכן.', en: 'Arrive prepared.' },
+  /**
+   * ⚠️ Rewritten 22.9. Chaya, reading the landing page cold: "the headline says
+   * if you're not Israeli then come prepared — but someone who just opened the
+   * site wouldn't even understand to what." So the first sentence now names the
+   * processes; only then does it say what we do about them.
+   */
   hero_lede: {
-    he: 'המערכת בודקת את המסמכים שברשותך מול הדרישות הרשמיות, ומראה מה תקין, מה חסר, ומה לעשות ראשון. מיועדת למי שחי בישראל בלי תעודת זהות כחולה.',
-    en: 'The system checks the documents you hold against the official requirements, and shows what is in order, what is missing, and what to do first. Built for people living in Israel without a blue teudat zehut.',
+    he: 'תהליכים בירוקרטיים בישראל — רישיון נהיגה, חידוש אשרה, פתיחת חשבון בנק — בנויים למי שמחזיק תעודת זהות ישראלית. אנחנו ממפים עבורך את התהליך מול הרשות, שלב אחר שלב, ובודקים את המסמכים שברשותך מול הדרישות הרשמיות: מה תקין, מה חסר, ובמה לטפל ראשון.',
+    en: 'Bureaucratic processes in Israel — a driving licence, a visa renewal, a bank account — are built for people who hold an Israeli ID. We map your process at the authority, step by step, and check the documents you hold against the official requirements: what is in order, what is missing, and what to handle first.',
+  },
+  hero_cta: { he: 'התחלת בדיקת מוכנות', en: 'Begin the readiness check' },
+  hero_cta_secondary: { he: 'איך זה עובד', en: 'How it works' },
+  hero_meta: { he: 'כ־4 דקות · ללא הרשמה', en: 'About 4 minutes · no registration' },
+
+  // ── what the person receives ─────────────────────────────────────────────
+  gets_kicker: { he: 'מה אנחנו מציעים', en: 'What we offer' },
+  get_route: { he: 'התהליך המלא', en: 'The full route' },
+  get_route_note: {
+    he: 'כל שלב לפי הסדר, איפה מבצעים אותו, ומה לוח הזמנים.',
+    en: 'Every step in order, where it is done, and its timing.',
+  },
+  get_docs: { he: 'בדיקת מסמכים', en: 'A document check' },
+  get_docs_note: {
+    he: 'הדרכון, האשרה והרישיון נבדקים זה מול זה ומול הדרישה.',
+    en: 'Your passport, visa and licence checked against each other and against the requirement.',
+  },
+  get_first: { he: 'פעולה ראשונה אחת', en: 'One first action' },
+  get_first_note: {
+    he: 'מה לעשות ראשון, והסיבה שזה קודם לכל השאר.',
+    en: 'What to do first, and the reason it comes before everything else.',
   },
 
   /* ⭐ Chaya's call, 31.8, and the most important block on the page. This
@@ -63,21 +97,52 @@ export const UI = {
     en: 'It does not submit applications and does not contact any authority on your behalf. It explains what is required and checks it against what you have. There is no sign-up, and nothing you enter is saved.',
   },
 
+  how_kicker: { he: 'שלושה שלבים', en: 'Three stages' },
   how_title: { he: 'איך זה עובד', en: 'How it works' },
-  beat_1: { he: 'כמה שאלות על המעמד שלך', en: 'A few questions about your status' },
-  beat_1_note: { he: 'שתי שאלות חובה. את השאר אפשר לדלג.', en: 'Two are required. The rest can be skipped.' },
-  beat_2: { he: 'מה כתוב על המסמכים שלך', en: 'What your documents say' },
-  beat_2_note: { he: 'מעתיקים את הפרטים; המערכת משווה ביניהם.', en: 'You copy the details; the system compares them.' },
-  beat_3: { he: 'הדרך שלך, והשלב הראשון', en: 'Your route, and the first step' },
-  beat_3_note: { he: 'כל שלב לפי הסדר, עם המקור לכל דרישה.', en: 'Every step in order, with the source for each requirement.' },
-
-  choose_title: { he: 'במה אפשר לעזור?', en: 'What do you need?' },
-  choose_note: {
-    he: 'תהליך אחד פעיל כרגע. נוספים בפיתוח.',
-    en: 'One process is available now. More are in development.',
+  how_note: {
+    he: 'שלושה שלבים, ובסופם מפת הדרכים שלך. כל דרישה נושאת את הסעיף שממנו נלקחה.',
+    en: 'Three stages, then your roadmap. Every requirement carries the clause it came from.',
   },
-  status_live: { he: 'זמין', en: 'Available' },
-  status_planned: { he: 'בקרוב', en: 'Coming soon' },
+  beat_1: { he: 'המעמד שלך', en: 'Your status' },
+  beat_1_note: {
+    he: 'כמה שאלות קצרות: סוג האשרה, התאריכים, והרישיון שכבר ברשותך.',
+    en: 'A few short questions: visa type, dates, and the licence you already hold.',
+  },
+  beat_2: { he: 'המסמכים שלך', en: 'Your documents' },
+  beat_2_note: {
+    he: 'מזינים את הפרטים בדיוק כפי שהם רשומים; המערכת משווה ביניהם ומול הדרישה.',
+    en: 'You enter the details exactly as they appear; the system compares them against each other and against the requirement.',
+  },
+  beat_3: { he: 'מפת הדרכים', en: 'Your roadmap' },
+  beat_3_note: {
+    he: 'המסלול, כל השלבים לפי הסדר, ופעולה ראשונה אחת — כל דרישה עם הסעיף שממנו נלקחה.',
+    en: 'The route, every step in order, and one first action, each requirement with the clause it came from.',
+  },
+
+  choose_kicker: { he: 'במה אנחנו מטפלים', en: 'What we cover' },
+  choose_title: { he: 'התהליכים', en: 'The processes' },
+  choose_note: {
+    he: 'אחד פתוח כעת. נוספים בפיתוח, ויעבדו באותה שיטה.',
+    en: 'One is open now. More are in development, and will work the same way.',
+  },
+  status_live: { he: 'פתוח כעת', en: 'Open now' },
+  status_planned: { he: 'בפיתוח', en: 'In development' },
+  process_cta: { he: 'לבדיקת המוכנות', en: 'Check my readiness' },
+  process_closed: { he: 'טרם נפתח', en: 'Not yet open' },
+  process_closed_note: {
+    he: 'ייפתח לאחר שתהליך הרישיון יוכיח את עצמו',
+    en: 'Opens once the licence process has proven itself',
+  },
+
+  // ── the closing call ─────────────────────────────────────────────────────
+  close_title: {
+    he: 'ארבע דקות כאן, במקום יום עבודה מבוזבז שם.',
+    en: 'Four minutes here, instead of a wasted day there.',
+  },
+  close_note: {
+    he: 'ללא הרשמה, ללא שמירת פרטים, וכל דרישה נושאת את הסעיף שממנו נלקחה.',
+    en: 'No registration, nothing stored, and every requirement carries the clause it came from.',
+  },
   at_authority: { he: 'מול', en: 'With' },
 
   q_status: { he: 'מה המעמד שלך בישראל?', en: 'What is your status in Israel?' },
