@@ -214,17 +214,67 @@ export function App() {
    */
   async function toggleStep(id: string, isDone: boolean) {
     if (!answers) return;
+    /**
+     * ⚠️ Found in M5, and it was not cosmetic. The tick was written into
+     * `done` BEFORE the call, and on a failed call it stayed there. The
+     * checkbox itself corrected: it reads the engine's result, which had not
+     * changed. But `done` had, so the NEXT successful call would have sent a
+     * step he never confirmed, and the road would have been built on it.
+     * A silent wrong answer is the one failure this product cannot have.
+     */
+    const before = done;
     const next = isDone ? [...done, id] : done.filter((x) => x !== id);
     setDone(next);
     setBusy(true);
+    setError(null);
     try {
       setResult(await fetchReadiness({ ...answers, completed_steps: next }));
+    } catch {
+      setDone(before);
+      setError(t('error_step'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /**
+   * ⭐ A dead end is not an error state. Whatever failed, the way out is the
+   * same: do the last thing again. With answers in hand that means re-running
+   * the engine; before that it means fetching the question list again.
+   */
+  async function retry() {
+    setError(null);
+    if (!answers) {
+      fetchStatuses()
+        .then(setStatuses)
+        .catch(() => setError(t('error_offline')));
+      return;
+    }
+    setBusy(true);
+    try {
+      setResult(await fetchReadiness({ ...answers, completed_steps: done }));
     } catch {
       setError(t('error_offline'));
     } finally {
       setBusy(false);
     }
   }
+
+  /**
+   * ⚠️ ONE notice, defined once and shown on every screen. It used to live
+   * inside the narrow-column layout only, so a failure while ticking a step
+   * on the answer page — the one screen where ticking happens — was rendered
+   * nowhere at all. He pressed, nothing moved, and nothing said why.
+   */
+  const failure = error ? (
+    <div className="card fail" role="alert">
+      <h3>{t('error_title')}</h3>
+      <p className="small">{error}</p>
+      <button className="btn btn-quiet" onClick={retry} disabled={busy}>
+        {busy ? t('loading') : t('retry')}
+      </button>
+    </div>
+  ) : null;
 
   const header = (
     <header className="mast">
@@ -279,6 +329,16 @@ export function App() {
         <div className="answer">
           <div className="answer-head">
             <h2>{t('roadmap_title')}</h2>
+
+            {/* ⭐ Printed at the top of the sheet and nowhere else. A roadmap
+                carried into an office on paper is a roadmap frozen on the day
+                it was printed, and the procedures behind it keep moving. The
+                date is the reader's own way of knowing how much to trust it. */}
+            <p className="print-only print-stamp">
+              {t('printed_on')}{' '}
+              <span className="num">{new Date().toISOString().slice(0, 10)}</span> ·{' '}
+              {t('printed_note')}
+            </p>
             <div className="answer-progress">
               <span>
                 <span className="num">{result.roadmap.filter((s) => s.state === 'done').length}</span>{' '}
@@ -361,7 +421,20 @@ export function App() {
             );
           })()}
 
-          <div className="answer-cols">
+          {failure}
+
+          {/* ⚠️ Said out loud, quietly. Ticking a step re-runs the whole
+              engine, so the numbers and the road change a moment after he
+              presses — and until M5 nothing on the screen admitted that
+              anything was happening. */}
+          {busy && (
+            <p className="working" role="status">
+              <span className="working-dot" aria-hidden="true" />
+              {t('updating_road')}
+            </p>
+          )}
+
+          <div className="answer-cols" aria-busy={busy}>
             {/* ⭐ ONE orchestrated reveal, on the screen where the answer
                 arrives, and nothing else in the product moves. */}
             <div className="answer-main reveal">
@@ -372,9 +445,19 @@ export function App() {
                   do next. The road is the detail under it. */}
               <Readiness result={result} lang={lang} />
               <Roadmap result={result} lang={lang} onToggle={toggleStep} />
-              <button className="btn btn-quiet" onClick={restart}>
-                {t('start_over')}
-              </button>
+
+              {/* ⭐ The paper sheet was built in M1 and had no door. This is
+                  the door. It is the product's own thesis — they walk into an
+                  office where a phone is no use — so it is a real offer on
+                  the page, not something to be discovered through Ctrl+P. */}
+              <div className="answer-actions">
+                <button className="btn btn-quiet" onClick={() => window.print()}>
+                  {t('print_page')}
+                </button>
+                <button className="btn btn-quiet" onClick={restart}>
+                  {t('start_over')}
+                </button>
+              </div>
             </div>
 
             <aside className="answer-side">
@@ -463,14 +546,24 @@ export function App() {
         </p>
       )}
 
-      {error && (
-        <div
-          className="card"
-          style={{ borderInlineStartWidth: '4px', borderInlineStartColor: 'var(--uncertain)' }}
-          role="alert"
-        >
-          <h3>{t('error_title')}</h3>
-          <p className="small">{error}</p>
+      {failure}
+
+      {/**
+        * ⭐ The first screen of the product, on a slow connection, used to be
+        * a headline and then nothing: the visa list comes from the API, and
+        * until it lands there is no form to draw. Blank space reads as broken,
+        * and this audience has been failed by enough websites already.
+        *
+        * ⚠️ The shapes are the shapes of the real questions, so the page does
+        * not jump when the answer arrives.
+        */}
+      {screen === 'intake' && !statuses && !error && (
+        <div className="card stack-sm skel-form" aria-busy="true" aria-live="polite">
+          <p className="muted small">{t('loading_form')}</p>
+          <span className="skel skel-title" />
+          <span className="skel skel-field" />
+          <span className="skel skel-line" />
+          <span className="skel skel-field" />
         </div>
       )}
 

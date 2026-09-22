@@ -71,9 +71,9 @@ function Item({
         </p>
       )}
 
-      {/* ⚠️ Step TITLES, not ids. The roadmap prints raw ids for `waiting_on`
-          and that is already too much machinery for a person to read; a
-          readiness report that says "fz.photo_and_eye" is not a report. */}
+      {/* ⚠️ Step TITLES, not ids. A report that says "fz.photo_and_eye" is
+          not a report. The road used to print raw ids here too, which this
+          note once recorded; it no longer does. */}
       <p className="small muted" style={{ margin: 'var(--gap-xs) 0 0' }}>
         {t('r_needed_for')}: {item.needed_for.map(titleOf).join(' · ')}
       </p>
