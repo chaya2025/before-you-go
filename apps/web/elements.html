@@ -88,25 +88,56 @@
 
   <section>
     <h2>שדות ואפשרויות</h2>
-    <div class="stack" style="max-width:28rem">
-      <label class="stack-sm" style="display:block">
-        <span class="small muted">מספר דרכון</span>
-        <input type="text" placeholder="כפי שרשום במסמך">
-      </label>
-      <label class="stack-sm" style="display:block">
-        <span class="small muted">תאריך תפוגה</span>
-        <input type="text" class="num" value="2029-04-17">
-      </label>
-      <label class="stack-sm" style="display:block">
-        <span class="small muted">סוג האשרה</span>
-        <select><option>א/2</option><option>א/5</option><option>ב/1</option></select>
-      </label>
-      <button class="option" type="button" aria-pressed="true">
-        <span>יש לי רישיון נהיגה זר<span class="option-note">נבחר</span></span>
-      </button>
-      <button class="option" type="button" aria-pressed="false">
-        <span>אין לי רישיון נהיגה<span class="option-note">מסלול מאפס</span></span>
-      </button>
+    <div style="max-width:30rem">
+      <div class="field">
+        <label for="pp">מספר הדרכון</label>
+        <p class="field-note">כפי שהוא מודפס בעמוד הראשון, בלי רווחים.</p>
+        <input id="pp" type="text" placeholder="לדוגמה 5AB1234567">
+      </div>
+
+      <div class="field">
+        <label for="exp">תאריך התפוגה של הדרכון</label>
+        <input id="exp" type="text" class="num" value="2029-04-17">
+      </div>
+
+      <div class="field">
+        <label for="bad">תאריך התפוגה של האשרה</label>
+        <input id="bad" type="text" class="num" value="17/04/2029" aria-invalid="true">
+        <p class="field-error">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5v5.5M12 16.2v.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          התאריך נקרא בפורמט שנה־חודש־יום. לדוגמה: <span class="code">2029-04-17</span>
+        </p>
+      </div>
+
+      <div class="field">
+        <label for="visa">סוג האשרה</label>
+        <select id="visa"><option>א/2 — סטודנט</option><option>א/5 — תושב ארעי</option><option>ב/1 — עובד</option></select>
+      </div>
+
+      <div class="field">
+        <span class="field-label">יש ברשותך רישיון נהיגה זר בתוקף?</span>
+        <p class="field-note">רישיון לאומי בלבד. רישיון בינלאומי אינו נחשב.</p>
+        <div class="options">
+          <button class="option" type="button" aria-pressed="true">
+            <span>כן, יש לי רישיון זר<span class="option-note">מסלול המרה</span></span>
+          </button>
+          <button class="option" type="button" aria-pressed="false">
+            <span>לא, אין לי רישיון<span class="option-note">מסלול מאפס</span></span>
+          </button>
+          <button class="option" type="button" aria-pressed="false" disabled>
+            <span>לא בטוח<span class="option-note">זמין בהמשך</span></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">האם יש לך תעודת זהות ישראלית?</span>
+        <div class="options options-inline">
+          <button class="option" type="button" aria-pressed="false"><span>כן</span></button>
+          <button class="option" type="button" aria-pressed="true"><span>לא</span></button>
+          <button class="option" type="button" aria-pressed="false"><span>לא יודע</span></button>
+        </div>
+      </div>
     </div>
   </section>
 

@@ -355,35 +355,193 @@ select {
 
 .btn-quiet:hover { border-color: var(--ink); }
 
+/* ==========================================================================
+   Asking a question
+   ==========================================================================
+   ⭐ Rebuilt 22.9. Every screen in this product is a form, so a field that
+   feels cheap makes the whole thing feel cheap. Three rules here:
+
+   1. The QUESTION is the loudest thing in the field, not the box. A person
+      standing in a queue reads the question, not the border.
+   2. The state is carried by an edge and a mark, never by a fill. Filling an
+      answer amber would put "you are here" on every chosen answer on the
+      screen, and amber would stop meaning anything.
+   3. Nothing moves except what the finger is on.
+   ========================================================================== */
+
+/* A question and its answer, with room to breathe between them. */
+.field {
+  display: grid;
+  gap: 0.45rem;
+  margin-block-end: var(--gap);
+}
+
+.field > label,
+.field-label {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+/* The note under a question: what counts as an answer, where to look on the
+   document. Deliberately not italic — this audience reads Hebrew and English
+   at different speeds and italics cost legibility. */
+.field-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.field-error {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--uncertain);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+input[type='text'],
+input[type='number'],
+select {
+  min-height: 54px;
+  width: 100%;
+  padding: 0 var(--gap);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  transition: border-color var(--t-quick) var(--ease),
+              box-shadow var(--t-quick) var(--ease),
+              background var(--t-quick) var(--ease);
+}
+
+input::placeholder { color: #a8b3af; }
+
+input[type='text']:hover,
+input[type='number']:hover,
+select:hover { border-color: var(--muted); }
+
+/* ⚠️ The focus ring is amber because focus IS "where you are standing" — the
+   same rule the road markers follow. Drawn as a ring around the field rather
+   than a colour swap, so it survives a high-contrast setting and so the field
+   does not change size when it takes focus. */
+input[type='text']:focus-visible,
+input[type='number']:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--amber);
+  box-shadow: 0 0 0 4px var(--amber-soft);
+}
+
+input[aria-invalid='true'],
+select[aria-invalid='true'] { border-color: var(--uncertain); }
+
+input[aria-invalid='true']:focus-visible,
+select[aria-invalid='true']:focus-visible {
+  box-shadow: 0 0 0 4px rgba(163, 68, 51, 0.12);
+}
+
+input:disabled,
+select:disabled { background: #f4f0e8; color: var(--muted); cursor: not-allowed; }
+
+/* Numbers, dates and document codes are quoted from a document, so they are
+   set in the quoted face and their digits line up in a column. */
+input[type='number'],
+input.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ⚠️ The native select arrow is drawn by the operating system and looks
+   different on every one of them, which is exactly what makes a form look
+   unfinished. This draws our own. background-position has no logical
+   keyword, so the side is set per direction rather than guessed. */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' fill='none'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%2364736e' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left var(--gap) center;
+  padding-inline-end: var(--gap);
+  padding-inline-start: 2.6rem;
+}
+
+[dir='ltr'] select {
+  background-position: right var(--gap) center;
+  padding-inline-start: var(--gap);
+  padding-inline-end: 2.6rem;
+}
+
+/* ---- choosing between answers ------------------------------------------ */
+
+.options { display: grid; gap: 0.6rem; }
+
 /* An answer option. Big enough to hit with a thumb while standing in a queue. */
 .option {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--gap-sm);
   width: 100%;
-  min-height: 52px;
-  padding: var(--gap-sm) var(--gap);
-  border: 1px solid var(--line);
+  min-height: 58px;
+  padding: 0.9rem var(--gap);
+  border: 1.5px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--surface);
   text-align: start;
+  font: inherit;
+  color: inherit;
   cursor: pointer;
   transition: border-color var(--t-quick) var(--ease),
-              background var(--t-quick) var(--ease),
-              transform var(--t-quick) var(--ease);
+              box-shadow var(--t-quick) var(--ease),
+              background var(--t-quick) var(--ease);
 }
 
-.option:hover { border-color: var(--muted); transform: translateY(-1px); }
+/* The mark. A ring that fills amber when the answer is chosen — the one
+   place amber belongs here, because the chosen answer IS where he stands.
+   Drawn in CSS so no component has to carry an icon for it. */
+.option::before {
+  content: '';
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: var(--paper);
+  transition: border-color var(--t-quick) var(--ease),
+              box-shadow var(--t-quick) var(--ease),
+              background var(--t-quick) var(--ease);
+}
 
-/* ⚠️ Chosen is marked by the amber EDGE and the weight of the text, not by a
-   filled amber block: a filled option would put the "you are here" colour on
-   four answers at once and stop meaning anything. */
+.option:hover { border-color: var(--muted); }
+.option:hover::before { border-color: var(--muted); }
+
+.option:focus-visible {
+  outline: none;
+  border-color: var(--amber);
+  box-shadow: 0 0 0 4px var(--amber-soft);
+}
+
+/* ⚠️ Chosen is marked by the edge, the ring and the weight of the text — not
+   by a filled amber block. A filled option puts the "you are here" colour on
+   several answers at once and it stops meaning anything. */
 .option[aria-pressed='true'] {
   border-color: var(--amber);
+  background: var(--surface);
   box-shadow: inset 3px 0 0 0 var(--amber);
-  background: var(--amber-soft);
   font-weight: 500;
-  transform: none;
+}
+
+[dir='ltr'] .option[aria-pressed='true'] { box-shadow: inset -3px 0 0 0 var(--amber); }
+
+.option[aria-pressed='true']::before {
+  border-color: var(--amber);
+  background: var(--amber);
+  box-shadow: inset 0 0 0 4px var(--surface);
+}
+
+.option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: var(--line-soft);
 }
 
 .option-note {
@@ -391,38 +549,19 @@ select {
   font-size: 0.85rem;
   color: var(--muted);
   font-weight: 400;
+  margin-block-start: 0.1rem;
 }
 
-input[type='text'],
-input[type='number'],
-select {
-  min-height: 52px;
-  width: 100%;
-  padding: 0 var(--gap);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  transition: border-color var(--t-quick) var(--ease),
-              box-shadow var(--t-quick) var(--ease);
+/* Two or three short answers (yes / no / not sure) sit in a row rather than
+   a stack, because a stack of three one-word answers wastes a whole screen
+   on a phone. */
+.options-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
 }
 
-input[type='text']:hover,
-input[type='number']:hover,
-select:hover { border-color: var(--muted); }
-
-/* ⚠️ The focus ring is amber because focus IS "where you are standing" — the
-   same rule the road markers follow. It is drawn as a ring rather than a
-   colour swap so it survives a high-contrast setting. */
-input[type='text']:focus-visible,
-input[type='number']:focus-visible,
-select:focus-visible {
-  border-color: var(--amber);
-  box-shadow: 0 0 0 3px var(--amber-soft);
-}
-
-/* Numbers, dates and document codes typed into a field read as quoted. */
-input[type='number'],
-input.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.options-inline .option { width: auto; flex: 1 1 8rem; min-height: 50px; }
 
 /* ==========================================================================
    Certainty chips
