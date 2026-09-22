@@ -1250,6 +1250,13 @@ h1, h2, h3 { text-wrap: balance; }
 
 .step-row-body .step-channel { display: none; }
 
+/* The padlock on a row the order will not let him start. A glyph, not a word:
+   it repeats on fourteen rows out of fifteen and a repeated word is noise,
+   while a repeated mark is a column you can run your eye down. */
+.step-lock { display: inline-flex; color: var(--muted); opacity: 0.55; }
+.step-lock svg { width: 14px; height: 14px; }
+.step-row:hover .step-lock { opacity: 0.85; }
+
 /* A tick the order will not allow yet. Not hidden and not silent: it says
    which step has to come first, and it comes back the moment that is ticked. */
 .step-tick-blocked { opacity: 0.85; }
