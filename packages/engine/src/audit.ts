@@ -167,6 +167,15 @@ function invariants(persona: string, r: Result, raw: Record<string, unknown>): F
     if (!step.step.evidence.length) add(`${step.step.id} is shown with no evidence`);
   }
 
+  // 8. ⭐ ADDED 22.9, with the ordering chain. Eleven steps gained a declared
+  //    prerequisite that day. Get one of those wrong in a circle, or hang the
+  //    only root step on a condition that excludes this person, and every step
+  //    on his road says "waiting on something else" — a page that tells a man
+  //    there is nothing he can do, forever, and no test would have noticed.
+  if (r.roadmap.length > 0 && !r.roadmap.some((s) => s.state === 'do_now' || s.state === 'done')) {
+    add('every step on the road is blocked — there is nothing he can start');
+  }
+
   // 7. ⭐ PRIVACY, checked rather than promised. No identifier he typed may
   //    come back out — a message quoting his passport number ends up in a
   //    screenshot he sends to a friend.

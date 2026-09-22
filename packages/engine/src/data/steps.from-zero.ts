@@ -210,6 +210,9 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     },
     applies_when: EVERYONE,
     sequence_position: 5,
+    // ⚠️ ordering_constraint, added 22.9 with the founder. The theory test is booked against the application and the eye test; there
+    // is nothing to sit an exam against until both of them exist.
+    must_come_after: ['fz.online_form', 'fz.photo_and_eye'],
     channel: 'test_center',
     links: [{ label: { he: "הרשמה למבחן תיאוריה", en: 'Register for the theory test' }, url: 'https://www.theorytest.org.il/' }],
     checklist: [
@@ -255,6 +258,11 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     },
     applies_when: EVERYONE,
     sequence_position: 6,
+    // ⚠️ ordering_constraint, added 22.9 with the founder. ⭐ the founder, 22.9: lessons can start BEFORE the theory is passed. They need
+    // the green form and the eye test and nothing else. The obvious-looking
+    // rule "no lessons until theory" is WRONG and would have blocked a person
+    // who is entitled to be out driving.
+    must_come_after: ['fz.online_form', 'fz.photo_and_eye'],
     channel: 'driving_school',
     evidence: [
       servicePage(
@@ -275,6 +283,8 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     },
     applies_when: EVERYONE,
     sequence_position: 7,
+    // ⚠️ ordering_constraint, added 22.9 with the founder. The school's own test is the end of the lessons, not a thing beside them.
+    must_come_after: ['fz.lessons'],
     channel: 'driving_school',
     evidence: [
       servicePage(
@@ -339,6 +349,9 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     },
     applies_when: EVERYONE,
     sequence_position: 9,
+    // ⚠️ ordering_constraint, added 22.9 with the founder. ⭐ The practical test is where the theory DOES bind. Until 22.9 nothing
+    // stopped this being ticked before a single lesson had been taken.
+    must_come_after: ['fz.theory', 'fz.lessons', 'fz.internal_test'],
     channel: 'test_center',
     /**
      * ⚠️ THE FEE RECEIPT AND THE GLASSES WERE BOTH TAKEN OFF THIS LIST ON 31.8,
@@ -444,6 +457,8 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     },
     applies_when: HAS_TEUDAT_ZEHUT,
     sequence_position: 10,
+    // ⚠️ ordering_constraint, added 22.9 with the founder. The permit is what passing the test produces.
+    must_come_after: ['fz.test'],
     channel: 'online',
     evidence: [
       servicePage(
@@ -464,6 +479,8 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     },
     applies_when: NO_TEUDAT_ZEHUT,
     sequence_position: 10,
+    // ⚠️ ordering_constraint, added 22.9 with the founder. The permit is what passing the test produces.
+    must_come_after: ['fz.test'],
     channel: 'licensing_office',
     requires_appointment: true,
     requires_documents: ['doc.passport', 'doc.form_89'],
@@ -538,6 +555,10 @@ export const FROM_ZERO_STEPS: StepInput[] = [
      */
     applies_when: EVERYONE,
     sequence_position: 12,
+    // ⚠️ ordering_constraint, added 22.9 with the founder. New-driver limits begin with the permit. Both routes to it are named; only
+    // the one that applies to him is ever in his roadmap, so in practice this
+    // reads as an OR.
+    must_come_after: ['fz.permit_online', 'fz.permit_in_person'],
     channel: 'unknown',
     notes: [
       {
@@ -615,6 +636,8 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     // being told to file a form he is explicitly exempt from.
     applies_when: { all: [HAS_TEUDAT_ZEHUT, { field: 'age_years', op: 'lt', value: 24 }] },
     sequence_position: 13,
+    // ⚠️ ordering_constraint, added 22.9 with the founder. The accompaniment period has to have run before it can be declared over.
+    must_come_after: ['fz.new_driver'],
     channel: 'online',
     evidence: [
       servicePage(
@@ -660,6 +683,8 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     // ⚠️ Same correction: only someone who did a ליווי declares its end.
     applies_when: { all: [NO_TEUDAT_ZEHUT, { field: 'age_years', op: 'lt', value: 24 }] },
     sequence_position: 13,
+    // ⚠️ ordering_constraint, added 22.9 with the founder. The accompaniment period has to have run before it can be declared over.
+    must_come_after: ['fz.new_driver'],
     channel: 'licensing_office',
     requires_appointment: true,
     evidence: [
@@ -692,6 +717,9 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     action: { he: "שלם את אגרת כרטיס הפלסטיק בסניף דואר.", en: 'Pay the plastic card fee at a post office.' },
     applies_when: NO_TEUDAT_ZEHUT,
     sequence_position: 14,
+    // ⚠️ ordering_constraint, added 22.9 with the founder. Paid for after the accompaniment is settled, by whichever of the three
+    // routes applies to him.
+    must_come_after: ['fz.completion_online', 'fz.completion_in_person', 'fz.no_declaration_needed'],
     channel: 'post_office',
     cost: {
       amount_ils: 20,
@@ -745,6 +773,8 @@ export const FROM_ZERO_STEPS: StepInput[] = [
     },
     applies_when: EVERYONE,
     sequence_position: 15,
+    // ⚠️ ordering_constraint, added 22.9 with the founder. Nothing is posted until it has been paid for.
+    must_come_after: ['fz.plastic_fee'],
     channel: 'mail',
     checklist: [
       {
