@@ -93,9 +93,18 @@ function Bucket({
   titleOf: (stepId: string) => string;
 }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
-  // ⭐ The clean bucket starts folded. A man with nine documents in order does
-  // not need nine green lines above his road; he needs the two that are not.
-  const [open, setOpen] = useState(bucket !== 'ready');
+  /**
+   * ⭐ Only the buckets he has to ACT on open by themselves.
+   *
+   * ⚠️ 22.9: with three of the four buckets open, this card measured 1,090px
+   * — the tallest thing on the answer page, sitting above the road and
+   * pushing "what do I do today" off the first screen. A man must be stopped
+   * by a mismatch or a missing document before he reads anything else. What
+   * is merely unchecked, and what is already fine, is reference and opens on
+   * a tap. Nothing is hidden: every bucket shows its name and its count
+   * whether it is open or not.
+   */
+  const [open, setOpen] = useState(bucket === 'mismatched' || bucket === 'missing');
   if (items.length === 0) return null;
 
   return (
@@ -160,28 +169,22 @@ export function Readiness({ result, lang }: { result: Result; lang: Lang }) {
       {/* ⭐ ONE thing to do next, and the reason it is that one. The whole
           failure this product replaces is "אחרי הטסט אף אחד לא אמר מה השלב הבא" —
           a person holding plenty of information and no idea what to do on
-          Monday morning. */}
+          Monday morning.
+
+          ⚠️ 22.9: it was printed TWICE. This block carried the title, the
+          action and the why, and the עכשיו part of the road immediately below
+          carried the same step as a full card — the page saying the identical
+          thing to itself. The road keeps the instruction, because that is
+          where he ticks it off. This keeps the one line the road cannot give
+          him — WHY this one comes first — and a way straight to it. */}
       {r.first_action && (
-        <div
-          className="first-action"
-          style={{
-            padding: 'var(--gap)',
-          }}
-        >
-          <div className="first-action-label">{t('r_first_action')}</div>
-          <h3>{pick(r.first_action.title, lang)}</h3>
-          {pick(r.first_action.action, lang)
-            .split('\n')
-            .filter(Boolean)
-            .map((line, i) => (
-              <p key={i}>{line}</p>
-            ))}
-          {/* ⚠️ A person told to do step nine before step two assumes the system
-              is broken. Both surprising orderings here look wrong until read. */}
-          <p className="first-action-why">
+        <p className="first-action-line">
+          <span className="first-action-label">{t('r_first_action')}</span>
+          <a href="#now">{pick(r.first_action.title, lang)}</a>
+          <span className="first-action-why">
             {t('r_why')}: {pick(r.first_action.why, lang)}
-          </p>
-        </div>
+          </span>
+        </p>
       )}
 
       {/* ⚠️ Worst first. A man scanning this screen must hit the thing that will
