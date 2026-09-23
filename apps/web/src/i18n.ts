@@ -283,7 +283,25 @@ export const UI = {
     he: 'לפי המעמד שבחרת, כנראה אין לך תעודת זהות ישראלית. נכון?',
     en: 'Based on the status you chose, you probably do not have an Israeli teudat zehut. Is that right?',
   },
+  /**
+   * ⭐⭐ SPLIT IN TWO, 23.9 (the founder): "make sure nothing that doesn't need
+   * mentioning is mentioned for no reason."
+   *
+   * The 89 clarification exists for a real reason — גיליון 11 שאלה 1 found that
+   * people mistake their 89 for a teudat zehut and then answer this question
+   * wrongly, which misroutes everything. But the 89 left the conversion road on
+   * 23.9, and most converters have never held one. Naming an unfamiliar
+   * document inside a question about a different document is exactly the noise
+   * she is cutting.
+   *
+   * So: everyone gets the blue card. Only the FROM-ZERO road, where the 89 is
+   * the first stop and the confusion is live, gets the second sentence.
+   */
   confirm_tz_explain: {
+    he: 'תעודת זהות היא הכרטיס הכחול עם הספח.',
+    en: 'A teudat zehut is the blue card with the attached page.',
+  },
+  confirm_tz_explain_89: {
     he: 'תעודת זהות היא הכרטיס הכחול עם הספח. מספר מזהה שמתחיל ב-89 הוא לא תעודת זהות — הוא דף A4 מודפס שמשרד הרישוי מנפיק.',
     en: 'A teudat zehut is the blue card with the attached page. An identity number starting with 89 is not one — it is a printed A4 sheet issued by the licensing office.',
   },
@@ -387,7 +405,18 @@ export const UI = {
   d_89_name: { he: 'השם כפי שמופיע על המסמך', en: 'The name as it appears on it' },
 
   d_passport_title: { he: 'הדרכון', en: 'Your passport' },
+  /**
+   * ⭐ SPLIT 23.9, same reason as `confirm_tz_explain`. The 89 version exists
+   * because the whole point of this field is catching a passport that was
+   * renewed AFTER the 89 was printed — a real case. But the 89 left the
+   * conversion road, so a converter was being told to distinguish his passport
+   * from one issued with a document he has never held.
+   */
   d_passport_help: {
+    he: 'הדרכון שבידך עכשיו, כפי שהוא מודפס בו.',
+    en: 'The passport you hold now, exactly as it is printed in it.',
+  },
+  d_passport_help_89: {
     he: 'הדרכון שבידך עכשיו — לא זה שהיה לך כשהוצאת את ה-89.',
     en: 'The passport you hold now, not the one you had when the 89 was issued.',
   },
@@ -577,6 +606,45 @@ export const UI = {
     en: 'Not sure this step applies to you',
   },
   uncertain_answer: { he: 'כדי לדעת, צריך לענות על', en: 'To know, answer' },
+
+  /**
+   * ⭐⭐ 23.9. Two places printed ENGINE FIELD NAMES straight at the reader —
+   * the diagnosis ("שאלות שעוד יחדדו את התשובה: has_record_document,
+   * held_class, requested_class") and the undecided-step line on the road.
+   * Found by walking the real page.
+   *
+   * A person cannot answer `has_record_document`. He can answer "whether you
+   * have a רקורד". Same rule as the raw step ids caught on 22.9: an internal
+   * name that reaches the reader is a bug, not a detail.
+   *
+   * ⚠️ `fieldLabel` falls back to the raw name rather than hiding an unlabelled
+   * field. Silence would be worse: he would be told to answer something and
+   * not told what.
+   */
+  f_visa_type: { he: 'סוג האשרה שלך', en: 'your visa type' },
+  f_has_teudat_zehut: { he: 'אם יש לך תעודת זהות', en: 'whether you have a teudat zehut' },
+  f_visa_valid_now: { he: 'אם האשרה בתוקף', en: 'whether your visa is valid' },
+  f_foreign_license_kind: { he: 'איזה רישיון זר יש לך', en: 'which foreign licence you hold' },
+  f_foreign_license_valid: { he: 'אם הרישיון הזר בתוקף', en: 'whether your foreign licence is valid' },
+  f_foreign_license_years: { he: 'כמה שנים הרישיון שלך בתוקף', en: 'how many years you have held your licence' },
+  f_held_class: { he: 'איזו דרגה יש לך היום', en: 'the grade you hold today' },
+  f_requested_class: { he: 'לאיזו דרגה אתה רוצה להמיר', en: 'the grade you want to convert to' },
+  f_has_record_document: { he: 'אם יש לך "רקורד"', en: 'whether you have a "record"' },
+  f_lived_abroad_6_months_continuous: { he: 'אם שהית חצי שנה רצופה בחו"ל', en: 'whether you spent six consecutive months abroad' },
+  f_origin_country: { he: 'מדינת המוצא', en: 'your home country' },
+  f_nohal_category: { he: 'הקטגוריה שלך בנוהל', en: 'your category in the procedure' },
+  f_track: { he: 'המסלול שלך', en: 'your route' },
+  f_months_since_anchor: { he: 'מתי נכנסת / עלית / שבת', en: 'when you entered, made aliyah, or returned' },
+  f_age_years: { he: 'באיזו שנה נולדת', en: 'the year you were born' },
+  f_months_until_visa_expiry: { he: 'עד מתי האשרה בתוקף', en: 'when your visa expires' },
+  f_passport_valid_now: { he: 'אם הדרכון בתוקף', en: 'whether your passport is valid' },
+  f_months_until_passport_expiry: { he: 'עד מתי הדרכון בתוקף', en: 'when your passport expires' },
+  f_passport_89_number_match: { he: 'מספר הדרכון שעל מסמך ה-89', en: 'the passport number on your 89' },
+  f_passport_89_name_match: { he: 'השם שעל מסמך ה-89', en: 'the name on your 89' },
+  f_passport_license_name_match: { he: 'השם שעל הרישיון הזר', en: 'the name on your foreign licence' },
+  f_months_until_license_expiry: { he: 'עד מתי הרישיון הזר בתוקף', en: 'when your foreign licence expires' },
+  f_foreign_license_language: { he: 'באיזו שפה כתוב הרישיון', en: 'what language your licence is in' },
+  f_holds_form_89: { he: 'אם מסמך ה-89 בידך', en: 'whether you hold your 89' },
   done: { he: 'הושלם', en: 'Done' },
   /* The state of a step, in a word. ⚠️ A word, never an emoji on its own: a
      screen reader reads an emoji out as its own name, and nobody translates it. */
@@ -611,3 +679,16 @@ export const UI = {
     en: 'We could not reach the server. Check your connection and try again. Nothing you answered was lost.',
   },
 } as const;
+
+/**
+ * ⭐⭐ An engine field name, in words a person can act on (23.9).
+ *
+ * The engine names the fact; this names the QUESTION. Falls back to the raw
+ * id rather than hiding an unlabelled field — being told to answer something
+ * and not told what is worse than seeing the id.
+ */
+export function fieldLabel(field: string, lang: Lang): string {
+  const key = `f_${field}` as keyof typeof UI;
+  const entry = UI[key];
+  return entry ? pick(entry, lang) : field;
+}

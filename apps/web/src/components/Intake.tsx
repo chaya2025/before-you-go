@@ -180,8 +180,14 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
       )}
 
       {/* ── ש4 · a confirmation, not a question ────────────────────────── */}
+      {/* ⚠️ The 89 sentence only where the 89 exists — the from-zero road. It
+          left the conversion road on 23.9, and naming it here to a converter
+          introduces a document he has never held. */}
       {visaType && licenceKind && chosen && (
-        <Question title={t('confirm_tz_title')} help={t('confirm_tz_explain')}>
+        <Question
+          title={t('confirm_tz_title')}
+          help={converting ? t('confirm_tz_explain') : t('confirm_tz_explain_89')}
+        >
           <p>{chosen.usually_has_teudat_zehut === true ? t('confirm_tz_yes') : t('confirm_tz_no')}</p>
           <Option selected={tz === true} label={t('confirm_tz_have')} onClick={() => setTz(true)} />
           <Option selected={tz === false} label={t('confirm_tz_havent')} onClick={() => setTz(false)} />

@@ -307,6 +307,22 @@ describe('the first thing to do', () => {
     expect(r.first_action!.why.en).toContain('takes time');
   });
 
+  it('⭐⭐ is never a step he has told us he cannot do', () => {
+    /**
+     * Found on the rendered page, 23.9: a man who answered "my country does not
+     * issue a רקורד" was told the first thing to do was obtain one, directly
+     * above the panel explaining that he cannot and need not. The step is still
+     * on his road — it is where the explanation lives — but it must not be
+     * promoted as his next action.
+     */
+    const r = readinessOf(
+      p({ ...CONVERTER, has_record_document: 'origin_country_does_not_issue' }),
+    );
+    expect(r.first_action?.step_id).not.toBe('cv.record');
+    // And he is not left with nothing: the road still has a real next thing.
+    expect(r.first_action).not.toBeNull();
+  });
+
   it('⭐ and an unanswered רקורד does not freeze the rest of the road', () => {
     // An OFFER cannot gate the queue. Before 23.9 an uncertain record at
     // position 1 made first_action null and every other step 'later'.
