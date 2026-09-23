@@ -32,6 +32,15 @@ export const UI = {
   /* Names the progress rail for a screen reader; the marks carry no text. */
   progress_label: { he: 'התקדמות בשאלון', en: 'Progress through the questions' },
 
+  /* ⭐ The script kicker on the band each screen of the flow opens on, added
+     23.9 with the colour pass. It is the product's own voice, one line, and it
+     NEVER carries information: the heading or the lede under it says the same
+     thing in plain words. Same rule the landing page's kickers follow. */
+  band_kicker_intake: { he: 'מתחילים כאן', en: 'We start here' },
+  band_kicker_diagnosis: { he: 'לפני שממשיכים', en: 'Before we go on' },
+  band_kicker_documents: { he: 'כפי שכתוב', en: 'Exactly as written' },
+  band_kicker_roadmap: { he: 'כל הדרך, לפי הסדר', en: 'The whole road, in order' },
+
   intro: {
     he: 'כמה שאלות קצרות, ואז מפת הדרכים שלך — כל השלבים לפי הסדר, מה נדרש בכל אחד, ומה כדאי להתחיל כבר עכשיו.',
     en: 'A few short questions, then your roadmap — every step in order, what each one needs, and what to start today.',
@@ -217,14 +226,24 @@ export const UI = {
     en: 'Five years or more can exempt you from the control test and the eye test.',
   },
   q_class: { he: 'לאיזו דרגה אתה רוצה להמיר?', en: 'Which grade do you want to convert to?' },
+  /**
+   * ⭐⭐ 23.9. This question is asked ONLY of someone who has said five years or
+   * more, because ס' 2 gives the exemption to nobody else — so for anyone else
+   * the רקורד buys nothing and asking about it is pure confusion.
+   *
+   * Chaya: "some people don't even know what it is. Say that it's only needed,
+   * or it's an option. Don't make it complicated."
+   */
   q_record: {
     he: 'יש לך "רקורד" ממדינת המוצא?',
     en: 'Do you have a "record" from your home country?',
   },
   q_record_help: {
-    he: 'אסמכתה מהרשות במדינת המוצא על מועד הוצאת הרישיון הקבוע. זה מה שקונה את הפטור.',
-    en: 'A document from your home authority stating when your permanent licence was issued. This is what buys the exemption.',
+    he: 'לא חובה. זה מסמך מהרשות שהנפיקה לך את הרישיון במדינת המוצא, שכתוב בו מתי קיבלת את הרישיון הקבוע. אם יש לך אותו — אתה פטור ממבחן שליטה ומבדיקת ראייה. אם אין — אתה עדיין ממיר, פשוט עובר את שתי הבדיקות.',
+    en: 'Not required. It is a document from the authority that issued your licence abroad, stating when you received your permanent licence. With it you skip the control test and the eye test. Without it you still convert, you just sit those two.',
   },
+  dont_know_record: { he: 'לא יודע מה זה', en: 'I do not know what that is' },
+  record_optional_tag: { he: 'לא חובה', en: 'Optional' },
 
   /**
    * ⚠️ Chaya, 30.8: "it asks some questions which the next step will be asking

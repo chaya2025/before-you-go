@@ -85,6 +85,9 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
   const [years, setYears] = useState('');
   const [requestedClass, setRequestedClass] = useState('');
   const [record, setRecord] = useState<string | null>(null);
+  /** ⚠️ Screen-only. Never sent: not knowing what a document is says nothing
+      about whether you have one. */
+  const [explainRecord, setExplainRecord] = useState(false);
   const [sixMonths, setSixMonths] = useState<boolean | 'unknown' | null>(null);
 
   const chosen = statuses.find((s) => s.value === visaType);
@@ -127,7 +130,9 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
       ...(dateAnswer ? { [dateKey]: dateAnswer } : {}),
       ...(bornYear.length === 4 ? { born: `${bornYear}-06` } : {}),
       ...(requestedClass ? { requested_class: requestedClass } : {}),
-      ...(record ? { has_record_document: record } : {}),
+      // ⚠️ Only when the question was actually ASKED. Typing 2 years after
+      // having answered it must not leave a stale answer riding along.
+      ...(record && Number(years) >= 5 ? { has_record_document: record } : {}),
       ...(sixMonths !== null ? { lived_abroad_6_months_continuous: sixMonths } : {}),
     };
     onSubmit(answers);
@@ -288,23 +293,54 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
             </select>
           </Question>
 
-          <Question title={t('q_record')} help={t('q_record_help')}>
-            <Option selected={record === 'yes'} label={t('yes')} onClick={() => setRecord('yes')} />
-            <Option
-              selected={record === 'in_progress'}
-              label={t('in_progress')}
-              onClick={() => setRecord('in_progress')}
-            />
-            <Option selected={record === 'no'} label={t('no')} onClick={() => setRecord('no')} />
-            {/* ⚠️ Its own answer, never folded into "no". It is the biggest
-                practical blocker in the conversion route and the נוהל says
-                nothing about what to do. */}
-            <Option
-              selected={record === 'origin_country_does_not_issue'}
-              label={t('country_no_record')}
-              onClick={() => setRecord('origin_country_does_not_issue')}
-            />
-          </Question>
+          {/*
+            ⭐⭐ ASKED ONLY AT FIVE YEARS OR MORE (23.9, Chaya).
+
+            נוהל ס' 2 gives the exemption to "בעל רישיון נהיגה לאומי קבוע במשך
+            חמש שנים לפחות" and to nobody else, so under five years the רקורד
+            buys NOTHING. Asking about it there was the single most confusing
+            thing on this screen: a document most people have never heard of,
+            introduced as the thing that "buys the exemption" — to someone who
+            cannot have the exemption.
+
+            The same five-year rule is `RECORD_RELEVANT` in the engine. This
+            gate is the question-layer half of it; the engine does not trust
+            the screen, and the screen does not decide.
+          */}
+          {Number(years) >= 5 && (
+            <Question title={t('q_record')} help={t('q_record_help')}>
+              <Option selected={record === 'yes'} label={t('yes')} onClick={() => setRecord('yes')} />
+              <Option
+                selected={record === 'in_progress'}
+                label={t('in_progress')}
+                onClick={() => setRecord('in_progress')}
+              />
+              <Option selected={record === 'no'} label={t('no')} onClick={() => setRecord('no')} />
+              {/* ⚠️ Its own answer, never folded into "no". It is the biggest
+                  practical blocker in the conversion route and the נוהל says
+                  nothing about what to do. */}
+              <Option
+                selected={record === 'origin_country_does_not_issue'}
+                label={t('country_no_record')}
+                onClick={() => setRecord('origin_country_does_not_issue')}
+              />
+              {/*
+                ⚠️ Answers nothing, on purpose. "I don't know what that is" is
+                not a claim about whether he holds one, so it must not be sent
+                as one — it opens the explanation and leaves the question open
+                so he can then answer it properly.
+              */}
+              <Option
+                selected={explainRecord}
+                label={t('dont_know_record')}
+                onClick={() => {
+                  setExplainRecord(true);
+                  setRecord(null);
+                }}
+              />
+              {explainRecord && <p className="muted small">{t('q_record_help')}</p>}
+            </Question>
+          )}
         </>
       )}
 
