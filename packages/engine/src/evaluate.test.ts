@@ -1637,3 +1637,141 @@ describe('the conversion ordering chain — what the visit may and may not wait 
     }
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * ============================================================================
+ * ⭐⭐ THE נוהל AUDIT (23.9)
+ * ============================================================================
+ *
+ * The founder read the three-page נוהל against the engine and found five mismatches.
+ * "My product is literally depended on accuracy." Each test below is one clause
+ * of the נוהל, quoted in the test name, and each one FAILED before 23.9.
+ */
+describe('the נוהל audit — clauses the engine was getting wrong', () => {
+  const oleh = (o: Record<string, unknown>) =>
+    evaluate(
+      p({
+        visa_type: 'a1', visa_valid_now: true, has_teudat_zehut: false,
+        teudat_zehut_confirmed: true, born: '1985-01',
+        entered_israel: '2026-01', aliyah_date: '2026-01', ...o,
+      }),
+      TODAY,
+    );
+  const worker = (o: Record<string, unknown>) =>
+    evaluate(
+      p({
+        visa_type: 'b1', visa_valid_now: true, has_teudat_zehut: false,
+        teudat_zehut_confirmed: true, born: '1985-01', entered_israel: '2026-03', ...o,
+      }),
+      TODAY,
+    );
+  const lic = (years: number, cls: string) => ({
+    kind: 'national', valid_now: true, years_held_permanent: years,
+    held_class: cls, language: 'en',
+  });
+  const ids = (r: ReturnType<typeof evaluate>) => r.roadmap.map((s) => s.step.id);
+
+  /**
+   * ס' 1: "לעניין דרגות נהיגה הקבועות בתקנות 176 עד 181 ... נדרשת עמידה גם
+   * במבחן שליטה" — and 182-185 gets "קורס לנהגי רכב ציבורי/כבד ... בדיקות
+   * רפואיות ובבחינות" instead.
+   */
+  it('⭐ a bus conversion (D) is not sent to a מבחן שליטה — that is 176-181', () => {
+    const bus = ids(oleh({ foreign_license: lic(10, 'D'), requested_class: 'D', has_record_document: 'yes' }));
+    expect(bus).not.toContain('cv.control_test');
+  });
+
+  it('⭐ and it gets the four things clause 1 actually demands of it', () => {
+    const bus = ids(oleh({ foreign_license: lic(10, 'D'), requested_class: 'D', has_record_document: 'yes' }));
+    expect(bus).toContain('cv.heavy_course');
+    expect(bus).toContain('cv.heavy_exams');
+    expect(bus).toContain('cv.medical');
+  });
+
+  it('a truck conversion (C) is treated the same way as the bus', () => {
+    const truck = ids(oleh({ foreign_license: lic(10, 'C'), requested_class: 'C', has_record_document: 'yes' }));
+    expect(truck).not.toContain('cv.control_test');
+    expect(truck).toContain('cv.heavy_course');
+  });
+
+  it('a car conversion still gets the control test, and no heavy-grade steps', () => {
+    // Not exempt: no record, so ס' 2 cannot reach him.
+    const car = ids(worker({ foreign_license: lic(2, 'B'), requested_class: 'B', has_record_document: 'no' }));
+    expect(car).toContain('cv.control_test');
+    expect(car).not.toContain('cv.heavy_course');
+    expect(car).not.toContain('cv.heavy_exams');
+  });
+
+  it('⭐ C1 is inside 176-181, so it keeps BOTH the control test and the medical', () => {
+    // ס' 1: תיקון 6 — the obligation runs to 181, the ס' 2 exemption stops at 180.
+    const c1 = ids(worker({ foreign_license: lic(10, 'C1'), requested_class: 'C1', has_record_document: 'yes' }));
+    expect(c1).toContain('cv.control_test');
+    expect(c1).toContain('cv.medical');
+  });
+
+  /**
+   * פרק "מסמכים נדרשים": "רקורד - למעוניינים בקבלת פטור ... (בעלי רישיון נהיגה
+   * לאומי קבוע במשך חמש שנים לפחות, כאמור)".
+   */
+  it('⭐ the רקורד leaves the two-year DOCUMENT list, not only his steps', () => {
+    const r = worker({ foreign_license: lic(2, 'B'), requested_class: 'B', has_record_document: 'no' });
+    const attend = r.roadmap.find((s) => s.step.id === 'cv.attend')!;
+    expect(attend.documents.map((d) => d.id)).not.toContain('doc.record');
+    expect(ids(r)).not.toContain('cv.record');
+  });
+
+  const recordItem = (r: ReturnType<typeof evaluate>) => {
+    const rd = r.readiness!;
+    return [...rd.ready, ...rd.mismatched, ...rd.missing, ...rd.unconfirmed].find(
+      (i) => i.id === 'doc.record',
+    );
+  };
+
+  it('⭐ nobody is told "המסלול דורש אותו" about a document the נוהל only offers', () => {
+    const item = recordItem(
+      worker({ foreign_license: lic(10, 'B'), requested_class: 'B', has_record_document: 'no' }),
+    )!;
+    expect(item.detail.he).not.toContain('המסלול דורש אותו');
+    expect(item.detail.he).toContain('אינו תנאי להמרה');
+  });
+
+  it('⭐ a man whose country issues none is not told to go and ask it', () => {
+    const item = recordItem(
+      worker({
+        foreign_license: lic(10, 'B'), requested_class: 'B',
+        has_record_document: 'origin_country_does_not_issue',
+      }),
+    )!;
+    // The explanation stands; the contradicting action underneath it is gone.
+    expect(item.detail.he).toContain('שאלה פתוחה');
+    expect(item.action).toBeUndefined();
+  });
+
+  it('⭐ an absent רקורד does not drag the verdict down to "gaps"', () => {
+    // א/5 holds a teudat zehut, so no 89 — this strips the route down to where
+    // the record is the only required-looking thing he lacks.
+    const a5 = (rec: string) =>
+      evaluate(
+        p({
+          visa_type: 'a5', visa_valid_now: true, has_teudat_zehut: true,
+          teudat_zehut_confirmed: true, born: '1985-01', entered_israel: '2026-03',
+          foreign_license: lic(10, 'B'), requested_class: 'B', has_record_document: rec,
+        }),
+        TODAY,
+      );
+    expect(a5('no').readiness!.verdict).not.toBe('gaps');
+    expect(a5('origin_country_does_not_issue').readiness!.verdict).not.toBe('gaps');
+  });
+
+  it('the treaty clause and the age condition are stated, and attached to a step', () => {
+    const r = worker({ foreign_license: lic(10, 'B'), requested_class: 'B', has_record_document: 'yes' });
+    const standing = r.standing_conditions.map((c) => c.id);
+    expect(standing).toContain('cc.treaty_country');
+    expect(standing).toContain('cc.age_condition');
+    // ⚠️ Neither claims to know the answer: no treaty list, no age numbers.
+    const treaty = r.standing_conditions.find((c) => c.id === 'cc.treaty_country')!;
+    expect(treaty.evidence.some((e) => e.certainty === 'unchecked')).toBe(true);
+  });
+});

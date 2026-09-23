@@ -1,6 +1,6 @@
 import type { ContinuousConditionInput } from '../domain';
 import type { Condition } from '../condition';
-import { nohal, servicePage, fieldReport, inferred, unresolved, LAST_VERIFIED_LATE } from './sources';
+import { nohal, servicePage, fieldReport, inferred, unresolved, notChecked, LAST_VERIFIED_LATE } from './sources';
 
 /**
  * ============================================================================
@@ -253,6 +253,84 @@ export const CONTINUOUS_CONDITIONS: ContinuousConditionInput[] = [
         "רישיון נהיגה קבוע (פלסטיק) יישלח לכתובת המעודכנת ברשות האוכלוסין.",
       ),
       fieldReport("איסוף עצמי בדפוס בארי אינו תלוי בכתובת רשומה", { generalizability: 'single_report' }),
+    ],
+  },
+
+  {
+    /**
+     * ⭐⭐ ADDED 23.9. ס' 3 לנוהל was not modelled anywhere — `origin_country`
+     * was collected and nothing read it. A person from a treaty country was
+     * shown the standard route with full confidence, when the נוהל says his
+     * application is judged under different terms entirely.
+     *
+     * The founder's ruling: "most countries are fine but I guess we could say it.
+     * Save it as a rule... for now just leave it and mark as it says — only say
+     * what it says on the נוהל."
+     *
+     * So this says exactly what ס' 3 says and stops. We do not hold the treaty
+     * list (open question 15), so it never tells him a treaty DOES or does not
+     * apply to him — only that the נוהל provides for one, and where to ask.
+     */
+    id: 'cc.treaty_country',
+    name: {
+      he: "למדינת המוצא ייתכן הסכם המרה עם ישראל",
+      en: 'Your home country may have a conversion treaty with Israel',
+    },
+    applies_when: CONVERTING,
+    check_before: ['cv.online_form', 'cv.attend'],
+    consequence_if_invalid: {
+      he: "אם בין מדינת המוצא לישראל קיימת אמנה בנושא המרת רישיונות נהיגה, הבקשה שלך תיבחן לפי תנאי אותה אמנה ולא לפי התנאים הרגילים. התנאים עשויים להיות שונים — לטובה או לרעה.",
+      en: 'If a conversion treaty exists between your home country and Israel, your application is judged under that treaty rather than the ordinary conditions. Those terms may differ, in either direction.',
+    },
+    remedy: {
+      he: "⚠️ אין בידינו את רשימת המדינות שיש להן אמנה, והנוהל אינו כולל אותה. זו שאלה פתוחה. כדאי לברר מול אגף הרישוי, 02-6663050, אם למדינה שלך יש אמנה עם ישראל.",
+      en: '⚠️ We do not hold the list of treaty countries and the procedure does not include it. This is an open question. Worth asking the Licensing Division, 02-6663050, whether your country has a treaty with Israel.',
+    },
+    evidence: [
+      nohal(
+        "ס' 3",
+        "קיימת אמנה — הבקשה נבחנת לפי תנאי האמנה ולא לפי התנאים הרגילים",
+        "ככל ורישיון הנהיגה הלאומי שברשות המבקש ניתן לו ממדינה שבינה לבין ישראל קיימת אמנה בנושא המרת רישיונות נהיגה – תיבחן הבקשה להמרה בהתאם לתנאים שנקבעו באותה אמנה.",
+      ),
+      notChecked("אילו מדינות חתומות על אמנה עם ישראל, ומה קובעת כל אמנה"),
+    ],
+  },
+
+  {
+    /**
+     * ⭐ ADDED 23.9. ס' 1 lists the age condition among the CUMULATIVE
+     * conditions of תקנה 216, and the conversion track checked it nowhere —
+     * age was used only for the accompaniment clock.
+     *
+     * ⚠️ And here is the discipline: the נוהל states the requirement and defers
+     * the NUMBERS to התקנות, which we have not read. The founder's own estimate is
+     * 16 years and 9 months, and her instruction was "keep it simple" — so this
+     * says that a minimum age applies and that we have not verified the figure,
+     * rather than printing a number that would look verified. Same rule as the
+     * רקורד: never state as fact something the source does not say.
+     */
+    id: 'cc.age_condition',
+    name: {
+      he: "תנאי גיל לפי התקנות",
+      en: 'The age conditions set out in the regulations',
+    },
+    applies_when: CONVERTING,
+    check_before: ['cv.online_form'],
+    consequence_if_invalid: {
+      he: "ההמרה מותנית בעמידה בתנאי הגיל הקבועים בתקנות, לצד שאר התנאים. גיל מינימלי חל על כל דרגה.",
+      en: 'Conversion is conditional on meeting the age requirements set out in the regulations, alongside the other conditions. A minimum age applies to every grade.',
+    },
+    remedy: {
+      he: "⚠️ הנוהל מפנה לתקנות ואינו נוקב בגילים, ולא בדקנו אותם. אם אתה קרוב לגיל המינימלי לדרגה שביקשת — ברר מול אגף הרישוי, 02-6663050, לפני שתתחיל.",
+      en: '⚠️ The procedure points at the regulations without naming the ages, and we have not checked them. If you are near the minimum age for the grade you asked for, check with the Licensing Division, 02-6663050, before you start.',
+    },
+    evidence: [
+      nohal(
+        "ס' 1",
+        "עמידה בתנאי הגיל הקבועים בתקנות היא אחד התנאים המצטברים להמרה",
+        "עמידה בתנאי הגיל הקבועים בתקנות.",
+      ),
+      notChecked("מהו הגיל המינימלי לכל דרגה לפי התקנות"),
     ],
   },
 ];

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { Step, CheckedStep } from '../domain';
 import { Condition, evaluateCondition, type Facts } from '../condition';
-import { ALL_STEPS } from './index';
+import { ALL_STEPS, ALL_DOCUMENTS } from './index';
 
 const stepById = (id: string) => {
   const step = ALL_STEPS.find((s) => s.id === id);
@@ -258,11 +258,25 @@ describe('the research rules hold across the whole file', () => {
   });
 
   it('the conversion route starts with the רקורד, though it is needed last', () => {
-    // גיליון 13 principle 3. Longest lead time, depends on a foreign authority.
+    // גיליון 13 principle 3. Depends on a foreign authority, so it goes first.
     const record = stepById('cv.record');
     expect(record.sequence_position).toBe(1);
+    // ⚠️ `act_when: 'start_now'` is what actually floats it to the top of his
+    // road — evaluate.ts sorts on it. This used to also assert
+    // `lead_time_days > 0`, which was an UNSOURCED 60 carried across from the
+    // נוהל's "60 ימים לפני תום שנת שהייה" — a rule about submitting the
+    // application before the first year runs out, nothing to do with how long a
+    // foreign authority takes. The founder caught it on 23.9. The field is read by no
+    // rule and no screen, so the number is simply gone rather than guessed at.
     expect(record.act_when).toBe('start_now');
-    expect(record.lead_time_days).toBeGreaterThan(0);
+  });
+
+  it('⭐ the רקורד is offered, never demanded, and says so in the data', () => {
+    // נוהל: "רקורד - למעוניינים בקבלת פטור ממבחן שליטה ובדיקת ראיה".
+    const record = ALL_DOCUMENTS.find((d) => d.id === 'doc.record')!;
+    expect(record.optional).toBeDefined();
+    // And the step and the document are scoped by the SAME rule, not two copies.
+    expect(record.applies_when).toEqual(stepById('cv.record').applies_when);
   });
 
   it('the conversion route admits it does not know how delivery works', () => {

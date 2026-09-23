@@ -478,6 +478,65 @@ export const RequiredDocument = z.object({
    */
   broken_when: Condition.optional(),
 
+  /**
+   * ⭐⭐ AN OPTIONAL DOCUMENT — one the נוהל OFFERS rather than DEMANDS.
+   *
+   * Added 23.9. The רקורד is the only one so far, and it was being reported as
+   * "המסמך אינו ברשותך, והמסלול דורש אותו" — the route requires it — which is
+   * false for every single person who sees it. The נוהל introduces it with
+   * "למעוניינים בקבלת פטור": it buys an exemption, and its absence costs him
+   * that exemption, never the route.
+   *
+   * ⚠️ An optional document is excluded from the readiness VERDICT. A man who
+   * holds everything the route actually requires is ready, and a document that
+   * was never required cannot make him not-ready. It still appears in its
+   * bucket, under a heading that says only "אינו ברשותך", which is true.
+   */
+  optional: z
+    .object({
+      /** What holding it buys him. */
+      buys: Text,
+      /**
+       * What its absence costs. Said INSTEAD of "the route requires it".
+       *
+       * ⚠️ This is the DEFAULT wording. Where a particular answer deserves a
+       * different sentence ("my country does not issue one"), that lives in
+       * `absence_variants` below, which is checked first.
+       */
+      if_absent: Text,
+    })
+    .optional(),
+
+  /**
+   * ⭐⭐ HOW THIS DOCUMENT'S ABSENCE IS WORDED — data, not a branch (23.9).
+   *
+   * The founder's rule: "change the engine and not the code itself... the code is so
+   * changeable, so the engine should be set to whatever you change."
+   *
+   * readiness.ts used to carry `if (doc.id === 'doc.record' && ...)` twice. A
+   * claim about a document was living in a switch statement where nobody
+   * auditing the נוהל would ever find it. A document now says for itself how
+   * its own absence should read, beside its sources, and the report just
+   * renders what the data says.
+   *
+   * ⚠️ FIRST MATCH WINS, so order these from most specific to least. "I have
+   * started on it" must be answered before "you do not have it".
+   */
+  absence_variants: z
+    .array(
+      z.object({
+        when: Condition,
+        detail: Text,
+        /**
+         * ⚠️ He cannot obtain it at all — offer no action. Otherwise the
+         * producing step's "go and ask the authority in your home country" is
+         * printed directly under an explanation that there is nobody to ask.
+         */
+        no_action: z.boolean().default(false),
+      }),
+    )
+    .default([]),
+
   evidence: Evidence,
 });
 export type RequiredDocument = z.infer<typeof RequiredDocument>;
