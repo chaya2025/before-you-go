@@ -358,8 +358,23 @@ export function App() {
     return (
       <>
         {header}
-        <div className="answer">
-          <div className="answer-head">
+
+        {/**
+          * ⭐ THE ANSWER OPENS ON A BAND, 23.9. The founder, walking the finished
+          * flow: the landing page has colour and "the roadmap screen and also
+          * the other are a little too pail". The title, the progress and the
+          * print stamp used to sit on plain paper inside the reading column,
+          * which is where the pale stretch began. They now sit on the warm
+          * ground the landing page opens its sections on, full width, so the
+          * answer starts the way the site starts.
+          *
+          * ⚠️ OUTSIDE .answer on purpose. The band is a ground and a ground
+          * runs the width of the window; inside a 78rem column it would be a
+          * tinted box, which is the thing it was built to replace.
+          */}
+        <section className="screen-band">
+          <div className="screen-band-in">
+            <p className="kicker">{t('band_kicker_roadmap')}</p>
             <h2>{t('roadmap_title')}</h2>
 
             {/* ⭐ Printed at the top of the sheet and nowhere else. A roadmap
@@ -386,6 +401,9 @@ export function App() {
               </div>
             </div>
           </div>
+        </section>
+
+        <div className="answer">
 
           {/**
             * ⭐ The numbers that decide his week, her ask 22.9. Four at most,
@@ -551,33 +569,68 @@ export function App() {
     );
   }
 
+  /**
+   * ⭐ EVERY SCREEN OF THE FLOW IS WIDE, 23.9. אבחון and מסמכים went first;
+   * the intake followed on her third note, and the intake was the one she had
+   * meant all along: "the page with that question where the user says what he
+   * has and what visa he is holding looks like a list. I don't like it."
+   *
+   * ⚠️ The first draft argued the opposite here — that fourteen answers to one question
+   * is what a list is FOR. She overruled it, and she is right about this
+   * audience: a column of fourteen near-identical rows is the government form
+   * the whole product exists to not be. Across the page they are a board of
+   * answers he can see all of at once and pick from, which is what choosing
+   * your own status actually is.
+   */
+  const wide = screen === 'intake' || screen === 'diagnosis' || screen === 'documents';
+
   return (
-    <div className="page stack">
+    <>
       {header}
 
-      {/* ⭐ Where you are, in four marks. Added 31.8.
-          The flow is intake → אבחון → מסמכים → הדרך, and until now a person
-          could not tell which of the four he was on, or how many were left.
-          For an audience the PRD describes as "כבר נדחו, כבר בזבזו יום עבודה",
-          an unmarked multi-step form is its own small anxiety.
-          Marks rather than numbered labels, so it stays legible at 320px and
-          mirrors correctly in both directions. */}
-      <ol className="progress" aria-label={t('progress_label')}>
-        {SCREENS.map((s, i) => {
-          const at = SCREENS.indexOf(screen);
-          const state = i < at ? 'done' : i === at ? 'here' : 'ahead';
-          return (
-            <li key={s} data-state={state} aria-current={state === 'here' ? 'step' : undefined} />
-          );
-        })}
-      </ol>
+      {/**
+        * ⭐ THE SAME BAND ON THE QUESTION SCREENS, 23.9. They were a column of
+        * white cards on warm paper, opening on a grey line of explanation — the
+        * other half of her "too pail". The band carries the product's voice, the
+        * line about what this is and does not do, and the rail saying where he
+        * is in the flow, all on the warm ground, so a screen of questions starts
+        * like a section of the landing page.
+        *
+        * ⚠️ The masthead moved out of .page at the same time. It was inside the
+        * 46rem reading column here and full width on every other screen, so the
+        * wordmark jumped sideways the moment a person pressed "start".
+        */}
+      <section className={`screen-band${wide ? '' : ' screen-band-form'}`}>
+        <div className="screen-band-in">
+          <p className="kicker">{t(`band_kicker_${screen}` as keyof typeof UI)}</p>
 
-      {screen === 'intake' && (
-        <p className="muted">
-          {t('intro')} <strong>{t('privacy')}</strong>
-        </p>
-      )}
+          {screen === 'intake' && (
+            <p className="screen-band-lede">
+              {t('intro')} <strong>{t('privacy')}</strong>
+            </p>
+          )}
 
+          {/* ⭐ Where you are, in four marks. Added 31.8.
+              The flow is intake → אבחון → מסמכים → הדרך, and until now a person
+              could not tell which of the four he was on, or how many were left.
+              For an audience the PRD describes as "כבר נדחו, כבר בזבזו יום עבודה",
+              an unmarked multi-step form is its own small anxiety.
+              Marks rather than numbered labels, so it stays legible at 320px and
+              mirrors correctly in both directions.
+              ⚠️ It sits at the FOOT of the band, against the form it measures. */}
+          <ol className="progress" aria-label={t('progress_label')}>
+            {SCREENS.map((s, i) => {
+              const at = SCREENS.indexOf(screen);
+              const state = i < at ? 'done' : i === at ? 'here' : 'ahead';
+              return (
+                <li key={s} data-state={state} aria-current={state === 'here' ? 'step' : undefined} />
+              );
+            })}
+          </ol>
+        </div>
+      </section>
+
+      <div className={`page stack${wide ? ` page-wide page-${screen}` : ''}`}>
       {failure}
 
       {/**
@@ -643,6 +696,7 @@ export function App() {
       {screen === 'roadmap' && result && result.blocked && (
         <Blocked result={result} lang={lang} onBack={restart} />
       )}
-    </div>
+      </div>
+    </>
   );
 }

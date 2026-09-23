@@ -137,7 +137,10 @@ export function Diagnosis({
         </p>
       )}
 
-      <div style={{ display: 'flex', gap: 'var(--gap-sm)', flexWrap: 'wrap' }}>
+      {/* ⚠️ Was an inline flex written here. The two ways out of this screen are
+          a pattern, not a one-off, and a pattern belongs in the theme where its
+          spacing and its hit targets can be set once. */}
+      <div className="diagnosis-actions">
         <button className="btn btn-primary" onClick={onConfirm}>
           {t('looks_right')}
         </button>

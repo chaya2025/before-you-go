@@ -36,6 +36,23 @@
   --sage-top: #edf4ef;
   --sage-bottom: #e4eee8;
 
+  /* ⭐ THE SAME TWO GROUNDS, ONE STEP DEEPER. Added 23.9, the founder's note while
+     walking the finished flow: the landing page has colour and "the roadmap
+     screen and the others are a little too pale". The cause was that every
+     ground inside the product was mixed at the top of a fade and washed out to
+     paper within a few hundred pixels, so a band read as a stain rather than a
+     ground. These are the same two colours, held at full strength where a band
+     starts. Nothing new was invented, and they still mean nothing. */
+  --sand-deep: #efdfc6;
+  --sage-deep: #dbe9e1;
+  /* The edge of a sand or sage band, so a band has a line and not only a tint. */
+  --line-sand: #e7d8bd;
+  --line-sage: #cfe0d6;
+  /* The muted gold the notes already use for their bullets, here for a rule
+     under a title. Deliberately NOT --amber: a rule that repeats on every
+     screen cannot be the colour that means "you are here". */
+  --gold-quiet: #d9b478;
+
   /* ⭐ THE ONLY ACCENT. "אינו משמש לשום דבר אחר, ולכן העין לומדת שענבר
      פירושו 'כאן'." Marks where you are standing: the open step, progress,
      the next action. Never used for anything else — not for errors, not for
@@ -64,6 +81,15 @@
      slate — visibly not-a-status, and distinct from --muted so it is never
      read as "a future step". */
   --unchecked: #767e7b;
+
+  /* ⚠️ THE SAME INFORMATION, ON THE INK GROUND. Added 23.9 with the figures
+     band. --verified and --uncertain are mixed for dark text on warm paper and
+     fail outright on ink: a dark green number on a dark green ground is not a
+     softer version of the information, it is the information gone. Same hue,
+     lifted until it passes on ink. Used NOWHERE else — a light ground always
+     takes the scale above, or the two drift apart. */
+  --verified-on-ink: #79c6a0;
+  --uncertain-on-ink: #f0917c;
 
   /* ---- type -----------------------------------------------------------
      Two families only. "ההיררכיה נבנית ממשקל וגודל ולא מריבוי גופנים." */
@@ -319,6 +345,12 @@ select {
 .btn:hover svg { transform: translateX(-4px); }
 :root[dir='ltr'] .btn:hover svg,
 [dir='ltr'] .btn:hover svg { transform: translateX(4px); }
+
+/* ⭐ A press, 23.9. The button lifted on hover and then did nothing under the
+   finger, which on a phone — no hover at all, a queue, one hand — meant the
+   only feedback that a tap landed was the screen changing a moment later. It
+   settles back down and takes a fraction of its own size. */
+.btn:active:not(:disabled) { transform: translateY(0) scale(0.985); }
 
 .btn:disabled {
   opacity: 0.4;
@@ -706,17 +738,13 @@ h1, h2, h3 { text-wrap: balance; }
   max-width: 78rem;
   margin: 0 auto;
   padding-inline: clamp(1.15rem, 4vw, 3rem);
-  padding-block-end: var(--gap-xl);
+  padding-block: var(--gap) var(--gap-xl);
 }
 
-/* The headline of the answer: what this is, and how far along he is. */
-.answer-head {
-  display: grid;
-  gap: 0.6rem;
-  padding-block: clamp(1.5rem, 3vw, 2.2rem);
-}
-
-.answer-head h2 { margin: 0; }
+/* ⚠️ .answer-head is GONE, 23.9. The headline of the answer, its progress and
+   the print stamp moved out of the reading column and onto .screen-band, the
+   warm full-width ground every screen past the landing page now opens on. What
+   is left here is the progress line itself, which the band draws. */
 
 .answer-progress {
   display: flex;
@@ -807,7 +835,15 @@ h1, h2, h3 { text-wrap: balance; }
 
 /* The clocks, as their own note: a deadline is a fact that keeps moving, and
    it belongs beside him the whole way rather than in the middle of the list. */
-.note-clocks { background: var(--surface); border-color: var(--line-soft); transform: none; }
+/* ⚠️ On the sage ground since 23.9. Beside an amber sticky note it was a
+   white rectangle, which is what made the rail look half-finished. Sage rather
+   than sand because the clocks are not a note in the product's voice: they are
+   read off the engine, they sit straight, and the ground says so. */
+.note-clocks {
+  background: linear-gradient(180deg, var(--sage-top) 0%, var(--sage-deep) 100%);
+  border-color: var(--line-sage);
+  transform: none;
+}
 .note-clocks h3 { font-family: var(--font-display); font-size: 1.15rem; color: var(--ink); }
 .note-clocks .clock-row { border-block-end-color: var(--line-soft); }
 
@@ -848,10 +884,17 @@ h1, h2, h3 { text-wrap: balance; }
 
 /* The part he is on. The warm ground, and the only part whose steps are
    full cards. The eye lands here first because everything else is quieter. */
+/* ⭐ 23.9: the sand started at full strength and was gone by 88%, so the band
+   read as a stain at the top of a paper column rather than a ground the steps
+   stand on. It now holds the deeper sand through the band and softens only at
+   the very bottom, it has an edge, and the amber rule along the top is the one
+   piece of meaning here: this is the part he is standing on. */
 .road-part-now {
   background:
-    radial-gradient(120% 90% at 88% 0%, rgba(200, 120, 30, 0.09) 0%, rgba(200, 120, 30, 0) 62%),
-    linear-gradient(180deg, var(--sand) 0%, rgba(250, 247, 241, 0) 88%);
+    radial-gradient(120% 90% at 88% 0%, rgba(200, 120, 30, 0.13) 0%, rgba(200, 120, 30, 0) 64%),
+    linear-gradient(180deg, var(--sand-deep) 0%, var(--sand) 66%, rgba(243, 233, 216, 0.6) 100%);
+  border: 1px solid var(--line-sand);
+  box-shadow: inset 0 3px 0 0 var(--amber);
 }
 
 .road-part-now .road-part-head h3 {
@@ -859,13 +902,24 @@ h1, h2, h3 { text-wrap: balance; }
   font-size: clamp(1.35rem, 3.4vw, 1.7rem);
 }
 
-/* What is coming. Plain paper and no card chrome at all: a list, hairlines,
-   nothing competing with the part above it. */
-.road-part-later { background: none; padding-block-start: clamp(0.6rem, 2vw, 1rem); }
+/* What is coming. The white ground: still the quietest of the three and still
+   no card chrome inside it, but a GROUND. A list of rows sitting on nothing was
+   the middle of the pale stretch she flagged on 23.9. */
+.road-part-later {
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  padding-block-start: clamp(0.6rem, 2vw, 1rem);
+}
 
-/* What is behind. Sage, the system's other ground, and folded. */
+/* ⚠️ A row's number sits on a small patch of the part's ground, to mask the
+   rail running behind it. The patch has to BE that ground, or a paper-coloured
+   box appears on the white. */
+.road-part-later .step-row .step-index { background: var(--surface); }
+
+/* What is behind. Sage, the system's other ground, held rather than faded. */
 .road-part-done {
-  background: linear-gradient(180deg, var(--sage-top) 0%, var(--sage-bottom) 100%);
+  background: linear-gradient(180deg, var(--sage-deep) 0%, var(--sage-bottom) 100%);
+  border: 1px solid var(--line-sage);
 }
 
 /* Finished steps fold away. Nothing is hidden — he can open it — but a
@@ -892,23 +946,35 @@ h1, h2, h3 { text-wrap: balance; }
    ⚠️ Four at most, and every one of them is a number he would otherwise have
    to work out by reading the whole page: how long he has, what is left, what
    is wrong. A tile that merely counts something is decoration and gets cut.
+
+   ⭐ ON THE INK GROUND, 23.9. It was four white tiles on warm paper directly
+   under a warm band — the palest thing on the page, carrying the four numbers
+   that decide his week. The landing page already has a band for exactly this
+   job: .gets, where the three things he walks away with sit on ink. Same
+   device, same ground, and the numbers get the contrast they were missing.
+
+   ⚠️ The ground carries no meaning here either. The tile's own class still
+   says which number matters, exactly as before.
    ========================================================================== */
 
 .figures {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
-  background: var(--line-soft);
-  border: 1px solid var(--line-soft);
+  /* The hairlines between the tiles, one step up from the ink they separate. */
+  background: #1e403b;
+  border: 1px solid var(--ink);
   border-radius: var(--radius);
   overflow: hidden;
   margin-block-end: var(--gap);
+  box-shadow: var(--shadow);
 }
 
 @media (min-width: 760px) { .figures { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 .figure {
-  background: var(--surface);
+  background: var(--ink);
+  color: #e9f1ee;
   padding: var(--gap) var(--gap-sm);
   display: grid;
   gap: 0.15rem;
@@ -923,14 +989,17 @@ h1, h2, h3 { text-wrap: balance; }
   font-variant-numeric: tabular-nums;
 }
 
-.figure span { font-size: 0.85rem; color: var(--muted); }
-.figure small { font-size: 0.78rem; color: var(--muted); }
+.figure b { color: #fff; }
+.figure span { font-size: 0.85rem; color: #a6bdb6; }
+.figure small { font-size: 0.78rem; color: #8ba49d; }
 
 /* ⚠️ Amber on a figure means THIS is the one that moves, not "this is bad".
-   Red is kept for a number that is already lost — an expired window. */
-.figure-now b { color: var(--amber-ink); }
-.figure-bad b { color: var(--uncertain); }
-.figure-good b { color: var(--verified); }
+   Red is kept for a number that is already lost — an expired window.
+   On ink each one resolves through the scale's own on-ink value, so there is
+   still exactly one place where these colours are decided. */
+.figure-now b { color: var(--amber); }
+.figure-bad b { color: var(--uncertain-on-ink); }
+.figure-good b { color: var(--verified-on-ink); }
 
 /* ==========================================================================
    Ask about your case — the chat that is a summary for now
@@ -1250,6 +1319,23 @@ h1, h2, h3 { text-wrap: balance; }
 
 .step-row-body .step-channel { display: none; }
 
+/* ⭐⭐ "לא חובה" — the mark on a step the נוהל OFFERS rather than requires
+   (23.9). Only the רקורד carries it. Deliberately quiet: it borrows the same
+   pill as `.step-where` rather than inventing a colour, because it is a
+   qualification on the row, not an alarm. Amber still means only "you are
+   here", and an optional step must not compete with it. */
+.step-optional {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #6b6152;
+  background: #f4efe2;
+  border: 1px solid #e7dcc4;
+  border-radius: var(--radius-pill);
+  padding: 0.12rem 0.55rem;
+  white-space: nowrap;
+}
+
 /* The padlock on a row the order will not let him start. A glyph, not a word:
    it repeats on fourteen rows out of fifteen and a repeated word is noise,
    while a repeated mark is a column you can run your eye down. */
@@ -1486,10 +1572,319 @@ h1, h2, h3 { text-wrap: balance; }
    different on every screen. One definition each, here.
    ========================================================================== */
 
-/* A screen's own title, and the line under it saying what the screen is for. */
-.screen-head { display: grid; gap: 0.35rem; margin-block-end: var(--gap); }
+/* A screen's own title, and the line under it saying what the screen is for.
+   ⭐ 23.9: the rule under it, the landing page's device for giving a headline
+   something to stand on, in the notes' quiet gold rather than in amber — it
+   appears on every screen and amber appears where he is standing. */
+.screen-head { display: grid; gap: 0.35rem; margin-block-end: var(--gap); padding-block-end: 0.75rem; position: relative; }
 .screen-head h2 { margin: 0; font-size: clamp(1.5rem, 3.4vw, 2.1rem); }
 .screen-head p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+.screen-head::after {
+  content: '';
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  width: 3rem;
+  height: 3px;
+  background: var(--gold-quiet);
+}
+
+
+/* ==========================================================================
+   The diagnosis — a reading screen, at the width of the page
+   ==========================================================================
+   ⭐ Added 23.9, her call: "change the diagnoses page to full width like the
+   other screens".
+
+   She is right about WHY, and it is worth writing down. Everything else in the
+   flow is a form, and a form belongs in a 46rem column: one question under the
+   last, answerable one-handed in a queue. The diagnosis is not a form. It is
+   six conclusions the whole roadmap will be built on, and F1 step 17 makes
+   checking them חובה — "טעות באבחון מייצרת רודמאפ שגוי לגמרי". A thing a
+   person is asked to CHECK wants to be seen at once, not scrolled.
+
+   ⚠️ Nothing here is restructured. Same screen, same order, same markup: the
+   list of facts is still a <dl>, and every value still comes from the engine.
+   What changed is the width it is read at and the shape a fact is drawn in.
+   ========================================================================== */
+
+/* The same 78rem the answer page uses, so the two reading screens in the
+   product are measured the same and the band above lines up with both. */
+.page-wide {
+  max-width: 78rem;
+  padding-inline: clamp(1.15rem, 4vw, 3rem);
+}
+
+/* A card carrying a whole screen's width earns more room around its contents
+   than one carrying a column of questions. */
+.page-wide .card { padding: var(--gap-lg) clamp(var(--gap), 2.5vw, var(--gap-lg)); }
+
+/* ⭐ A FACT BECOMES A TILE. In the narrow column a fact is one line — label at
+   one end, value at the other — and that is right there, because the eye runs
+   straight down the values. Given the width of the page it is wrong: four
+   lines with 40rem of empty paper beside them, and a value stranded from the
+   label that names it. Across the page a fact stacks instead, the label above
+   its value, and they sit side by side as tiles.
+
+   ⚠️ Same shape the figures on the answer page are drawn in, so "a fact and
+   its value" looks like one idea across the product, and it is the SAME <dl>:
+   nothing was reordered, renamed or rewritten to get this. */
+/* ⚠️ auto-fit, not a fixed count. The engine returns between four and seven
+   facts depending on the case, and a fixed three-column grid leaves a hole at
+   the end of the row on most of them — which is exactly what made this still
+   read as a list with gaps in it. The tiles fill the row they are given. */
+@media (min-width: 720px) {
+  .page-wide .facts {
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--gap-sm);
+    margin-block-start: var(--gap-sm);
+  }
+}
+
+@media (min-width: 720px) {
+  .page-wide .facts-row {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 0.35rem;
+    padding: var(--gap) var(--gap);
+    border-block-end: 0;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-sm);
+    background: linear-gradient(180deg, var(--surface) 0%, rgba(243, 233, 216, 0.28) 100%);
+  }
+
+  /* The label is a name for the value under it now, not the other half of a
+     line, so it is set as one: small, spaced, and quiet. */
+  .page-wide .facts-row dt {
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    color: var(--muted);
+  }
+
+  /* ⚠️ The value is the thing he is checking, so it gets the size. The display
+     face, which the system allows exactly one moment of per screen — this is a
+     grid of the same moment, not a second one. */
+  .page-wide .facts-row dd {
+    text-align: start;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.05rem, 1.7vw, 1.3rem);
+    line-height: 1.25;
+  }
+
+  .page-wide .facts-row dd.mono { font-family: var(--font-mono); font-size: 1rem; }
+}
+
+/* ⭐ AND THE BOX AROUND IT GOES, 23.9. Her second look: "it still looks like a
+   list". It did, and the width alone was not the reason — a white card with
+   things stacked inside it reads as a list however wide the card is. Across
+   the page the card stops being drawn and the tiles become the objects on the
+   screen, the way the figures are on the answer page. Nothing was removed from
+   the markup; the section is still there, it is simply no longer a box.
+
+   ⚠️ Below 720px the card comes back, because on a phone the tiles are lines
+   again and lines need something to sit on. */
+@media (min-width: 720px) {
+  .page-diagnosis .card {
+    background: none;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  /* The title gets the room the card's padding used to give it. */
+  .page-diagnosis .screen-head { margin-block-end: var(--gap-lg); }
+}
+
+/* ⭐ AND THE TILES GET SIZE, 23.9, her third look: "the diagnoses screen didn't
+   change and it still looks like a list."
+
+   It had changed, and she was still right, which is the useful part. Four
+   small tiles in ONE ROW across the top of an empty page is a strip, and a
+   strip of short rows is a list with a border drawn round each line. The
+   documents screen she approved in the same breath is the answer: two columns
+   of blocks with real weight, filling the page. So the facts are laid out the
+   same way — two abreast, each one a panel a conclusion can sit in the middle
+   of, the value at the size of something a person is being asked to check.
+
+   ⚠️ Still the same <dl>, still in the engine's order, still nothing added or
+   taken away. A fact has a label and a value on this screen exactly as it did
+   in the first version; what changed is how much room it is given. */
+@media (min-width: 900px) {
+  .page-diagnosis .facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gap);
+  }
+
+  /* ⚠️ A minimum height and centred contents, so a one-word answer and a
+     three-line one make the same shaped block. Without it the row of panels
+     steps up and down with the length of the value, which is the ragged edge
+     that reads as a list in the first place. */
+  /* ⚠️ Brought down a size on her note "it's all too big". Still a block with
+     weight — that is what stopped it reading as a list — but a conclusion does
+     not need a seventh of the screen to be legible. */
+  .page-diagnosis .facts-row {
+    min-height: 6.4rem;
+    padding: var(--gap) var(--gap-lg);
+    gap: 0.4rem;
+    align-content: center;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  .page-diagnosis .facts-row dt { font-size: 0.78rem; }
+
+  .page-diagnosis .facts-row dd { font-size: clamp(1.25rem, 2vw, 1.6rem); }
+  .page-diagnosis .facts-row dd.mono { font-size: clamp(1rem, 1.6vw, 1.25rem); }
+
+  /* The trap under the facts is a sentence he has to read, not a footnote, so
+     across the page it is given the weight of one. */
+  .page-diagnosis .flag {
+    padding: var(--gap) var(--gap-lg);
+    border-radius: var(--radius);
+    font-size: 1.02rem;
+    line-height: 1.5;
+    margin-block-start: var(--gap-sm);
+  }
+}
+
+
+/* ==========================================================================
+   The intake — a board of answers, not a column of them
+   ==========================================================================
+   ⭐ Added 23.9, and it is the screen she meant from the start: "the page with
+   that question where the user says what he has and what visa he is holding
+   looks like a list. I don't like it. Make it more visible and nicer."
+
+   Fourteen residency statuses stacked one under the other is the shape of the
+   form at the counter — identical rows, scrolled, read one at a time. Across
+   the page they are a BOARD: he sees every answer at once, compares them, and
+   picks. That is what choosing your own status actually is, and it is the one
+   question on which the whole roadmap turns.
+
+   ⚠️ Nothing about the question changed. Same answers, same order, same
+   engine list, same one-at-a-time selection. They are laid out, not rewritten.
+   ========================================================================== */
+
+@media (min-width: 900px) {
+  /* The answers to a question spread across the card. auto-fill with a 16rem
+     floor, so a question with three answers gets three wide ones and a question
+     with fourteen gets four columns of them — without a count written here
+     that the served list could outgrow. */
+  .page-intake .card > .stack-sm {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 0.7rem;
+  }
+
+  .page-intake .card > .stack-sm > * + * { margin-block-start: 0; }
+
+  /* ⚠️ Anything in there that is NOT an answer — the sentence above the
+     teudat-zehut confirmation, a date field, a text field — takes the whole
+     row. A sentence in a 16rem column beside two answers reads as a third one. */
+  .page-intake .card > .stack-sm > :not(.option) { grid-column: 1 / -1; }
+
+  /* ⭐ An answer becomes a card he can see rather than a row he scans past.
+     The warm ground is the same one every other surface in the product picks
+     up; the lift on hover is allowed here and nowhere else, because this is
+     the one thing on the screen you can actually press. */
+  .page-intake .option {
+    align-items: flex-start;
+    min-height: 4.6rem;
+    padding: 0.9rem var(--gap);
+    background: linear-gradient(180deg, var(--surface) 0%, rgba(243, 233, 216, 0.42) 100%);
+    transition: border-color var(--t-quick) var(--ease),
+                box-shadow var(--t-quick) var(--ease),
+                background var(--t-quick) var(--ease),
+                transform var(--t-quick) var(--ease);
+  }
+
+  .page-intake .option::before { margin-block-start: 0.1rem; }
+
+  .page-intake .option:hover {
+    transform: translateY(-2px);
+    border-color: var(--amber-ink);
+    box-shadow: var(--shadow);
+  }
+
+  .page-intake .option:active { transform: translateY(0); }
+
+  /* ⚠️ The chosen answer is still NOT a filled amber block — several
+     questions are on screen at once and a board of amber blocks says "you are
+     here" four times. It keeps the edge, the ring and the weight, and gains a
+     soft halo so it is findable on a board of fourteen without being shouted. */
+  .page-intake .option[aria-pressed='true'] {
+    box-shadow: inset 3px 0 0 0 var(--amber), 0 0 0 3px var(--amber-soft);
+  }
+
+  [dir='ltr'] .page-intake .option[aria-pressed='true'] {
+    box-shadow: inset -3px 0 0 0 var(--amber), 0 0 0 3px var(--amber-soft);
+  }
+
+  .page-intake .option[aria-pressed='true']:hover { transform: none; }
+
+  /* The identity document under a status — "דרכון + אשרה" — is the line
+     that tells two similar-looking answers apart, so on the board it gets its
+     own line rather than trailing the label. */
+  .page-intake .option-note { margin-block-start: 0.2rem; }
+}
+
+/* ⭐ THE DOCUMENTS SCREEN, 23.9, same note. Twelve groups in one column is a
+   scroll, and a person filling it in cannot see how much is left. Across the
+   page they sit two abreast, so the whole ask is on one screen and each group
+   stays its own card — a form still needs its box.
+
+   ⚠️ The title block and the buttons span the full width. They are not
+   groups, and a submit button floating in the left-hand column beside the last
+   question is how a form loses its ending. */
+@media (min-width: 900px) {
+  .page-documents > .stack {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--gap);
+  }
+
+  /* ⚠️ The two cards in a row match heights; the fields inside them stay at
+     the top. Left to themselves the short card ends early and the next row
+     starts below the tall one, which leaves a hole in the middle of the form
+     — and a hole in a form reads as a question that failed to load. */
+  .page-documents .doc-group { align-content: start; }
+
+  /* The stack's own rhythm is what the grid replaces. */
+  .page-documents > .stack > * + * { margin-block-start: 0; }
+
+  .page-documents > .stack > .stack-sm { grid-column: 1 / -1; }
+
+  /* A group is a card in a grid now, so the hairline that separated it from
+     the next one in a column has nothing left to separate. */
+  .page-documents .doc-group { border-block-end: 0; padding-block-end: var(--gap-lg); }
+}
+
+/* ⭐ The two ways out of the diagnosis. The screen exists to be agreed with or
+   corrected, so the pair is a real bar under the card rather than two buttons
+   left at the foot of a column: a hairline above them, room around them, and
+   the confirm wide enough to be pressed with a thumb without aiming.
+
+   ⚠️ "לא נכון, תקן" stays quiet and stays RIGHT THERE. A person who was
+   diagnosed wrongly and cannot find the way back is the failure this screen
+   was built to prevent, so it is never a link in small type. */
+.diagnosis-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--gap-sm) var(--gap);
+  margin-block-start: var(--gap);
+  padding-block-start: var(--gap);
+  border-block-start: 1px solid var(--line-soft);
+}
+
+.diagnosis-actions .btn-primary { padding-inline: var(--gap-xl); font-size: 1.05rem; }
+
+@media (min-width: 640px) {
+  .diagnosis-actions { justify-content: flex-start; }
+}
 
 /* ---- a fact and its value ----------------------------------------------- */
 
@@ -1601,8 +1996,11 @@ h1, h2, h3 { text-wrap: balance; }
 .first-action-line > a:hover { color: var(--amber-ink); }
 .first-action-line .first-action-why { flex-basis: 100%; }
 
-/* The road's now band, when the pointer above has just jumped him to it. */
-#now:target { box-shadow: 0 0 0 2px var(--amber); }
+/* The road's now band, when the pointer above has just jumped him to it.
+   ⚠️ The inset rule along its top is restated here. box-shadow does not
+   merge, it replaces, so writing only the ring would take the top rule off the
+   band at the exact moment he is being pointed at it. */
+#now:target { box-shadow: inset 0 3px 0 0 var(--amber), 0 0 0 2px var(--amber); }
 
 /* ---- readiness buckets -------------------------------------------------- */
 
@@ -1847,13 +2245,25 @@ h1, h2, h3 { text-wrap: balance; }
 .fail h3 { margin: 0; color: var(--uncertain); }
 
 /* The two ways off the answer page, side by side and both quiet. Neither is
-   what he came for, so neither takes the amber. */
+   what he came for, so neither takes the amber.
+
+   ⭐ 23.9: on the ink ground the landing page closes on, so the answer ENDS
+   instead of trailing off into pale paper after the last row of the road. The
+   buttons stay quiet; on ink that means an outline that fills paper. */
 .answer-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--gap-sm);
   margin-block-start: var(--gap);
+  background: var(--ink);
+  border-radius: var(--radius);
+  padding: var(--gap) clamp(0.9rem, 2.5vw, 1.4rem);
 }
+
+.answer-actions .btn { border-color: rgba(233, 241, 238, 0.45); color: #e9f1ee; }
+.answer-actions .btn::before { background: var(--paper); }
+.answer-actions .btn:hover { color: var(--ink); border-color: var(--paper); }
 
 /* Written for the printer, hidden from the screen. The print sheet turns it
    back on. */
@@ -1942,6 +2352,141 @@ h1, h2, h3 { text-wrap: balance; }
    ⚠️ The grounds carry no meaning. Amber still means "you are here" and the
    primary action, nowhere else, exactly as the PRD requires.
    ========================================================================== */
+
+/* ==========================================================================
+   The band every screen past the landing page opens on
+   ==========================================================================
+   ⭐ Added 23.9. The founder, walking the finished flow: the landing page has colour,
+   "the roadmap screen and also the other are a little too pail".
+
+   She was right, and the fault was the same one the road had in M3: the
+   landing page works because it is a SEQUENCE OF FULL-WIDTH GROUNDS and the
+   change of ground separates one idea from the next. Everything past it was a
+   46rem column of white cards on warm paper, opening on a heading that stood
+   on nothing. So the landing page's own opening device — a warm ground under
+   the title, with the amber hairline along the top — comes inside and every
+   screen of the flow starts on it.
+
+   ⚠️ It is a GROUND and a script kicker. It carries no information that the
+   heading under it does not repeat in plain words, exactly as the kickers on
+   the landing page do, and the only amber on it is the hairline and the mark
+   for where he is standing in the flow.
+   ========================================================================== */
+
+.screen-band {
+  position: relative;
+  background:
+    radial-gradient(90% 130% at 82% 0%, rgba(200, 120, 30, 0.10) 0%, rgba(200, 120, 30, 0) 62%),
+    linear-gradient(180deg, var(--sand-deep) 0%, var(--sand) 52%, var(--paper) 100%);
+  border-block-end: 1px solid var(--line-sand);
+}
+
+/* The same hairline the landing page runs over its notice, for the same
+   reason: it tells the eye a band has started without a word being spent. */
+.screen-band::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--amber) 0%, #e0a860 45%, rgba(200, 120, 30, 0.12) 100%);
+}
+
+.screen-band-in {
+  position: relative;
+  max-width: 78rem;
+  margin: 0 auto;
+  padding: clamp(1.4rem, 3.4vw, 2.1rem) clamp(1.15rem, 4vw, 3rem) clamp(1.1rem, 2.6vw, 1.5rem);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.screen-band-in h2 { margin: 0; }
+.screen-band-in .kicker { margin: 0; }
+
+/* ⚠️ The questions live in a 46rem column, so on those screens the band's
+   contents line up with the column rather than with the masthead. A band whose
+   title starts 30rem away from the form under it reads as a different page. */
+.screen-band-form .screen-band-in { max-width: 46rem; padding-inline: var(--gap); }
+
+@media (min-width: 640px) {
+  .screen-band-form .screen-band-in { padding-inline: var(--gap-lg); }
+}
+
+/* The line under the kicker on the first screen: what this is and what it does
+   not do. It was muted grey on paper above the form, which is where a person
+   who has been burned by an official-looking site stops reading. */
+.screen-band-lede {
+  margin: 0;
+  max-width: 54ch;
+  color: #3e5854;
+  font-size: 0.98rem;
+  line-height: 1.5;
+}
+
+.screen-band-lede strong { color: var(--ink); font-weight: 500; }
+
+/* ⚠️ The progress rail sits at the FOOT of the band, against the form it
+   measures, and its unmarked steps are drawn against sand rather than paper —
+   --line on --sand-deep is very nearly invisible. */
+.screen-band .progress { margin-block-start: 0.35rem; }
+.screen-band .progress li { background: rgba(19, 46, 43, 0.16); }
+.screen-band .progress li[data-state='done'] { background: var(--muted); }
+.screen-band .progress li[data-state='here'] { background: var(--amber); }
+
+/* ⭐ THE WARM PAPER, 23.9. The band fixed the top of a screen and the rest of
+   the scroll went pale again, because the paper under the cards is one flat
+   colour for 8,000px. This is the hero's dawn wash on the PAPER ITSELF: warm
+   where he starts reading, cooled to plain paper a screen down, so a card has
+   something to sit on instead of floating in a void.
+
+   ⚠️ On the canvas, not on an element. A full-window layer at z-index -1 was
+   the first attempt and it is the wrong tool twice over: it is a second thing
+   for the browser to composite on every scroll, and being fixed it defeats the
+   full-page capture the evidence shots are taken with. A background painted on
+   the body has neither problem and cannot catch a tap.
+
+   ⚠️ Sized in vh and NOT repeated, so the wash is one screen tall whatever
+   the page's length — a percentage would stretch it over a 9,000px road and
+   the whole thing would read as a tint. Every section with a ground of its own
+   covers it, which is why the landing page looks exactly as it did. */
+body {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(70% 60% at 78% 0%, rgba(200, 120, 30, 0.07) 0%, rgba(200, 120, 30, 0) 70%),
+    linear-gradient(180deg, rgba(243, 233, 216, 0.62) 0%, rgba(250, 247, 241, 0) 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 100vh;
+}
+
+/* ⭐ A QUESTION GROUP IS A NAMED SECTION, 23.9. Twelve groups opened with ink
+   text at the top of a white card, so a scroll through the form was one white
+   wall. The group's name now sits on the sand ground, running the full width of
+   its card — the same move the landing page makes between sections, at the
+   size a card can afford.
+
+   ⚠️ The mark is the notes' bullet gold, NOT amber. It repeats on every
+   group, and the accent that means "you are here" cannot repeat. */
+.page .card > h3:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: calc(var(--gap-lg) * -1) calc(var(--gap) * -1) 0;
+  padding: 0.85rem var(--gap);
+  background: linear-gradient(180deg, var(--sand) 0%, rgba(243, 233, 216, 0.4) 100%);
+  border-block-end: 1px solid var(--line-sand);
+  border-start-start-radius: var(--radius);
+  border-start-end-radius: var(--radius);
+}
+
+.page .card > h3:first-child::before {
+  content: '';
+  flex: none;
+  width: 9px;
+  height: 9px;
+  background: var(--gold-quiet);
+  transform: rotate(45deg);
+}
 
 .stack-lg > * + * { margin-block-start: var(--gap-xl); }
 
@@ -2530,8 +3075,73 @@ h1, h2, h3 { text-wrap: balance; }
   .road-part-now { background: none; padding-inline: 0; margin-inline: 0; }
   .road-part-now > .road-part-head { border-inline-start: 3pt solid #000; padding-inline-start: 6pt; }
 
-  .figures { border-color: #999; background: #fff; gap: 0; }
-  .figure { border: 0.5pt solid #bbb; }
+  .figures { border-color: #999; background: #fff; gap: 0; box-shadow: none; }
+
+  /* ⚠️ The figures band is ink on screen. On a home printer a dark band is a
+     black rectangle with four unreadable numbers in it, and on a laser it is
+     most of a toner cartridge. On paper it goes back to four bordered boxes. */
+  .figure { border: 0.5pt solid #bbb; background: #fff; color: #000; }
+  .figure b,
+  .figure span,
+  .figure small,
+  .figure-now b,
+  .figure-bad b,
+  .figure-good b { color: #000; }
+
+  /* The opening band keeps its rule and loses its ground, like every other
+     ground on this sheet. */
+  .screen-band { background: none; border-block-end: 1pt solid #999; }
+  .screen-band::before { display: none; }
+  .screen-band-in { max-width: none; padding: 0 0 6pt; }
+  .screen-band-form .screen-band-in { padding-inline: 0; }
+
+  /* The paper wash and the sand strip over a question group: screen only. */
+  body { background-image: none; }
+  .page .card > h3:first-child {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border-block-end: 0;
+  }
+  .page .card > h3:first-child::before { display: none; }
+
+  .screen-head::after { display: none; }
+
+  /* The wide reading screen is a sheet like any other, and a fact goes back to
+     being one line: label, value, hairline. Tiles on paper are boxes. */
+  .page-wide { max-width: none; padding: 0; }
+  .page-wide .facts { grid-template-columns: 1fr; gap: 0; }
+  .page-wide .facts-row {
+    grid-template-columns: 1fr auto;
+    background: none;
+    border: 0;
+    border-block-end: 0.5pt dashed #bbb;
+    border-radius: 0;
+    padding: 4pt 0;
+  }
+  .page-wide .facts-row dd { text-align: end; font-size: 10pt; }
+  .page-diagnosis .card { background: #fff; border: 1px solid #999; padding: 8pt; }
+  .page-diagnosis .facts { grid-template-columns: 1fr; gap: 0; }
+  .page-diagnosis .facts-row {
+    min-height: 0;
+    padding: 4pt 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .page-diagnosis .facts-row dd,
+  .page-diagnosis .facts-row dd.mono { font-size: 10pt; }
+  .page-diagnosis .flag { padding: 4pt 6pt; font-size: 9.5pt; }
+  .page-documents > .stack { display: block; }
+  .page-intake .card > .stack-sm { display: block; }
+  .page-intake .option { min-height: 0; padding: 3pt 0; background: none; }
+  .page-documents > .stack > * + * { margin-block-start: 10pt; }
+  .diagnosis-actions { border-block-start: 0; padding-block-start: 0; margin-block-start: 0; }
+
+  .road-part-later,
+  .road-part-done { background: none; border: 0; padding-inline: 0; margin-inline: 0; }
+  .road-part-now { border: 0; box-shadow: none; }
+  .road-part-later .step-row .step-index { background: #fff; }
+  .note-clocks { background: #fff; }
 
   /* Print the URL after every link, or a printed page loses every reference. */
   a[href^='http']::after {
