@@ -1,3 +1,4 @@
+import { RECORD_RELEVANT } from './rules';
 import type { RequiredDocumentInput } from '../domain';
 import type { Condition } from '../condition';
 import { nohal, servicePage, official, fieldReport, notChecked } from './sources';
@@ -255,7 +256,57 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
   {
     id: 'doc.record',
     name: { he: "\"רקורד\" ממדינת המוצא", en: 'The "record" from your home country' },
-    applies_when: CONVERTING,
+    /**
+     * ⭐ SCOPED 23.9 to match `cv.record`, from the one shared rule. It was
+     * CONVERTING — every converter — while the step had already been narrowed,
+     * so a two-year holder stopped seeing the step and went on being told to
+     * bring the document. See RECORD_RELEVANT for the clause and the reasoning.
+     */
+    applies_when: RECORD_RELEVANT,
+    /**
+     * ⭐⭐ The נוהל offers this one. It never demands it.
+     * "רקורד - למעוניינים בקבלת פטור ממבחן שליטה ובדיקת ראיה".
+     */
+    optional: {
+      buys: {
+        he: "פטור ממבחן שליטה ומבדיקת ראייה",
+        en: 'Exemption from the control test and the eye test',
+      },
+      if_absent: {
+        he: "המסמך אינו ברשותך. הוא אינו תנאי להמרה — הוא קונה פטור ממבחן שליטה ומבדיקת ראייה. בלעדיו המסלול נותר פתוח, בתוספת שתי הבדיקות.",
+        en: 'You do not have it. It is not a condition of converting — it buys exemption from the control test and the eye test. Without it the route remains open, with those two tests included.',
+      },
+    },
+    /**
+     * ⭐ Most specific first. "I have started on it" is a real third state, and
+     * only this document has four answers rather than three.
+     */
+    absence_variants: [
+      {
+        when: { field: 'has_record_document', op: 'eq', value: 'in_progress' },
+        detail: {
+          he: "ציינת שהתחלת בתהליך. המסמך מונפק על ידי רשות זרה, ולכן זמן ההמתנה לו הארוך ביותר במסלול. מומלץ להמשיך לטפל בו במקביל לשלבים האחרים — הוא אינו עוצר אותך.",
+          en: 'You indicated that you have started the process. The document is issued by a foreign authority and has the longest waiting time in the route. Keep pursuing it alongside the other steps — it is not holding you up.',
+        },
+      },
+      {
+        /**
+         * ⚠️ Open question 16, and the biggest practical blocker in this route.
+         * The נוהל is silent, so the answer says so rather than inventing one.
+         */
+        when: {
+          field: 'has_record_document',
+          op: 'eq',
+          value: 'origin_country_does_not_issue',
+        },
+        detail: {
+          he: "ציינת שמדינת המוצא אינה מנפיקה מסמך כזה. הנוהל אינו מתייחס למקרה הזה ואין לנו תשובה מאומתת — זו שאלה פתוחה. מה שידוע: הרקורד נדרש רק לצורך הפטור, ולכן המסלול נותר פתוח בפניך, בתוספת מבחן שליטה ובדיקת ראייה.",
+          en: 'You told us your home country does not issue one. The procedure does not address this case and we have no verified answer — it is an open question. What is known: the record is only ever needed for the exemption, so your route remains open, with the control test and the eye test included.',
+        },
+        // Nobody to ask. An action here would contradict the line above it.
+        no_action: true,
+      },
+    ],
     issued_by: { he: "גורם מוסמך במדינת המוצא", en: 'A competent authority in your home country' },
     // ⭐ Not an original, and this is the one piece of good news in the whole
     // conversion route: it can be started remotely, today, by email.
