@@ -269,8 +269,36 @@ function actionFor(
  * day one, and the fix that has to happen before anything else — look wrong
  * until they are explained.
  */
-function firstAction(roadmap: RoadmapStep[]): FirstAction | null {
-  const next = roadmap.find((r) => r.state === 'do_now');
+function firstAction(
+  roadmap: RoadmapStep[],
+  facts: Facts,
+  wanted: Map<string, { doc: RequiredDocument; steps: RoadmapStep[] }>,
+): FirstAction | null {
+  /**
+   * ⭐⭐ NEVER OFFER A STEP HE HAS TOLD US HE CANNOT DO (23.9).
+   *
+   * Found by reading the rendered page: a man who answered "my country does
+   * not issue a רקורד" was shown "הדבר הראשון לעשות: השגת רקורד ממדינת המוצא"
+   * directly above the panel explaining that he cannot get one and does not
+   * need to. Two parts of one screen contradicting each other, which is the
+   * same fault as the "go and ask the authority" action fixed earlier today —
+   * this one just arrived through a different door.
+   *
+   * The document already carries the answer as data (`absence_variants` with
+   * `no_action`), so nothing new is decided here: this only refuses to promote
+   * a step whose whole purpose is a document he has said is unobtainable.
+   */
+  const unobtainable = (r: RoadmapStep) => {
+    const id = r.step.produces_document;
+    const doc = id ? wanted.get(id)?.doc : undefined;
+    return Boolean(
+      doc?.absence_variants.some(
+        (v) => v.no_action && evaluateCondition(v.when, facts) === true,
+      ),
+    );
+  };
+
+  const next = roadmap.find((r) => r.state === 'do_now' && !unobtainable(r));
   if (!next) return null;
 
   const dependents = roadmap
@@ -466,7 +494,7 @@ export function buildReadiness(facts: Facts, roadmap: RoadmapStep[]): Readiness 
     mismatched,
     missing,
     unconfirmed,
-    first_action: firstAction(roadmap),
+    first_action: firstAction(roadmap, facts, wanted),
     steps_done: roadmap.length - outstanding.length,
     steps_total: roadmap.length,
   };

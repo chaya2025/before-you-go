@@ -1,6 +1,6 @@
 import type { Result } from '@byg/engine';
 import { CERTAINTY_META, NOHAL_CATEGORY_LABEL, type NohalCategory } from '@byg/engine';
-import { UI, pick, type Lang } from '../i18n';
+import { UI, pick, type Lang, fieldLabel } from '../i18n';
 import { Urgent } from './Urgent';
 
 /**
@@ -133,7 +133,8 @@ export function Diagnosis({
 
       {result.diagnosis.unanswered.length > 0 && (
         <p className="muted small">
-          {t('d_open_questions')}: <span className="ltr">{result.diagnosis.unanswered.join(', ')}</span>
+          {t('d_open_questions')}:{' '}
+          {result.diagnosis.unanswered.map((f) => fieldLabel(f, lang)).join(' · ')}
         </p>
       )}
 
