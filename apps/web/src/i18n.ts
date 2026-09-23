@@ -225,7 +225,37 @@ export const UI = {
     he: 'חמש שנים ומעלה יכולות לפטור אותך ממבחן שליטה ומבדיקת ראייה.',
     en: 'Five years or more can exempt you from the control test and the eye test.',
   },
+  /**
+   * ⭐⭐ ASKED FOR THE FIRST TIME ON 23.9, AND IT HAD BEEN MISSING ALL ALONG.
+   *
+   * `held_class` is one of the four conditions in EXEMPT_FROM_TESTS, it is in
+   * the Profile schema, the audit personas set it, and `f_held_class` below has
+   * been sitting here as a label for a question nothing ever asked. No screen
+   * collected it, so the field arrived 'unknown' on every single request the
+   * website ever made, `in` on an unknown is unknown, and the exemption could
+   * therefore never resolve for anybody. Every converter was told "עוד לא ברור"
+   * and carried מבחן שליטה and בדיקת ראייה on his road, however many years he
+   * had been driving.
+   *
+   * ⚠️ It is the grade he HOLDS, which is not the grade he is asking for. ס' 2
+   * requires the five years to be ON a grade in תקנות 176-180, so a man with
+   * twenty years on a C1 is not exempt even though C1 is convertible. Two
+   * different questions about two different documents, and collapsing them is
+   * exactly the bug steps.conversion.ts records for 30.8.
+   */
+  q_held_class: { he: 'איזו דרגה כתובה ברישיון שלך היום?', en: 'Which grade is on your licence today?' },
+  q_held_class_help: {
+    he: 'כפי שמופיע על הרישיון הזר. יחד עם הוותק, זה מה שקובע אם מגיע לך פטור ממבחן שליטה ומבדיקת ראייה.',
+    en: 'As printed on the foreign licence. Together with the seniority, this is what decides whether the exemption from the control test and eye test applies to you.',
+  },
   q_class: { he: 'לאיזו דרגה אתה רוצה להמיר?', en: 'Which grade do you want to convert to?' },
+  /* ⚠️ Says why it is worth answering, without making it compulsory. The
+     exemption needs BOTH grades, so leaving this blank keeps the answer at
+     "עוד לא ברור" — and until 23.9 nothing on the screen said so. */
+  q_class_help: {
+    he: 'אפשר לדלג, אבל בלי זה לא נוכל לומר לך אם אתה פטור ממבחן שליטה ומבדיקת ראייה.',
+    en: 'You can skip this, but without it we cannot tell you whether the control test and eye test exemption applies.',
+  },
   /**
    * ⭐⭐ 23.9. This question is asked ONLY of someone who has said five years or
    * more, because ס' 2 gives the exemption to nobody else — so for anyone else
@@ -571,6 +601,15 @@ export const UI = {
   standing_note: {
     he: 'שלב שכבר עברת יכול להתבטל בשקט אם אחד מאלה נשבר.',
     en: 'A step you have already passed can be quietly voided if one of these breaks.',
+  },
+
+  /* ⚠️ "שווה לבדוק", not "שגיאה". The engine's cross-field checks warn and never
+     block — F1 validation 2 — and the heading has to carry that or the quiet
+     block below it reads as a rejection. See components/Warnings.tsx. */
+  warn_title: { he: 'שתי תשובות שלא לגמרי מסתדרות', en: 'Two answers that do not quite agree' },
+  warn_note: {
+    he: 'זה לא עוצר כלום, והדרך למטה נכונה כפי שהיא. אם אחת מהתשובות לא מדויקת, שווה לחזור ולתקן.',
+    en: 'Nothing here stops you, and the road below stands as it is. If one of these answers is not accurate, it is worth going back and correcting it.',
   },
 
   start_now: { he: 'להתחיל עכשיו', en: 'Start now' },

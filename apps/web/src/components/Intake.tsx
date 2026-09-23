@@ -83,6 +83,7 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
   const [dateAnswer, setDateAnswer] = useState('');
   const [bornYear, setBornYear] = useState('');
   const [years, setYears] = useState('');
+  const [heldClass, setHeldClass] = useState('');
   const [requestedClass, setRequestedClass] = useState('');
   const [record, setRecord] = useState<string | null>(null);
   /** ⚠️ Screen-only. Never sent: not knowing what a document is says nothing
@@ -125,6 +126,9 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
       foreign_license: {
         kind: licenceKind,
         ...(years ? { years_held_permanent: Number(years) } : {}),
+        // ⚠️ Under foreign_license, not at the top level: it is a fact printed
+        // on the foreign licence, and `requested_class` below is not.
+        ...(heldClass ? { held_class: heldClass } : {}),
       },
       ...(tz !== null ? { has_teudat_zehut: tz, teudat_zehut_confirmed: true } : {}),
       ...(dateAnswer ? { [dateKey]: dateAnswer } : {}),
@@ -284,7 +288,36 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
             />
           </Question>
 
-          <Question title={t('q_class')}>
+          {/*
+            ⭐⭐ THE GRADE HE HOLDS — asked for the first time on 23.9.
+
+            It was in the Profile schema, in EXEMPT_FROM_TESTS, and in the audit
+            personas, and no screen had ever collected it. So it reached the
+            engine as 'unknown' on every request this website has ever made, and
+            `in` on an unknown is unknown, which meant the exemption resolved to
+            "עוד לא ברור" for every converter who ever used the site — however
+            many years he had been driving, and whatever he answered about the
+            רקורד. Found by walking the form and reading the POST body.
+
+            ⚠️ Before the requested grade, because that is the order of the
+            facts: what he has, then what he wants. ס' 2 reads the first.
+          */}
+          <Question title={t('q_held_class')} help={t('q_held_class_help')}>
+            <select
+              value={heldClass}
+              onChange={(e) => setHeldClass(e.target.value)}
+              aria-label={t('q_held_class')}
+            >
+              <option value="">—</option>
+              {licenseClasses.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </Question>
+
+          <Question title={t('q_class')} help={t('q_class_help')}>
             <select
               value={requestedClass}
               onChange={(e) => setRequestedClass(e.target.value)}
@@ -335,9 +368,22 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props
                 not a claim about whether he holds one, so it must not be sent
                 as one — it opens the explanation and leaves the question open
                 so he can then answer it properly.
+
+                ⚠️ FOUND 23.9 BY WALKING THE FORM. `selected` was `explainRecord`
+                alone, and nothing ever cleared it. Press this, read the
+                explanation, then answer "כן" — and the screen showed BOTH as
+                chosen, on a question that takes one answer. A form that shows
+                two contradictory answers as selected has told him something
+                false about what he just said, which is the one thing this
+                product cannot do.
+
+                ⭐ The explanation itself STAYS after he answers. He asked what
+                the document is; the answer to that does not stop being true
+                because he then said whether he holds one. Only the pressed
+                state is exclusive, because only the pressed state is a claim.
               */}
               <Option
-                selected={explainRecord}
+                selected={explainRecord && record === null}
                 label={t('dont_know_record')}
                 onClick={() => {
                   setExplainRecord(true);
