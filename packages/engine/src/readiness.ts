@@ -131,24 +131,24 @@ function detailFor(
 
     case 'missing': {
       /**
-       * ⭐ The one document-specific case in this file, and it earns its place.
-       * "מדינת המוצא לא מנפיקה מסמך כזה" is open question 16 — the biggest
-       * practical blocker in the conversion route, and the נוהל says nothing
-       * about it. The honest answer is not "go and get it"; it is that the
-       * רקורד only ever bought the exemption, and the route is still his.
+       * ⭐⭐ RULE, not a branch (23.9). This used to carry two hardcoded
+       * `doc.id === 'doc.record'` cases over a fallback that told everyone else
+       * "המסלול דורש אותו". That sentence was FALSE every time it appeared on
+       * the רקורד, because the נוהל offers that document rather than demanding
+       * it — "למעוניינים בקבלת פטור".
+       *
+       * A document now says for itself how its own absence reads, in
+       * documents.ts beside its sources, where somebody auditing the נוהל will
+       * actually find it. This function renders; it decides nothing.
        */
-      if (doc.id === 'doc.record' && facts.has_record_document === 'origin_country_does_not_issue') {
-        return {
-          he: 'ציינת שמדינת המוצא אינה מנפיקה מסמך כזה. הנוהל אינו מתייחס למקרה הזה, ואין לנו תשובה מאומתת — זו שאלה פתוחה. הידוע: הרקורד נדרש רק לצורך פטור ממבחן שליטה ומבדיקת ראייה. בלעדיו המסלול נותר פתוח, בתוספת שתי הבדיקות.',
-          en: 'You indicated that your home country does not issue one. The procedure does not address this case and we have no verified answer — it is an open question. What is known: the record is required only for exemption from the control test and the eye test. Without it the route remains open, with those two tests included.',
-        };
-      }
-      if (doc.id === 'doc.record' && facts.has_record_document === 'in_progress') {
-        return {
-          he: 'ציינת שהתחלת בתהליך. המסמך מונפק על ידי רשות זרה, ולכן זמן ההמתנה לו הארוך ביותר במסלול. מומלץ להמשיך לטפל בו במקביל לשלבים האחרים.',
-          en: 'You indicated that you have started the process. The document is issued by a foreign authority and has the longest waiting time in the route. Continue pursuing it alongside the other steps.',
-        };
-      }
+      const variant = doc.absence_variants.find(
+        (v) => evaluateCondition(v.when, facts) === true,
+      );
+      if (variant) return variant.detail;
+
+      // Offered, not demanded. Its absence costs what it buys, never the route.
+      if (doc.optional) return doc.optional.if_absent;
+
       return {
         he: 'המסמך אינו ברשותך, והמסלול דורש אותו.',
         en: 'You do not have this document, and your route requires it.',
@@ -186,12 +186,32 @@ function detailFor(
 function actionFor(
   bucket: ReadinessBucket,
   doc: RequiredDocument,
+  facts: Facts,
   resolvedBy: RoadmapStep | undefined,
 ): Text | undefined {
   // ⭐ 'ready' carries no action. There is nothing to do, and inventing a chore
   // for a document that is fine is how a clean report starts to read like a
   // list of problems.
   if (bucket === 'ready') return undefined;
+
+  /**
+   * ⭐⭐ 23.9. He has told us this document cannot be obtained at all, so there
+   * is no action to give him.
+   *
+   * Found by reading the real report: the man who answered "my country does not
+   * issue one" was shown the honest explanation and then, immediately under it,
+   * "בקש מהרשות המוסמכת במדינת המוצא אסמכתה..." — go and ask the authority he
+   * had just told us does not exist. The action came from the producing step,
+   * which knows nothing about his answer. Two lines of one card contradicting
+   * each other is worse than either line alone.
+   */
+  if (
+    doc.absence_variants.some(
+      (v) => v.no_action && evaluateCondition(v.when, facts) === true,
+    )
+  ) {
+    return undefined;
+  }
 
   // The precise words, from the step that was written against a source.
   if (resolvedBy) return resolvedBy.step.action;
@@ -327,7 +347,7 @@ export function buildReadiness(facts: Facts, roadmap: RoadmapStep[]): Readiness 
   const items: ReadinessItem[] = [...wanted.values()].map(({ doc, steps }) => {
     const { bucket, resolved_by } = place(doc, facts, producers.get(doc.id), repairers.get(doc.id));
     const firstNeed = steps[0] ? steps[0].step.title : null;
-    const action = actionFor(bucket, doc, resolved_by);
+    const action = actionFor(bucket, doc, facts, resolved_by);
 
     return {
       id: doc.id,
@@ -360,6 +380,23 @@ export function buildReadiness(facts: Facts, roadmap: RoadmapStep[]): Readiness 
   const ready = of('ready');
 
   /**
+   * ⭐⭐ THE VERDICT IS ABOUT DOCUMENTS THE ROUTE REQUIRES (23.9).
+   *
+   * An optional document — one the נוהל offers rather than demands — is listed
+   * honestly in its bucket under "אינו ברשותך", but it must not drive the
+   * verdict. A man holding every document the route actually requires is READY,
+   * and a רקורד he was never obliged to produce cannot make him not-ready.
+   *
+   * ⚠️ The lists handed back are untouched. He still sees it; the headline just
+   * stops calling it a gap.
+   */
+  const optionalIds = new Set(
+    [...wanted.values()].filter(({ doc }) => doc.optional).map(({ doc }) => doc.id),
+  );
+  const requiredMissing = missing.filter((i) => !optionalIds.has(i.id));
+  const requiredUnconfirmed = unconfirmed.filter((i) => !optionalIds.has(i.id));
+
+  /**
    * ⚠️ Worst first, and 'ready' last of the four. The verdict is about the
    * DOCUMENTS, never about him — see ReadinessVerdict.
    */
@@ -378,10 +415,10 @@ export function buildReadiness(facts: Facts, roadmap: RoadmapStep[]): Readiness 
         en: '{n} documents you hold will not be accepted in their current state. This can be dealt with in advance.',
       },
     );
-  } else if (missing.length > 0) {
+  } else if (requiredMissing.length > 0) {
     verdict = 'gaps';
     headline = plural(
-      missing.length,
+      requiredMissing.length,
       {
         he: 'חסר מסמך אחד. כל מה שכבר ברשותך תקין.',
         en: 'One document is missing. Everything you already hold is in order.',
@@ -391,10 +428,10 @@ export function buildReadiness(facts: Facts, roadmap: RoadmapStep[]): Readiness 
         en: '{n} documents are missing. Everything you already hold is in order.',
       },
     );
-  } else if (unconfirmed.length > 0) {
+  } else if (requiredUnconfirmed.length > 0) {
     verdict = 'unknown';
     headline = plural(
-      unconfirmed.length,
+      requiredUnconfirmed.length,
       {
         he: 'מסמך אחד שהמסלול דורש טרם נבדק. מילוי פרטי המסמכים ייתן תשובה מלאה.',
         en: 'One document your route requires has not been checked. Filling in your document details gives a complete answer.',
