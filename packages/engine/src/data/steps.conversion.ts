@@ -117,33 +117,19 @@ export const CONVERSION_STEPS: StepInput[] = [
     ],
   },
 
-  {
-    id: 'cv.english_name',
-    track: 'conversion',
-    title: { he: "עדכון השם באנגלית ברשות האוכלוסין", en: 'Update your name in English' },
-    action: {
-      he: "ודא שהשם שלך מעודכן באנגלית ברשות האוכלוסין, בכתיב זהה לדרכון.",
-      en: 'Make sure your name is registered in English at the Population Authority, spelled as in your passport.',
-    },
-    applies_when: NO_TEUDAT_ZEHUT,
-    sequence_position: 2,
-    act_when: 'start_now',
-    channel: 'population_authority',
-    authority: "רשות האוכלוסין וההגירה",
-    links: [{ label: { he: "רשות האוכלוסין", en: 'Population and Immigration Authority' }, url: 'https://www.gov.il/he/departments/population_and_immigration_authority' }],
-    evidence: [
-      servicePage(
-        "הגשת בקשה להוצאת רישיון נהיגה",
-        "נדרש שהשם יהיה מעודכן באנגלית ברשות האוכלוסין",
-        "יש לוודא כי שמם של מגישי הבקשה מעודכן בשפה האנגלית ברשות האוכלוסין וההגירה.",
-      ),
-      // 📏 כלל הודאות: requirement 🟢, the matching-the-passport part 🟡, so 🟡.
-      inferred(
-        "הכתיב חייב להיות זהה לדרכון — הדף דורש עדכון, לא התאמה",
-        'גיליון 03 שורה 3 · גיליון 05 שורה 13',
-      ),
-    ],
-  },
+  /**
+   * ⭐ DELETED 23.9 (the founder): there used to be a step here, "update your name in
+   * English at the Population Authority", at sequence_position 2. It was a
+   * second copy of `cc.english_name_match`, which already guards
+   * `cv.online_form` and already carries the consequence and the remedy.
+   *
+   * Her words: "most people already have it — I didn't have to do it. If I saw
+   * it I wouldn't know what to do and it would confuse me." A standing fact
+   * printed as a task tells a person who is already fine that he is missing
+   * something. It is a reminder to CHECK, not a thing to complete, so it lives
+   * as a condition and nowhere else. Position 2 is deliberately vacant;
+   * sequence_position is only ever compared, never counted.
+   */
 
   {
     id: 'cv.doc_89',
