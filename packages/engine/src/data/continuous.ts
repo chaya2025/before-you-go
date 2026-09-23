@@ -189,9 +189,18 @@ export const CONTINUOUS_CONDITIONS: ContinuousConditionInput[] = [
 
   {
     id: 'cc.english_name_match',
+    /**
+     * ⭐ 23.9, the founder: this is the ONLY place the English name is said. The two
+     * steps that repeated it (`fz.english_name`, `cv.english_name`) were
+     * deleted, because most people are already registered correctly and a task
+     * they cannot act on reads as a thing they have failed to do. Her rule:
+     * "a saying and a reminder, not a full step that has to be completed,
+     * because it really doesn't apply to everyone." So the wording below tells
+     * him what must be true, and what to do ONLY IF he has reason to doubt it.
+     */
     name: {
-      he: "השם באנגלית חייב להיות מעודכן ברשות האוכלוסין",
-      en: 'Your name in English must be up to date at the Population Authority',
+      he: "השם באנגלית ברשות האוכלוסין חייב להיות זהה לדרכון",
+      en: 'Your name in English at the Population Authority must match your passport',
     },
     applies_when: NO_TEUDAT_ZEHUT,
     check_before: ['fz.online_form', 'cv.online_form'],
@@ -200,8 +209,8 @@ export const CONTINUOUS_CONDITIONS: ContinuousConditionInput[] = [
       en: 'A mismatch between your passport and the Population Authority registry stalls the process.',
     },
     remedy: {
-      he: "עדכן את השם באנגלית ברשות האוכלוסין לפני שאתה ממלא את הטופס.",
-      en: 'Update your name in English at the Population Authority before filling in the form.',
+      he: "אצל רוב האנשים השם כבר רשום כראוי ואין מה לעשות. אם יש לך ספק שהכתיב ברשות האוכלוסין זהה לדרכון — בדוק, ועדכן לפני מילוי הטופס.",
+      en: 'For most people the name is already registered correctly and there is nothing to do. If you have any doubt that the spelling at the Population Authority matches your passport, check it, and update it before filling in the form.',
     },
     evidence: [
       servicePage(

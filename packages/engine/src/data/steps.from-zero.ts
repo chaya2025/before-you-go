@@ -24,33 +24,13 @@ const HAS_TEUDAT_ZEHUT: Condition = { field: 'has_teudat_zehut', op: 'eq', value
 const EVERYONE: Condition = { always: true };
 
 export const FROM_ZERO_STEPS: StepInput[] = [
-  {
-    id: 'fz.english_name',
-    track: 'from_zero',
-    title: { he: "עדכון השם באנגלית ברשות האוכלוסין", en: 'Update your name in English' },
-    action: {
-      he: "ודא שהשם שלך רשום באנגלית ברשות האוכלוסין וההגירה, בכתיב זהה לדרכון.",
-      en: 'Make sure your name is registered in English at the Population Authority, spelled as in your passport.',
-    },
-    applies_when: NO_TEUDAT_ZEHUT,
-    sequence_position: 1,
-    act_when: 'start_now',
-    channel: 'population_authority',
-    authority: "רשות האוכלוסין וההגירה",
-    links: [{ label: { he: "רשות האוכלוסין", en: 'Population and Immigration Authority' }, url: 'https://www.gov.il/he/departments/population_and_immigration_authority' }],
-    evidence: [
-      servicePage(
-        "הגשת בקשה להוצאת רישיון נהיגה",
-        "נדרש שהשם יהיה מעודכן באנגלית ברשות האוכלוסין",
-        "יש לוודא כי שמם של מגישי הבקשה מעודכן בשפה האנגלית ברשות האוכלוסין וההגירה.",
-      ),
-      // 📏 כלל הודאות: the requirement is 🟢, the reason we act on is 🟡, so the step is 🟡.
-      inferred(
-        "הכתיב חייב להיות זהה לדרכון — הדף דורש עדכון, לא התאמה",
-        'גיליון 03 שורה 3 · גיליון 05 שורה 13',
-      ),
-    ],
-  },
+  /**
+   * ⭐ DELETED 23.9 (the founder), same as cv.english_name on the conversion road:
+   * "update your name in English" was a duplicate of `cc.english_name_match`,
+   * which already guards `fz.online_form`. It is a fact to check, not a task to
+   * finish, and printing it as step 1 made a person who is already registered
+   * correctly think he had work to do. Position 1 is deliberately vacant.
+   */
 
   {
     id: 'fz.doc_89',

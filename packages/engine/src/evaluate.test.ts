@@ -310,13 +310,13 @@ describe('mid-process entry — ticking what he has already done', () => {
     has_teudat_zehut: false,
     teudat_zehut_confirmed: true,
     born: '2005-01',
-    completed_steps: ['fz.english_name', 'fz.doc_89', 'fz.online_form'],
+    completed_steps: ['fz.doc_89', 'fz.online_form'],
   });
   const r = evaluate(partway, TODAY);
 
   it('marks what he ticked as done', () => {
     const done = r.roadmap.filter((s) => s.state === 'done').map((s) => s.step.id);
-    expect(done).toEqual(expect.arrayContaining(['fz.english_name', 'fz.doc_89', 'fz.online_form']));
+    expect(done).toEqual(expect.arrayContaining(['fz.doc_89', 'fz.online_form']));
   });
 
   it('⭐ unblocks the eye test, now that the 89 document is done', () => {
@@ -1381,9 +1381,10 @@ describe('⭐ the system follows where the person actually is', () => {
 
     const after = withSteps(['fz.doc_89']);
     expect(after.roadmap.find((s) => s.step.id === 'fz.doc_89')!.state).toBe('done');
-    // ⚠️ No longer BLOCKED. It reads 'later' rather than 'do_now' because
-    // fz.english_name at position 1 is still outstanding — the prerequisite
-    // cleared, the queue did not.
+    // ⚠️ No longer BLOCKED. The prerequisite cleared. It used to read 'later'
+    // rather than 'do_now' because fz.english_name sat undone at position 1;
+    // that step was deleted on 23.9, so the only thing asserted here now is
+    // that ticking the 89 releases what was waiting on it.
     expect(after.roadmap.find((s) => s.step.id === 'fz.photo_and_eye')!.state).not.toBe('waiting_on');
     expect(after.roadmap.find((s) => s.step.id === 'fz.photo_and_eye')!.waiting_on).toEqual([]);
   });
