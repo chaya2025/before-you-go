@@ -147,6 +147,16 @@ function Step({
       </span>
       <h3>{pick(step.title, lang)}</h3>
       <span className="step-head-meta">
+        {/* ⭐⭐ AN OFFER IS NOT AN OBLIGATION (23.9, the founder). The רקורד is the
+            only step the נוהל offers rather than requires — "למעוניינים בקבלת
+            פטור" — and a road that draws it identically to the four steps that
+            ARE required is telling him something false about one of them. The
+            engine says which (`step.optional`); this only prints it. */}
+        {step.optional && (
+          <span className="step-optional" title={pick(step.optional.buys, lang)}>
+            {t('record_optional_tag')}
+          </span>
+        )}
         {/* ⭐ WHERE, on the row itself. Sixteen steps are spread over eight
             different places — the population authority, a photo station, a
             driving school, a test centre, the post office — and a person
