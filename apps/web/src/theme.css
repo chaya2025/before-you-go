@@ -847,6 +847,36 @@ h1, h2, h3 { text-wrap: balance; }
 .note-clocks h3 { font-family: var(--font-display); font-size: 1.15rem; color: var(--ink); }
 .note-clocks .clock-row { border-block-end-color: var(--line-soft); }
 
+/* ⭐ Two answers that disagree, 23.9. It sits in the reading column above the
+   road rather than out on the rail, so it borrows the note's paper and then
+   undoes the two things that make a note a note: it does NOT tilt, because a
+   tilted card reads as an aside and this is about what he just told us, and it
+   carries the display face rather than the script one, for the same reason the
+   clocks do — it is read off the engine, not spoken in the product's voice.
+
+   ⚠️ Amber, never red. These warn and never block (F1 validation 2), and the
+   alert colours are spoken for: --uncertain is a real mismatch on a document.
+   Colouring a "check this answer" the same as "this will be refused" is the
+   red-box mistake the founder took out on 30.8, in a new place. */
+.note-check {
+  transform: none;
+  border-color: var(--amber);
+  border-inline-start-width: 3px;
+}
+.note-check h3 { font-family: var(--font-display); font-size: 1.08rem; color: var(--amber-ink); }
+.note-check .note-list li { display: flex; gap: 0.45rem; align-items: flex-start; }
+/* ⚠️ A mark rather than a bullet, and drawn in CSS: the list is one to three
+   lines and a disc bullet on sticky paper reads as a checklist he has to do. */
+.note-check .note-list li::before {
+  content: '';
+  flex: none;
+  width: 0.42rem;
+  height: 0.42rem;
+  margin-block-start: 0.42rem;
+  border-radius: 50%;
+  background: var(--amber);
+}
+
 /* ---- the road, in three named parts ------------------------------------- */
 
 .road-part { display: grid; gap: var(--gap-sm); }

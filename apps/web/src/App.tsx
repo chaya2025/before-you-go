@@ -9,6 +9,7 @@ import { Roadmap, RoadSide } from './components/Roadmap';
 import { Urgent } from './components/Urgent';
 import { Readiness } from './components/Readiness';
 import { PlainWords } from './components/PlainWords';
+import { Warnings } from './components/Warnings';
 import { Welcome } from './components/Welcome';
 import { useReveal } from './useReveal';
 
@@ -488,6 +489,12 @@ export function App() {
             {/* ⭐ ONE orchestrated reveal, on the screen where the answer
                 arrives, and nothing else in the product moves. */}
             <div className="answer-main reveal">
+              {/* ⭐ ABOVE EVERYTHING, 23.9. If two of his answers disagree then
+                  the notices, the report and the road below are all built on
+                  one of them, and he has to be able to see that before he
+                  believes any of it. Quiet, because it is a doubt about an
+                  answer and not a fact about his case. */}
+              <Warnings warnings={result.warnings} lang={lang} />
               {/* ⚠️ Above the road. A roadmap built on a lapsed visa describes
                   a process he cannot currently start. */}
               <Urgent issues={result.urgent} lang={lang} />
