@@ -271,12 +271,32 @@ describe('the research rules hold across the whole file', () => {
     expect(record.act_when).toBe('start_now');
   });
 
-  it('⭐ the רקורד is offered, never demanded, and says so in the data', () => {
+  it('⭐ the רקורד is offered, never demanded — on the document AND the step', () => {
     // נוהל: "רקורד - למעוניינים בקבלת פטור ממבחן שליטה ובדיקת ראיה".
     const record = ALL_DOCUMENTS.find((d) => d.id === 'doc.record')!;
     expect(record.optional).toBeDefined();
-    // And the step and the document are scoped by the SAME rule, not two copies.
-    expect(record.applies_when).toEqual(stepById('cv.record').applies_when);
+    expect(stepById('cv.record').optional).toBeDefined();
+  });
+
+  it('⭐ the רקורד step is only the ACT of getting one, so it goes when he has it', () => {
+    /**
+     * Chaya, 23.9: "only mention it as a step if he doesn't have one, and as
+     * optional — and to bring it to the visit if he has it."
+     *
+     * The DOCUMENT stays for a five-year holder either way: it is what he
+     * brings. The STEP is the errand, and a man holding it has no errand.
+     */
+    const step = stepById('cv.record').applies_when;
+    const doc = ALL_DOCUMENTS.find((d) => d.id === 'doc.record')!.applies_when;
+    const holder = { ...veteranConverter, has_record_document: 'yes' as const };
+    const without = { ...veteranConverter, has_record_document: 'no' as const };
+    expect(evaluateCondition(step, holder)).toBe(false);
+    expect(evaluateCondition(doc, holder)).toBe(true);
+    expect(evaluateCondition(step, without)).toBe(true);
+    // And under five years neither one reaches him.
+    const junior = { ...veteranConverter, foreign_license_years: 2, has_record_document: 'no' as const };
+    expect(evaluateCondition(step, junior)).toBe(false);
+    expect(evaluateCondition(doc, junior)).toBe(false);
   });
 
   it('the conversion route admits it does not know how delivery works', () => {
@@ -342,7 +362,13 @@ describe('the exemption — the highest-consequence rule in the conversion route
 
 describe('the entries-and-exits form is asked of exactly one category', () => {
   // כל-זכות demands it from everyone and contradicts the נוהל. The נוהל wins.
-  const form = () => stepById('cv.entry_exit_form').applies_when;
+  //
+  // ⚠️ Re-pointed 23.9 from the STEP to the DOCUMENT. `cv.entry_exit_form` was
+  // deleted when the conversion road was cut back to פרק "התהליך": the נוהל
+  // lists this form under מסמכים נדרשים, as item 3 for a returning resident,
+  // and never as an action. The claim under test is unchanged and still the
+  // important one — WHO is asked for it.
+  const form = () => ALL_DOCUMENTS.find((d) => d.id === 'doc.entry_exit_form')!.applies_when;
 
   it('applies to תושב ישראל ששב', () => {
     expect(evaluateCondition(form(), { ...veteranConverter, nohal_category: 'toshav_israel' })).toBe(true);

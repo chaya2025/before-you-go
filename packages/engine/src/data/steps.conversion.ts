@@ -101,7 +101,26 @@ export const CONVERSION_STEPS: StepInput[] = [
      * renders as uncertain rather than vanishing. A long-lead item must never
      * be hidden by a question nobody asked.
      */
-    applies_when: RECORD_RELEVANT,
+    /**
+     * ⭐⭐ 23.9 (Chaya): "only require the record at the שאלון with a condition
+     * of 5+ years, and then only mention it as a STEP if he doesn't have one,
+     * and as optional — and to bring it to the visit if he has it."
+     *
+     * So the step is the ACT of obtaining one, and a man who already holds it
+     * has nothing to obtain. For him the רקורד is only a document to bring,
+     * which is exactly where the נוהל puts it: פרק "מסמכים נדרשים", never
+     * פרק "התהליך".
+     */
+    applies_when: {
+      all: [RECORD_RELEVANT, { field: 'has_record_document', op: 'ne', value: 'yes' }],
+    },
+    /** ⚠️ Offered, never required. ס' 2 gives the exemption; nothing demands it. */
+    optional: {
+      buys: {
+        he: "פטור ממבחן שליטה ומבדיקת ראייה",
+        en: 'Exemption from the control test and the eye test',
+      },
+    },
     // ⭐ Needed at the END, started on DAY ONE. גיליון 13 principle 3:
     // "אם מציגים אותו בסוף — המשתמש כבר איחר."
     //
@@ -166,135 +185,41 @@ export const CONVERSION_STEPS: StepInput[] = [
    * sequence_position is only ever compared, never counted.
    */
 
-  {
-    id: 'cv.doc_89',
-    track: 'conversion',
-    produces_document: 'doc.form_89',
-    title: { he: "הוצאת מספר מזהה 89", en: 'Get your 89 identity number' },
-    action: {
-      he: "הגע למשרד הרישוי עם דרכון מקורי ואשרת שהייה בתוקף וקבל מספר מזהה שמתחיל ב-89.",
-      en: 'Go to a licensing office with your original passport and valid visa and get an identity number starting with 89.',
-    },
-    applies_when: NO_TEUDAT_ZEHUT,
-    sequence_position: 3,
-    act_when: 'start_now',
-    channel: 'licensing_office',
-    authority: "משרד הרישוי",
-    requires_appointment: false,
-    requires_documents: ['doc.passport', 'doc.visa'],
-    links: [{ label: { he: "זימון תור למשרד הרישוי", en: 'Book a licensing office appointment' }, url: 'https://www.gov.il/he/Departments/General/govisit' }],
-    fallback: {
-      he: "לך בלי תור. אם דוחים אותך — קבע תור באותו רגע, במקום.",
-      en: 'Go without an appointment. If they turn you away, book one there and then.',
-    },
-    evidence: [
-      servicePage(
-        "הוצאת רישיון נהיגה לעובד זר",
-        "משרד הרישוי מנפיק מספר זיהוי המתחיל ב-89",
-        "במשרד הרישוי יונפק מספר זיהוי פיקטיבי המתחיל בספרות 89.",
-      ),
-      fieldReport("להנפקה הראשונה אין צורך בתור מראש. כל ביקור אחר מחייב תור", {
-        varies_by: ['branch'],
-      }),
-      // ⭐ Open question 20, answered by Chaya 25.8. The נוהל never mentions the
-      // 89 number, but the reason is not that it is optional here — it is that
-      // the נוהל describes eligibility, not identification. Every Israeli driver
-      // needs an identifying number; without a teudat zehut that number is an 89,
-      // and it is the first stop on BOTH tracks.
-      fieldReport(
-        "כל נהג בישראל חייב מספר מזהה. מי שאין לו תעודת זהות מקבל מספר 89, וזה נכון גם במסלול ההמרה — זו התחנה הראשונה, אף שהנוהל אינו מזכיר זאת",
-        { generalizability: 'pattern', last_verified_at: LAST_VERIFIED_LATE },
-      ),
-      // ⭐ The strongest hint that the נוהל was written for people without an ID.
-      nohal(
-        "פרק \"מסמכים נדרשים\" ← \"תושב מדינת חוץ\"",
-        "רשימת המסמכים לתושב מדינת חוץ אינה כוללת תעודת זהות כלל",
-        "רישיון נהיגה לאומי בתוקף. דרכון עם אשרת שהייה בתוקף.",
-      ),
-    ],
-  },
+  /**
+   * ⭐⭐ DELETED 23.9 (Chaya). There was a step here, "הוצאת מספר מזהה 89",
+   * sending him to the licensing office BEFORE the appointment.
+   *
+   * The נוהל does not mention the 89 anywhere — not in פרק "התהליך" and not on
+   * any of the three document lists. It came from a gov.il page about foreign
+   * WORKERS and from field reports. Its effect on the road was concrete: a
+   * licensing-office trip before the one the נוהל describes, and a document on
+   * the visit list that the נוהל never asks him to bring.
+   *
+   * Her words: "the user doesn't have to bring an 89 for the conversion
+   * because he doesn't have one... most probably at the visit the person will
+   * get the 89 anyway as his identifying number, but that is just for your
+   * information — it doesn't really say it anywhere."
+   *
+   * ⚠️ So it is NOT re-stated as "you will receive an 89 at the visit" either.
+   * That is her reading, she flagged it as undocumented, and an undocumented
+   * claim does not get printed as fact. The 89 simply leaves this road.
+   *
+   * ⚠️ The FROM-ZERO road keeps `fz.doc_89`, untouched. That track is not this
+   * one, and there the 89 is evidenced.
+   */
 
-  {
-    id: 'cv.entry_exit_form',
-    track: 'conversion',
-    produces_document: 'doc.entry_exit_form',
-    title: { he: "טופס כניסות ויציאות", en: 'Entries and exits form' },
-    action: {
-      he: "הוצא טופס כניסות ויציאות מרשות האוכלוסין. הראשון ביום — חינם.",
-      en: 'Get an entries-and-exits form from the Population Authority. The first one each day is free.',
-    },
-    // ⚠️ ONLY תושב ישראל ששב. כל-זכות demands it from everyone and contradicts
-    // the נוהל; the נוהל wins. A תושב מדינת חוץ is not merely exempt from this —
-    // he is not entitled to request it at all.
-    applies_when: { field: 'nohal_category', op: 'eq', value: 'toshav_israel' },
-    sequence_position: 4,
-    channel: 'population_authority',
-    authority: "רשות האוכלוסין",
-    links: [{ label: { he: "בירור פרטים על נוסע", en: 'Entries and exits enquiry' }, url: 'https://www.gov.il/he/service/inquiry_of_exit_and_entery_from_israel' }],
-    cost: {
-      amount_ils: 0,
-      note: { he: "בקשה נוספת באותו יום — 20 ₪.", en: 'A second request on the same day costs 20 ILS.' },
-      evidence: [
-        official(
-          'דף השירות "בירור פרטים על נוסע", רשות האוכלוסין',
-          "הראשון ביום חינם, נוסף באותו יום 20 ₪",
-          "השירות ניתן ללא עלות (עבור בקשה אחת ליום).",
-          'https://www.gov.il/he/service/inquiry_of_exit_and_entery_from_israel',
-        ),
-      ],
-    },
-    evidence: [
-      nohal(
-        "פרק \"מסמכים נדרשים\" ← \"תושב ישראל ששהה בחו\"ל לפחות 6 חודשים\", ס' 3",
-        "הטופס נדרש רק מתושב ישראל ששב, ואינו מופיע ברשימות עולה חדש ותושב מדינת חוץ",
-        "טופס כניסות ויציאות ממשרד הפנים.",
-      ),
-    ],
-  },
-
-  {
-    id: 'cv.translation',
-    track: 'conversion',
-    produces_document: 'doc.translation',
-    title: { he: "תרגום מסמכים שאינם באנגלית", en: 'Translate documents that are not in English' },
-    action: {
-      he: "רשות הרישוי רשאית לדרוש תרגום של הרישיון הלאומי או של כל מסמך אחר שאינו באנגלית. התרגום מתבצע על ידי עו\"ד או נוטריון דובר השפה.",
-      en: 'The licensing authority may require a translation of your licence or any other document not in English, done by a lawyer or notary who speaks the language.',
-    },
-    /**
-     * ⚠️ Was EVERYONE, which made the STEP broader than the DOCUMENT it produces.
-     * doc.translation has been scoped to a non-English licence since 30.8; this
-     * was not, so two things went wrong at once. An English-licence holder was
-     * told to go and translate documents that need no translation, and — found
-     * by reading the readiness report on 31.8 — a person who had not yet said
-     * what language his licence is in was told outright that he was MISSING a
-     * notarised translation. Nobody had asked. That is "unknown rendered as no",
-     * the failure this engine exists to avoid, arriving through the back door of
-     * a summary rather than a rule.
-     *
-     * ⭐ Same condition as the document now, quite deliberately: `ne 'en'` and
-     * not `eq 'other'`, so an unanswered language leaves this UNCERTAIN rather
-     * than quietly dropping a requirement the נוהל may well impose.
-     */
-    applies_when: {
-      all: [
-        { field: 'track', op: 'eq', value: 'conversion' },
-        { field: 'foreign_license_language', op: 'ne', value: 'en' },
-      ],
-    },
-    sequence_position: 5,
-    channel: 'unknown',
-    authority: "עו\"ד או נוטריון",
-    evidence: [
-      // ⚠️ "רשאית לדרוש" is an authority, not an obligation. The system may never
-      // tell someone "you must get a translation" — only that it may be required.
-      nohal(
-        "פרק \"הערות\", תבליט 4",
-        "רשות הרישוי רשאית לדרוש תרגום — סמכות, לא חובה אוטומטית",
-        "רשות הרישוי רשאית לדרוש תרגום של רישיון הנהיגה הלאומי, ו/או כל מסמך הנדרש לצורך המרת רישיון (מלבד אנגלית) התרגום יתבצע ע\"י עו\"ד/נוטריון דובר השפה.",
-      ),
-    ],
-  },
+  /**
+   * ⭐ DELETED 23.9 (Chaya): "טופס כניסות ויציאות" and "תרגום מסמכים" were both
+   * steps here. Neither is in פרק "התהליך".
+   *
+   * The entries-and-exits form is item 3 on the נוהל's DOCUMENT list for תושב
+   * ישראל ששב. The translation lives in פרק "הערות" as "רשות הרישוי רשאית
+   * לדרוש" — a power the clerk holds, on no list at all.
+   *
+   * Both still exist as documents (`doc.entry_exit_form`, `doc.translation`)
+   * and still appear on the visit, which is where the נוהל puts them. What
+   * they stopped being is actions on a road that the נוהל describes in five.
+   */
 
   {
     id: 'cv.online_form',
@@ -305,8 +230,13 @@ export const CONVERSION_STEPS: StepInput[] = [
       en: 'Fill in the licence application on the Ministry of Transport site. There is no separate conversion form; it is the same one used for the from-scratch route.',
     },
     applies_when: EVERYONE,
-    sequence_position: 6,
-    must_come_after: ['cv.doc_89'],
+    /**
+     * ⭐ FIRST on the road now (23.9). The נוהל opens פרק "התהליך" with this and
+     * nothing before it: "על המבקש למלא טופס בקשה להוצאת רישיון נהיגה באתר
+     * משרד התחבורה". It used to wait on `cv.doc_89`, which the נוהל does not
+     * have.
+     */
+    sequence_position: 2,
     channel: 'online',
     authority: "משרד התחבורה",
     links: [{ label: { he: "טופס הבקשה", en: 'The application form' }, url: 'https://www.gov.il/he/service/apply_for_new_driver_drivers_license' }],
@@ -333,7 +263,7 @@ export const CONVERSION_STEPS: StepInput[] = [
       en: 'After submitting the form, go to a photo station with photo ID. The photo is free.',
     },
     applies_when: EVERYONE,
-    sequence_position: 7,
+    sequence_position: 3,
     must_come_after: ['cv.online_form'],
     channel: 'photo_station',
     links: [{ label: { he: "תחנות צילום", en: 'Photo stations' }, url: 'https://www.gov.il/he/service/drivers_license_photo_stations' }],
@@ -361,7 +291,7 @@ export const CONVERSION_STEPS: StepInput[] = [
       en: 'Take an eye test at one of the stations. Required if you have held your licence under five years, or cannot prove seniority with a record.',
     },
     applies_when: { not: EXEMPT_FROM_TESTS },
-    sequence_position: 8,
+    sequence_position: 4,
     // ⭐ 23.9: "כמו כן" in פרק התהליך attaches the eye test to the photo-station
     // stage, which the נוהל places "לאחר מילוי הטופס הנ\"ל". Same gate as the
     // photo, same station, same visit.
@@ -390,7 +320,7 @@ export const CONVERSION_STEPS: StepInput[] = [
     title: { he: "זימון תור למשרד הרישוי", en: 'Book a licensing office appointment' },
     action: { he: "קבע תור לסניף משרד הרישוי דרך GoVisit.", en: 'Book an appointment at a licensing office branch through GoVisit.' },
     applies_when: EVERYONE,
-    sequence_position: 9,
+    sequence_position: 5,
     channel: 'online',
     requires_appointment: true,
     links: [{ label: { he: "GoVisit — זימון תור", en: 'GoVisit appointment booking' }, url: 'https://www.gov.il/he/Departments/General/govisit' }],
@@ -412,7 +342,7 @@ export const CONVERSION_STEPS: StepInput[] = [
       en: 'Go to the licensing office branch on your appointment, with every document your category requires.',
     },
     applies_when: EVERYONE,
-    sequence_position: 10,
+    sequence_position: 6,
     /**
      * ⭐⭐ THE ORDERING CHAIN, 23.9, read off the נוהל rather than guessed.
      * פרק "התהליך" in full: fill the form → "לאחר מילוי הטופס הנ\"ל" the photo
@@ -434,13 +364,7 @@ export const CONVERSION_STEPS: StepInput[] = [
      *                    is in, since an unknown condition keeps a step on the
      *                    road. That is "unknown rendered as yes".
      */
-    must_come_after: [
-      'cv.book_appointment',
-      'cv.online_form',
-      'cv.photo',
-      'cv.eye_test',
-      'cv.entry_exit_form',
-    ],
+    must_come_after: ['cv.book_appointment', 'cv.online_form', 'cv.photo', 'cv.eye_test'],
     channel: 'licensing_office',
     requires_appointment: true,
     /**
@@ -473,11 +397,19 @@ export const CONVERSION_STEPS: StepInput[] = [
      * only when the licence is not in English. A step names everything the
      * visit could need; the person decides what he actually sees.
      */
+    /**
+     * ⚠️ `doc.form_89` REMOVED 23.9. The נוהל's three document lists are short
+     * and none of them contains it:
+     *   עולה חדש          — דרכון/ת"ז · תעודת עולה · רישיון לאומי בתוקף · רקורד
+     *   תושב ישראל ששב    — דרכון/ת"ז · רישיון לאומי בתוקף · טופס כניסות ויציאות · רקורד
+     *   תושב מדינת חוץ     — רישיון לאומי בתוקף · דרכון עם אשרת שהייה בתוקף · רקורד
+     * Each document still decides for itself whether it applies to THIS person,
+     * so a man sees his own list and not all of them.
+     */
     requires_documents: [
       'doc.identity',
       'doc.passport',
       'doc.visa',
-      'doc.form_89',
       'doc.foreign_license',
       'doc.record',
       'doc.translation',
@@ -508,7 +440,17 @@ export const CONVERSION_STEPS: StepInput[] = [
       },
       { he: "הרישיון הזר בתוקף — לא רק קיים?", en: 'Is your foreign licence valid, not merely in your possession?' },
       { he: "כל המסמכים במקור?", en: 'Are all documents originals?' },
-      { he: "הרקורד הגיע?", en: 'Has the record arrived?' },
+      {
+        /**
+         * ⭐ SCOPED 23.9. It had no `when`, so a two-year holder — who has no
+         * record step and no record document — was asked at the counter whether
+         * his record had arrived. Chaya's rule: nothing that does not need
+         * mentioning gets mentioned. Same rule as the 31.8 visa line above.
+         */
+        he: "הרקורד הגיע?",
+        en: 'Has the record arrived?',
+        when: RECORD_RELEVANT,
+      },
     ],
     evidence: [
       nohal(
@@ -528,13 +470,21 @@ export const CONVERSION_STEPS: StepInput[] = [
   {
     id: 'cv.verification',
     track: 'conversion',
-    title: { he: "בדיקה ואימות המסמכים", en: 'Document check and verification' },
+    /**
+     * ⭐ RENAMED 23.9 (Chaya): "הגעה אישית עם המסמכים" and "בדיקה ואימות
+     * המסמכים" read as the same thing two rows apart. This one is not him
+     * doing anything — it is the authority deciding.
+     */
+    title: {
+      he: "בדיקה ואישור ההמרה ע\"י משרד הרישוי",
+      en: 'The licensing office checks and approves the conversion',
+    },
     action: {
       he: "רשות הרישוי בודקת ומאמתת את המסמכים על פי שיקול דעתה, וככל הניתן בתוך 14 ימי עבודה. ⚠️ זהו יעד רך ולא התחייבות.",
       en: 'The licensing authority checks and verifies your documents at its discretion, as far as possible within 14 working days. ⚠️ That is a soft target, not a commitment.',
     },
     applies_when: EVERYONE,
-    sequence_position: 11,
+    sequence_position: 7,
     must_come_after: ['cv.attend'],
     lead_time_days: 14,
     channel: 'licensing_office',
@@ -585,7 +535,7 @@ export const CONVERSION_STEPS: StepInput[] = [
      * A heavy-vehicle conversion was being drawn as a car conversion.
      */
     applies_when: { all: [GRADES_176_181, { not: EXEMPT_FROM_TESTS }] },
-    sequence_position: 12,
+    sequence_position: 8,
     channel: 'test_center',
     authority: "בוחן משרד התחבורה",
     checklist: [
@@ -646,7 +596,7 @@ export const CONVERSION_STEPS: StepInput[] = [
         '⚠️ The procedure sets the requirement and says nothing about where the course is given, what it costs or how long it takes. We have no verified answer to those questions.',
     },
     applies_when: GRADES_182_185,
-    sequence_position: 12,
+    sequence_position: 8,
     act_when: 'start_now',
     channel: 'unknown',
     authority: "משרד התחבורה",
@@ -687,7 +637,7 @@ export const CONVERSION_STEPS: StepInput[] = [
         '⚠️ The procedure does not say which examinations, where, or what they cover. We have no verified answer.',
     },
     applies_when: GRADES_182_185,
-    sequence_position: 13,
+    sequence_position: 9,
     must_come_after: ['cv.heavy_course'],
     channel: 'unknown',
     authority: "משרד התחבורה",
@@ -724,7 +674,7 @@ export const CONVERSION_STEPS: StepInput[] = [
     applies_when: {
       any: [{ field: 'requested_class', op: 'eq', value: 'C1' }, GRADES_182_185],
     },
-    sequence_position: 13,
+    sequence_position: 9,
     channel: 'unknown',
     authority: "מרב\"ד",
     evidence: [
@@ -749,7 +699,7 @@ export const CONVERSION_STEPS: StepInput[] = [
         '⚠️ The procedure does not describe this stage for conversion at all, and nobody has reported to us how it works in practice. It most likely works as it does on the from-scratch route, but we are not certain.',
     },
     applies_when: EVERYONE,
-    sequence_position: 14,
+    sequence_position: 10,
     /**
      * ⭐ 23.9. The נוהל never describes delivery on this route, but it does say
      * what stands between a man and a licence being issued at all:

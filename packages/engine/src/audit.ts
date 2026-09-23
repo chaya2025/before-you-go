@@ -132,7 +132,8 @@ function invariants(persona: string, r: Result, raw: Record<string, unknown>): F
   //    update the same document on the same page.
   const holds89 = Boolean(raw.form_89_number || raw.form_89_passport_number || raw.form_89_name_latin);
   if (holds89) {
-    for (const acquire of ['fz.doc_89', 'cv.doc_89']) {
+    // ⚠️ `cv.doc_89` removed 23.9: the 89 is not on the conversion road at all.
+    for (const acquire of ['fz.doc_89']) {
       const step = r.roadmap.find((s) => s.step.id === acquire);
       if (step && step.state !== 'done') {
         add(`he gave his 89 details, yet ${acquire} is "${step.state}" — told to obtain a document he holds`);

@@ -74,7 +74,8 @@ export const CONTINUOUS_CONDITIONS: ContinuousConditionInput[] = [
       'fz.test',
       'fz.permit_in_person',
       'fz.completion_in_person',
-      'cv.doc_89',
+      // ⚠️ `cv.doc_89` removed 23.9 with the step itself. The visa still has to
+      // be valid at the conversion visit, which `cv.attend` carries.
       'cv.attend',
     ],
     consequence_if_invalid: {

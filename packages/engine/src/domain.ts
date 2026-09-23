@@ -103,6 +103,24 @@ export const Step = z.object({
   /** Roughly how long the outside world takes. Drives what surfaces early. */
   lead_time_days: z.number().int().min(0).optional(),
 
+  /**
+   * ⭐⭐ AN OPTIONAL STEP — the נוהל offers it, it is not part of the process.
+   *
+   * Added 23.9 (Chaya): "only mention it as a step if he doesn't have one, and
+   * as optional." The רקורד is the only one. Everything else on the conversion
+   * road is either in פרק "התהליך" or is a condition in ס' 1.
+   *
+   * ⚠️ DATA, so the screen can mark it without knowing which step it is. A road
+   * that draws an offer and an obligation identically is telling him something
+   * false about one of them.
+   */
+  optional: z
+    .object({
+      /** What doing it buys him. Printed on the row. */
+      buys: Text,
+    })
+    .optional(),
+
   channel: Channel,
   requires_appointment: z.union([z.boolean(), z.literal('unknown')]).default('unknown'),
   authority: z.string().optional(),

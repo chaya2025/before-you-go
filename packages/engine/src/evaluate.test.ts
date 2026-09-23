@@ -160,9 +160,19 @@ describe('⭐ persona 2 — א/5 תושב ארעי. HOLDS a teudat zehut, and is
     expect(ids).not.toContain('cv.control_test');
   });
 
-  it('⭐ still starts with the רקורד, though it is needed at the end', () => {
-    expect(r.roadmap[0]!.step.id).toBe('cv.record');
-    expect(r.roadmap[0]!.start_now).toBe(true);
+  it('⭐ holds his רקורד already, so the errand is gone and the road opens on the form', () => {
+    /**
+     * ⚠️ CHANGED 23.9. This persona HAS a רקורד (7 years, exempt from both
+     * tests). Chaya: "only mention it as a step if he doesn't have one."
+     * The step is the errand of obtaining one; he has nothing to obtain.
+     * What remains is `doc.record`, which he brings to the visit — exactly
+     * where the נוהל puts it.
+     *
+     * The lead-time principle it used to test is not lost: it is now tested on
+     * a man who has answered that he does NOT have one, in readiness.test.ts.
+     */
+    expect(ids).not.toContain('cv.record');
+    expect(r.roadmap[0]!.step.id).toBe('cv.online_form');
   });
 
   it('gets both conversion clocks, counted from entry', () => {
@@ -237,12 +247,17 @@ describe('persona 4 — ב/1 foreign worker, 2 years on his licence, no רקור
     expect(ids).toContain('cv.control_test');
   });
 
-  it('IS sent to get an 89 number, because he has no teudat zehut', () => {
-    expect(ids).toContain('cv.doc_89');
+  it('⭐ is NOT sent for an 89 — the נוהל never asks a converter for one', () => {
+    // ⚠️ REVERSED 23.9. This used to assert the opposite. The נוהל's document
+    // list for תושב מדינת חוץ is three lines and an 89 is not among them:
+    // רישיון לאומי בתוקף · דרכון עם אשרת שהייה בתוקף · רקורד.
+    expect(ids).not.toContain('cv.doc_89');
   });
 
   it('is not asked for the entries-and-exits form — that is one category only', () => {
-    expect(ids).not.toContain('cv.entry_exit_form');
+    // Now a DOCUMENT rather than a step; the step was deleted on 23.9.
+    const attend = r.roadmap.find((s) => s.step.id === 'cv.attend')!;
+    expect(attend.documents.map((d) => d.id)).not.toContain('doc.entry_exit_form');
   });
 
   it('is inside both clocks, having entered five months ago', () => {
@@ -462,6 +477,24 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     expect(r.roadmap.map((s) => s.step.id)).not.toContain('fix.renew_visa');
   });
 
+  /**
+   * ⚠️ MOVED to the FROM-ZERO road on 23.9. These three tests used the
+   * converter fixture because `cv.doc_89` used to exist; it was deleted when
+   * the conversion road was cut back to פרק "התהליך", since the נוהל never asks
+   * for an 89. The RULE is unchanged and is Chaya's, from 30.8: filling in the
+   * number IS the proof, so a man who typed one is never told to go and get
+   * one. It is now tested where the 89 actually lives.
+   */
+  const fromZero = (patch: Record<string, unknown> = {}) =>
+    evaluate(
+      p({
+        visa_type: 'a2', visa_valid_now: true, has_teudat_zehut: false,
+        teudat_zehut_confirmed: true, foreign_license: { kind: 'none' },
+        born: '2005-03', entered_israel: '2024-01', ...patch,
+      }),
+      TODAY,
+    );
+
   it('⭐⭐ typing an 89 number proves he has one, so he is not sent to get one', () => {
     // ⚠️ Found by Chaya on 30.8, using the documents screen the day it was
     // built. She entered a mismatched 89 and was told BOTH to update it and to
@@ -473,29 +506,29 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     // ⚠️ cv.* here: this persona holds a national licence, so he is on the
     // CONVERSION route. The from-zero half of the same rule is covered by the
     // fz.doc_89 fixture run through the CLI.
-    const r = run({ ...DOCS, visa_valid_now: false });
-    const doc89 = r.roadmap.find((s) => s.step.id === 'cv.doc_89')!;
+    const r = fromZero({ ...DOCS, visa_valid_now: false });
+    const doc89 = r.roadmap.find((s) => s.step.id === 'fz.doc_89')!;
     expect(doc89.state).toBe('done');
 
     // And it must genuinely unblock what was waiting on it, exactly as ticking
     // the box would. Half a fix would leave the road stalled behind a step the
     // system already knows is finished.
-    const form = r.roadmap.find((s) => s.step.id === 'cv.online_form')!;
-    expect(form.waiting_on).not.toContain('cv.doc_89');
-    expect(form.state).not.toBe('waiting_on');
+    // Nothing may still be held up by a step the engine already counts as done.
+    const stillWaiting = r.roadmap.filter((s) => s.waiting_on.includes('fz.doc_89'));
+    expect(stillWaiting).toEqual([]);
   });
 
   it('and someone who did NOT type an 89 is still told to go and get one', () => {
-    const r = run({ visa_valid_now: true });
-    const doc89 = r.roadmap.find((s) => s.step.id === 'cv.doc_89')!;
+    const r = fromZero({ visa_valid_now: true });
+    const doc89 = r.roadmap.find((s) => s.step.id === 'fz.doc_89')!;
     expect(doc89.state).not.toBe('done');
   });
 
   it('any one of the three 89 fields is enough evidence that he holds it', () => {
     // He may know the number, or only recognise the name printed on it.
     for (const field of ['form_89_number', 'form_89_passport_number', 'form_89_name_latin']) {
-      const r = run({ [field]: field === 'form_89_name_latin' ? 'John Smith' : '891234567' });
-      const doc89 = r.roadmap.find((s) => s.step.id === 'cv.doc_89')!;
+      const r = fromZero({ [field]: field === 'form_89_name_latin' ? 'John Smith' : '891234567' });
+      const doc89 = r.roadmap.find((s) => s.step.id === 'fz.doc_89')!;
       expect(doc89.state, field).toBe('done');
     }
   });
@@ -542,13 +575,18 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     // documents existed in the data, fully sourced, required by NO step:
     // doc.record, doc.translation, doc.entry_exit_form, doc.teudat_oleh.
     //
-    // ⚠️ The worst was doc.form_89. cv.doc_89 tells him to GO AND GET one and
-    // nothing told him to BRING it, though for a man with no teudat zehut it
-    // IS his identity for the whole process.
-    const noTz = run({ foreign_license: { kind: 'national', valid_now: true, language: 'other' } });
+    // ⚠️ `doc.form_89` was on this list and came OFF on 23.9. The נוהל's three
+    // document lists are short and none of them contains an 89:
+    //   תושב מדינת חוץ — רישיון לאומי בתוקף · דרכון עם אשרת שהייה בתוקף · רקורד
+    // Chaya: "the user doesn't have to bring an 89 for the conversion because
+    // he doesn't have one."
+    const noTz = run({
+      foreign_license: { kind: 'national', valid_now: true, language: 'other' },
+      has_record_document: 'no',
+    });
     const attend = noTz.roadmap.find((s) => s.step.id === 'cv.attend')!;
     const ids = attend.documents.map((d) => d.id);
-    expect(ids).toContain('doc.form_89');
+    expect(ids).not.toContain('doc.form_89');
     expect(ids).toContain('doc.record');
     expect(ids).toContain('doc.translation');
 
@@ -1298,15 +1336,19 @@ describe('⭐ the system follows where the person actually is', () => {
     );
     const q = worker.diagnosis.document_questions;
     expect(q.visa.ask).toBe(true);
-    expect(q.form_89.ask).toBe(true);
     expect(q.passport.ask).toBe(true);
     expect(q.foreign_license.ask).toBe(true);
 
     /**
-     * ⚠️ And his 89 is gated, because cv.doc_89 is still on his road. He is
-     * asked WHETHER he has one before he is asked what is printed on it.
+     * ⭐⭐ CHANGED 23.9, and this is the whole point of the cut-back. He is no
+     * longer asked ANYTHING about an 89, because the נוהל does not put one on
+     * his road and nothing on it needs one. Chaya: "the user doesn't have to
+     * bring an 89 for the conversion because he doesn't have one."
+     *
+     * ⚠️ The from-zero road is untouched — there the 89 is the first stop and
+     * every one of these questions is still asked.
      */
-    expect(q.form_89.confirm_possession).toBe(true);
+    expect(q.form_89.ask).toBe(false);
     // Nobody issues him a passport, a visa or a foreign licence on this route.
     expect(q.passport.confirm_possession).toBe(false);
     expect(q.visa.confirm_possession).toBe(false);
@@ -1615,7 +1657,9 @@ describe('the conversion ordering chain — what the visit may and may not wait 
     const under = converting({ foreign_license: license(2, 'en'), has_record_document: 'no' });
     expect(under.roadmap.map((s) => s.step.id)).not.toContain('cv.record');
 
-    const over = converting({ foreign_license: license(10, 'en'), has_record_document: 'yes' });
+    // ⚠️ 'no', not 'yes': since 23.9 the STEP is the errand of getting one, so
+    // it exists only for a man who has said he does not have it.
+    const over = converting({ foreign_license: license(10, 'en'), has_record_document: 'no' });
     expect(over.roadmap.map((s) => s.step.id)).toContain('cv.record');
   });
 
