@@ -84,9 +84,31 @@ export const CONVERSION_STEPS: StepInput[] = [
       he: "בקש מהרשות המוסמכת במדינת המוצא אסמכתה המציינת את המועד שבו הוצא לך רישיון הנהיגה הקבוע. מתקבל גם בדוא\"ל — אפשר להתחיל מרחוק היום.",
       en: 'Ask the competent authority in your home country for a document stating when your permanent licence was issued. Email is accepted, so you can start this remotely today.',
     },
-    applies_when: EVERYONE,
+    /**
+     * ⭐⭐ SCOPED 23.9, from the נוהל itself after the founder sent the PDF. It was
+     * EVERYONE, which is wrong twice over. The document lists say, identically
+     * in all three categories:
+     *
+     *   "רקורד - למעוניינים בקבלת פטור ממבחן שליטה ובדיקת ראיה (בעלי רישיון
+     *    נהיגה לאומי קבוע במשך חמש שנים לפחות, כאמור) נדרש להציג אסמכתה..."
+     *
+     * Conditional twice: only for a person who WANTS the exemption, and only a
+     * five-year holder can want it. Under five years it buys nothing, so
+     * putting a 60-day chase on his road is pure cost.
+     *
+     * ⚠️ `gte 5` on an unanswered seniority is UNKNOWN, not false, so the step
+     * renders as uncertain rather than vanishing. A long-lead item must never
+     * be hidden by a question nobody asked.
+     */
+    applies_when: { field: 'foreign_license_years', op: 'gte', value: 5 },
     // ⭐ Needed at the END, started on DAY ONE. גיליון 13 principle 3:
     // "אם מציגים אותו בסוף — המשתמש כבר איחר."
+    //
+    // ⚠️ And NOT a prerequisite of cv.attend, deliberately. "למעוניינים בקבלת
+    // פטור" is an offer, not a condition of converting. A man who never gets
+    // one still attends, still converts, and simply sits the eye test and the
+    // control test. Gating the visit on it would tell a person whose country
+    // issues no such document that he can never go at all.
     sequence_position: 1,
     act_when: 'start_now',
     lead_time_days: 60,
@@ -327,6 +349,10 @@ export const CONVERSION_STEPS: StepInput[] = [
     },
     applies_when: { not: EXEMPT_FROM_TESTS },
     sequence_position: 8,
+    // ⭐ 23.9: "כמו כן" in פרק התהליך attaches the eye test to the photo-station
+    // stage, which the נוהל places "לאחר מילוי הטופס הנ\"ל". Same gate as the
+    // photo, same station, same visit.
+    must_come_after: ['cv.online_form'],
     channel: 'photo_station',
     links: [{ label: { he: "תחנות צילום ובדיקת ראייה", en: 'Photo stations and eye tests' }, url: 'https://www.gov.il/he/service/drivers_license_photo_stations' }],
     evidence: [
@@ -374,7 +400,34 @@ export const CONVERSION_STEPS: StepInput[] = [
     },
     applies_when: EVERYONE,
     sequence_position: 10,
-    must_come_after: ['cv.book_appointment'],
+    /**
+     * ⭐⭐ THE ORDERING CHAIN, 23.9, read off the נוהל rather than guessed.
+     * פרק "התהליך" in full: fill the form → "לאחר מילוי הטופס הנ\"ל" the photo
+     * station → "כמו כן" the eye test for under-five-years → "לקבוע תור לסניף
+     * משרד הרישוי ולגשת באופן אישי עם המסמכים הדרושים".
+     *
+     * Each of these gates only the person it concerns, because a step whose
+     * applies_when is false is not on his road and `waiting_on` filters to what
+     * is (evaluate.ts). The eye test disappears for an exempt five-year holder;
+     * the entries-and-exits form exists only for a returning Israeli resident,
+     * whose list carries it as item 3.
+     *
+     * ⚠️ NOT here, on purpose, and both were nearly added:
+     *   cv.record      — "למעוניינים בקבלת פטור", an offer, not a condition.
+     *   cv.translation — lives in פרק "הערות" as "רשות הרישוי רשאית לדרוש".
+     *                    A power the clerk holds, absent from the process and
+     *                    from every document list. Gating on it would block a
+     *                    person who has not yet said what language his licence
+     *                    is in, since an unknown condition keeps a step on the
+     *                    road. That is "unknown rendered as yes".
+     */
+    must_come_after: [
+      'cv.book_appointment',
+      'cv.online_form',
+      'cv.photo',
+      'cv.eye_test',
+      'cv.entry_exit_form',
+    ],
     channel: 'licensing_office',
     requires_appointment: true,
     /**
@@ -569,6 +622,15 @@ export const CONVERSION_STEPS: StepInput[] = [
     },
     applies_when: EVERYONE,
     sequence_position: 14,
+    /**
+     * ⭐ 23.9. The נוהל never describes delivery on this route, but it does say
+     * what stands between a man and a licence being issued at all:
+     *   ס' 1 — "במידה ולא עמד המבקש פעמיים במבחן שליטה, לא יינתן לו רישיון נהיגה"
+     *   ס' 1 — "ולעניין הדרגה המנויה בתקנה 181 נדרשת עמידה בבדיקות רפואיות"
+     * Each still gates only whom it applies to: the control test vanishes for an
+     * exempt holder, the medical exists only for C1.
+     */
+    must_come_after: ['cv.verification', 'cv.control_test', 'cv.medical_c1'],
     channel: 'mail',
     checklist: [
       { he: "הכתובת שלך מעודכנת ברשות האוכלוסין?", en: 'Is your address up to date at the Population Authority?' },
