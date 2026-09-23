@@ -162,6 +162,79 @@ describe('an undecided step can say which answer would settle it', () => {
     ]);
     expect(missingFacts(exempt, known)).toEqual([]);
   });
+
+  /**
+   * ⭐⭐ 23.9. Found by walking the real page, not by a test: a two-year holder
+   * was told that to place his מבחן שליטה he should answer
+   * `has_record_document`. He should not — his two years had already made the
+   * exemption FALSE, so the record cannot change the outcome whatever he says.
+   *
+   * An inert question is the exact thing the audit counts and the thing this
+   * product exists to avoid asking.
+   */
+  it('⭐ says nothing about a branch that is already decided', () => {
+    const exempt: Condition = {
+      all: [
+        { field: 'foreign_license_years', op: 'gte', value: 5 },
+        { field: 'has_record_document', op: 'eq', value: 'yes' },
+      ],
+    };
+    // Two years settles it on its own. Nothing is blocking, so nothing is asked.
+    const twoYears: Facts = { ...vague, foreign_license_years: 2 } as Facts;
+    expect(missingFacts(exempt, twoYears)).toEqual([]);
+
+    // Ten years does NOT settle it, so the record is a real question again.
+    const tenYears: Facts = { ...vague, foreign_license_years: 10 } as Facts;
+    expect(missingFacts(exempt, tenYears)).toEqual(['has_record_document']);
+  });
+
+  /**
+   * ⭐⭐ THE SHAPE THAT ACTUALLY BROKE ON THE PAGE, and neither test above
+   * catches it: `cv.control_test.applies_when` is
+   *     all[ requested_class in 176-181 , not( EXEMPT ) ]
+   * With two years, EXEMPT is FALSE so `not(EXEMPT)` is TRUE — a branch that
+   * is fully decided — while the grade is still unanswered, so the whole
+   * condition is undecided and the walk recurses. The decided branch must
+   * contribute nothing, or the page asks for `has_record_document` to settle a
+   * question the record cannot affect.
+   */
+  it('⭐⭐ a decided branch nested inside an undecided one contributes nothing', () => {
+    const controlTest: Condition = {
+      all: [
+        { field: 'requested_class', op: 'in', value: ['B', 'C1'] },
+        {
+          not: {
+            all: [
+              { field: 'foreign_license_years', op: 'gte', value: 5 },
+              { field: 'has_record_document', op: 'eq', value: 'yes' },
+              { field: 'held_class', op: 'in', value: ['B'] },
+            ],
+          },
+        },
+      ],
+    };
+    const twoYears: Facts = {
+      ...vague,
+      foreign_license_years: 2,
+      requested_class: 'unknown',
+      held_class: 'unknown',
+    } as Facts;
+    // Undecided overall — the grade is genuinely missing and IS worth asking.
+    expect(evaluateCondition(controlTest, twoYears)).toBe('unknown');
+    // But only the grade. The record and the held class are settled already.
+    expect(missingFacts(controlTest, twoYears)).toEqual(['requested_class']);
+  });
+
+  it('⭐ and says nothing when one branch of an OR is already true', () => {
+    const either: Condition = {
+      any: [
+        { field: 'foreign_license_years', op: 'gte', value: 5 },
+        { field: 'has_record_document', op: 'eq', value: 'yes' },
+      ],
+    };
+    const tenYears: Facts = { ...vague, foreign_license_years: 10 } as Facts;
+    expect(missingFacts(either, tenYears)).toEqual([]);
+  });
 });
 
 describe('conditions are data, so the data file validates them', () => {

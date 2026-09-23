@@ -370,7 +370,37 @@ export function fieldsUsed(condition: Condition): ConditionField[] {
   return [condition.field];
 }
 
-/** The facts that are missing and are actually blocking a verdict. */
+/**
+ * The facts that are missing AND are actually blocking a verdict.
+ *
+ * ⚠️ FIXED 23.9. The comment above always said this; the implementation only
+ * collected every unanswered field anywhere in the tree, including fields
+ * inside a branch already decided. Found by walking the real page: a
+ * two-year holder was told that to place his מבחן שליטה he should answer
+ * `has_record_document`. He should not. The exemption is an `all` containing
+ * "five years or more", which his two years already made FALSE, so the record
+ * cannot change the outcome whatever he says.
+ *
+ * That is an inert question — the exact thing the audit counts and the thing
+ * this product exists to avoid asking. So the walk follows three-valued logic:
+ *   all  — one FALSE child settles it; nothing is blocking.
+ *   any  — one TRUE child settles it; nothing is blocking.
+ * Otherwise only the children that are themselves undecided can be blocking.
+ */
 export function missingFacts(condition: Condition, facts: Facts): ConditionField[] {
-  return [...new Set(fieldsUsed(condition))].filter((f) => isUnknown(facts[f]));
+  const walk = (c: Condition): ConditionField[] => {
+    if (evaluateCondition(c, facts) !== 'unknown') return [];
+    if ('always' in c) return [];
+    if ('all' in c) {
+      if (c.all.some((child) => evaluateCondition(child, facts) === false)) return [];
+      return c.all.flatMap(walk);
+    }
+    if ('any' in c) {
+      if (c.any.some((child) => evaluateCondition(child, facts) === true)) return [];
+      return c.any.flatMap(walk);
+    }
+    if ('not' in c) return walk(c.not);
+    return isUnknown(facts[c.field]) ? [c.field] : [];
+  };
+  return [...new Set(walk(condition))];
 }
