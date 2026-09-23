@@ -134,8 +134,23 @@ export const CONTINUOUS_CONDITIONS: ContinuousConditionInput[] = [
       he: "מספר הדרכון במסמך ה-89 חייב לתאום לדרכון שבידך",
       en: 'The passport number on your 89 document must match the passport you hold',
     },
-    applies_when: NO_TEUDAT_ZEHUT,
-    check_before: ['fz.photo_and_eye', 'fz.test', 'fz.permit_in_person', 'cv.attend'],
+    /**
+     * ⭐⭐ SCOPED OFF THE CONVERSION ROAD 23.9, found by walking the real page.
+     * It was NO_TEUDAT_ZEHUT, so it printed "מספר הדרכון במסמך ה-89 חייב לתאום
+     * לדרכון שבידך" in the standing conditions of a converter who has no 89 —
+     * the 89 left that road with `cv.doc_89`, because the נוהל never asks for
+     * one. A standing condition about a document he does not hold is the
+     * clearest possible case of Chaya's rule: nothing that does not need
+     * mentioning gets mentioned.
+     *
+     * ⚠️ Untouched on the FROM-ZERO road, where it is the single most expensive
+     * warning in the product: a mismatch does not turn him away, it records his
+     * test as a FAILURE with the fee paid.
+     */
+    applies_when: {
+      all: [NO_TEUDAT_ZEHUT, { field: 'track', op: 'ne', value: 'conversion' }],
+    },
+    check_before: ['fz.photo_and_eye', 'fz.test', 'fz.permit_in_person'],
     consequence_if_invalid: {
       // ⚠️ The most expensive trap in the research. Not "you are turned away" —
       // the test is RECORDED AS A FAILURE, with the fee paid and the wait wasted.

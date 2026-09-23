@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Result, RoadmapStep, ClockState, CertaintyMark } from '@byg/engine';
 import { CERTAINTY_META, attributions } from '@byg/engine';
-import { UI, pick, type Lang } from '../i18n';
+import { UI, pick, type Lang, fieldLabel } from '../i18n';
 
 /**
  * ============================================================================
@@ -309,8 +309,10 @@ function Step({
       {/* An unplaceable step stays, and says which answer would settle it. */}
       {item.applies === 'unknown' && (
         <p className="small" style={{ color: 'var(--unchecked)' }}>
+          {/* ⚠️ Words, not engine field names. This printed
+              "has_record_document, held_class" at the reader until 23.9. */}
           ❔ {t('uncertain_step')} — {t('uncertain_answer')}:{' '}
-          <span className="ltr">{item.missing_answers.join(', ')}</span>
+          {item.missing_answers.map((f) => fieldLabel(f, lang)).join(' · ')}
         </p>
       )}
 

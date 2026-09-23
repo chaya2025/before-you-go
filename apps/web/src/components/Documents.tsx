@@ -425,7 +425,10 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
       <Section
         question={questions.passport}
         title={t('d_passport_title')}
-        help={t('d_passport_help')}
+        // ⚠️ The 89 wording only where the 89 is actually asked for: it left the
+        // conversion road on 23.9, so a converter must not be asked to
+        // distinguish his passport from one issued with a document he never had.
+        help={questions.form_89.ask ? t('d_passport_help_89') : t('d_passport_help')}
         lang={lang}
       >
         <Field label={t('d_passport_number')} problem={problems.passport_number} lang={lang}>
