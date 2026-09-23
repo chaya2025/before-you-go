@@ -1,3 +1,4 @@
+import { RECORD_RELEVANT, GRADES_176_181, GRADES_182_185 } from './rules';
 import type { StepInput } from '../domain';
 import type { Condition } from '../condition';
 import { nohal, servicePage, official, fieldReport, inferred, notChecked, LAST_VERIFIED_LATE } from './sources';
@@ -100,7 +101,7 @@ export const CONVERSION_STEPS: StepInput[] = [
      * renders as uncertain rather than vanishing. A long-lead item must never
      * be hidden by a question nobody asked.
      */
-    applies_when: { field: 'foreign_license_years', op: 'gte', value: 5 },
+    applies_when: RECORD_RELEVANT,
     // ⭐ Needed at the END, started on DAY ONE. גיליון 13 principle 3:
     // "אם מציגים אותו בסוף — המשתמש כבר איחר."
     //
@@ -111,7 +112,19 @@ export const CONVERSION_STEPS: StepInput[] = [
     // issues no such document that he can never go at all.
     sequence_position: 1,
     act_when: 'start_now',
-    lead_time_days: 60,
+    /**
+     * ⚠️ `lead_time_days: 60` REMOVED 23.9, Chaya. The נוהל does say 60 days —
+     * "מומלץ להגיש את הבקשה ולהתחיל את התהליך לכל הפחות 60 ימים לפני תום שנת
+     * שהייה בישראל" — but that is about submitting the APPLICATION before the
+     * first year of stay runs out, and has nothing to do with how long a
+     * foreign authority takes to answer. The number had been carried across to
+     * the record with no source of its own.
+     *
+     * Nothing is lost by dropping it: `lead_time_days` is read by no rule and
+     * no screen, and `act_when: 'start_now'` is what actually floats this to
+     * the top of his road. The real 60 days lives where it belongs, on
+     * `clock.foreign_driving` and on `cv.online_form`, both quoted.
+     */
     channel: 'origin_country',
     authority: "רשות הרישוי במדינת המוצא",
     checklist: [
@@ -558,7 +571,20 @@ export const CONVERSION_STEPS: StepInput[] = [
       he: "עבור מבחן שליטה. ⚠️ זהו מבחן שונה ומצומצם מטסט רגיל — לא מבחן מעשי מלא.",
       en: 'Take a control test. ⚠️ This is a different, narrower test than a full driving test.',
     },
-    applies_when: { not: EXEMPT_FROM_TESTS },
+    /**
+     * ⭐⭐ SCOPED 23.9, and this was a real mismatch with the נוהל.
+     *
+     * ס' 1 attaches the control test to ONE range and names it:
+     *   "לעניין דרגות נהיגה הקבועות בתקנות 176 עד 181 ... נדרשת עמידה גם
+     *    במבחן שליטה"
+     *
+     * It was `{ not: EXEMPT_FROM_TESTS }` alone, and EXEMPT is written around
+     * the 176-180 exemption in ס' 2. So a man converting a bus (D) or a truck
+     * (C) came out "not exempt" and was handed a מבחן שליטה the נוהל never asks
+     * of him — while the four things it DOES ask of him had no steps at all.
+     * A heavy-vehicle conversion was being drawn as a car conversion.
+     */
+    applies_when: { all: [GRADES_176_181, { not: EXEMPT_FROM_TESTS }] },
     sequence_position: 12,
     channel: 'test_center',
     authority: "בוחן משרד התחבורה",
@@ -591,11 +617,113 @@ export const CONVERSION_STEPS: StepInput[] = [
   },
 
   {
-    id: 'cv.medical_c1',
+    /**
+     * ⭐⭐ ADDED 23.9. ס' 1 names four things for the heavy grades and the
+     * roadmap carried none of them:
+     *
+     *   "לעניין דרגות נהיגה הקבועות בתקנות 182 עד 185 (E, C, D, D1, D2, D3)
+     *    נדרש סיום קורס לנהגי רכב ציבורי/כבד, נדרשת עמידה בבדיקות רפואיות
+     *    ובבחינות, מילוי אחר תקנה 189(ד)(3) וכן שלא התקיים במבקש האמור
+     *    בתקנה 15ב לתקנות."
+     *
+     * ⚠️ This is the honest shape of it: the נוהל says the course is REQUIRED
+     * and says nothing whatever about where it is given, what it costs or how
+     * long it takes. So the requirement is quoted and the process is marked
+     * never-checked, rather than filled in from somewhere else.
+     */
+    id: 'cv.heavy_course',
     track: 'conversion',
-    title: { he: "בדיקות רפואיות לדרגה C1", en: 'Medical tests for grade C1' },
+    title: {
+      he: "קורס לנהגי רכב ציבורי/כבד",
+      en: 'Course for public-service and heavy-vehicle drivers',
+    },
+    action: {
+      he:
+        "לדרגות C, D, D1, D2, D3 ו-E נדרש סיום קורס לנהגי רכב ציבורי/כבד. זו אינה המרה רגילה.\n\n" +
+        "⚠️ הנוהל קובע את הדרישה ואינו מתאר היכן הקורס ניתן, כמה הוא עולה או כמה זמן הוא אורך. אין לנו תשובה מאומתת לשאלות האלה.",
+      en:
+        'Grades C, D, D1, D2, D3 and E require completing a course for public-service and heavy-vehicle drivers. This is not an ordinary conversion.\n\n' +
+        '⚠️ The procedure sets the requirement and says nothing about where the course is given, what it costs or how long it takes. We have no verified answer to those questions.',
+    },
+    applies_when: GRADES_182_185,
+    sequence_position: 12,
+    act_when: 'start_now',
+    channel: 'unknown',
+    authority: "משרד התחבורה",
+    checklist: [
+      {
+        he: "⚠️ נדרש גם מילוי אחר תקנה 189(ד)(3), וכן שלא התקיים בך האמור בתקנה 15ב לתקנות. הנוהל מפנה לתקנות ואינו מצטט אותן — כדאי לברר מול אגף הרישוי מה חל עליך.",
+        en: '⚠️ Regulation 189(d)(3) must also be satisfied, and the disqualification in regulation 15b must not apply to you. The procedure points at the regulations without quoting them — worth checking with the Licensing Division what applies to you.',
+      },
+    ],
+    evidence: [
+      nohal(
+        "ס' 1",
+        "דרגות 182-185 מחייבות קורס לנהגי רכב ציבורי/כבד, בדיקות רפואיות, בחינות, תקנה 189(ד)(3) ותקנה 15ב",
+        "לעניין דרגות נהיגה הקבועות בתקנות 182 עד 185 (E, C, D, D1, D2, D3) נדרש סיום קורס לנהגי רכב ציבורי/כבד, נדרשת עמידה בבדיקות רפואיות ובבחינות, מילוי אחר תקנה 189(ד)(3) וכן שלא התקיים במבקש האמור בתקנה 15ב לתקנות.",
+      ),
+      notChecked(
+        "היכן ניתן הקורס, מה משכו, מה עלותו, ומה בדיוק דורשות תקנה 189(ד)(3) ותקנה 15ב",
+      ),
+    ],
+  },
+
+  {
+    /**
+     * ⭐⭐ ADDED 23.9, from the same clause. "בחינות" is its own requirement,
+     * and it is NOT a מבחן שליטה — that one is scoped to 176-181 and these
+     * grades are outside it. Two different words in one sentence of the נוהל,
+     * and collapsing them would tell a bus driver to sit the wrong test.
+     */
+    id: 'cv.heavy_exams',
+    track: 'conversion',
+    title: { he: "בחינות לדרגות הכבדות", en: 'Examinations for the heavy grades' },
+    action: {
+      he:
+        "לדרגות C, D, D1, D2, D3 ו-E נדרשת עמידה בבחינות.\n\n" +
+        "⚠️ הנוהל אינו מפרט אילו בחינות, היכן, או מה תוכנן. אין לנו תשובה מאומתת.",
+      en:
+        'Grades C, D, D1, D2, D3 and E require passing examinations.\n\n' +
+        '⚠️ The procedure does not say which examinations, where, or what they cover. We have no verified answer.',
+    },
+    applies_when: GRADES_182_185,
+    sequence_position: 13,
+    must_come_after: ['cv.heavy_course'],
+    channel: 'unknown',
+    authority: "משרד התחבורה",
+    evidence: [
+      nohal(
+        "ס' 1",
+        "דרגות 182-185 מחייבות עמידה בבחינות, לצד הקורס והבדיקות הרפואיות",
+        "לעניין דרגות נהיגה הקבועות בתקנות 182 עד 185 (E, C, D, D1, D2, D3) נדרש סיום קורס לנהגי רכב ציבורי/כבד, נדרשת עמידה בבדיקות רפואיות ובבחינות, מילוי אחר תקנה 189(ד)(3) וכן שלא התקיים במבקש האמור בתקנה 15ב לתקנות.",
+      ),
+      // ⚠️ A negative claim the נוהל DOES make, by naming a different range.
+      nohal(
+        "ס' 1",
+        "מבחן שליטה שייך לדרגות 176-181 בלבד, ולכן אינו חל על הדרגות הכבדות",
+        "לעניין דרגות נהיגה הקבועות בתקנות 176 עד 181 (דרגות C1, B, A, A1, A2, 1) נדרשת עמידה גם במבחן שליטה.",
+      ),
+      notChecked("אילו בחינות בדיוק, היכן הן נערכות ומה תוכנן"),
+    ],
+  },
+
+  {
+    /**
+     * ⭐ RENAMED and WIDENED 23.9, from `cv.medical_c1`. ס' 1 imposes medical
+     * tests in TWO places, and only one of them was modelled:
+     *   "ולעניין הדרגה המנויה בתקנה 181 נדרשת עמידה בבדיקות רפואיות כקבוע
+     *    בתקנות"                                              ← C1, was here
+     *   "לעניין דרגות נהיגה הקבועות בתקנות 182 עד 185 ... נדרשת עמידה בבדיקות
+     *    רפואיות ובבחינות"                                     ← was missing
+     * The old id said C1 and the rule now covers more, so the id says so too.
+     */
+    id: 'cv.medical',
+    track: 'conversion',
+    title: { he: "בדיקות רפואיות", en: 'Medical tests' },
     action: { he: "עבור את הבדיקות הרפואיות הקבועות בתקנות.", en: 'Complete the medical tests set out in the regulations.' },
-    applies_when: { field: 'requested_class', op: 'eq', value: 'C1' },
+    applies_when: {
+      any: [{ field: 'requested_class', op: 'eq', value: 'C1' }, GRADES_182_185],
+    },
     sequence_position: 13,
     channel: 'unknown',
     authority: "מרב\"ד",
@@ -630,7 +758,7 @@ export const CONVERSION_STEPS: StepInput[] = [
      * Each still gates only whom it applies to: the control test vanishes for an
      * exempt holder, the medical exists only for C1.
      */
-    must_come_after: ['cv.verification', 'cv.control_test', 'cv.medical_c1'],
+    must_come_after: ['cv.verification', 'cv.control_test', 'cv.medical', 'cv.heavy_course', 'cv.heavy_exams'],
     channel: 'mail',
     checklist: [
       { he: "הכתובת שלך מעודכנת ברשות האוכלוסין?", en: 'Is your address up to date at the Population Authority?' },
