@@ -189,7 +189,25 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
   {
     id: 'doc.form_89',
     name: { he: "מסמך 89 (\"הטופס הלבן\")", en: 'The 89 document (the "white form")' },
-    applies_when: NO_TEUDAT_ZEHUT,
+    /**
+     * ⭐⭐ SCOPED OFF THE CONVERSION ROAD 23.9 (the founder). It was NO_TEUDAT_ZEHUT,
+     * so it appeared on a converter's document list for the office visit.
+     *
+     * The נוהל's three lists are short and the 89 is on none of them:
+     *   עולה חדש        — דרכון/ת"ז · תעודת עולה · רישיון לאומי בתוקף · רקורד
+     *   תושב ישראל ששב  — דרכון/ת"ז · רישיון לאומי בתוקף · כניסות ויציאות · רקורד
+     *   תושב מדינת חוץ   — רישיון לאומי בתוקף · דרכון עם אשרת שהייה בתוקף · רקורד
+     *
+     * Her words: "the user doesn't have to bring an 89 for the conversion
+     * because he doesn't have one."
+     *
+     * ⚠️ The FROM-ZERO road is untouched: there the 89 is evidenced, it is the
+     * first stop, and `fz.doc_89` produces it. This narrows the document to
+     * that track, it does not delete it.
+     */
+    applies_when: {
+      all: [NO_TEUDAT_ZEHUT, { field: 'track', op: 'ne', value: 'conversion' }],
+    },
     issued_by: { he: "משרד הרישוי", en: 'The licensing office' },
     must_be_original: true,
     notes: {
