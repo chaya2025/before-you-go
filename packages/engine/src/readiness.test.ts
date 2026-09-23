@@ -30,6 +30,16 @@ const bucketOf = (r: Readiness, id: string): string | undefined =>
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** א/2 student, nothing to convert. The road where the 89 actually lives. */
+const FROM_ZERO = {
+  visa_type: 'a2',
+  has_teudat_zehut: false,
+  teudat_zehut_confirmed: true,
+  visa_valid_now: true,
+  foreign_license: { kind: 'none' },
+  born: '2005-03',
+};
+
 const CONVERTER = {
   visa_type: 'b1',
   has_teudat_zehut: false,
@@ -91,10 +101,24 @@ describe('silence is never a "no"', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('a document he holds that will not work', () => {
-  /** a real case: renewed passport, 89 still carrying the old number. */
+  /**
+   * a real case: renewed passport, 89 still carrying the old number.
+   *
+   * ⚠️ MOVED to the FROM-ZERO road on 23.9, and it should always have been
+   * there. The 89 left the conversion road with `cv.doc_89` — the נוהל never
+   * asks for one — and a real case is a from-zero case anyway: א/2, no
+   * foreign licence, nothing to convert. The claim under test is untouched and
+   * is still the most expensive warning in the product: a document he is
+   * HOLDING that will be rejected is worse than one he knows he lacks.
+   */
   const stale = readinessOf(
     p({
-      ...CONVERTER,
+      visa_type: 'a2',
+      has_teudat_zehut: false,
+      teudat_zehut_confirmed: true,
+      visa_valid_now: true,
+      foreign_license: { kind: 'none' },
+      born: '2005-03',
       form_89_number: '891234567',
       form_89_passport_number: 'AB1234567',
       passport_number: 'CD7654321',
@@ -182,7 +206,7 @@ describe('what his own road already says', () => {
    * The founder's rule was never about the 89. It is about documents: a step that
    * exists to obtain one is done when the document is held.
    */
-  it('⭐ saying you hold the רקורד finishes the step that obtains it', () => {
+  it('⭐ saying you hold the רקורד removes the step that obtains it', () => {
     const converting = {
       visa_type: 'b1',
       has_teudat_zehut: false,
@@ -191,10 +215,24 @@ describe('what his own road already says', () => {
       requested_class: 'B',
       entered_israel: '2024-01',
     };
+    /**
+     * ⚠️ CHANGED 23.9. It used to be marked 'done'; now it is not on his road
+     * at all. The founder: "only mention it as a step if he doesn't have one, and as
+     * optional — and to bring it to the visit if he has it."
+     *
+     * The step is the ERRAND of obtaining one, and a man holding it has no
+     * errand. What he still needs — bring it to the visit — is the DOCUMENT,
+     * which is exactly where the נוהל puts it: פרק "מסמכים נדרשים".
+     *
+     * The rule underneath is the same one as 30.8 and it still holds: never
+     * tell a man to obtain a document he is holding.
+     */
     const holdsIt = evaluate(p({ ...converting, has_record_document: 'yes' }), TODAY);
     const record = holdsIt.roadmap.find((s) => s.step.id === 'cv.record');
 
-    expect(record?.state).toBe('done');
+    expect(record).toBeUndefined();
+    // ⭐ And the DOCUMENT is still his, ready to bring. Removing the errand
+    // must never remove the thing he carries to the counter.
     expect(bucketOf(holdsIt.readiness!, 'doc.record')).toBe('ready');
     // ⚠️ And it must not be what he is told to do first.
     expect(holdsIt.readiness!.first_action?.step_id).not.toBe('cv.record');
@@ -257,9 +295,24 @@ describe('the first thing to do', () => {
    * authority controls it. גיליון 13 principle 3.
    */
   it('sends a converter to the רקורד first, and explains the lead time', () => {
-    const r = readinessOf(p(CONVERTER));
+    /**
+     * ⚠️ The fixture now ANSWERS the record question, and that is the point.
+     * Since 23.9 the step exists only for a man who has said he does not have
+     * one — so that is who this rule is about. Unanswered, the first action is
+     * the online form, which is correct: we do not send someone chasing a
+     * foreign document before knowing whether he wants the exemption at all.
+     */
+    const r = readinessOf(p({ ...CONVERTER, has_record_document: 'no' }));
     expect(r.first_action!.step_id).toBe('cv.record');
     expect(r.first_action!.why.en).toContain('takes time');
+  });
+
+  it('⭐ and an unanswered רקורד does not freeze the rest of the road', () => {
+    // An OFFER cannot gate the queue. Before 23.9 an uncertain record at
+    // position 1 made first_action null and every other step 'later'.
+    const r = readinessOf(p(CONVERTER));
+    expect(r.first_action).not.toBeNull();
+    expect(r.first_action!.step_id).toBe('cv.online_form');
   });
 
   /** A broken document comes before everything, including the long-lead work. */
@@ -286,9 +339,21 @@ describe('the verdict is about the documents, never about him', () => {
     expect(blocked.readiness).toBeNull();
   });
 
+  /**
+   * ⚠️ The 'gaps' case moved to the FROM-ZERO road on 23.9. A converter now has
+   * nothing REQUIRED that he can be missing outright: the 89 left this road
+   * with `cv.doc_89` (the נוהל never asks for one), and the רקורד is optional,
+   * so it is deliberately excluded from the verdict. The ranking under test is
+   * unchanged — mismatch beats gap beats unanswered.
+   */
   it('ranks a mismatch above a gap, and a gap above an unanswered question', () => {
     expect(readinessOf(p({ ...CONVERTER, visa_valid_now: false })).verdict).toBe('mismatch');
-    expect(readinessOf(p(CONVERTER)).verdict).toBe('gaps');
+    expect(readinessOf(p(FROM_ZERO)).verdict).toBe('gaps');
+    expect(readinessOf(p(CONVERTER)).verdict).toBe('unknown');
+  });
+
+  it('⭐ an absent רקורד alone never reads as a gap — the נוהל offers it', () => {
+    expect(readinessOf(p({ ...CONVERTER, has_record_document: 'no' })).verdict).not.toBe('gaps');
   });
 
   /**
@@ -297,9 +362,11 @@ describe('the verdict is about the documents, never about him', () => {
    * sentence. Hebrew inflects the verb; the two numbers need two sentences.
    */
   it('⭐ agrees the verb with the number, in both languages', () => {
+    // ⚠️ From-zero: the stale 89 is the single mismatch, and the 89 lives on
+    // that road now. One mismatched document, which is what this tests.
     const one = readinessOf(
       p({
-        ...CONVERTER,
+        ...FROM_ZERO,
         form_89_number: '891234567',
         form_89_passport_number: 'AB1234567',
         passport_number: 'CD7654321',

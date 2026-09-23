@@ -341,7 +341,19 @@ function buildRoadmap(facts: Facts, profile: Profile): RoadmapStep[] {
 
   const included = new Set(relevant.map((r) => r.step.id));
 
-  const notDone = relevant.filter(({ step }) => !done.has(step.id));
+  /**
+   * ⭐⭐ AN OPTIONAL STEP NEVER HOLDS UP THE QUEUE (23.9).
+   *
+   * `firstUndonePosition` is what makes the next real stage actionable. The
+   * רקורד sits at position 1 and is an OFFER — ס' 2 gives an exemption, nothing
+   * demands it — so leaving it in this calculation froze the entire road behind
+   * a thing he is free to skip. Found the moment the record became conditional:
+   * an unanswered record made `first_action` null and every other step 'later',
+   * so the page had nothing at all to tell him to do.
+   *
+   * An obligation can gate the queue. An offer cannot.
+   */
+  const notDone = relevant.filter(({ step }) => !done.has(step.id) && !step.optional);
   const firstUndonePosition = notDone.length
     ? Math.min(...notDone.map(({ step }) => step.sequence_position))
     : Number.POSITIVE_INFINITY;
@@ -453,11 +465,11 @@ function issuedByAnOutstandingStep(id: string, facts: Facts, profile: Profile): 
     (step) =>
       step.produces_document === id &&
       !profile.completed_steps.includes(step.id) &&
-      // ⚠️ The SAME two filters buildRoadmap uses, and the track one is not
-      // optional: fz.doc_89 and cv.doc_89 are two steps issuing one document,
-      // scoped apart by track alone — both carry the identical `applies_when`.
-      // Without this, ticking the one on his road left the other one standing
-      // and the question was asked of a man who had already answered it.
+      // ⚠️ The SAME two filters buildRoadmap uses. The track one used to be
+      // load-bearing because fz.doc_89 and cv.doc_89 were two steps issuing one
+      // document, scoped apart by track alone. cv.doc_89 was removed on 23.9 —
+      // the נוהל never asks for an 89 — but the filter stays: it is the general
+      // rule that a step off his track can never speak for him.
       (facts.track === 'unknown' || step.track === 'both' || step.track === facts.track) &&
       evaluateCondition(step.applies_when, facts) !== false,
   );
