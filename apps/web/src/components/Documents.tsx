@@ -498,6 +498,33 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
             onChange={(e) => {
               setVisaExpires(e.target.value);
               setNoVisaDoc(false);
+              /**
+               * ⭐⭐ FOUND 23.9 BY WALKING THE SCREEN, AND IT WAS THE WORST BUG
+               * ON THE SITE.
+               *
+               * The fallback yes/no exists for the man who does not have the
+               * document in front of him. Press it, answer "לא", then find the
+               * visa and type the real date: the yes/no block HIDES, but
+               * `visaValid` was never cleared, so the request carried
+               * `visa_valid_now: false` AND `visa_expires: 2028-06` together.
+               *
+               * The self-report wins in the engine by design — `resolveValidity`
+               * returns false the moment he says false, whatever the date says,
+               * and that rule is right, because a man who says his visa is not
+               * valid knows something the date does not record. What was wrong
+               * is that he never said it about THIS answer. He corrected himself
+               * and the correction was thrown away.
+               *
+               * What he saw: a blocking "your visa has expired" notice and a
+               * sixteenth step telling him to renew, holding a visa good until
+               * 2028. A silent wrong answer, which is the single failure this
+               * product exists to not produce.
+               *
+               * ⚠️ The 89 section has always done this correctly — flipping it
+               * to "no" clears the numbers underneath. This is the same rule:
+               * an answer that is no longer on screen is not an answer.
+               */
+              setVisaValid(null);
             }}
           />
         </Field>

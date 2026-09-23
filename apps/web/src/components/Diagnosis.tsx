@@ -2,6 +2,7 @@ import type { Result } from '@byg/engine';
 import { CERTAINTY_META, NOHAL_CATEGORY_LABEL, type NohalCategory } from '@byg/engine';
 import { UI, pick, type Lang, fieldLabel } from '../i18n';
 import { Urgent } from './Urgent';
+import { Warnings } from './Warnings';
 
 /**
  * ============================================================================
@@ -123,6 +124,12 @@ export function Diagnosis({
           </p>
         ))}
       </section>
+
+      {/* ⭐ Here too, 23.9, and this is the screen where it matters most: it is
+          the one that already asks him to confirm or correct, and "לא נכון, תקן"
+          is right underneath. A contradiction between two answers belongs beside
+          the button for fixing an answer. */}
+      <Warnings warnings={result.warnings} lang={lang} />
 
       {result.urgent.length > 0 && (
         <div className="stack-sm">

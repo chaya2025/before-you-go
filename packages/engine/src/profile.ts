@@ -461,6 +461,49 @@ export function checkProfile(profile: Profile, today: string): ProfileWarning[] 
   }
 
   /**
+   * ⭐⭐ THE OTHER HALF OF THAT CHECK, AND IT WAS MISSING (23.9).
+   *
+   * Only one direction of the contradiction was ever caught. The reverse — he
+   * says the visa is NOT valid, and the expiry month he gave is still ahead —
+   * went through in total silence, and it is the direction that actually costs
+   * him something: `resolveValidity` gives the self-report absolute priority,
+   * so "no" wins over a date two years in the future, and he is handed a
+   * blocking "your visa expired" notice and an extra renewal step.
+   *
+   * ⚠️ The self-report keeping priority is correct and stays. A man who says
+   * his visa is not valid may be holding a revoked one, or one cancelled on
+   * exit, and no expiry date records that. So this does not resolve the
+   * contradiction — it names it, and asks him, exactly as the case above does.
+   *
+   * ⚠️ The form could manufacture this on its own until 23.9: answering the
+   * fallback yes/no and then typing the real date left the old answer riding
+   * along invisibly. That is fixed in Documents.tsx. This is the API path,
+   * where there is no form to fix.
+   */
+  if (profile.visa_valid_now === false && profile.visa_expires !== 'unknown' && profile.visa_expires >= thisMonth) {
+    warnings.push({
+      field: 'visa_valid_now',
+      message_he: 'אמרת שהאשרה אינה בתוקף, אבל חודש התפוגה שמסרת עוד לא הגיע. אם האשרה כן בתוקף, תקן את התשובה — היא קובעת, לא התאריך.',
+      message_en: 'You said the visa is not valid, but the expiry month you gave has not arrived yet. If it is in fact valid, correct that answer: it decides this, not the date.',
+    });
+  }
+
+  /**
+   * ⚠️ The foreign licence resolves validity the same four-case way, so it can
+   * hold the same contradiction. No screen collects `valid_now` for it today,
+   * which is precisely why this belongs here rather than in a form: the API
+   * accepts it from anyone, and the day a screen does ask, this already covers it.
+   */
+  const licence = profile.foreign_license;
+  if (licence.valid_now === false && licence.expires !== 'unknown' && licence.expires >= thisMonth) {
+    warnings.push({
+      field: 'foreign_license.valid_now',
+      message_he: 'אמרת שהרישיון הזר אינו בתוקף, אבל חודש התפוגה שמסרת עוד לא הגיע. אם הוא כן בתוקף, תקן את התשובה.',
+      message_en: 'You said the foreign licence is not valid, but the expiry month you gave has not arrived yet. If it is in fact valid, correct that answer.',
+    });
+  }
+
+  /**
    * ⭐ THE DOCUMENT DATES, which nothing was checking at all until 31.8.
    *
    * ⚠️ `type="month"` in the form carried no bounds, so `9999-12` was accepted
