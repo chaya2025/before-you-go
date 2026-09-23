@@ -1538,3 +1538,102 @@ describe('⭐⭐ a person is only asked for what he can provide (22.9)', () => {
     expect(eightyNine?.bucket).toBe('missing');
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * ============================================================================
+ * ⭐⭐ THE CONVERSION ORDERING CHAIN (23.9)
+ * ============================================================================
+ *
+ * Read off the נוהל rather than guessed, after Chaya sent the PDF. פרק "התהליך":
+ * form → "לאחר מילוי הטופס הנ"ל" photo → "כמו כן" eye test → book → attend.
+ *
+ * These four exist because the two plausible wrong answers both READ fine and
+ * both strand a real person, and no existing test caught either:
+ *
+ *   · gate the visit on the רקורד, and a man whose country issues no such
+ *     document is told to wait for it forever — while the readiness page tells
+ *     him, correctly, that "המסלול נותר פתוח". The product would contradict
+ *     itself in two places on one screen.
+ *   · gate the visit on the תרגום, and anyone who has not yet said what
+ *     language his licence is in is blocked on a translation the נוהל only ever
+ *     says the clerk MAY ask for. Unknown rendered as yes.
+ */
+describe('the conversion ordering chain — what the visit may and may not wait on', () => {
+  const converting = (o: Record<string, unknown>) =>
+    evaluate(
+      p({
+        visa_type: 'b1',
+        visa_valid_now: true,
+        has_teudat_zehut: false,
+        teudat_zehut_confirmed: true,
+        born: '1990-01',
+        entered_israel: '2026-03',
+        requested_class: 'B',
+        ...o,
+      }),
+      TODAY,
+    );
+
+  const license = (years: number | 'unknown', language?: string) => ({
+    kind: 'national',
+    valid_now: true,
+    years_held_permanent: years,
+    held_class: 'B',
+    ...(language ? { language } : {}),
+  });
+
+  const attendOf = (r: ReturnType<typeof evaluate>) =>
+    r.roadmap.find((s) => s.step.id === 'cv.attend')!;
+
+  it('the visit waits on the form, the photo and the eye test — the נוהל order', () => {
+    const attend = attendOf(converting({ foreign_license: license(2, 'en'), has_record_document: 'no' }));
+    expect(attend.waiting_on).toEqual(
+      expect.arrayContaining(['cv.online_form', 'cv.photo', 'cv.eye_test', 'cv.book_appointment']),
+    );
+  });
+
+  it('⭐ a man whose country issues no record is NOT held up by it', () => {
+    const r = converting({
+      foreign_license: license(10, 'en'),
+      has_record_document: 'origin_country_does_not_issue',
+    });
+    expect(attendOf(r).waiting_on).not.toContain('cv.record');
+    // He loses the exemption, so the eye test is his. That is the whole cost.
+    expect(r.roadmap.map((s) => s.step.id)).toContain('cv.eye_test');
+  });
+
+  it('⭐ an unanswered licence language never blocks the visit on a translation', () => {
+    // No `language` at all — the condition is UNKNOWN, which keeps cv.translation
+    // on the road. It must still not be a gate.
+    const attend = attendOf(converting({ foreign_license: license(2) }));
+    expect(attend.waiting_on).not.toContain('cv.translation');
+  });
+
+  it('the record is off the road entirely under five years, where it buys nothing', () => {
+    const under = converting({ foreign_license: license(2, 'en'), has_record_document: 'no' });
+    expect(under.roadmap.map((s) => s.step.id)).not.toContain('cv.record');
+
+    const over = converting({ foreign_license: license(10, 'en'), has_record_document: 'yes' });
+    expect(over.roadmap.map((s) => s.step.id)).toContain('cv.record');
+  });
+
+  it('an exempt five-year holder is not held up by an eye test he does not take', () => {
+    const r = converting({ foreign_license: license(10, 'en'), has_record_document: 'yes' });
+    expect(r.roadmap.map((s) => s.step.id)).not.toContain('cv.eye_test');
+    expect(attendOf(r).waiting_on).not.toContain('cv.eye_test');
+  });
+
+  it('no version of this person ends up with every step blocked', () => {
+    for (const o of [
+      { foreign_license: license(10, 'en'), has_record_document: 'origin_country_does_not_issue' },
+      { foreign_license: license(10, 'en'), has_record_document: 'yes' },
+      { foreign_license: license(2, 'en'), has_record_document: 'no' },
+      { foreign_license: license('unknown' as const) },
+    ]) {
+      const r = converting(o);
+      expect(r.roadmap.some((s) => s.waiting_on.length === 0)).toBe(true);
+    }
+  });
+});
