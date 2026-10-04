@@ -25,11 +25,14 @@ CLAUDE.md            rules for Nick inside this folder
 **Ignore, all automatic:** `node_modules/` (downloaded libraries), `dist/` (built site), `.git/`, `package-lock.json`, `tsconfig*.json`, `.gitignore`, `.dockerignore`. **Never share:** `.env` (the secret key).
 
 ## One request, end to end
-Form (web) → `POST /api/v1/readiness` (api) → `evaluate()` reads `data/` (engine) → `buildReadiness()` → JSON back → roadmap + report on screen → `POST /api/v1/explain` → Claude writes it in plain words. If Claude is down, the site still works from the rules.
+Form (web) → `POST /api/v1/readiness` (api) → `evaluate()` reads `data/` (engine) → `buildReadiness()` → JSON back → roadmap + report on screen → `POST /api/v1/explain` → plain words. With no `ANTHROPIC_API_KEY` set (the case now, D-139) that returns the fixed text from the rules and calls nothing paid. If Claude is down, the site still works from the rules.
 
 ## Commands
+Needs Node 22 (the version the Dockerfile uses; at least 20.12). Run `npm install` once first.
+
 | What | Command |
 |---|---|
+| Install everything | `npm install` |
 | Run the server | `npm run dev:api` |
 | Run the website | `npm run dev:web`, then http://localhost:5173 |
 | All tests | `npm test` |
