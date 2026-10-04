@@ -96,6 +96,42 @@ describe('0548ba2 · what has to come before what, on the from-zero road', () =>
     expect(stepById('fz.internal_test').must_come_after).toContain('fz.lessons');
   });
 
+  /* ⚠️ Added after the 4.10 re-review. The tests above pinned the links into
+     the practical test and the lessons, and nothing else: the checker cut
+     "permit after test" and "card after fee" and all 408 stayed green. So the
+     whole declared chain is written out here. Changing the order of the road
+     means changing this table on purpose, never by accident. */
+  const FROM_ZERO_ORDER: Record<string, string[]> = {
+    'fz.doc_89': [],
+    'fz.online_form': ['fz.doc_89'],
+    'fz.photo_and_eye': ['fz.doc_89'],
+    'fz.theory': ['fz.online_form', 'fz.photo_and_eye'],
+    'fz.lessons': ['fz.online_form', 'fz.photo_and_eye'],
+    'fz.internal_test': ['fz.lessons'],
+    'fz.book_permit_appointment': [],
+    'fz.test': ['fz.theory', 'fz.lessons', 'fz.internal_test'],
+    'fz.permit_online': ['fz.test'],
+    'fz.permit_in_person': ['fz.test'],
+    'fz.permit_fee': ['fz.permit_in_person'],
+    'fz.new_driver': ['fz.permit_online', 'fz.permit_in_person'],
+    'fz.completion_online': ['fz.new_driver'],
+    'fz.completion_in_person': ['fz.new_driver'],
+    'fz.plastic_fee': ['fz.completion_online', 'fz.completion_in_person', 'fz.no_declaration_needed'],
+    'fz.no_declaration_needed': [],
+    'fz.receive_card': ['fz.plastic_fee'],
+  };
+
+  it('the table covers every from-zero step there is', () => {
+    const ids = ALL_STEPS.filter((s) => s.id.startsWith('fz.')).map((s) => s.id).sort();
+    expect(ids).toEqual(Object.keys(FROM_ZERO_ORDER).sort());
+  });
+
+  for (const [id, before] of Object.entries(FROM_ZERO_ORDER)) {
+    it(`${id} waits on exactly: ${before.join(', ') || 'nothing'}`, () => {
+      expect([...stepById(id).must_come_after].sort()).toEqual([...before].sort());
+    });
+  }
+
   it('every declared prerequisite is a step that exists', () => {
     const ids = new Set(ALL_STEPS.map((s) => s.id));
     for (const step of ALL_STEPS) {
