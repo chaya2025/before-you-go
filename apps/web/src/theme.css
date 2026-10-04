@@ -2522,6 +2522,8 @@ body {
 
 /* A full-width band with a readable column inside it. */
 .band { padding-block: clamp(3rem, 7.5vw, 5rem); }
+/* The start buttons land here; keep the heading clear of the top bar. */
+#services { scroll-margin-block-start: 4rem; }
 .band-in {
   max-width: 72rem;
   margin: 0 auto;
