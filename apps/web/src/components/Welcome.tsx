@@ -70,6 +70,29 @@ export function Welcome({
     </svg>
   );
 
+  /**
+   * ⭐ Chaya, 4.10: the start buttons used to open the licence questions
+   * directly, because the licence is the only live process. With more
+   * processes coming that sends everyone down one road. So "start" now means
+   * "go choose": it scrolls to the processes below, where the live one starts
+   * and the planned ones say so.
+   *
+   * ⚠️ That section only exists when the list loaded. If it did not, the
+   * button falls back to starting the licence, so it never points at nothing.
+   */
+  const start = (label: string, className: string) =>
+    processes.length > 0 ? (
+      <a className={className} href="#services">
+        {label}
+        {arrow}
+      </a>
+    ) : (
+      <button type="button" className={className} onClick={onStart}>
+        {label}
+        {arrow}
+      </button>
+    );
+
   return (
     <>
       <section className="hero">
@@ -89,10 +112,7 @@ export function Welcome({
           <div className="hero-rule rise rise-1" />
           <p className="hero-lede rise rise-2">{t('hero_lede')}</p>
           <div className="hero-acts rise rise-3">
-            <button type="button" className="btn btn-primary" onClick={onStart}>
-              {t('hero_cta')}
-              {arrow}
-            </button>
+            {start(t('hero_cta'), 'btn btn-primary')}
             <a className="btn btn-quiet" href="#how">
               {t('hero_cta_secondary')}
             </a>
@@ -213,7 +233,7 @@ export function Welcome({
           hardcoded, so when the API is unreachable this section simply is not
           there — better than a title over a void, which reads as broken. */}
       {processes.length > 0 && (
-      <section className="band services" style={{ paddingBlockEnd: 0 }}>
+      <section className="band services" id="services" style={{ paddingBlockEnd: 0 }}>
         <div className="band-in">
           <div className="band-head rise">
             <p className="kicker">{t('choose_kicker')}</p>
@@ -284,10 +304,7 @@ export function Welcome({
             <p>{t('close_note')}</p>
           </div>
           <div className="rise rise-1">
-            <button type="button" className="btn" onClick={onStart}>
-              {t('hero_cta')}
-              {arrow}
-            </button>
+            {start(t('hero_cta'), 'btn')}
           </div>
         </div>
       </section>
