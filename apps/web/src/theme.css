@@ -3238,3 +3238,54 @@ body {
   .gets,
   .close { display: none; }
 }
+
+/* ==========================================================================
+   Accounts (M1). The header button and the account window.
+   ========================================================================== */
+
+.mast-actions { display: flex; align-items: center; gap: var(--gap-sm); }
+.mast-who {
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: ltr;
+}
+.narrow-only { display: none; }
+@media (max-width: 40rem) {
+  .mast-who, .wide-only { display: none; }
+  .narrow-only { display: inline; }
+}
+
+.acct {
+  width: min(28rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 24px 60px rgba(12, 31, 29, 0.25);
+}
+.acct::backdrop { background: rgba(12, 31, 29, 0.45); backdrop-filter: blur(3px); }
+.acct-in { padding: clamp(1.25rem, 4vw, 2rem); }
+.acct-head { display: flex; align-items: center; justify-content: space-between; gap: var(--gap); }
+.acct-head h2 { margin: 0; }
+.acct-head .btn { padding: 0.35rem 0.8rem; min-height: 0; }
+.acct-google { width: 100%; justify-content: center; gap: 0.6rem; }
+.acct-or { text-align: center; }
+.acct form .btn-primary { width: 100%; justify-content: center; }
+.acct-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--gap-sm); }
+
+.linkish {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.linkish:hover { color: var(--amber-ink); }
+
+@media print { .acct, .mast-actions { display: none; } }

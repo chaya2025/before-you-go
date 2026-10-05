@@ -11,6 +11,8 @@ import { Readiness } from './components/Readiness';
 import { PlainWords } from './components/PlainWords';
 import { Warnings } from './components/Warnings';
 import { Welcome } from './components/Welcome';
+import { AccountPanel, type PanelMode } from './components/AccountPanel';
+import { accountsEnabled, getAccount, onAccountChange, logOut, type Account } from './account';
 import { useReveal } from './useReveal';
 
 /**
@@ -72,6 +74,22 @@ export function App() {
   const [asking, setAsking] = useState(false);
 
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
+
+  /**
+   * ⭐ Accounts (M1). Optional: nothing below depends on being logged in yet.
+   * `panel` is which mode the account window is open in, or null when closed.
+   * Arriving from a reset-password email opens it on "choose a new password".
+   */
+  const [account, setAccount] = useState<Account>(null);
+  const [panel, setPanel] = useState<PanelMode | null>(null);
+  useEffect(() => {
+    if (!accountsEnabled) return;
+    getAccount().then(setAccount);
+    return onAccountChange((a, recovering) => {
+      setAccount(a);
+      if (recovering) setPanel('newpass');
+    });
+  }, []);
 
   /* Motion, on the landing page only. Nothing past it moves. */
   useReveal(screen === 'welcome', processes.length);
@@ -332,14 +350,31 @@ export function App() {
           </span>
         </div>
 
-        <button
-          className="btn btn-quiet"
-          onClick={() => setLang(lang === 'he' ? 'en' : 'he')}
-          aria-label={lang === 'he' ? 'Switch to English' : 'עבור לעברית'}
-        >
-          {lang === 'he' ? 'EN' : 'עב'}
-        </button>
+        <div className="mast-actions">
+          {accountsEnabled && account && (
+            <>
+              <span className="mast-who small muted" title={account.email}>
+                {t('acct_signed_in')}{account.email}
+              </span>
+              <button className="btn btn-quiet" onClick={() => logOut()}>{t('acct_logout')}</button>
+            </>
+          )}
+          {accountsEnabled && !account && (
+            <button className="btn btn-quiet" onClick={() => setPanel('login')}>
+              <span className="wide-only">{t('acct_open')}</span>
+              <span className="narrow-only">{t('acct_open_short')}</span>
+            </button>
+          )}
+          <button
+            className="btn btn-quiet"
+            onClick={() => setLang(lang === 'he' ? 'en' : 'he')}
+            aria-label={lang === 'he' ? 'Switch to English' : 'עבור לעברית'}
+          >
+            {lang === 'he' ? 'EN' : 'עב'}
+          </button>
+        </div>
       </div>
+      {panel && <AccountPanel lang={lang} mode={panel} onClose={() => setPanel(null)} />}
     </header>
   );
 
