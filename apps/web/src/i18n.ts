@@ -46,8 +46,8 @@ export const UI = {
     en: 'A few short questions, then your roadmap — every step in order, what each one needs, and what to start today.',
   },
   privacy: {
-    he: 'בלי הרשמה. שום דבר לא נשמר.',
-    en: 'No sign-up. Nothing is saved.',
+    he: 'אין צורך בהרשמה. בלי חשבון, שום דבר לא נשמר.',
+    en: 'No sign-up needed. Without an account, nothing is saved.',
   },
 
   // ── the landing page ─────────────────────────────────────────────────────
@@ -717,6 +717,58 @@ export const UI = {
     he: 'לא הצלחנו להגיע לשרת. בדוק את החיבור לאינטרנט ונסה שוב. שום דבר שענית לא אבד.',
     en: 'We could not reach the server. Check your connection and try again. Nothing you answered was lost.',
   },
+
+  // ── Accounts (M1). Optional: every screen works without one (D-146). ──
+  acct_open: { he: 'התחברות / הרשמה', en: 'Log in / Sign up' },
+  acct_open_short: { he: 'כניסה', en: 'Log in' },
+  acct_logout: { he: 'התנתקות', en: 'Log out' },
+  acct_signed_in: { he: 'מחובר כ־', en: 'Logged in as ' },
+  acct_close: { he: 'סגירה', en: 'Close' },
+  acct_login_title: { he: 'התחברות', en: 'Log in' },
+  acct_signup_title: { he: 'יצירת חשבון', en: 'Create an account' },
+  acct_why: {
+    he: 'חשבון שומר את התשובות שלך, כדי שבפעם הבאה תמשיך מאיפה שעצרת. אפשר להשתמש באתר גם בלי חשבון.',
+    en: 'An account keeps your answers, so next time you pick up where you left off. The site works without one too.',
+  },
+  acct_google: { he: 'המשך עם Google', en: 'Continue with Google' },
+  acct_or: { he: 'או עם אימייל', en: 'or with email' },
+  acct_email: { he: 'אימייל', en: 'Email' },
+  acct_password: { he: 'סיסמה', en: 'Password' },
+  acct_password_note: { he: 'לפחות 8 תווים.', en: 'At least 8 characters.' },
+  acct_do_login: { he: 'התחברות', en: 'Log in' },
+  acct_do_signup: { he: 'יצירת חשבון', en: 'Create account' },
+  acct_to_signup: { he: 'אין לך חשבון? יצירת חשבון', en: 'No account? Create one' },
+  acct_to_login: { he: 'כבר יש לך חשבון? התחברות', en: 'Already have an account? Log in' },
+  acct_forgot: { he: 'שכחת סיסמה?', en: 'Forgot your password?' },
+  acct_forgot_title: { he: 'איפוס סיסמה', en: 'Reset your password' },
+  acct_forgot_note: {
+    he: 'נשלח לכתובת הזו קישור לבחירת סיסמה חדשה.',
+    en: "We'll send this address a link to choose a new password.",
+  },
+  acct_send_link: { he: 'שליחת קישור', en: 'Send the link' },
+  acct_back_login: { he: 'חזרה להתחברות', en: 'Back to log in' },
+  acct_sent_title: { he: 'בדוק את תיבת המייל', en: 'Check your email' },
+  acct_sent_signup: {
+    he: 'שלחנו קישור לאישור החשבון. לא הגיע תוך כמה דקות? בדוק בספאם, או נסה להתחבר: ייתכן שכבר יש לך חשבון.',
+    en: "We sent a link to confirm the account. Nothing within a few minutes? Check spam, or try logging in: you may already have an account.",
+  },
+  acct_sent_reset: {
+    he: 'אם יש חשבון עם הכתובת הזו, שלחנו אליה קישור לבחירת סיסמה חדשה. בדוק גם בספאם.',
+    en: 'If this address has an account, we sent it a link to choose a new password. Check spam too.',
+  },
+  acct_newpass_title: { he: 'בחירת סיסמה חדשה', en: 'Choose a new password' },
+  acct_save_password: { he: 'שמירת הסיסמה', en: 'Save password' },
+  acct_password_saved: { he: 'הסיסמה עודכנה, ואתה מחובר.', en: "Password updated. You're logged in." },
+  acct_err_bad_login: { he: 'האימייל או הסיסמה לא נכונים.', en: 'The email or password is wrong.' },
+  acct_err_not_confirmed: {
+    he: 'החשבון עוד לא אושר. חפש את המייל שלנו, גם בספאם.',
+    en: "The account isn't confirmed yet. Look for our email, spam included.",
+  },
+  acct_err_weak_password: { he: 'הסיסמה קצרה מדי. לפחות 8 תווים.', en: 'The password is too short. At least 8 characters.' },
+  acct_err_bad_email: { he: 'כתובת האימייל לא נראית תקינה.', en: "That email address doesn't look right." },
+  acct_err_rate_limited: { he: 'יותר מדי ניסיונות. נסה שוב בעוד כמה דקות.', en: 'Too many tries. Try again in a few minutes.' },
+  acct_err_network: { he: 'אין חיבור כרגע. נסה שוב.', en: 'No connection right now. Try again.' },
+  acct_err_unknown: { he: 'משהו השתבש. נסה שוב.', en: 'Something went wrong. Try again.' },
 } as const;
 
 /**
