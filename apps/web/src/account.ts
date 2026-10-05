@@ -300,15 +300,19 @@ export async function saveLang(lang: 'he' | 'en'): Promise<void> {
  */
 const PENDING = 'byg.pending-case';
 
-export function stashPending(answers: Record<string, unknown>, done: string[]) {
+/**
+ * `soft`: he pressed "log in", not "save my case". His answers are kept only
+ * if he has no saved case yet; otherwise his saved case opens (D-161).
+ */
+export function stashPending(answers: Record<string, unknown>, done: string[], soft = false) {
   try {
-    sessionStorage.setItem(PENDING, JSON.stringify({ answers: storable(answers), done }));
+    sessionStorage.setItem(PENDING, JSON.stringify({ answers: storable(answers), done, soft }));
   } catch {
     /* private mode: the carry-over is lost, nothing else breaks */
   }
 }
 
-export function takePending(): { answers: Record<string, unknown>; done: string[] } | null {
+export function takePending(): { answers: Record<string, unknown>; done: string[]; soft?: boolean } | null {
   try {
     const raw = sessionStorage.getItem(PENDING);
     sessionStorage.removeItem(PENDING);
