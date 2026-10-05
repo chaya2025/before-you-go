@@ -3380,9 +3380,8 @@ body {
 .back-link { align-self: flex-start; }
 .settings h2, .privacy h2 { font-family: var(--font-display); }
 .privacy ul { padding-inline-start: 1.2rem; display: grid; gap: 0.4rem; }
-.danger-zone { border-color: color-mix(in srgb, var(--uncertain) 35%, var(--line)); }
-.btn-danger { background: var(--uncertain); color: #fff; border: 1px solid var(--uncertain); align-self: flex-start; }
-.btn-danger:hover { filter: brightness(0.92); }
+.btn-danger { background: transparent; color: var(--uncertain); border: 1px solid var(--line); align-self: flex-start; }
+.btn-danger:hover { border-color: var(--uncertain); }
 .site-foot { text-align: center; padding: 1.25rem var(--gap); background: var(--ink-deep); }
 .site-foot a { color: var(--paper); font-size: 0.9rem; }
 .deleted-note { margin: 0; padding: 0.75rem var(--gap); text-align: center; background: var(--amber-soft); color: var(--amber-ink); }
