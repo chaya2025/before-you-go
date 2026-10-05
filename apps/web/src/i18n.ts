@@ -827,6 +827,7 @@ export const UI = {
   qc_save: { he: 'עדכון הדרך', en: 'Update my road' },
   confirmed_on: { he: 'מבוסס על הפרטים שאישרת ב־', en: 'Based on the details you confirmed on ' },
   ch_title: { he: 'הדרך שלך השתנתה', en: 'Your road changed' },
+  ch_same: { he: 'הפרטים עודכנו. הדרך שלך נשארת אותו דבר.', en: 'Details updated. Your road stays the same.' },
   ch_because: { he: 'כי עדכנת:', en: 'Because you updated:' },
   ch_so: { he: 'ולכן:', en: 'So:' },
   ch_was: { he: 'היה:', en: 'was:' },
