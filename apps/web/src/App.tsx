@@ -14,6 +14,8 @@ import { Welcome } from './components/Welcome';
 import { AccountPanel, type PanelMode } from './components/AccountPanel';
 import { AccountMenu } from './components/AccountMenu';
 import { GuestSave, SavedMark, WelcomeBack, type SaveState } from './components/CaseBar';
+import { ChangedNote, QuickCheck, StaleAsk, dmy } from './components/Stale';
+import { staleDocs, whatChanged, type Change, type StaleDoc } from './stale';
 import {
   accountsEnabled,
   clearLinkProblem,
@@ -129,6 +131,16 @@ export function App() {
   const [saveState, setSaveState] = useState<SaveState>('saved');
   const [welcomeBack, setWelcomeBack] = useState(false);
 
+  /**
+   * ⭐ Stale answers (M1 milestone 3, D-127). `confirmedAt` is when he last
+   * said "these are right". `stale` is what to ask before the road. `change`
+   * holds the road before and after an update, for "what changed and why".
+   */
+  const [confirmedAt, setConfirmedAt] = useState<string | null>(null);
+  const [stale, setStale] = useState<StaleDoc[]>([]);
+  const [quickCheck, setQuickCheck] = useState(false);
+  const [change, setChange] = useState<{ change: Change; before: Result; after: Result } | null>(null);
+
   const snapshot = (a: Answers, d: string[]) => JSON.stringify([storable(a), d]);
 
   /** Open a saved case: the engine re-runs on it with TODAY's date (D-118). */
@@ -142,6 +154,52 @@ export function App() {
     setScreen('roadmap');
     setWelcomeBack(welcome);
     setSaveState('saved');
+    setConfirmedAt(c.confirmedAt);
+    setChange(null);
+    // Only on a RETURN: right after saving, nothing can have gone stale.
+    setStale(welcome ? staleDocs(c.answers, new Date(c.confirmedAt), new Date()) : []);
+    setQuickCheck(welcome);
+  }
+
+  /** Save now with "confirmed today", even if no answer changed. */
+  async function confirmNow(a: Answers) {
+    if (!caseId.current) return;
+    try {
+      const c = await saveCase(caseId.current, a, done, true);
+      lastSaved.current = snapshot(a, done);
+      lastAnswers.current = JSON.stringify(storable(a));
+      setConfirmedAt(c.confirmedAt);
+      setSaveState('saved');
+    } catch {
+      setSaveState('error');
+    }
+  }
+
+  /**
+   * He updated an answer (the stale ask or the quick check): re-run the
+   * engine, keep both roads so the screen can say what moved, and save with
+   * today as his confirmed date.
+   */
+  async function applyAnswers(next: Answers) {
+    const before = result;
+    const beforeAnswers = answers;
+    setBusy(true);
+    setError(null);
+    try {
+      const r = await fetchReadiness({ ...next, completed_steps: done });
+      setAnswers(next);
+      setResult(r);
+      const c = before && beforeAnswers ? whatChanged(before, r, beforeAnswers, next) : null;
+      setChange(c && before ? { change: c, before, after: r } : null);
+      setStale([]);
+      setQuickCheck(false);
+      await confirmNow(next);
+      window.scrollTo({ top: 0 });
+    } catch {
+      setError(t('error_offline'));
+    } finally {
+      setBusy(false);
+    }
   }
 
   /**
@@ -162,8 +220,14 @@ export function App() {
     restoring.current = true;
     (async () => {
       loadLang().then((l) => l && setLang(l)).catch(() => {});
-      const pending = takePending();
-      const carry = pending ?? (answers ? { answers: storable(answers), done } : null);
+      /**
+       * ⚠️ ONLY what this tab was asked to carry. Logging in on one tab tells
+       * every open tab, and a forgotten tab still holding guest answers used
+       * to save them as a new case, which then became his "newest" and hid
+       * his real one. Found in the M1.3 run, 2026-10-05. The ask is written
+       * per tab (sessionStorage) when he presses "save" or "log in" here.
+       */
+      const carry = takePending();
       try {
         if (carry) {
           const c = await saveCase(null, carry.answers, carry.done, true);
@@ -173,6 +237,7 @@ export function App() {
             caseId.current = c.id;
             lastSaved.current = snapshot(answers, done);
             lastAnswers.current = JSON.stringify(storable(answers));
+            setConfirmedAt(c.confirmedAt);
             setSaveState('saved');
           }
         } else {
@@ -199,12 +264,14 @@ export function App() {
     if (snap === lastSaved.current) return;
     const answersNow = JSON.stringify(storable(answers));
     const timer = setTimeout(async () => {
+      if (snap === lastSaved.current) return; // saved meanwhile (confirmNow)
       setSaveState('saving');
       try {
         const c = await saveCase(caseId.current, answers, done, answersNow !== lastAnswers.current);
         caseId.current = c.id;
         lastSaved.current = snap;
         lastAnswers.current = answersNow;
+        setConfirmedAt(c.confirmedAt);
         setSaveState('saved');
       } catch {
         setSaveState('error');
@@ -385,6 +452,10 @@ export function App() {
     setResult(null);
     setAnswers(null);
     setDone([]);
+    setStale([]);
+    setQuickCheck(false);
+    setChange(null);
+    setConfirmedAt(null);
     // ⚠️ Back to the landing page, not into the visa question. Starting over
     // should not drop somebody straight back into the coldest screen.
     setScreen('welcome');
@@ -491,7 +562,14 @@ export function App() {
         <div className="mast-actions">
           {accountsEnabled && account && <AccountMenu account={account} lang={lang} />}
           {accountsEnabled && !account && (
-            <button className="btn btn-quiet" onClick={() => setPanel('login')}>
+            <button
+              className="btn btn-quiet"
+              onClick={() => {
+                // Logging in from here with answers on screen keeps them (D-146).
+                if (answers) stashPending(answers, done);
+                setPanel('login');
+              }}
+            >
               <span className="wide-only">{t('acct_open')}</span>
               <span className="narrow-only">{t('acct_open_short')}</span>
             </button>
@@ -525,6 +603,37 @@ export function App() {
    * conditions — sit beside it and stay visible as he scrolls. Her note after
    * walking the finished road: "it's just a long list of things to do".
    */
+  /**
+   * ⭐ Asked BEFORE the road (D-127): a document that lapsed since he last
+   * confirmed. The road he would otherwise see is built on the old answer.
+   */
+  if (screen === 'roadmap' && answers && account && stale.length > 0) {
+    return (
+      <>
+        {header}
+        <section className="screen-band">
+          <div className="screen-band-in stack">
+            <h2>{account.name ? `${t('wb_hello_name')}${firstName(account)}` : t('wb_hello')}</h2>
+            <StaleAsk docs={stale} answers={answers} lang={lang} busy={busy} onDone={applyAnswers} />
+            {failure}
+          </div>
+        </section>
+      </>
+    );
+  }
+
+  const changedNote =
+    change && account ? (
+      <ChangedNote
+        change={change.change}
+        before={change.before}
+        after={change.after}
+        statuses={statuses?.statuses ?? []}
+        lang={lang}
+        onClose={() => setChange(null)}
+      />
+    ) : null;
+
   if (screen === 'roadmap' && result && !result.blocked) {
     return (
       <>
@@ -553,8 +662,29 @@ export function App() {
                 {account ? <SavedMark state={saveState} lang={lang} /> : <GuestSave lang={lang} onSave={saveAsGuest} />}
               </div>
             )}
+            {account && confirmedAt && (
+              <p className="confirmed-line small muted">
+                {t('confirmed_on')}
+                <span className="num">{dmy(confirmedAt)}</span>
+              </p>
+            )}
+            {changedNote}
             {account && welcomeBack && (
-              <WelcomeBack result={result} name={firstName(account)} lang={lang} onNext={goToNext} />
+              <WelcomeBack result={result} name={firstName(account)} lang={lang} onNext={goToNext}>
+                {quickCheck && answers && (
+                  <QuickCheck
+                    answers={answers}
+                    statuses={statuses?.statuses ?? []}
+                    lang={lang}
+                    busy={busy}
+                    onConfirm={() => {
+                      setQuickCheck(false);
+                      confirmNow(answers);
+                    }}
+                    onUpdate={applyAnswers}
+                  />
+                )}
+              </WelcomeBack>
             )}
 
             {/* ⭐ Printed at the top of the sheet and nowhere else. A roadmap
@@ -879,6 +1009,7 @@ export function App() {
         />
       )}
 
+      {screen === 'roadmap' && result && result.blocked && changedNote}
       {screen === 'roadmap' && result && result.blocked && (
         <Blocked result={result} lang={lang} onBack={restart} />
       )}
