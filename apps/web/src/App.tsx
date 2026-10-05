@@ -12,7 +12,8 @@ import { PlainWords } from './components/PlainWords';
 import { Warnings } from './components/Warnings';
 import { Welcome } from './components/Welcome';
 import { AccountPanel, type PanelMode } from './components/AccountPanel';
-import { accountsEnabled, getAccount, onAccountChange, logOut, type Account } from './account';
+import { AccountMenu } from './components/AccountMenu';
+import { accountsEnabled, getAccount, onAccountChange, type Account } from './account';
 import { useReveal } from './useReveal';
 
 /**
@@ -351,14 +352,7 @@ export function App() {
         </div>
 
         <div className="mast-actions">
-          {accountsEnabled && account && (
-            <>
-              <span className="mast-who small muted" title={account.email}>
-                {t('acct_signed_in')}{account.email}
-              </span>
-              <button className="btn btn-quiet" onClick={() => logOut()}>{t('acct_logout')}</button>
-            </>
-          )}
+          {accountsEnabled && account && <AccountMenu account={account} lang={lang} />}
           {accountsEnabled && !account && (
             <button className="btn btn-quiet" onClick={() => setPanel('login')}>
               <span className="wide-only">{t('acct_open')}</span>
