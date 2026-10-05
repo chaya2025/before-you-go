@@ -12,7 +12,7 @@ import {
   type AuthProblem,
 } from '../account';
 
-export type PanelMode = 'login' | 'signup' | 'forgot' | 'sent-signup' | 'sent-reset' | 'newpass';
+export type PanelMode = 'login' | 'signup' | 'forgot' | 'sent-signup' | 'sent-reset' | 'newpass' | 'expired';
 
 /**
  * The account window (M1). One panel, several modes, so log in, sign up and
@@ -91,6 +91,7 @@ export function AccountPanel({
     : mode === 'signup' ? t('acct_signup_title')
     : mode === 'forgot' ? t('acct_forgot_title')
     : mode === 'newpass' ? t('acct_newpass_title')
+    : mode === 'expired' ? t('acct_expired_title')
     : t('acct_sent_title');
 
   return (
@@ -123,6 +124,15 @@ export function AccountPanel({
           <>
             <p>{t(mode === 'sent-signup' ? 'acct_sent_signup' : 'acct_sent_reset')}</p>
             <button className="btn btn-quiet" onClick={() => go('login')}>{t('acct_back_login')}</button>
+          </>
+        )}
+
+        {mode === 'expired' && (
+          <>
+            <p>{t('acct_expired_body')}</p>
+            {emailLogin && (
+              <button className="btn btn-primary" onClick={() => go('forgot')}>{t('acct_send_new')}</button>
+            )}
           </>
         )}
 

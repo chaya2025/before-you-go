@@ -13,7 +13,7 @@ import { Warnings } from './components/Warnings';
 import { Welcome } from './components/Welcome';
 import { AccountPanel, type PanelMode } from './components/AccountPanel';
 import { AccountMenu } from './components/AccountMenu';
-import { accountsEnabled, getAccount, onAccountChange, type Account } from './account';
+import { accountsEnabled, clearLinkProblem, getAccount, linkProblem, onAccountChange, type Account } from './account';
 import { useReveal } from './useReveal';
 
 /**
@@ -85,6 +85,10 @@ export function App() {
   const [panel, setPanel] = useState<PanelMode | null>(null);
   useEffect(() => {
     if (!accountsEnabled) return;
+    if (linkProblem(window.location.href)) {
+      setPanel('expired');
+      clearLinkProblem();
+    }
     getAccount().then(setAccount);
     return onAccountChange((a, recovering) => {
       setAccount(a);

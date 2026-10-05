@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { accountFrom, checkCredentials, firstName, initial, problemFrom, MIN_PASSWORD } from './account';
+import { linkProblem, accountFrom, checkCredentials, firstName, initial, problemFrom, MIN_PASSWORD } from './account';
 import { UI } from './i18n';
 
 /**
@@ -85,5 +85,21 @@ describe('accountFrom: what the header shows', () => {
   it('no session, or no email: logged out', () => {
     expect(accountFrom(null)).toBeNull();
     expect(accountFrom({ user_metadata: { full_name: 'X' } })).toBeNull();
+  });
+});
+
+describe('linkProblem: coming back from a used or expired email link', () => {
+  const base = 'http://localhost:5173/';
+  it.each([
+    // The exact shape Supabase sent on 2026-10-05, in the part after #.
+    [base + '#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired', 'expired'],
+    [base + '?error=access_denied&error_code=otp_expired', 'expired'],
+    [base + '#error_code=otp_expired', 'expired'],
+    [base + '#error=server_error&error_code=unexpected_failure', 'other'],
+    [base, null],
+    [base + '#access_token=abc&type=recovery', null],
+    [base + '?demo=roadmap', null],
+  ] as const)('%s → %s', (href, want) => {
+    expect(linkProblem(href)).toBe(want);
   });
 });

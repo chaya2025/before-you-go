@@ -100,6 +100,29 @@ export function checkCredentials(email: string, password: string | null): AuthPr
   return null;
 }
 
+/**
+ * ⚠️ An email link works ONCE. Clicking a used or expired one sends the person
+ * back here with the reason in the address, e.g.
+ * `#error=access_denied&error_code=otp_expired&error_description=...`.
+ * Ignoring it lands them on the home page, logged out, with no word why: the
+ * bug the founder hit on 2026-10-05. Pure, so it is tested; checks the part after #
+ * and after ?, since Supabase has used both.
+ */
+export function linkProblem(href: string): 'expired' | 'other' | null {
+  const u = new URL(href);
+  const params = new URLSearchParams(u.hash.replace(/^#/, ''));
+  const q = u.searchParams;
+  const code = params.get('error_code') ?? q.get('error_code');
+  const error = params.get('error') ?? q.get('error');
+  if (!code && !error) return null;
+  return code === 'otp_expired' || error === 'access_denied' ? 'expired' : 'other';
+}
+
+/** Remove the error from the address bar, so a refresh doesn't show it again. */
+export function clearLinkProblem() {
+  history.replaceState(null, '', window.location.pathname);
+}
+
 /** Where Supabase sends people back to after an email link or Google. */
 const home = () => window.location.origin + window.location.pathname;
 
