@@ -10,7 +10,7 @@ import { firstName, initial, logOut, type Account } from '../account';
  * image request that says which site it came from. If the photo still fails,
  * the circle falls back to the initial instead of a broken-image icon.
  */
-export function AccountMenu({ account, lang }: { account: NonNullable<Account>; lang: Lang }) {
+export function AccountMenu({ account, lang, onSettings }: { account: NonNullable<Account>; lang: Lang; onSettings: () => void }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
   const [open, setOpen] = useState(false);
   const [photoOk, setPhotoOk] = useState(true);
@@ -69,6 +69,16 @@ export function AccountMenu({ account, lang }: { account: NonNullable<Account>; 
               <p className="small muted acct-drop-email">{account.email}</p>
             </div>
           </div>
+          <button
+            className="acct-drop-item"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              onSettings();
+            }}
+          >
+            {t('acct_settings')}
+          </button>
           <button
             className="acct-drop-item"
             role="menuitem"

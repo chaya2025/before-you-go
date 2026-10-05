@@ -61,6 +61,9 @@ const WEB_DIST = join(import.meta.dirname, '../../web/dist');
 
 if (existsSync(WEB_DIST)) {
   await app.register(fastifyStatic, { root: WEB_DIST });
+  // The privacy page has its own address (Google links to it, D-164). The
+  // site opens it from the path; the server only has to hand over the page.
+  app.get('/privacy', (_req, reply) => reply.sendFile('index.html'));
   app.log.info(`serving the website from ${WEB_DIST}`);
 }
 

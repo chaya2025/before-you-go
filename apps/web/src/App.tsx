@@ -15,6 +15,8 @@ import { AccountPanel, type PanelMode } from './components/AccountPanel';
 import { AccountMenu } from './components/AccountMenu';
 import { GuestSave, SavedMark, WelcomeBack, type SaveState } from './components/CaseBar';
 import { ChangedNote, QuickCheck, StaleAsk, dmy } from './components/Stale';
+import { Settings } from './components/Settings';
+import { Privacy } from './components/Privacy';
 import { staleDocs, whatChanged, type Change, type StaleDoc } from './stale';
 import {
   accountsEnabled,
@@ -142,6 +144,23 @@ export function App() {
   const [change, setChange] = useState<{ change: Change; before: Result; after: Result } | null>(null);
   /** He changed a detail and the road did not move: say so, not silence. */
   const [sameRoad, setSameRoad] = useState(false);
+  /** The two pages outside the flow (M1.4). Privacy has its own address for Google. */
+  const [page, setPage] = useState<'settings' | 'privacy' | null>(() =>
+    window.location.pathname === '/privacy' ? 'privacy' : null,
+  );
+  const [deletedNote, setDeletedNote] = useState(false);
+  // The browser's back button between the site and /privacy.
+  useEffect(() => {
+    const back = () => setPage(window.location.pathname === '/privacy' ? 'privacy' : null);
+    window.addEventListener('popstate', back);
+    return () => window.removeEventListener('popstate', back);
+  }, []);
+  const openPage = (p: 'settings' | 'privacy' | null) => {
+    const path = p === 'privacy' ? '/privacy' : '/';
+    if (window.location.pathname !== path) window.history.pushState(null, '', path);
+    setPage(p);
+    window.scrollTo({ top: 0 });
+  };
 
   const snapshot = (a: Answers, d: string[]) => JSON.stringify([storable(a), d]);
 
@@ -566,7 +585,7 @@ export function App() {
         </div>
 
         <div className="mast-actions">
-          {accountsEnabled && account && <AccountMenu account={account} lang={lang} />}
+          {accountsEnabled && account && <AccountMenu account={account} lang={lang} onSettings={() => openPage('settings')} />}
           {accountsEnabled && !account && (
             <button
               className="btn btn-quiet"
@@ -887,11 +906,53 @@ export function App() {
     );
   }
 
+  if (page === 'privacy') {
+    return (
+      <>
+        {header}
+        <Privacy lang={lang} onBack={() => openPage(null)} />
+      </>
+    );
+  }
+  if (page === 'settings' && account) {
+    return (
+      <>
+        {header}
+        <Settings
+          account={account}
+          lang={lang}
+          onBack={() => openPage(null)}
+          onPrivacy={() => openPage('privacy')}
+          onDeleted={() => {
+            setDeletedNote(true);
+            openPage(null);
+          }}
+        />
+      </>
+    );
+  }
+
   if (screen === 'welcome') {
     return (
       <>
         {header}
+        {deletedNote && (
+          <p className="deleted-note" role="status">
+            {t('set_deleted')}
+          </p>
+        )}
         <Welcome processes={processes} lang={lang} onStart={() => setScreen('intake')} />
+        <footer className="site-foot">
+          <a
+            href="/privacy"
+            onClick={(e) => {
+              e.preventDefault();
+              openPage('privacy');
+            }}
+          >
+            {t('priv_link')}
+          </a>
+        </footer>
       </>
     );
   }
