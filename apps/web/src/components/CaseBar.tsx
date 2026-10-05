@@ -45,11 +45,14 @@ export function WelcomeBack({
   name,
   lang,
   onNext,
+  children,
 }: {
   result: Result;
   name: string | null;
   lang: Lang;
   onNext: () => void;
+  /** The document check (D-160), inside this card rather than beside it. */
+  children?: React.ReactNode;
 }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
   const s = summarize(result);
@@ -71,7 +74,8 @@ export function WelcomeBack({
           <span className="num">{s.nearest.days_left}</span> {t('wb_days')})
         </p>
       )}
-      {s.next && (
+      {children}
+      {s.next && !children && (
         <button className="btn btn-primary" onClick={onNext}>
           {t('wb_go_next')}
         </button>
