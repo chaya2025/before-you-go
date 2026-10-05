@@ -3338,3 +3338,23 @@ body {
 .acct-drop-item:hover { background: var(--sand); }
 
 @media print { .acct, .mast-actions { display: none; } }
+
+/* ── Saved case (M1 milestone 2) ─────────────────────────────────────────── */
+.case-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap); margin-block-start: var(--gap); }
+.saved-mark { display: inline-flex; align-items: center; gap: 0.35rem; margin: 0; color: var(--muted); }
+.saved-saved { color: var(--verified); }
+.saved-error { color: var(--uncertain); }
+.guest-save {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap-sm) var(--gap);
+  padding: 0.75rem 1rem; border: 1px dashed var(--line-sand); border-radius: var(--radius-sm); background: var(--surface);
+}
+.guest-save p { margin: 0; flex: 1 1 16rem; }
+.welcome-back { border-inline-start: 4px solid var(--amber); }
+.welcome-back h3 { margin: 0; }
+.wb-progress { font-family: var(--font-display); font-size: 1.1rem; }
+.wb-urgent { color: var(--uncertain); }
+/* "Lands on the next step": the step he was sent to glows for a moment. */
+.step.just-landed { animation: landed 2.4s ease-out; }
+@keyframes landed { 0%, 30% { box-shadow: 0 0 0 4px var(--amber-soft), 0 0 0 6px var(--amber); } 100% { box-shadow: none; } }
+@media (prefers-reduced-motion: reduce) { .step.just-landed { animation: none; outline: 3px solid var(--amber); } }
+@media print { .case-bar, .welcome-back { display: none; } }

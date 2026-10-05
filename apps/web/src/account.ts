@@ -183,3 +183,137 @@ export async function sendReset(email: string): Promise<AuthResult> {
 }
 
 export const setNewPassword = (password: string) => run(() => client!.auth.updateUser({ password }));
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Saved cases (M1 milestone 2). Still the only file that talks to Supabase.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * ⚠️ Never stored (plan, "Never stored"): document numbers and names. The
+ * engine only COMPARES these (does the 89 carry the passport he holds today?)
+ * and never shows them, so on a return visit those checks honestly read "not
+ * checked yet" until he types them again. The database refuses them as well
+ * (constraint cases_no_document_numbers), so this is the first of two locks.
+ */
+export const NEVER_STORED = [
+  'passport_number',
+  'form_89_number',
+  'form_89_passport_number',
+  'passport_name_latin',
+  'form_89_name_latin',
+] as const;
+export const NEVER_STORED_IN_LICENSE = ['name_latin'] as const;
+
+/** A copy of the answers that is safe to save. Pure, so it is tested. */
+export function storable(answers: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...answers };
+  for (const k of NEVER_STORED) delete out[k];
+  delete out.completed_steps; // saved on its own, as `done`
+  const fl = out.foreign_license;
+  if (fl && typeof fl === 'object') {
+    const copy = { ...(fl as Record<string, unknown>) };
+    for (const k of NEVER_STORED_IN_LICENSE) delete copy[k];
+    out.foreign_license = copy;
+  }
+  return out;
+}
+
+export type SavedCase = {
+  id: string;
+  answers: Record<string, unknown>;
+  done: string[];
+  confirmedAt: string;
+  updatedAt: string;
+};
+
+type CaseRow = { id: string; answers: Record<string, unknown>; done: string[]; confirmed_at: string; updated_at: string };
+const toCase = (r: CaseRow): SavedCase => ({
+  id: r.id,
+  answers: r.answers,
+  done: r.done,
+  confirmedAt: r.confirmed_at,
+  updatedAt: r.updated_at,
+});
+
+/**
+ * The newest case. An account can hold several (family, D-152); until the
+ * screens to switch between them exist, the newest is the one shown.
+ * RLS means this only ever sees the logged-in person's own rows.
+ */
+export async function loadNewestCase(): Promise<SavedCase | null> {
+  if (!client) return null;
+  const { data, error } = await client
+    .from('cases')
+    .select('id, answers, done, confirmed_at, updated_at')
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? toCase(data as CaseRow) : null;
+}
+
+/**
+ * Create (no id) or update (id) a case. `confirmed` true means he just
+ * answered or edited the questions, so his "these are right" date moves;
+ * ticking a step leaves it alone.
+ */
+export async function saveCase(
+  id: string | null,
+  answers: Record<string, unknown>,
+  done: string[],
+  confirmed: boolean,
+): Promise<SavedCase> {
+  if (!client) throw new Error('accounts off');
+  const row = {
+    answers: storable(answers),
+    done,
+    ...(confirmed ? { confirmed_at: new Date().toISOString() } : {}),
+  };
+  const q = id
+    ? client.from('cases').update(row).eq('id', id)
+    : client.from('cases').insert(row);
+  const { data, error } = await q.select('id, answers, done, confirmed_at, updated_at').single();
+  if (error) throw error;
+  return toCase(data as CaseRow);
+}
+
+/** The language he last chose, or null if he never chose one. */
+export async function loadLang(): Promise<'he' | 'en' | null> {
+  if (!client) return null;
+  const { data } = await client.from('profiles').select('lang').maybeSingle();
+  return (data?.lang as 'he' | 'en' | undefined) ?? null;
+}
+
+export async function saveLang(lang: 'he' | 'en'): Promise<void> {
+  if (!client) return;
+  const { data: u } = await client.auth.getUser();
+  if (!u.user) return;
+  await client.from('profiles').upsert({ user_id: u.user.id, lang });
+}
+
+/**
+ * ⚠️ A guest's answers survive the trip to Google and back (D-146: "save"
+ * asks him to sign up and carries his answers over). The page is left
+ * entirely for Google, so they wait in sessionStorage: this tab only, gone
+ * when the tab closes, and taken out the moment they are saved to his account.
+ * Already stripped of document numbers before they are put there.
+ */
+const PENDING = 'byg.pending-case';
+
+export function stashPending(answers: Record<string, unknown>, done: string[]) {
+  try {
+    sessionStorage.setItem(PENDING, JSON.stringify({ answers: storable(answers), done }));
+  } catch {
+    /* private mode: the carry-over is lost, nothing else breaks */
+  }
+}
+
+export function takePending(): { answers: Record<string, unknown>; done: string[] } | null {
+  try {
+    const raw = sessionStorage.getItem(PENDING);
+    sessionStorage.removeItem(PENDING);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
