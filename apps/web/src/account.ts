@@ -31,7 +31,26 @@ const client: SupabaseClient | null = accountsEnabled ? createClient(url!, key!)
  */
 export const emailLogin = import.meta.env.VITE_EMAIL_LOGIN === 'on';
 
-export type Account = { email: string } | null;
+/**
+ * What the header shows. `name` and `photo` come from Google when the user
+ * logs in with it; an email sign-up has neither, so the header falls back to
+ * the first letter of the address.
+ */
+export type Account = { email: string; name: string | null; photo: string | null } | null;
+
+type SessionUser = { email?: string; user_metadata?: Record<string, unknown> };
+
+/** Pure, so it is tested without a network. */
+export function accountFrom(user: SessionUser | null | undefined): Account {
+  if (!user?.email) return null;
+  const m = user.user_metadata ?? {};
+  const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null);
+  return { email: user.email, name: str(m.full_name) ?? str(m.name), photo: str(m.avatar_url) ?? str(m.picture) };
+}
+
+/** First name for the button; the address's first letter when there's no name. */
+export const firstName = (a: NonNullable<Account>) => a.name?.split(/\s+/)[0] ?? null;
+export const initial = (a: NonNullable<Account>) => (a.name ?? a.email).trim().charAt(0).toUpperCase();
 
 /** Every failure the panel knows how to explain, in the user's language. */
 export type AuthProblem =
@@ -97,7 +116,7 @@ async function run(call: () => Promise<{ error: unknown }>): Promise<AuthResult>
 export async function getAccount(): Promise<Account> {
   if (!client) return null;
   const { data } = await client.auth.getSession();
-  return data.session?.user.email ? { email: data.session.user.email } : null;
+  return accountFrom(data.session?.user);
 }
 
 /**
@@ -107,8 +126,7 @@ export async function getAccount(): Promise<Account> {
 export function onAccountChange(cb: (a: Account, recovering: boolean) => void): () => void {
   if (!client) return () => {};
   const { data } = client.auth.onAuthStateChange((event, session) => {
-    const email = session?.user.email;
-    cb(email ? { email } : null, event === 'PASSWORD_RECOVERY');
+    cb(accountFrom(session?.user), event === 'PASSWORD_RECOVERY');
   });
   return () => data.subscription.unsubscribe();
 }

@@ -721,8 +721,8 @@ export const UI = {
   // ── Accounts (M1). Optional: every screen works without one (D-146). ──
   acct_open: { he: 'התחברות / הרשמה', en: 'Log in / Sign up' },
   acct_open_short: { he: 'כניסה', en: 'Log in' },
+  acct_menu: { he: 'החשבון שלי', en: 'My account' },
   acct_logout: { he: 'התנתקות', en: 'Log out' },
-  acct_signed_in: { he: 'מחובר כ־', en: 'Logged in as ' },
   acct_close: { he: 'סגירה', en: 'Close' },
   acct_login_title: { he: 'התחברות', en: 'Log in' },
   acct_signup_title: { he: 'יצירת חשבון', en: 'Create an account' },
