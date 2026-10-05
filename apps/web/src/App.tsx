@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Result, Process } from '@byg/engine';
 import { fetchStatuses, fetchReadiness, fetchCapabilities, fetchProcesses, ValidationError, type StatusesResponse } from './api';
 import { UI, pick, dirFor, type Lang } from './i18n';
@@ -13,7 +13,24 @@ import { Warnings } from './components/Warnings';
 import { Welcome } from './components/Welcome';
 import { AccountPanel, type PanelMode } from './components/AccountPanel';
 import { AccountMenu } from './components/AccountMenu';
-import { accountsEnabled, clearLinkProblem, getAccount, linkProblem, onAccountChange, type Account } from './account';
+import { GuestSave, SavedMark, WelcomeBack, type SaveState } from './components/CaseBar';
+import {
+  accountsEnabled,
+  clearLinkProblem,
+  firstName,
+  getAccount,
+  linkProblem,
+  loadLang,
+  loadNewestCase,
+  onAccountChange,
+  saveCase,
+  saveLang,
+  stashPending,
+  storable,
+  takePending,
+  type Account,
+  type SavedCase,
+} from './account';
 import { useReveal } from './useReveal';
 
 /**
@@ -95,6 +112,122 @@ export function App() {
       if (recovering) setPanel('newpass');
     });
   }, []);
+
+  /**
+   * ⭐ The saved case (M1 milestone 2).
+   *
+   * `caseId` is the row this session writes to. `lastSaved` is what was last
+   * written, so a change that changes nothing is not sent. `restoring` holds
+   * auto-save back while a login is still being turned into a case, or a
+   * second, duplicate case would be created in the gap.
+   */
+  const caseId = useRef<string | null>(null);
+  const lastSaved = useRef<string>('');
+  const lastAnswers = useRef<string>('');
+  const restoring = useRef(false);
+  const restoredFor = useRef<string | null>(null);
+  const [saveState, setSaveState] = useState<SaveState>('saved');
+  const [welcomeBack, setWelcomeBack] = useState(false);
+
+  const snapshot = (a: Answers, d: string[]) => JSON.stringify([storable(a), d]);
+
+  /** Open a saved case: the engine re-runs on it with TODAY's date (D-118). */
+  async function resume(c: SavedCase, welcome: boolean) {
+    caseId.current = c.id;
+    lastSaved.current = snapshot(c.answers, c.done);
+    lastAnswers.current = JSON.stringify(storable(c.answers));
+    setAnswers(c.answers);
+    setDone(c.done);
+    setResult(await fetchReadiness({ ...c.answers, completed_steps: c.done }));
+    setScreen('roadmap');
+    setWelcomeBack(welcome);
+    setSaveState('saved');
+  }
+
+  /**
+   * On logging in: carry a guest's answers over (D-146), or open his newest
+   * saved case with the welcome-back summary (D-150). On logging out: back to
+   * the start, so the next person at a shared screen does not see his case.
+   */
+  useEffect(() => {
+    if (!account) {
+      if (caseId.current) restart();
+      caseId.current = null;
+      restoredFor.current = null;
+      setWelcomeBack(false);
+      return;
+    }
+    if (restoredFor.current === account.email) return;
+    restoredFor.current = account.email;
+    restoring.current = true;
+    (async () => {
+      loadLang().then((l) => l && setLang(l)).catch(() => {});
+      const pending = takePending();
+      const carry = pending ?? (answers ? { answers: storable(answers), done } : null);
+      try {
+        if (carry) {
+          const c = await saveCase(null, carry.answers, carry.done, true);
+          if (!answers) {
+            await resume(c, false); // back from Google: the page was reloaded
+          } else {
+            caseId.current = c.id;
+            lastSaved.current = snapshot(answers, done);
+            lastAnswers.current = JSON.stringify(storable(answers));
+            setSaveState('saved');
+          }
+        } else {
+          const c = await loadNewestCase();
+          if (c) await resume(c, true);
+        }
+      } catch {
+        setSaveState('error');
+      } finally {
+        restoring.current = false;
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account?.email]);
+
+  /**
+   * ⭐ Auto-save (D-150). No save button once logged in: every answer and
+   * every tick is written by itself, 0.6s after the last change. Answers
+   * changing moves his "confirmed on" date; a tick alone does not.
+   */
+  useEffect(() => {
+    if (!account || !answers || restoring.current || restoredFor.current !== account.email) return;
+    const snap = snapshot(answers, done);
+    if (snap === lastSaved.current) return;
+    const answersNow = JSON.stringify(storable(answers));
+    const timer = setTimeout(async () => {
+      setSaveState('saving');
+      try {
+        const c = await saveCase(caseId.current, answers, done, answersNow !== lastAnswers.current);
+        caseId.current = c.id;
+        lastSaved.current = snap;
+        lastAnswers.current = answersNow;
+        setSaveState('saved');
+      } catch {
+        setSaveState('error');
+      }
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [account, answers, done]);
+
+  /** A guest pressed "save my case": keep his answers through the login. */
+  function saveAsGuest() {
+    if (answers) stashPending(answers, done);
+    setPanel('login');
+  }
+
+  /** "Go to the next step" on the welcome-back card. */
+  function goToNext() {
+    const el = document.querySelector('[data-state="do_now"]');
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.remove('just-landed');
+    void (el as HTMLElement).offsetWidth; // restart the glow if pressed twice
+    el.classList.add('just-landed');
+  }
 
   /* Motion, on the landing page only. Nothing past it moves. */
   useReveal(screen === 'welcome', processes.length);
@@ -365,7 +498,11 @@ export function App() {
           )}
           <button
             className="btn btn-quiet"
-            onClick={() => setLang(lang === 'he' ? 'en' : 'he')}
+            onClick={() => {
+            const next = lang === 'he' ? 'en' : 'he';
+            setLang(next);
+            if (account) saveLang(next).catch(() => {}); // remembered on any device (D-152)
+          }}
             aria-label={lang === 'he' ? 'Switch to English' : 'עבור לעברית'}
           >
             {lang === 'he' ? 'EN' : 'עב'}
@@ -410,6 +547,15 @@ export function App() {
           <div className="screen-band-in">
             <p className="kicker">{t('band_kicker_roadmap')}</p>
             <h2>{t('roadmap_title')}</h2>
+
+            {accountsEnabled && (
+              <div className="case-bar">
+                {account ? <SavedMark state={saveState} lang={lang} /> : <GuestSave lang={lang} onSave={saveAsGuest} />}
+              </div>
+            )}
+            {account && welcomeBack && (
+              <WelcomeBack result={result} name={firstName(account)} lang={lang} onNext={goToNext} />
+            )}
 
             {/* ⭐ Printed at the top of the sheet and nowhere else. A roadmap
                 carried into an office on paper is a roadmap frozen on the day
