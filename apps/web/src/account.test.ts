@@ -60,19 +60,23 @@ describe('every problem has words', () => {
 
 describe('accountFrom: what the header shows', () => {
   it('Google user: name and photo', () => {
-    const a = accountFrom({ email: 'dana@gmail.com', user_metadata: { full_name: 'Dana Levi Cohen', avatar_url: 'https://x/p.jpg' } });
-    expect(a).toEqual({ email: 'dana@gmail.com', name: 'Dana Levi Cohen', photo: 'https://x/p.jpg' });
+    const a = accountFrom({ email: 'dana@gmail.com', user_metadata: { full_name: 'Dana Levi Cohen', avatar_url: 'https://x/p.jpg' }, app_metadata: { provider: 'google' } });
+    expect(a).toEqual({ email: 'dana@gmail.com', name: 'Dana Levi Cohen', photo: 'https://x/p.jpg', google: true });
     expect(firstName(a!)).toBe('Dana');
     expect(initial(a!)).toBe('D');
   });
   it('falls back to name / picture when Google sends those keys instead', () => {
     expect(accountFrom({ email: 'a@b.co', user_metadata: { name: 'Avi', picture: 'https://x/q.jpg' } })).toEqual({
-      email: 'a@b.co', name: 'Avi', photo: 'https://x/q.jpg',
+      email: 'a@b.co', name: 'Avi', photo: 'https://x/q.jpg', google: false,
     });
+  });
+  it('a Google login is told apart from an email login (settings depends on it)', () => {
+    expect(accountFrom({ email: 'x@y.co', app_metadata: { provider: 'google' } })?.google).toBe(true);
+    expect(accountFrom({ email: 'x@y.co', app_metadata: { provider: 'email' } })?.google).toBe(false);
   });
   it('email user: no name, no photo, initial from the address', () => {
     const a = accountFrom({ email: 'yosef@example.com', user_metadata: {} });
-    expect(a).toEqual({ email: 'yosef@example.com', name: null, photo: null });
+    expect(a).toEqual({ email: 'yosef@example.com', name: null, photo: null, google: false });
     expect(firstName(a!)).toBeNull();
     expect(initial(a!)).toBe('Y');
   });

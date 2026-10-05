@@ -36,16 +36,22 @@ export const emailLogin = import.meta.env.VITE_EMAIL_LOGIN === 'on';
  * logs in with it; an email sign-up has neither, so the header falls back to
  * the first letter of the address.
  */
-export type Account = { email: string; name: string | null; photo: string | null } | null;
+export type Account = { email: string; name: string | null; photo: string | null; google: boolean } | null;
 
-type SessionUser = { email?: string; user_metadata?: Record<string, unknown> };
+type SessionUser = { email?: string; user_metadata?: Record<string, unknown>; app_metadata?: Record<string, unknown> };
 
 /** Pure, so it is tested without a network. */
 export function accountFrom(user: SessionUser | null | undefined): Account {
   if (!user?.email) return null;
   const m = user.user_metadata ?? {};
   const str = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null);
-  return { email: user.email, name: str(m.full_name) ?? str(m.name), photo: str(m.avatar_url) ?? str(m.picture) };
+  return {
+    email: user.email,
+    name: str(m.full_name) ?? str(m.name),
+    photo: str(m.avatar_url) ?? str(m.picture),
+    // Google owns a Google login's address and password; settings says so (M1.4).
+    google: user.app_metadata?.provider === 'google',
+  };
 }
 
 /** First name for the button; the address's first letter when there's no name. */
@@ -183,6 +189,27 @@ export async function sendReset(email: string): Promise<AuthResult> {
 }
 
 export const setNewPassword = (password: string) => run(() => client!.auth.updateUser({ password }));
+
+/**
+ * Settings (M1.4, D-152). A new address is only switched once he clicks the
+ * link sent to it, so a typo cannot lock him out of his own account.
+ */
+export async function changeEmail(email: string): Promise<AuthResult> {
+  const r = await run(() => client!.auth.updateUser({ email: email.trim() }, { emailRedirectTo: home() }));
+  return r.ok ? { ok: true, checkEmail: true } : r;
+}
+
+/**
+ * ⭐ Delete my account: the login, every saved case and his language, for
+ * good. The database does it (`delete_my_account`), locked to whoever is
+ * logged in; cases and profiles go with the login (on delete cascade).
+ * Then this browser forgets the session.
+ */
+export async function deleteAccount(): Promise<AuthResult> {
+  const r = await run(async () => await client!.rpc('delete_my_account'));
+  if (r.ok) await client!.auth.signOut({ scope: 'local' }).catch(() => {});
+  return r;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Saved cases (M1 milestone 2). Still the only file that talks to Supabase.
