@@ -28,8 +28,13 @@ describe('staleDocs: what gets asked before the road', () => {
     expect(staleDocs({ visa_expires: '2026-07' }, AUG, TODAY)).toEqual([]);
   });
   it('expiring this month or the next two is asked as "soon"', () => {
-    expect(staleDocs({ passport_expires: '2026-10' }, AUG, TODAY)[0]?.kind).toBe('soon');
+    expect(staleDocs({ passport_expires: '2026-11' }, AUG, TODAY)[0]?.kind).toBe('soon');
     expect(staleDocs({ passport_expires: '2026-12' }, AUG, TODAY)[0]?.kind).toBe('soon');
+  });
+  it('already "soon" when he confirmed is NOT asked again (he said "not yet")', () => {
+    // Found live 2026-10-05: "not yet" today, and the next visit asked again.
+    expect(staleDocs({ passport_expires: '2026-11' }, TODAY, TODAY)).toEqual([]);
+    expect(staleDocs({ passport_expires: '2026-10' }, AUG, TODAY)).toEqual([]);
   });
   it('three months out is not asked', () => {
     expect(staleDocs({ passport_expires: '2027-01' }, AUG, TODAY)).toEqual([]);

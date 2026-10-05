@@ -58,7 +58,8 @@ export function readExpiry(answers: Record<string, unknown>, field: DocField): s
  * he said "these are right", lapsed by today. A document that was already
  * expired when he confirmed is something he told us, not news; the engine
  * already deals with it, and asking again would be nagging him about a fact
- * he gave us himself.
+ * he gave us himself. Same for "soon": a document that was already within
+ * SOON_MONTHS when he confirmed is not asked again (he said "not yet").
  *
  * ⚠️ Months are compared as text ('2026-03' < '2026-10'), which is correct
  * only because they are zero-padded 'YYYY-MM'. `isMonth` guarantees that.
@@ -67,6 +68,8 @@ export function staleDocs(answers: Record<string, unknown>, confirmedAt: Date, t
   const now = month(today);
   const confirmed = month(confirmedAt);
   const soonUntil = addMonths(now, SOON_MONTHS);
+  // Already in the "soon" window when he confirmed: he answered it then.
+  const knownSoonUntil = addMonths(confirmed, SOON_MONTHS);
   const out: StaleDoc[] = [];
   for (const field of ['visa_expires', 'passport_expires', 'license_expires'] as const) {
     const e = readExpiry(answers, field);
@@ -74,7 +77,7 @@ export function staleDocs(answers: Record<string, unknown>, confirmedAt: Date, t
     // A licence he does not hold has no expiry worth asking about.
     if (field === 'license_expires' && (answers.foreign_license as { kind?: string } | undefined)?.kind === 'none') continue;
     if (e < now && e >= confirmed) out.push({ field, expires: e, kind: 'expired' });
-    else if (e >= now && e <= soonUntil) out.push({ field, expires: e, kind: 'soon' });
+    else if (e >= now && e <= soonUntil && e > knownSoonUntil) out.push({ field, expires: e, kind: 'soon' });
   }
   return out;
 }
