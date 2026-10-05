@@ -140,6 +140,8 @@ export function App() {
   const [stale, setStale] = useState<StaleDoc[]>([]);
   const [quickCheck, setQuickCheck] = useState(false);
   const [change, setChange] = useState<{ change: Change; before: Result; after: Result } | null>(null);
+  /** He changed a detail and the road did not move: say so, not silence. */
+  const [sameRoad, setSameRoad] = useState(false);
 
   const snapshot = (a: Answers, d: string[]) => JSON.stringify([storable(a), d]);
 
@@ -156,6 +158,7 @@ export function App() {
     setSaveState('saved');
     setConfirmedAt(c.confirmedAt);
     setChange(null);
+    setSameRoad(false);
     // Only on a RETURN: right after saving, nothing can have gone stale.
     setStale(welcome ? staleDocs(c.answers, new Date(c.confirmedAt), new Date()) : []);
     setQuickCheck(welcome);
@@ -191,6 +194,7 @@ export function App() {
       setResult(r);
       const c = before && beforeAnswers ? whatChanged(before, r, beforeAnswers, next) : null;
       setChange(c && before ? { change: c, before, after: r } : null);
+      setSameRoad(!c && JSON.stringify(beforeAnswers) !== JSON.stringify(next));
       setStale([]);
       setQuickCheck(false);
       await confirmNow(next);
@@ -229,7 +233,9 @@ export function App() {
        */
       const carry = takePending();
       try {
-        if (carry) {
+        // "Log in" (not "save my case") with a saved case already: open that.
+        const saved = carry && !carry.soft ? null : await loadNewestCase();
+        if (carry && !(carry.soft && saved)) {
           const c = await saveCase(null, carry.answers, carry.done, true);
           if (!answers) {
             await resume(c, false); // back from Google: the page was reloaded
@@ -240,9 +246,8 @@ export function App() {
             setConfirmedAt(c.confirmedAt);
             setSaveState('saved');
           }
-        } else {
-          const c = await loadNewestCase();
-          if (c) await resume(c, true);
+        } else if (saved) {
+          await resume(saved, true);
         }
       } catch {
         setSaveState('error');
@@ -455,6 +460,7 @@ export function App() {
     setStale([]);
     setQuickCheck(false);
     setChange(null);
+    setSameRoad(false);
     setConfirmedAt(null);
     // ⚠️ Back to the landing page, not into the visa question. Starting over
     // should not drop somebody straight back into the coldest screen.
@@ -565,8 +571,8 @@ export function App() {
             <button
               className="btn btn-quiet"
               onClick={() => {
-                // Logging in from here with answers on screen keeps them (D-146).
-                if (answers) stashPending(answers, done);
+                // Answers on screen are kept only if he has no saved case (D-161).
+                if (answers) stashPending(answers, done, true);
                 setPanel('login');
               }}
             >
@@ -669,6 +675,11 @@ export function App() {
               </p>
             )}
             {changedNote}
+            {sameRoad && (
+              <p className="saved-mark small saved-saved" role="status">
+                {t('ch_same')}
+              </p>
+            )}
             {account && welcomeBack && (
               <WelcomeBack result={result} name={firstName(account)} lang={lang} onNext={goToNext}>
                 {quickCheck && answers && (
