@@ -3358,3 +3358,20 @@ body {
 @keyframes landed { 0%, 30% { box-shadow: 0 0 0 4px var(--amber-soft), 0 0 0 6px var(--amber); } 100% { box-shadow: none; } }
 @media (prefers-reduced-motion: reduce) { .step.just-landed { animation: none; outline: 3px solid var(--amber); } }
 @media print { .case-bar, .welcome-back { display: none; } }
+
+/* ── Stale answers (M1 milestone 3) ──────────────────────────────────────── */
+.stale-ask { border-inline-start: 4px solid var(--amber); max-width: 40rem; }
+.stale-ask h3 { margin: 0; line-height: 1.35; }
+.row-btns { display: flex; flex-wrap: wrap; gap: var(--gap-sm); }
+.quick-check h3, .changed-note h3 { margin: 0; }
+.qc-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: var(--gap-sm) var(--gap); margin: 0; }
+.qc-facts div { padding: 0.6rem 0.8rem; background: var(--sand); border-radius: var(--radius-sm); }
+.qc-facts dt { font-size: 0.8rem; color: var(--muted); }
+.qc-facts dd { margin: 0.15rem 0 0; font-family: var(--font-display); }
+.changed-note { border-inline-start: 4px solid var(--first-hand); }
+.ch-list { margin: 0; padding-inline-start: 1.2rem; }
+.ch-list li + li { margin-block-start: 0.3rem; }
+.confirmed-line { margin: 0; }
+@media print { .stale-ask, .quick-check, .changed-note { display: none; } }
+.welcome-back .quick-check { margin-block-start: var(--gap); padding-block-start: var(--gap); border-block-start: 1px solid var(--line-soft); }
+.qc-title { margin: 0; font-family: var(--font-display); }
