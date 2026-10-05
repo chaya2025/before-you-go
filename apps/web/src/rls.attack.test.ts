@@ -120,6 +120,11 @@ describe.skipIf(!ready)('RLS: user B against user A', () => {
     expect(data ?? []).toEqual([]);
   });
 
+  it('logged out: "delete my account" is refused (M1.4)', async () => {
+    const { error } = await anon.rpc('delete_my_account');
+    expect(error).not.toBeNull();
+  });
+
   it('the database itself refuses a passport number, even from the owner', async () => {
     const { error } = await a.from('cases').insert({ answers: { passport_number: 'CD7654321' } });
     expect(error?.message ?? '').toMatch(/cases_no_document_numbers/);
