@@ -11,8 +11,11 @@ import type { Lang } from '../i18n';
  * in the same commit.
  */
 
-/** Who to write to. Left empty until Chaya picks the address (asked 2026-10-05). */
-const CONTACT = '';
+/**
+ * Who to write to. Chaya's own Gmail for now (D-169, her call); swapped for a
+ * site Gmail once the name is final.
+ */
+const CONTACT = 'reichmanchaya1@gmail.com';
 
 type Section = { h: string; p?: string; li?: string[] };
 
