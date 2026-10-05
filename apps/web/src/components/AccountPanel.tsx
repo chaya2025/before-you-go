@@ -3,6 +3,7 @@ import { UI, pick, type Lang } from '../i18n';
 import {
   MIN_PASSWORD,
   checkCredentials,
+  emailLogin,
   logIn,
   logInWithGoogle,
   sendReset,
@@ -114,7 +115,7 @@ export function AccountPanel({
               </svg>
               {t('acct_google')}
             </button>
-            <p className="acct-or muted small">{t('acct_or')}</p>
+            {emailLogin && <p className="acct-or muted small">{t('acct_or')}</p>}
           </>
         )}
 
@@ -127,7 +128,11 @@ export function AccountPanel({
 
         {mode === 'newpass' && saved && <p role="status">{t('acct_password_saved')}</p>}
 
-        {(mode === 'login' || mode === 'signup' || mode === 'forgot' || (mode === 'newpass' && !saved)) && (
+        {problem && !emailLogin && mode !== 'newpass' && (
+          <p className="field-error" role="alert">{t(`acct_err_${problem}` as keyof typeof UI)}</p>
+        )}
+
+        {((emailLogin && (mode === 'login' || mode === 'signup' || mode === 'forgot')) || (mode === 'newpass' && !saved)) && (
           <form className="stack" onSubmit={submit} noValidate>
             {mode === 'forgot' && <p className="muted small">{t('acct_forgot_note')}</p>}
             {mode !== 'newpass' && (
@@ -177,13 +182,13 @@ export function AccountPanel({
           </form>
         )}
 
-        {mode === 'login' && (
+        {emailLogin && mode === 'login' && (
           <div className="acct-links small">
             <button className="linkish" onClick={() => go('forgot')}>{t('acct_forgot')}</button>
             <button className="linkish" onClick={() => go('signup')}>{t('acct_to_signup')}</button>
           </div>
         )}
-        {mode === 'signup' && (
+        {emailLogin && mode === 'signup' && (
           <div className="acct-links small">
             <button className="linkish" onClick={() => go('login')}>{t('acct_to_login')}</button>
           </div>
