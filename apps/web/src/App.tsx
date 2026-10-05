@@ -632,6 +632,37 @@ export function App() {
    * ⭐ Asked BEFORE the road (D-127): a document that lapsed since he last
    * confirmed. The road he would otherwise see is built on the old answer.
    */
+  /**
+   * ⚠️ The pages outside the flow come FIRST. They sat below the road, so a
+   * logged-in user with a saved case (the road opens on login) pressed
+   * "account settings" and nothing happened. The founder found it live, 2026-10-05.
+   */
+  if (page === 'privacy') {
+    return (
+      <>
+        {header}
+        <Privacy lang={lang} onBack={() => openPage(null)} />
+      </>
+    );
+  }
+  if (page === 'settings' && account) {
+    return (
+      <>
+        {header}
+        <Settings
+          account={account}
+          lang={lang}
+          onBack={() => openPage(null)}
+          onPrivacy={() => openPage('privacy')}
+          onDeleted={() => {
+            setDeletedNote(true);
+            openPage(null);
+          }}
+        />
+      </>
+    );
+  }
+
   if (screen === 'roadmap' && answers && account && stale.length > 0) {
     return (
       <>
@@ -902,32 +933,6 @@ export function App() {
             </aside>
           )}
         </div>
-      </>
-    );
-  }
-
-  if (page === 'privacy') {
-    return (
-      <>
-        {header}
-        <Privacy lang={lang} onBack={() => openPage(null)} />
-      </>
-    );
-  }
-  if (page === 'settings' && account) {
-    return (
-      <>
-        {header}
-        <Settings
-          account={account}
-          lang={lang}
-          onBack={() => openPage(null)}
-          onPrivacy={() => openPage('privacy')}
-          onDeleted={() => {
-            setDeletedNote(true);
-            openPage(null);
-          }}
-        />
       </>
     );
   }
