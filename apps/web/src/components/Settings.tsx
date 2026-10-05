@@ -13,8 +13,8 @@ import {
  * M1 milestone 4 (D-152): the account settings page, from the account menu.
  *
  * ⚠️ A Google login has no address or password here to change: Google owns
- * both. Showing those forms to him would be a form that cannot work, so he
- * gets one plain line instead. Email logins get both forms.
+ * both, so he sees neither form, and no line about it (Chaya: keep it plain).
+ * Email logins get both forms.
  */
 export function Settings({
   account,
@@ -82,9 +82,7 @@ export function Settings({
         <p>
           <span className="muted">{t('set_logged_in_as')}</span> <strong className="ltr">{account.email}</strong>
         </p>
-        {account.google ? (
-          <p className="muted small">{t('set_google_owns')}</p>
-        ) : (
+        {!account.google && (
           <>
             <form className="stack-sm" onSubmit={submitEmail} noValidate>
               <div className="field">
