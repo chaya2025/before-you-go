@@ -23,6 +23,14 @@ const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
 export const accountsEnabled = Boolean(url && key);
 const client: SupabaseClient | null = accountsEnabled ? createClient(url!, key!) : null;
 
+/**
+ * ⚠️ Email + password is switched OFF unless this says "on" (D-154). Supabase's
+ * free email sender only reaches the project team, so a real user would never
+ * get the confirm or reset email. Google only, until there is a domain and a
+ * real sender; then this goes on in Render's settings, no code change.
+ */
+export const emailLogin = import.meta.env.VITE_EMAIL_LOGIN === 'on';
+
 export type Account = { email: string } | null;
 
 /** Every failure the panel knows how to explain, in the user's language. */
