@@ -22,6 +22,13 @@ COPY apps/web/package.json apps/web/
 RUN npm ci
 
 COPY . .
+# ⭐ Accounts (M1). Vite writes these into the site WHILE BUILDING, so they must
+# exist at build time, not just at run time. Render hands its dashboard values
+# to the build as these ARGs. Both are public by design (the database's own
+# rules, RLS, are the lock). Missing → the site builds without accounts.
+# VITE_EMAIL_LOGIN is left unset on purpose: Google-only in public (D-154).
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_PUBLISHABLE_KEY
 RUN npm run build --workspace @byg/web
 
 ENV HOST=0.0.0.0
