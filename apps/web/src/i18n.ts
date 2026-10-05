@@ -775,6 +775,24 @@ export const UI = {
   acct_err_rate_limited: { he: 'יותר מדי ניסיונות. נסה שוב בעוד כמה דקות.', en: 'Too many tries. Try again in a few minutes.' },
   acct_err_network: { he: 'אין חיבור כרגע. נסה שוב.', en: 'No connection right now. Try again.' },
   acct_err_unknown: { he: 'משהו השתבש. נסה שוב.', en: 'Something went wrong. Try again.' },
+  // ── Saved case (M1 milestone 2) ──
+  wb_hello: { he: 'ברוך שובך.', en: 'Welcome back.' },
+  wb_hello_name: { he: 'ברוך שובך, ', en: 'Welcome back, ' },
+  wb_of: { he: 'מתוך', en: 'of' },
+  wb_steps_done: { he: 'שלבים הושלמו.', en: 'steps done.' },
+  wb_next: { he: 'השלב הבא:', en: 'Next step:' },
+  wb_nearest: { he: 'המועד הקרוב:', en: 'Nearest deadline:' },
+  wb_in: { he: 'בעוד', en: 'in' },
+  wb_days: { he: 'ימים', en: 'days' },
+  wb_go_next: { he: 'לשלב הבא', en: 'Go to the next step' },
+  save_saving: { he: 'שומר…', en: 'Saving…' },
+  save_saved: { he: 'נשמר בחשבון שלך', en: 'Saved to your account' },
+  save_error: { he: 'השמירה נכשלה. ננסה שוב בשינוי הבא.', en: "Couldn't save. We'll try again on your next change." },
+  save_guest_note: {
+    he: 'רוצה לחזור לכאן בפעם הבאה? שמור את התיק בחשבון, והתשובות שלך יישמרו.',
+    en: 'Want to come back to this next time? Save your case to an account and your answers are kept.',
+  },
+  save_guest_btn: { he: 'שמירת התיק', en: 'Save my case' },
 } as const;
 
 /**
