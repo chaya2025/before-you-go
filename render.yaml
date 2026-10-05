@@ -50,3 +50,10 @@ services:
       # language panel falls back to a summary assembled from the rules.
       - key: ANTHROPIC_API_KEY
         sync: false
+
+      # ⭐ Accounts (M1). Public values, but set in the dashboard like any key,
+      # so nothing key-shaped lives in the repo. Used at BUILD time (Dockerfile).
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
