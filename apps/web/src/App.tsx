@@ -26,6 +26,7 @@ import {
   linkProblem,
   loadLang,
   loadNewestCase,
+  logOut,
   onAccountChange,
   saveCase,
   saveLang,
@@ -111,9 +112,13 @@ export function App() {
       clearLinkProblem();
     }
     getAccount().then(setAccount);
-    return onAccountChange((a, recovering) => {
+    return onAccountChange((a, recovering, canReset) => {
       setAccount(a);
-      if (recovering) setPanel('newpass');
+      if (!recovering) return;
+      if (canReset) return setPanel('newpass');
+      // No password to reset: drop the recovery login, offer Google instead.
+      logOut();
+      setPanel('google-only');
     });
   }, []);
 

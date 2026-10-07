@@ -788,6 +788,11 @@ export const UI = {
     he: 'הקישור כבר נוצל או שפג תוקפו. כל קישור עובד פעם אחת בלבד, מטעמי אבטחה. אפשר לשלוח קישור חדש.',
     en: 'The link was already used or has expired. Each link works only once, for security. You can send a new one.',
   },
+  acct_google_only_title: { he: 'התחברות עם Google', en: 'Log in with Google' },
+  acct_google_only_body: {
+    he: 'לחשבון הזה אין סיסמה. ההתחברות אליו היא דרך Google.',
+    en: 'This account has no password. It logs in with Google.',
+  },
   acct_send_new: { he: 'שליחת קישור חדש', en: 'Send a new link' },
   acct_newpass_title: { he: 'בחירת סיסמה חדשה', en: 'Choose a new password' },
   acct_save_password: { he: 'שמירת הסיסמה', en: 'Save password' },
