@@ -17,12 +17,12 @@ import type { Lang } from '../i18n';
  */
 const CONTACT = 'reichmanchaya1@gmail.com';
 
-type Section = { h: string; p?: string; li?: string[] };
+type Section = { h: string; p?: string; li?: string[]; note?: string };
 
 const PAGE: Record<Lang, { title: string; updated: string; back: string; sections: Section[]; contact: string }> = {
   he: {
     title: 'פרטיות',
-    updated: 'עודכן לאחרונה: 5.10.2026',
+    updated: 'עודכן לאחרונה: 7.10.2026',
     back: 'חזרה',
     sections: [
       {
@@ -45,11 +45,11 @@ const PAGE: Record<Lang, { title: string; updated: string; back: string; section
       {
         h: 'מי עוד רואה',
         li: [
-          'הנתונים שמורים אצל Supabase, בשרתים באיחוד האירופי (פרנקפורט). רק אתה יכול לקרוא את התיק שלך: מסד הנתונים חוסם כל אחד אחר.',
-          'האתר רץ על Render. השרת לא שומר את התשובות שלך ולא רושם אותן ביומנים.',
-          'כשמבקשים הסבר במילים פשוטות, סיכום של ההחלטה (בלי שם ובלי מספרי מסמכים) נשלח ל-Claude של Anthropic כדי לנסח אותו.',
+          'המידע שלך שמור אצל ספק ענן מאובטח באיחוד האירופי. רק לך יש גישה לתיק שלך.',
+          'שרתי האתר לא שומרים את התשובות שלך ולא רושמים אותן.',
           'אנחנו לא מוכרים מידע, לא מציגים פרסומות ולא משתמשים בכלי מעקב.',
         ],
+        note: 'Storage: Supabase (EU, Frankfurt). Hosting: Render.',
       },
       {
         h: 'מחיקה',
@@ -60,7 +60,7 @@ const PAGE: Record<Lang, { title: string; updated: string; back: string; section
   },
   en: {
     title: 'Privacy',
-    updated: 'Last updated: 5 October 2026',
+    updated: 'Last updated: 7 October 2026',
     back: 'Back',
     sections: [
       {
@@ -81,13 +81,13 @@ const PAGE: Record<Lang, { title: string; updated: string; back: string; section
         p: 'Passport numbers, form 89 numbers, and your name in Latin letters. These are not saved even with an account, and the database itself refuses them.',
       },
       {
-        h: 'Who else sees anything',
+        h: 'Who else sees it',
         li: [
-          'Data is kept by Supabase, on servers in the EU (Frankfurt). Only you can read your case: the database blocks everyone else.',
-          'The site runs on Render. The server does not keep your answers and does not write them to its logs.',
-          'When you ask for a plain-words explanation, a summary of the decision (no name, no document numbers) is sent to Anthropic’s Claude to word it.',
+          'Your data is stored with a secure cloud provider in the EU. Only you can access your case.',
+          'The site’s servers do not keep or log your answers.',
           'We do not sell data, show ads, or use tracking tools.',
         ],
+        note: 'Storage: Supabase (EU, Frankfurt). Hosting: Render.',
       },
       {
         h: 'Deleting',
@@ -114,6 +114,7 @@ export function Privacy({ lang, onBack }: { lang: Lang; onBack: () => void }) {
               {s.li.map((x) => <li key={x}>{x}</li>)}
             </ul>
           )}
+          {s.note && <p className="muted small ltr">{s.note}</p>}
         </section>
       ))}
       {CONTACT && (
