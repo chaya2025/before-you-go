@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { linkProblem, accountFrom, checkCredentials, firstName, initial, problemFrom, MIN_PASSWORD } from './account';
+import { linkProblem, accountFrom, hasPassword, checkCredentials, firstName, initial, problemFrom, MIN_PASSWORD } from './account';
 import { UI } from './i18n';
 
 /**
@@ -105,5 +105,24 @@ describe('linkProblem: coming back from a used or expired email link', () => {
     [base + '?demo=roadmap', null],
   ] as const)('%s → %s', (href, want) => {
     expect(linkProblem(href)).toBe(want);
+  });
+});
+
+describe('hasPassword: who may reset a password', () => {
+  it('Google only: no password, so a reset link must not create one', () => {
+    expect(hasPassword({ email: 'x@y.co', app_metadata: { provider: 'google', providers: ['google'] } })).toBe(false);
+  });
+  it('email + password: may reset', () => {
+    expect(hasPassword({ email: 'x@y.co', app_metadata: { provider: 'email', providers: ['email'] } })).toBe(true);
+  });
+  it('both ways: may reset', () => {
+    expect(hasPassword({ email: 'x@y.co', app_metadata: { provider: 'google', providers: ['google', 'email'] } })).toBe(true);
+  });
+  it('a future way alone (no email) may not', () => {
+    expect(hasPassword({ email: 'x@y.co', app_metadata: { provider: 'apple', providers: ['apple'] } })).toBe(false);
+  });
+  it('no list: falls back to the main way; nobody logged in: no', () => {
+    expect(hasPassword({ email: 'x@y.co', app_metadata: { provider: 'email' } })).toBe(true);
+    expect(hasPassword(null)).toBe(false);
   });
 });
