@@ -54,6 +54,17 @@ export function accountFrom(user: SessionUser | null | undefined): Account {
   };
 }
 
+/**
+ * True when the account has a password to reset: `providers` lists every way
+ * the account logs in, and "email" means email + password. A Google-only
+ * account has none, so a reset link must not let it create one.
+ */
+export function hasPassword(user: SessionUser | null | undefined): boolean {
+  const providers = user?.app_metadata?.providers;
+  if (Array.isArray(providers)) return providers.includes('email');
+  return user?.app_metadata?.provider === 'email';
+}
+
 /** First name for the button; the address's first letter when there's no name. */
 export const firstName = (a: NonNullable<Account>) => a.name?.split(/\s+/)[0] ?? null;
 export const initial = (a: NonNullable<Account>) => (a.name ?? a.email).trim().charAt(0).toUpperCase();
@@ -151,11 +162,12 @@ export async function getAccount(): Promise<Account> {
 /**
  * Fires on log in, log out, and when someone arrives from a reset-password
  * email (`recovering` true: show "choose a new password", not the road).
+ * `canReset` is false for an account with no password (Google only).
  */
-export function onAccountChange(cb: (a: Account, recovering: boolean) => void): () => void {
+export function onAccountChange(cb: (a: Account, recovering: boolean, canReset: boolean) => void): () => void {
   if (!client) return () => {};
   const { data } = client.auth.onAuthStateChange((event, session) => {
-    cb(accountFrom(session?.user), event === 'PASSWORD_RECOVERY');
+    cb(accountFrom(session?.user), event === 'PASSWORD_RECOVERY', hasPassword(session?.user));
   });
   return () => data.subscription.unsubscribe();
 }
