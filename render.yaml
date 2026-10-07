@@ -31,6 +31,10 @@ services:
     plan: free
     region: frankfurt # Closest to the users. Israel has no Render region.
     healthCheckPath: /health
+    # M2 (D-175): deploy main only after the GitHub "tests" check is green.
+    # A red commit stays off the live site. Also set in the dashboard
+    # (Settings → Auto-Deploy), since a dashboard-made service ignores this file.
+    autoDeployTrigger: checksPass
 
     envVars:
       # ⚠️ Inside a container, 127.0.0.1 means "this container only", so the
