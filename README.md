@@ -4,6 +4,14 @@ Checks whether a non-citizen resident of Israel is ready for a bureaucratic proc
 
 Live demo: https://before-you-go-4nk5.onrender.com (free tier, ~50s to wake)
 
+## In short
+- **Who it's for:** people who live in Israel without citizenship. Every office visit is a gamble on whether you brought the right papers, and the rules for your status are scattered or missing.
+- **What it does:** you answer a short form, it tells you if you're ready, what's missing, and the steps in order. A plain-language explanation sits on top.
+- **How it's built:** the rules are written as data and checked by a pure logic engine, so the answer comes from the rules, never from an AI guess. AI only rewords the result, and the site still works without it.
+- **Stack:** TypeScript, React + Vite, Fastify, Zod, Supabase (Postgres with row-level security), Docker, Render.
+- **Quality:** automated tests run on every push, and a failing test blocks the deploy.
+- **Next:** choosing long-term hosting (AWS or staying on Render), then a second feature: reading the user's documents and deleting them right after.
+
 ## The map
 
 ```
@@ -19,7 +27,6 @@ docs/                the POC build plan, Matan's PRD template
 Dockerfile           the recipe for the container
 render.yaml          how Render runs it
 package.json         the 3 packages + the commands below
-CLAUDE.md            local assistant config
 ```
 
 **Ignore, all automatic:** `node_modules/` (downloaded libraries), `dist/` (built site), `.git/`, `package-lock.json`, `tsconfig*.json`, `.gitignore`, `.dockerignore`. **Never share:** `.env` (the secret key).
