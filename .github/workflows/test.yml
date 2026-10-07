@@ -1,0 +1,39 @@
+# M2 part 1 (D-175): the test check.
+#
+# Every push and pull request runs the type check and the engine, API and web
+# tests on a fresh machine. Any failure turns the run red, and Render only
+# deploys main once this run is green (milestone 2).
+#
+# ⚠️ The RLS attack tests (*.attack.test.ts) are NOT here (D-176): they hit the
+# live database and need its secrets. They stay run-by-hand.
+#
+# Node 22, the same as the Dockerfile, so tests run like the live site (D-177).
+name: tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Tests (engine, API, web)
+        run: npm test
