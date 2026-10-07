@@ -51,3 +51,7 @@ apps/web/dist/
 # Password vaults — NEVER commit
 *.kdbx
 *.kdbx.lock
+
+# Claude config stays local (backed up in personal-os)
+CLAUDE.md
+.claude/
