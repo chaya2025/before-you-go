@@ -12,7 +12,7 @@ import {
   type AuthProblem,
 } from '../account';
 
-export type PanelMode = 'login' | 'signup' | 'forgot' | 'sent-signup' | 'sent-reset' | 'newpass' | 'expired';
+export type PanelMode = 'login' | 'signup' | 'forgot' | 'sent-signup' | 'sent-reset' | 'newpass' | 'expired' | 'google-only';
 
 /**
  * The account window (M1). One panel, several modes, so log in, sign up and
@@ -92,6 +92,7 @@ export function AccountPanel({
     : mode === 'forgot' ? t('acct_forgot_title')
     : mode === 'newpass' ? t('acct_newpass_title')
     : mode === 'expired' ? t('acct_expired_title')
+    : mode === 'google-only' ? t('acct_google_only_title')
     : t('acct_sent_title');
 
   return (
@@ -104,9 +105,11 @@ export function AccountPanel({
           </button>
         </div>
 
-        {(mode === 'login' || mode === 'signup') && (
+        {(mode === 'login' || mode === 'signup' || mode === 'google-only') && (
           <>
-            <p className="muted small">{t('acct_why')}</p>
+            <p className={mode === 'google-only' ? undefined : 'muted small'}>
+              {t(mode === 'google-only' ? 'acct_google_only_body' : 'acct_why')}
+            </p>
             <button className="btn acct-google" onClick={google} disabled={busy}>
               <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                 <path fill="#4285F4" d="M22.6 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2-1.9 3.3-4.7 3.3-8z" />
@@ -116,7 +119,7 @@ export function AccountPanel({
               </svg>
               {t('acct_google')}
             </button>
-            {emailLogin && <p className="acct-or muted small">{t('acct_or')}</p>}
+            {emailLogin && mode !== 'google-only' && <p className="acct-or muted small">{t('acct_or')}</p>}
           </>
         )}
 
