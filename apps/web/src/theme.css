@@ -2343,7 +2343,30 @@ h1, h2, h3 { text-wrap: balance; }
 
 .mast .btn { padding: 0.5rem 1.1rem; min-height: 0; font-size: 0.9rem; }
 
-.mark { display: flex; align-items: center; gap: 0.7rem; color: var(--ink); }
+.mark { display: flex; align-items: center; gap: 0.7rem; color: var(--ink); text-decoration: none; }
+/* One screen back, at the head of the band. A plain text link with an arrow,
+   not a button: it's a way out, not a call to action. */
+.nav-back {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0 0 0.35rem;
+  padding: 0.25rem 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.92rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+.nav-back:hover { color: var(--ink); }
+.nav-back:hover svg { transform: translateX(2px); }
+.nav-back svg { transition: transform 0.15s ease; }
+/* The arrow points back in reading order: right in Hebrew, left in English. */
+.nav-back:dir(ltr) svg { scale: -1 1; }
+.nav-back:dir(ltr):hover svg { transform: translateX(-2px); }
+.nav-back:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 3px; }
 .seal { width: 34px; height: 34px; flex: none; }
 .mark-txt { display: flex; flex-direction: column; line-height: 1.05; }
 .mark-txt h1 { font-size: 1.05rem; letter-spacing: 0.01em; margin: 0; }
