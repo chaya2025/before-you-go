@@ -154,9 +154,27 @@ export function App() {
     window.location.pathname === '/privacy' ? 'privacy' : null,
   );
   const [deletedNote, setDeletedNote] = useState(false);
-  // The browser's back button between the site and /privacy.
+  /** Where in the site's own history entries he is (0 = the first one). */
+  const at = useRef(0);
+  /** The screen just changed because of the browser's back/forward: don't push. */
+  const fromHistory = useRef(false);
+  const started = useRef(false);
+  // The browser's back button between the site and /privacy, and between the
+  // screens of the flow (each screen leaves an entry in the history, below).
   useEffect(() => {
-    const back = () => setPage(window.location.pathname === '/privacy' ? 'privacy' : null);
+    const back = (e: PopStateEvent) => {
+      const onPrivacy = window.location.pathname === '/privacy';
+      setPage(onPrivacy ? 'privacy' : null);
+      if (onPrivacy) return;
+      const st = e.state as { screen?: Screen; i?: number } | null;
+      // No screen on the entry = one of the landing page's own jump links (#services).
+      const s = st?.screen ?? 'welcome';
+      at.current = st?.i ?? 0;
+      setScreen((prev) => {
+        if (prev !== s) fromHistory.current = true;
+        return s;
+      });
+    };
     window.addEventListener('popstate', back);
     return () => window.removeEventListener('popstate', back);
   }, []);
@@ -166,6 +184,83 @@ export function App() {
     setPage(p);
     window.scrollTo({ top: 0 });
   };
+
+  /**
+   * ⭐ Every screen change leaves an entry in the browser history, so the
+   * phone's back button goes back a screen instead of out of the site. The
+   * founder found it 12.10: "you can't really go back".
+   * ⚠️ Pushed only when the screen differs from the entry we're on, so the
+   * popstate above (which sets the screen FROM the entry) never pushes again.
+   */
+  /**
+   * ⚠️ The first version read the CURRENT entry to decide whether to push, and
+   * the in-app back pushed too. So after pressing it, the browser's back went
+   * FORWARD to the screen he had just left, and the two buttons fought. Now each
+   * entry carries its place in line (`i`), the in-app back is the browser's own
+   * back whenever there is an entry to return to, and a screen change that came
+   * FROM history never pushes.
+   */
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+    if (fromHistory.current) {
+      fromHistory.current = false;
+      return;
+    }
+    const st = window.history.state as { screen?: Screen } | null;
+    if (!started.current) {
+      started.current = true;
+      if (!st?.screen) window.history.replaceState({ screen, i: 0 }, '');
+      else at.current = (st as { i?: number }).i ?? 0;
+      return;
+    }
+    // Already on this screen's entry (React runs effects twice in development).
+    if (st?.screen === screen) return;
+    at.current += 1;
+    // A jump link's entry has no screen: take it over rather than stack on it.
+    if (st?.screen) window.history.pushState({ screen, i: at.current }, '');
+    else window.history.replaceState({ screen, i: at.current }, '');
+  }, [screen]);
+
+  // ⚠️ History can point at a screen whose answer is gone (back after "start
+  // over"). Those screens draw nothing without a result, so land on the start.
+  useEffect(() => {
+    if (screen !== 'welcome' && screen !== 'intake' && !result) setScreen('welcome');
+  }, [screen, result]);
+
+  /** One screen back. Answers are kept: the form comes back filled in. */
+  function stepBack() {
+    if (at.current > 0) {
+      window.history.back();
+      return;
+    }
+    const prev: Record<Screen, Screen> = {
+      welcome: 'welcome',
+      intake: 'welcome',
+      diagnosis: 'intake',
+      documents: 'diagnosis',
+      // A blocked road never went through diagnosis; its fix is the form.
+      roadmap: result?.blocked ? 'intake' : 'diagnosis',
+    };
+    setScreen(prev[screen]);
+    setError(null);
+  }
+
+  /** The wordmark goes home. Nothing is wiped: "start" brings his answers back. */
+  function goHome() {
+    if (page) openPage(null);
+    setScreen('welcome');
+    setError(null);
+    window.scrollTo({ top: 0 });
+  }
+
+  const backButton = (
+    <button type="button" className="nav-back" onClick={stepBack}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M10 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      {t('nav_back')}
+    </button>
+  );
 
   const snapshot = (a: Answers, d: string[]) => JSON.stringify([storable(a), d]);
 
@@ -569,7 +664,15 @@ export function App() {
   const header = (
     <header className="mast">
       <div className="mast-in">
-        <div className="mark">
+        <a
+          className="mark"
+          href="/"
+          aria-label={t('nav_home')}
+          onClick={(e) => {
+            e.preventDefault();
+            goHome();
+          }}
+        >
           {/**
            * ⭐ The seal. The PRD's own statement of the brand is
            * "נקודת אור אחת בענבר שמסמנת היכן אתה עומד", drawn here as a stamp:
@@ -587,7 +690,7 @@ export function App() {
             <h1 className="ltr">{t('brand')}</h1>
             <i>{t('tagline')}</i>
           </span>
-        </div>
+        </a>
 
         <div className="mast-actions">
           {accountsEnabled && account && <AccountMenu account={account} lang={lang} onSettings={() => openPage('settings')} />}
@@ -715,6 +818,7 @@ export function App() {
           */}
         <section className="screen-band">
           <div className="screen-band-in">
+            {backButton}
             <p className="kicker">{t('band_kicker_roadmap')}</p>
             <h2>{t('roadmap_title')}</h2>
 
@@ -1000,6 +1104,7 @@ export function App() {
         */}
       <section className={`screen-band${wide ? '' : ' screen-band-form'}`}>
         <div className="screen-band-in">
+          {backButton}
           <p className="kicker">{t(`band_kicker_${screen}` as keyof typeof UI)}</p>
 
           {screen === 'intake' && (
@@ -1065,6 +1170,7 @@ export function App() {
           licenseClasses={statuses.license_classes}
           onSubmit={submit}
           busy={busy}
+          initial={answers}
         />
       )}
 
@@ -1073,7 +1179,7 @@ export function App() {
           result={result}
           lang={lang}
           onConfirm={() => setScreen('documents')}
-          onBack={restart}
+          onBack={() => setScreen('intake')}
         />
       )}
 
@@ -1093,7 +1199,7 @@ export function App() {
 
       {screen === 'roadmap' && result && result.blocked && changedNote}
       {screen === 'roadmap' && result && result.blocked && (
-        <Blocked result={result} lang={lang} onBack={restart} />
+        <Blocked result={result} lang={lang} onBack={() => setScreen('intake')} />
       )}
       </div>
     </>

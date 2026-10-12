@@ -372,6 +372,8 @@ export const UI = {
   },
   print_tick: { he: 'בוצע', en: 'Done' },
   back: { he: 'לא נכון, תקן', en: 'Not right, fix it' },
+  nav_back: { he: 'חזרה', en: 'Back' },
+  nav_home: { he: 'לעמוד הבית', en: 'Home' },
 
   // ── the documents screen (ש7) ────────────────────────────────────────────
   //

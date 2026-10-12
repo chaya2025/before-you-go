@@ -31,6 +31,8 @@ type Props = {
   licenseClasses: string[];
   onSubmit: (answers: Answers) => void;
   busy: boolean;
+  /** What he answered last time, so going back to the form doesn't empty it. */
+  initial?: Answers | null;
 };
 
 /** A question, with its own heading and optional explanation. */
@@ -74,22 +76,30 @@ function Option({
   );
 }
 
-export function Intake({ lang, statuses, licenseClasses, onSubmit, busy }: Props) {
+export function Intake({ lang, statuses, licenseClasses, onSubmit, busy, initial }: Props) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
 
-  const [visaType, setVisaType] = useState<string | null>(null);
-  const [licenceKind, setLicenceKind] = useState<'national' | 'idp_only' | 'none' | null>(null);
-  const [tz, setTz] = useState<boolean | 'unknown' | null>(null);
-  const [dateAnswer, setDateAnswer] = useState('');
-  const [bornYear, setBornYear] = useState('');
-  const [years, setYears] = useState('');
-  const [heldClass, setHeldClass] = useState('');
-  const [requestedClass, setRequestedClass] = useState('');
-  const [record, setRecord] = useState<string | null>(null);
+  // ⭐ Every field starts from his last answer when there is one: `submit()`
+  // below, read backwards. Without it "back" lands on an empty form.
+  const was = (initial ?? {}) as Record<string, any>;
+  const lic = (was.foreign_license ?? {}) as Record<string, any>;
+  const [visaType, setVisaType] = useState<string | null>(was.visa_type ?? null);
+  const [licenceKind, setLicenceKind] = useState<'national' | 'idp_only' | 'none' | null>(lic.kind ?? null);
+  const [tz, setTz] = useState<boolean | 'unknown' | null>(was.has_teudat_zehut ?? null);
+  const [dateAnswer, setDateAnswer] = useState<string>(
+    was.made_aliyah ?? was.returned_to_israel ?? was.entered_israel ?? '',
+  );
+  const [bornYear, setBornYear] = useState<string>(typeof was.born === 'string' ? was.born.slice(0, 4) : '');
+  const [years, setYears] = useState(lic.years_held_permanent != null ? String(lic.years_held_permanent) : '');
+  const [heldClass, setHeldClass] = useState<string>(lic.held_class ?? '');
+  const [requestedClass, setRequestedClass] = useState<string>(was.requested_class ?? '');
+  const [record, setRecord] = useState<string | null>(was.has_record_document ?? null);
   /** ⚠️ Screen-only. Never sent: not knowing what a document is says nothing
       about whether you have one. */
   const [explainRecord, setExplainRecord] = useState(false);
-  const [sixMonths, setSixMonths] = useState<boolean | 'unknown' | null>(null);
+  const [sixMonths, setSixMonths] = useState<boolean | 'unknown' | null>(
+    was.lived_abroad_6_months_continuous ?? null,
+  );
 
   const chosen = statuses.find((s) => s.value === visaType);
   const converting = licenceKind === 'national';
