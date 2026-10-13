@@ -1,5 +1,6 @@
 # =============================================================================
-# How Before You Go is packaged. Render builds and runs this file (render.yaml).
+# How Before You Go is packaged. GitHub Actions builds this file for AWS Lambda
+# (aws-image workflow). Render's render.yaml can still run it if resumed.
 # =============================================================================
 #
 # One container, one Node server serving both the website and the API. Nothing
@@ -23,9 +24,10 @@ RUN npm ci
 
 COPY . .
 # ⭐ Accounts (M1). Vite writes these into the site WHILE BUILDING, so they must
-# exist at build time, not just at run time. Render hands its dashboard values
-# to the build as these ARGs. Both are public by design (the database's own
-# rules, RLS, are the lock). Missing → the site builds without accounts.
+# exist at build time, not just at run time. The aws-image workflow hands its
+# secrets to the build as these ARGs (Render, if resumed, its dashboard). Both
+# are public by design (the database's own rules, RLS, are the lock).
+# Missing → the site builds without accounts.
 # VITE_EMAIL_LOGIN is left unset on purpose: Google-only in public (D-154).
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_PUBLISHABLE_KEY
