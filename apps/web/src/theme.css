@@ -3368,10 +3368,17 @@ body {
 .saved-saved { color: var(--verified); }
 .saved-error { color: var(--uncertain); }
 .guest-save {
-  display: flex; flex-wrap: wrap; align-items: center; gap: var(--gap-sm) var(--gap);
-  padding: 0.75rem 1rem; border: 1px dashed var(--line-sand); border-radius: var(--radius-sm); background: var(--surface);
+  display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 0.6rem;
+  font-size: 0.9rem; color: var(--muted);
 }
-.guest-save p { margin: 0; flex: 1 1 16rem; }
+.guest-save svg { flex: none; color: var(--amber-ink); }
+.guest-save-btn {
+  font: inherit; font-weight: 600; color: var(--amber-ink); cursor: pointer;
+  background: transparent; border: 1px solid var(--amber); border-radius: var(--radius-pill);
+  padding: 0.25rem 0.85rem;
+}
+.guest-save-btn:hover { background: var(--amber-soft); }
+.guest-save-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .welcome-back { border-inline-start: 4px solid var(--amber); }
 .welcome-back h3 { margin: 0; }
 .wb-progress { font-family: var(--font-display); font-size: 1.1rem; }
