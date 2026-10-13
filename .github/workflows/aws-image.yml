@@ -1,32 +1,54 @@
-# M2 part 2 (D-185): build the image and put it on the AWS shelf (ECR).
+# M2 part 2: build the image, put it on the AWS shelf (ECR), switch Lambda to it.
 #
-# Started by hand for now: Actions tab → aws-image → Run workflow (on main).
-# M4 makes it run by itself after the tests are green.
+# Runs by itself once the "tests" run on main finishes GREEN (M4). A red run
+# starts this workflow too, but the job is skipped, so AWS keeps the old
+# version, the same gate Render has (D-175). The button (Actions tab →
+# aws-image → Run workflow, on main) still works for a manual redeploy.
 #
 # ⭐ No AWS key is stored anywhere. GitHub shows AWS a short-lived pass (OIDC)
 # that says which repo and branch is asking; AWS only accepts it from this
-# repo's main branch and only lets it push to the before-you-go shelf.
+# repo's main branch (D-187) and only for the before-you-go shelf + function.
 #
 # Repository secrets (Settings → Secrets and variables → Actions → Secrets):
 #   AWS_ROLE_ARN    the github-byg-deploy role
 #   ECR_REGISTRY    <account id>.dkr.ecr.eu-central-1.amazonaws.com
+#   AWS_SITE_URL    the API Gateway address
 # Secrets, not variables: Actions logs of a public repo are public, and only
 # secrets are hidden (***) in them. Same reason for mask-aws-account-id.
 name: aws-image
 
 on:
+  workflow_run:
+    workflows: [tests]
+    types: [completed]
+    branches: [main]
   workflow_dispatch: {}
 
 permissions:
   contents: read
   id-token: write # lets the job ask GitHub for the OIDC pass
 
+# Two pushes close together: the later one waits, never two deploys at once.
+concurrency:
+  group: aws-deploy
+  cancel-in-progress: false
+
 jobs:
   image:
+    # Button: always. Automatic: only after green tests for a push to main.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      # The exact commit the tests passed on, not whatever main is by now.
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SHA }}
 
       - name: Log in to AWS with the pass
         uses: aws-actions/configure-aws-credentials@v4
@@ -43,13 +65,41 @@ jobs:
       # The two Supabase values are public by design, same as on Render.
       - name: Build and push
         env:
-          IMAGE: ${{ secrets.ECR_REGISTRY }}/before-you-go:${{ github.sha }}
+          IMAGE: ${{ secrets.ECR_REGISTRY }}/before-you-go:${{ env.SHA }}
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
         run: |
+          if aws ecr describe-images --repository-name before-you-go \
+               --image-ids imageTag="$SHA" >/dev/null 2>&1; then
+            echo "image for $SHA already on the shelf, not rebuilding"
+            exit 0
+          fi
           docker build \
             --build-arg VITE_SUPABASE_URL \
             --build-arg VITE_SUPABASE_PUBLISHABLE_KEY \
             -t "$IMAGE" .
           docker push "$IMAGE"
           echo "pushed $IMAGE"
+
+      - name: Switch Lambda to the new image
+        env:
+          IMAGE: ${{ secrets.ECR_REGISTRY }}/before-you-go:${{ env.SHA }}
+        run: |
+          echo "before: $(aws lambda get-function --function-name before-you-go --query Code.ImageUri --output text)"
+          aws lambda update-function-code --function-name before-you-go \
+            --image-uri "$IMAGE" --query LastUpdateStatus --output text
+          aws lambda wait function-updated-v2 --function-name before-you-go
+          echo "after:  $(aws lambda get-function --function-name before-you-go --query Code.ImageUri --output text)"
+
+      # ⭐ The first start of a brand-new image is the slow one (it hit the
+      # 10 s limit once, D-188). This visit takes that hit instead of a user,
+      # and fails the run if the new version does not answer.
+      - name: Wake it up and check it answers
+        env:
+          URL: ${{ secrets.AWS_SITE_URL }}
+        run: |
+          for i in 1 2 3 4 5 6; do
+            if curl -sf --max-time 30 "$URL/health"; then echo; echo "live"; exit 0; fi
+            echo "not answering yet ($i)"; sleep 10
+          done
+          exit 1
