@@ -50,6 +50,23 @@ jobs:
         with:
           ref: ${{ env.SHA }}
 
+      # ⚠️ A missing secret otherwise fails later with a confusing AWS error.
+      # This names the empty one up front. Only checks it is set, never prints it.
+      - name: Check the settings are there
+        env:
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+          ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
+          AWS_SITE_URL: ${{ secrets.AWS_SITE_URL }}
+        run: |
+          missing=0
+          for name in AWS_ROLE_ARN ECR_REGISTRY AWS_SITE_URL; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret $name is empty. Add it in Settings > Secrets and variables > Actions."
+              missing=1
+            fi
+          done
+          exit $missing
+
       - name: Log in to AWS with the pass
         uses: aws-actions/configure-aws-credentials@v4
         with:

@@ -8,9 +8,10 @@ Live demo: https://8mt068hzw3.execute-api.eu-central-1.amazonaws.com (AWS Lambda
 - **Who it's for:** people who live in Israel without citizenship. Every office visit is a gamble on whether you brought the right papers, and the rules for your status are scattered or missing.
 - **What it does:** you answer a short form, it tells you if you're ready, what's missing, and the steps in order. A plain-language explanation sits on top.
 - **How it's built:** the rules are written as data and checked by a pure logic engine, so the answer comes from the rules, never from an AI guess. AI only rewords the result, and the site still works without it.
-- **Stack:** TypeScript, React + Vite, Fastify, Zod, Supabase (Postgres with row-level security), Docker, Render.
+- **Stack:** TypeScript, React + Vite, Fastify, Zod, Supabase (Postgres with row-level security), Docker, AWS Lambda.
 - **Quality:** automated tests run on every push, and a failing test blocks the deploy.
-- **Next:** choosing long-term hosting (AWS or staying on Render), then a second feature: reading the user's documents and deleting them right after.
+- **Hosting:** runs on AWS Lambda (Frankfurt) behind API Gateway. GitHub Actions builds the image and deploys it only after the tests pass, logging in to AWS with a short-lived pass (OIDC), no stored keys. Render is suspended as a backup.
+- **Next:** a second feature: reading the user's documents and deleting them right after.
 
 ## The map
 
@@ -25,7 +26,7 @@ apps/web/            THE WEBSITE. React + Vite.
   src/                 App.tsx (which screen), api.ts (calls the server), components/ (the screens)
 docs/                the POC build plan, the PRD template
 Dockerfile           the recipe for the container
-render.yaml          how Render runs it
+render.yaml          kept only to resume the suspended Render backup
 package.json         the 3 packages + the commands below
 ```
 
