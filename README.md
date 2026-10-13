@@ -2,7 +2,7 @@
 
 Checks whether a non-citizen resident of Israel is ready for a bureaucratic process before they show up. First process: getting or converting a driver's licence.
 
-Live demo: https://before-you-go-4nk5.onrender.com (free tier, ~50s to wake)
+Live demo: https://8mt068hzw3.execute-api.eu-central-1.amazonaws.com (AWS Lambda, Frankfurt; a few seconds to wake after a quiet stretch)
 
 ## In short
 - **Who it's for:** people who live in Israel without citizenship. Every office visit is a gamble on whether you brought the right papers, and the rules for your status are scattered or missing.
