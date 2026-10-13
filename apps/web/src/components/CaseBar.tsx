@@ -100,10 +100,16 @@ export function SavedMark({ state, lang }: { state: SaveState; lang: Lang }) {
 
 export function GuestSave({ lang, onSave }: { lang: Lang; onSave: () => void }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
+  // ⚠️ the founder, 12.10: a dashed box with a big amber button between the
+  // title and the progress read as random and loud. One quiet line now, so
+  // the roadmap stays the first thing he sees.
   return (
     <div className="guest-save">
-      <p className="small">{t('save_guest_note')}</p>
-      <button className="btn btn-amber" onClick={onSave}>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M7 4h10a1 1 0 011 1v15l-6-4-6 4V5a1 1 0 011-1z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      </svg>
+      <span>{t('save_guest_note')}</span>
+      <button type="button" className="guest-save-btn" onClick={onSave}>
         {t('save_guest_btn')}
       </button>
     </div>

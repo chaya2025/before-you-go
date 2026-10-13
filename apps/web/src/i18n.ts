@@ -823,8 +823,8 @@ export const UI = {
   save_saved: { he: 'נשמר בחשבון שלך', en: 'Saved to your account' },
   save_error: { he: 'השמירה נכשלה. ננסה שוב בשינוי הבא.', en: "Couldn't save. We'll try again on your next change." },
   save_guest_note: {
-    he: 'רוצה לחזור לכאן בפעם הבאה? שמור את התיק בחשבון, והתשובות שלך יישמרו.',
-    en: 'Want to come back to this next time? Save your case to an account and your answers are kept.',
+    he: 'רוצה לחזור לזה אחר כך?',
+    en: 'Want to come back to this later?',
   },
   save_guest_btn: { he: 'שמירת התיק', en: 'Save my case' },
   // ── Stale answers (M1 milestone 3) ──
