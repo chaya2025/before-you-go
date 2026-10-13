@@ -1,0 +1,53 @@
+# M2 part 2 (D-185): build the image and put it on the AWS shelf (ECR).
+#
+# Started by hand for now: Actions tab → aws-image → Run workflow (on main).
+# M4 makes it run by itself after the tests are green.
+#
+# ⭐ No AWS key is stored anywhere. GitHub shows AWS a short-lived pass (OIDC)
+# that says which repo and branch is asking; AWS only accepts it from this
+# repo's main branch and only lets it push to the before-you-go shelf.
+#
+# Repository variables (Settings → Secrets and variables → Actions → Variables):
+#   AWS_ROLE_ARN    the github-byg-deploy role
+#   ECR_REGISTRY    <account id>.dkr.ecr.eu-central-1.amazonaws.com
+# Kept out of the file so the account number is not in a public repo.
+name: aws-image
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write # lets the job ask GitHub for the OIDC pass
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to AWS with the pass
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: eu-central-1
+
+      - name: Log in to the shelf (ECR)
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # The image is labelled with the commit it came from (tags are immutable,
+      # D-186), so the label always says exactly which code is running.
+      # The two Supabase values are public by design, same as on Render.
+      - name: Build and push
+        env:
+          IMAGE: ${{ vars.ECR_REGISTRY }}/before-you-go:${{ github.sha }}
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          docker build \
+            --build-arg VITE_SUPABASE_URL \
+            --build-arg VITE_SUPABASE_PUBLISHABLE_KEY \
+            -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "pushed $IMAGE"

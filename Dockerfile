@@ -35,4 +35,16 @@ ENV HOST=0.0.0.0
 ENV PORT=3001
 EXPOSE 3001
 
+# ⭐ AWS Lambda (M2 part 2, D-182). Lambda does not send normal web requests,
+# it sends "events". The Lambda Web Adapter is a small translator that Lambda
+# starts next to the server: it turns each event into a normal request on PORT
+# and the server's answer back into an event. Off Lambda (Render, a laptop) it
+# is never started, so this line changes nothing there.
+# It waits for /health to answer before letting traffic in.
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.1 /lambda-adapter /opt/extensions/lambda-adapter
+ENV AWS_LWA_READINESS_CHECK_PATH=/health
+# ⚠️ On Lambda every folder is read-only except /tmp, and npm writes a cache
+# and logs when it starts. Pointing them at /tmp keeps the start from failing.
+ENV npm_config_cache=/tmp/.npm
+
 CMD ["npm", "run", "start", "--workspace", "@byg/api"]
