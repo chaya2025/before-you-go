@@ -7,10 +7,11 @@
 # that says which repo and branch is asking; AWS only accepts it from this
 # repo's main branch and only lets it push to the before-you-go shelf.
 #
-# Repository variables (Settings → Secrets and variables → Actions → Variables):
+# Repository secrets (Settings → Secrets and variables → Actions → Secrets):
 #   AWS_ROLE_ARN    the github-byg-deploy role
 #   ECR_REGISTRY    <account id>.dkr.ecr.eu-central-1.amazonaws.com
-# Kept out of the file so the account number is not in a public repo.
+# Secrets, not variables: Actions logs of a public repo are public, and only
+# secrets are hidden (***) in them. Same reason for mask-aws-account-id.
 name: aws-image
 
 on:
@@ -30,8 +31,9 @@ jobs:
       - name: Log in to AWS with the pass
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-central-1
+          mask-aws-account-id: true
 
       - name: Log in to the shelf (ECR)
         uses: aws-actions/amazon-ecr-login@v2
@@ -41,7 +43,7 @@ jobs:
       # The two Supabase values are public by design, same as on Render.
       - name: Build and push
         env:
-          IMAGE: ${{ vars.ECR_REGISTRY }}/before-you-go:${{ github.sha }}
+          IMAGE: ${{ secrets.ECR_REGISTRY }}/before-you-go:${{ github.sha }}
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
         run: |
