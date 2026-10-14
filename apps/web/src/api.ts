@@ -147,19 +147,24 @@ export type Reading =
   | { ok: false; reason: string; seen?: string };
 
 export async function readDocument(kind: DocKind, file: File): Promise<Reading> {
-  const data = await new Promise<string>((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result).split(',')[1] ?? '');
-    r.onerror = () => reject(r.error);
-    r.readAsDataURL(file);
-  });
+  const post = (path: string, body: object) =>
+    fetch(`${BASE}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   try {
-    const res = await fetch(`${BASE}/api/v1/read-document`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ kind, media_type: file.type, data }),
-    });
-    if (res.status === 413) return { ok: false, reason: 'too_big' };
+    // 1. A one-time ticket for this one file.
+    const linkRes = await post('/api/v1/upload-link', { kind, media_type: file.type });
+    if (!linkRes.ok) return { ok: false, reason: linkRes.status === 400 ? 'bad_file' : 'call_failed' };
+    const link = (await linkRes.json()) as { url: string; fields: Record<string, string>; key: string; max_bytes: number };
+    if (file.size > link.max_bytes) return { ok: false, reason: 'too_big' };
+
+    // 2. Straight into the private bucket. The file never passes through our server.
+    const form = new FormData();
+    for (const [k, v] of Object.entries(link.fields)) form.append(k, v);
+    form.append('file', file); // S3 requires the file last.
+    const up = await fetch(link.url, { method: 'POST', body: form });
+    if (!up.ok) return { ok: false, reason: up.status === 400 ? 'too_big' : 'call_failed' };
+
+    // 3. We read it from the bucket.
+    const res = await post('/api/v1/read-document', { kind, key: link.key });
     if (!res.ok) return { ok: false, reason: 'call_failed' };
     return (await res.json()) as Reading;
   } catch {
