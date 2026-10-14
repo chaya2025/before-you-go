@@ -1,0 +1,63 @@
+{
+  "passport-valid.png": {
+    "kind": "passport",
+    "want": {
+      "expires": "2031-05",
+      "number": "X7351942",
+      "name_latin": "DOE ALEX SAMPLE"
+    }
+  },
+  "passport-expired.png": {
+    "kind": "passport",
+    "want": {
+      "expires": "2025-02",
+      "number": "X7351942",
+      "name_latin": "DOE ALEX SAMPLE"
+    }
+  },
+  "passport-blurry.png": {
+    "kind": "passport",
+    "want": null
+  },
+  "form-89.png": {
+    "kind": "form_89",
+    "want": {
+      "number": "897351942",
+      "passport_number": "X7351942",
+      "name_latin": "DOE ALEX SAMPLE"
+    }
+  },
+  "visa-b1.png": {
+    "kind": "visa",
+    "want": {
+      "expires": "2027-08"
+    }
+  },
+  "licence-en.png": {
+    "kind": "licence",
+    "want": {
+      "expires": "2029-04",
+      "name_latin": "DOE ALEX SAMPLE",
+      "language": "en"
+    }
+  },
+  "licence-ru.png": {
+    "kind": "licence",
+    "want": {
+      "expires": "2028-07",
+      "language": "other"
+    }
+  },
+  "wrong-utility-bill.png": {
+    "kind": "passport",
+    "want": "wrong_document"
+  },
+  "passport-valid.pdf": {
+    "kind": "passport",
+    "want": {
+      "expires": "2031-05",
+      "number": "X7351942",
+      "name_latin": "DOE ALEX SAMPLE"
+    }
+  }
+}

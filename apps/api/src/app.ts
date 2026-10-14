@@ -2,6 +2,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import { Profile, evaluate, ALL_VISA_PROFILES, ALL_PROCESSES, LicenseClass } from '@byg/engine';
 import { explain, modelIsConfigured, type Lang } from './explain';
+import { readDocument, DOC_KINDS, MAX_BYTES, type DocKind } from './read-document';
 
 /**
  * ============================================================================
@@ -180,6 +181,36 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
     const result = evaluate(parsed.data, asOf);
     return explain(result, lang === 'en' ? 'en' : ('he' as Lang));
   });
+
+  /**
+   * ⭐ M3: READ A DOCUMENT. A photo or PDF in, the printed expiry date out.
+   *
+   * ⚠️ Returns a SUGGESTION, never a judgement. The website drops it into the
+   * box he would have typed into; he confirms it; only then does /readiness
+   * see it. Always 200 with `ok: false` for anything the reader could not do,
+   * so the screen can say "try again or type it" instead of an error.
+   *
+   * ⚠️ Fake documents only until SEC (D-190). Login and the 6-read limit come
+   * in milestone 3; this branch is not deployed before then.
+   */
+  app.post(
+    '/api/v1/read-document',
+    // base64 makes the file ~33% bigger; room for a 5 MB file plus the JSON.
+    { bodyLimit: Math.ceil((MAX_BYTES * 4) / 3) + 64 * 1024 },
+    async (request, reply) => {
+      const body = request.body as { kind?: unknown; media_type?: unknown; data?: unknown } | null;
+      if (
+        !body ||
+        typeof body !== 'object' ||
+        !DOC_KINDS.includes(body.kind as DocKind) ||
+        typeof body.media_type !== 'string' ||
+        typeof body.data !== 'string'
+      ) {
+        return reply.status(400).send({ error: 'expected { kind, media_type, data }' });
+      }
+      return readDocument({ kind: body.kind as DocKind, media_type: body.media_type, data: body.data });
+    },
+  );
 
   /**
    * So the website can tell the difference between "the plain-language layer is

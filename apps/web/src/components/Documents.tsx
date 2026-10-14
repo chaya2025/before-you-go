@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   checkForm89Number,
   checkPassportNumber,
@@ -9,6 +9,7 @@ import {
 import { UI, pick, type Lang } from '../i18n';
 import type { Diagnosis, DocumentQuestion } from '@byg/engine';
 import type { Answers } from './Intake';
+import { readDocument, type DocKind, type Reading } from '../api';
 
 /**
  * ============================================================================
@@ -254,6 +255,64 @@ function Section({
   );
 }
 
+/**
+ * ⭐ M3: "upload a photo instead". The reading lands in the SAME box he would
+ * have typed into, so he sees it, can fix it, and nothing reaches the engine
+ * until he presses continue. Upload and typing are one path.
+ *
+ * ⚠️ The month is also shown in words ("May 2031"): a date like 11/04/2029 can
+ * be read two ways, and a word makes a wrong reading easy to spot.
+ */
+function UploadRead({ kind, lang, onRead }: { kind: DocKind; lang: Lang; onRead: (r: Extract<Reading, { ok: true }>) => void }) {
+  const t = (k: keyof typeof UI) => pick(UI[k], lang);
+  const input = useRef<HTMLInputElement>(null);
+  const [state, setState] = useState<'idle' | 'reading' | Reading>('idle');
+
+  async function pickFile(file: File | undefined) {
+    if (!file) return;
+    setState('reading');
+    const r = await readDocument(kind, file);
+    setState(r);
+    if (r.ok) onRead(r);
+  }
+
+  const inWords = (ym: string) =>
+    new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-GB', { month: 'long', year: 'numeric' })
+      .format(new Date(`${ym}-01T12:00:00`));
+
+  const failure = (r: Extract<Reading, { ok: false }>) =>
+    r.reason === 'wrong_document' ? t('up_wrong')
+      : r.reason === 'unreadable' ? t('up_unreadable')
+      : r.reason === 'too_big' ? t('up_too_big')
+      : t('up_failed');
+
+  return (
+    <div className="upload-read">
+      <button type="button" className="btn btn-quiet upload-read-btn" disabled={state === 'reading'} onClick={() => input.current?.click()}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 16V4M7 9l5-5 5 5M4 20h16" />
+        </svg>
+        {state === 'reading' ? t('up_reading') : t('up_button')}
+      </button>
+      <input
+        ref={input}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,application/pdf"
+        hidden
+        onChange={(e) => { void pickFile(e.target.files?.[0]); e.target.value = ''; }}
+      />
+      {typeof state === 'object' && state.ok && (
+        <p className="small" role="status">
+          {t('up_read')}
+          {state.fields.expires && <> <strong>{inWords(state.fields.expires)}</strong>.</>} {t('up_check')}
+        </p>
+      )}
+      {typeof state === 'object' && !state.ok && <p className="small field-error" role="status">{failure(state)}</p>}
+      <p className="small muted">{t('up_fake_only')}</p>
+    </div>
+  );
+}
+
 export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
 
@@ -385,6 +444,15 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
           }
         }}
       >
+        <UploadRead
+          kind="form_89"
+          lang={lang}
+          onRead={({ fields: f }) => {
+            if (f.number) setForm89Number(f.number);
+            if (f.passport_number) setForm89Passport(f.passport_number);
+            if (f.name_latin) setForm89Name(f.name_latin);
+          }}
+        />
         <Field label={t('d_89_number')} problem={problems.form_89_number} lang={lang}>
           <input
             className="ltr"
@@ -431,6 +499,15 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
         help={questions.form_89.ask ? t('d_passport_help_89') : t('d_passport_help')}
         lang={lang}
       >
+        <UploadRead
+          kind="passport"
+          lang={lang}
+          onRead={({ fields: f }) => {
+            if (f.number) setPassportNumber(f.number);
+            if (f.expires) setPassportExpires(f.expires);
+            if (f.name_latin) setPassportName(f.name_latin);
+          }}
+        />
         <Field label={t('d_passport_number')} problem={problems.passport_number} lang={lang}>
           <input
             className="ltr"
@@ -487,6 +564,7 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
         help={t('d_visa_help')}
         lang={lang}
       >
+        <UploadRead kind="visa" lang={lang} onRead={({ fields: f }) => f.expires && setVisaExpires(f.expires)} />
         <Field label={t('d_visa_expires')} problem={problems.visa_expires} lang={lang}>
           <input
             type="month"
@@ -563,6 +641,15 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
         title={t('d_licence_title')}
         lang={lang}
       >
+        <UploadRead
+          kind="licence"
+          lang={lang}
+          onRead={({ fields: f }) => {
+            if (f.expires) setLicenceExpires(f.expires);
+            if (f.name_latin) setLicenceName(f.name_latin);
+            if (f.language) setLicenceLang(f.language);
+          }}
+        />
           <Field label={t('d_licence_expires')} problem={problems.licence_expires} lang={lang}>
             <input
               type="month"
