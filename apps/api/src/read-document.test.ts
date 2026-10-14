@@ -3,6 +3,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { Profile, evaluate } from '@byg/engine';
 import { checkReport, readDocument, type DocKind, type ReadFields } from './read-document';
 import { buildApp } from './app';
+import type { QuotaFn } from './quota';
 
 /**
  * ============================================================================
@@ -164,24 +165,62 @@ describe('upload = typing', () => {
   });
 });
 
-describe('the upload endpoints refuse what they should', () => {
-  const call = async (url: string, payload: object) => {
-    const app = await buildApp({ logger: false });
-    const res = await app.inject({ method: 'POST', url, payload });
+describe('the upload endpoints: login, his own files, the quiet limit (M3.3)', () => {
+  const ME = '11111111-1111-4111-8111-111111111111';
+  const OTHER = '22222222-2222-4222-8222-222222222222';
+  const FILE = '33333333-3333-4333-8333-333333333333';
+
+  /** A stand-in counter: `left` reads remaining; records every call. */
+  const counter = (left: number) => {
+    const calls: boolean[] = [];
+    const quota: QuotaFn = async (token, consume) => {
+      calls.push(consume);
+      if (token !== 'good') return { status: 'no_login' };
+      if (consume && left > 0) left--;
+      else if (consume) return { status: 'ok', user_id: ME, allowed: false, left: 0 };
+      return { status: 'ok', user_id: ME, allowed: left > 0 || consume, left };
+    };
+    return { quota, calls };
+  };
+
+  const call = async (quota: QuotaFn, url: string, payload: object, token?: string) => {
+    const app = await buildApp({ logger: false, quota });
+    const res = await app.inject({
+      method: 'POST', url, payload, headers: token ? { authorization: `Bearer ${token}` } : {},
+    });
     await app.close();
-    return res.statusCode;
+    return { code: res.statusCode, body: res.json() };
   };
 
   it('no upload link for an unknown kind or file type', async () => {
-    expect(await call('/api/v1/upload-link', { kind: 'selfie', media_type: 'image/png' })).toBe(400);
-    expect(await call('/api/v1/upload-link', { kind: 'passport', media_type: 'text/html' })).toBe(400);
+    const { quota } = counter(6);
+    expect((await call(quota, '/api/v1/upload-link', { kind: 'selfie', media_type: 'image/png' }, 'good')).code).toBe(400);
+    expect((await call(quota, '/api/v1/upload-link', { kind: 'passport', media_type: 'text/html' }, 'good')).code).toBe(400);
+  });
+
+  it('no login, no ticket and no read', async () => {
+    const { quota } = counter(6);
+    expect((await call(quota, '/api/v1/upload-link', { kind: 'passport', media_type: 'image/png' })).code).toBe(401);
+    expect((await call(quota, '/api/v1/upload-link', { kind: 'passport', media_type: 'image/png' }, 'forged')).code).toBe(401);
+    expect((await call(quota, '/api/v1/read-document', { kind: 'passport', key: `uploads/passport/${ME}/${FILE}` })).code).toBe(401);
+  });
+
+  it('out of reads: no ticket, and the read says "limit"', async () => {
+    const { quota } = counter(0);
+    expect((await call(quota, '/api/v1/upload-link', { kind: 'passport', media_type: 'image/png' }, 'good')).body)
+      .toEqual({ ok: false, reason: 'limit' });
+    expect((await call(quota, '/api/v1/read-document', { kind: 'passport', key: `uploads/passport/${ME}/${FILE}` }, 'good')).body)
+      .toEqual({ ok: false, reason: 'limit' });
   });
 
   it.each([
+    ['someone else’s file', `uploads/passport/${OTHER}/${FILE}`],
     ['a path of our own making only', 'uploads/passport/../../secrets'],
-    ['not another kind folder', 'uploads/visa/1b4e28ba-2fa1-41d2-883f-0016d3cca427'],
+    ['the right folder for the kind', `uploads/visa/${ME}/${FILE}`],
     ['not a bare name', 'passport.png'],
-  ])('read-document reads %s', async (_, key) => {
-    expect(await call('/api/v1/read-document', { kind: 'passport', key })).toBe(400);
+  ])('reads %s only, and refusing uses up no read', async (_, key) => {
+    const { quota, calls } = counter(6);
+    expect((await call(quota, '/api/v1/read-document', { kind: 'passport', key }, 'good')).code).toBe(400);
+    expect(calls).not.toContain(true);
   });
 });

@@ -541,20 +541,37 @@ export function App() {
    * `kind` and the seniority there, and overwriting it with only the expiry
    * would silently throw away the answer that decides his entire route.
    */
-  async function submitDocuments(documents: Answers) {
-    if (!answers) return;
-    const merged: Answers = {
+  /** The documents screen's answers on top of everything asked before. */
+  const mergeDocuments = (documents: Answers): Answers => ({
       ...answers,
       ...documents,
       ...(documents.foreign_license
         ? {
             foreign_license: {
-              ...(answers.foreign_license as object),
+              ...(answers?.foreign_license as object),
               ...(documents.foreign_license as object),
             },
           }
         : {}),
-    };
+  });
+
+  /**
+   * ⭐ M3.3 LIVE CHECK. The engine run on what is on the documents screen right
+   * now, so a problem shows under the section the moment it is filled (by
+   * upload or by typing), not only on the report. Free: no AI, our own rules.
+   */
+  async function liveCheck(documents: Answers) {
+    if (!answers) return null;
+    try {
+      return await fetchReadiness({ ...mergeDocuments(documents), completed_steps: done });
+    } catch {
+      return null;
+    }
+  }
+
+  async function submitDocuments(documents: Answers) {
+    if (!answers) return;
+    const merged = mergeDocuments(documents);
     setBusy(true);
     setError(null);
     setAnswers(merged);
@@ -778,7 +795,7 @@ export function App() {
         <section className="screen-band">
           <div className="screen-band-in stack">
             <h2>{account.name ? `${t('wb_hello_name')}${firstName(account)}` : t('wb_hello')}</h2>
-            <StaleAsk docs={stale} answers={answers} lang={lang} busy={busy} onDone={applyAnswers} />
+            <StaleAsk docs={stale} answers={answers} lang={lang} busy={busy} onDone={applyAnswers} onLogin={() => setPanel('login')} />
             {failure}
           </div>
         </section>
@@ -852,6 +869,7 @@ export function App() {
                       confirmNow(answers);
                     }}
                     onUpdate={applyAnswers}
+                    onLogin={() => setPanel('login')}
                   />
                 )}
               </WelcomeBack>
@@ -1192,6 +1210,8 @@ export function App() {
           lang={lang}
           questions={result.diagnosis.document_questions}
           onSubmit={submitDocuments}
+          liveCheck={liveCheck}
+          onLogin={() => setPanel('login')}
           onSkip={() => setScreen('roadmap')}
           busy={busy}
         />

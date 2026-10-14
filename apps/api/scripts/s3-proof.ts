@@ -15,8 +15,11 @@ try {
 const { buildApp } = await import('../src/app');
 const { createUploadLink } = await import('../src/storage');
 
-const app = await buildApp({ logger: false });
-const api = async (url: string, payload: object) => (await app.inject({ method: 'POST', url, payload })).json();
+// The real bucket, with a stand-in login (the limit is proven in M3.3, not here).
+const ME = '11111111-1111-4111-8111-111111111111';
+const app = await buildApp({ logger: false, quota: async () => ({ status: 'ok', user_id: ME, allowed: true, left: 6 }) });
+const api = async (url: string, payload: object) =>
+  (await app.inject({ method: 'POST', url, payload, headers: { authorization: 'Bearer proof' } })).json();
 
 const upload = async (link: { url: string; fields: Record<string, string> }, bytes: Uint8Array, type: string) => {
   const form = new FormData();
@@ -35,7 +38,7 @@ console.log(`   stored as: ${link.key}`);
 console.log(`   read:`, JSON.stringify(await api('/api/v1/read-document', { kind: 'passport', key: link.key })));
 
 // 2. A ticket that lived 1 second, used after 3.
-const expired = await createUploadLink('passport', 'image/png', 1);
+const expired = await createUploadLink('passport', 'image/png', ME, 1);
 await new Promise((r) => setTimeout(r, 3000));
 console.log(`2. expired ticket: ${await upload(expired!, new Uint8Array(100), 'image/png')}`);
 
