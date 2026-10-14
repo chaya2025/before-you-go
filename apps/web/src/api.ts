@@ -135,3 +135,34 @@ export const fetchCapabilities = () => get<{ plain_language: boolean }>('/api/v1
  * process becomes real, the landing page changes without this app being edited.
  */
 export const fetchProcesses = () => get<{ processes: Process[] }>('/api/v1/processes');
+
+/**
+ * ⭐ M3: send a photo or PDF to be read. The answer is a SUGGESTION for one
+ * field on the documents screen; he confirms it there. Never throws for a
+ * reading failure: `ok: false` means "try again or type it".
+ */
+export type DocKind = 'form_89' | 'passport' | 'visa' | 'licence';
+export type Reading =
+  | { ok: true; kind: DocKind; fields: { expires?: string; number?: string; passport_number?: string; name_latin?: string; language?: 'he' | 'en' | 'other' } }
+  | { ok: false; reason: string; seen?: string };
+
+export async function readDocument(kind: DocKind, file: File): Promise<Reading> {
+  const data = await new Promise<string>((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(',')[1] ?? '');
+    r.onerror = () => reject(r.error);
+    r.readAsDataURL(file);
+  });
+  try {
+    const res = await fetch(`${BASE}/api/v1/read-document`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kind, media_type: file.type, data }),
+    });
+    if (res.status === 413) return { ok: false, reason: 'too_big' };
+    if (!res.ok) return { ok: false, reason: 'call_failed' };
+    return (await res.json()) as Reading;
+  } catch {
+    return { ok: false, reason: 'call_failed' };
+  }
+}

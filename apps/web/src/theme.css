@@ -3415,3 +3415,9 @@ body {
 .site-foot { text-align: center; padding: 1.25rem var(--gap); background: var(--ink-deep); }
 .site-foot a { color: var(--paper); font-size: 0.9rem; }
 .deleted-note { margin: 0; padding: 0.75rem var(--gap); text-align: center; background: var(--amber-soft); color: var(--amber-ink); }
+
+/* M3: upload a document, top of each documents section */
+.upload-read { display: flex; flex-direction: column; gap: 6px; padding-bottom: 14px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+.upload-read-btn { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; }
+.upload-read-btn svg { transition: none; }
+.upload-read-btn:hover svg { transform: none; }

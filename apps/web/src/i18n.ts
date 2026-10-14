@@ -456,6 +456,17 @@ export const UI = {
   d_passport_expires: { he: 'תוקף עד', en: 'Valid until' },
   d_passport_name: { he: 'השם באותיות לטיניות, כפי שמופיע בדרכון', en: 'Name in Latin letters, as printed' },
 
+  // ── M3: upload instead of typing ──
+  up_button: { he: 'העלאת מסמך', en: 'Upload document' },
+  up_reading: { he: 'קורא את המסמך…', en: 'Reading the document…' },
+  up_read: { he: 'השדות מולאו מהמסמך.', en: 'Filled in from your document.' },
+  up_check: { he: 'בדקו את הפרטים ותקנו במידת הצורך.', en: 'Check the details and correct anything wrong.' },
+  up_unreadable: { he: 'לא הצלחנו לקרוא את המסמך. נסו צילום ברור יותר, או הקלידו.', en: 'We could not read it. Try a clearer photo, or type it.' },
+  up_wrong: { he: 'זה לא נראה כמו המסמך הנכון. נסו שוב, או הקלידו.', en: 'This does not look like the right document. Try again, or type it.' },
+  up_too_big: { he: 'הקובץ גדול מדי (עד 5MB). צלמו במקום זה, או הקלידו.', en: 'That file is too big (5 MB max). Take a photo instead, or type it.' },
+  up_failed: { he: 'הקריאה לא זמינה כרגע. הקלידו את הפרטים.', en: 'Reading is not available right now. Please type it.' },
+  up_fake_only: { he: 'גרסת ניסיון: מסמכים לדוגמה בלבד.', en: 'Test version: sample documents only.' },
+
   d_visa_title: { he: 'האשרה', en: 'Your visa' },
   d_visa_expires: { he: 'האשרה בתוקף עד', en: 'Visa valid until' },
   d_visa_help: {
