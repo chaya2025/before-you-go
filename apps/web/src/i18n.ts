@@ -463,7 +463,7 @@ export const UI = {
   up_check: { he: 'בדקו את הפרטים ותקנו במידת הצורך.', en: 'Check the details and correct anything wrong.' },
   up_unreadable: { he: 'לא הצלחנו לקרוא את המסמך. נסו צילום ברור יותר, או הקלידו.', en: 'We could not read it. Try a clearer photo, or type it.' },
   up_wrong: { he: 'זה לא נראה כמו המסמך הנכון. נסו שוב, או הקלידו.', en: 'This does not look like the right document. Try again, or type it.' },
-  up_too_big: { he: 'הקובץ גדול מדי (עד 5MB). צלמו במקום זה, או הקלידו.', en: 'That file is too big (5 MB max). Take a photo instead, or type it.' },
+  up_too_big: { he: 'הקובץ גדול מדי (תמונה עד 5MB, PDF עד 20MB). נסו קובץ קטן יותר, או הקלידו.', en: 'That file is too big (photo up to 5 MB, PDF up to 20 MB). Try a smaller file, or type it.' },
   up_failed: { he: 'הקריאה לא זמינה כרגע. הקלידו את הפרטים.', en: 'Reading is not available right now. Please type it.' },
   up_fake_only: { he: 'גרסת ניסיון: מסמכים לדוגמה בלבד.', en: 'Test version: sample documents only.' },
 

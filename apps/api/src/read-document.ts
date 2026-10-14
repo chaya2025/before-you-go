@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { maxBytesFor } from './storage';
 import { checkForm89Number, checkPassportNumber, checkLatinName, stripPunctuation } from '@byg/engine';
 
 /**
@@ -34,8 +35,6 @@ export const DOC_KINDS: readonly DocKind[] = ['form_89', 'passport', 'visa', 'li
 export const MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'] as const;
 export type MediaType = (typeof MEDIA_TYPES)[number];
 
-/** 5 MB of file. Claude's per-image limit; S3 lifts this for PDFs in milestone 2. */
-export const MAX_BYTES = 5 * 1024 * 1024;
 
 /** What the form receives: the same field names it already types into. */
 export type ReadFields = {
@@ -191,7 +190,7 @@ export async function readDocument(
 
   if (!(MEDIA_TYPES as readonly string[]).includes(input.media_type)) return { ok: false, reason: 'bad_file' };
   // base64 is 4 chars per 3 bytes.
-  if (Math.floor((input.data.length * 3) / 4) > MAX_BYTES) return { ok: false, reason: 'too_big' };
+  if (Math.floor((input.data.length * 3) / 4) > maxBytesFor(input.media_type)) return { ok: false, reason: 'too_big' };
   if (!client) return { ok: false, reason: 'no_key' };
 
   const file: Anthropic.ContentBlockParam =

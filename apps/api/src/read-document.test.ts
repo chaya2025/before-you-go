@@ -121,7 +121,7 @@ describe('readDocument: the call', () => {
       .toEqual({ ok: false, reason: 'bad_file' });
   });
 
-  it('a file over 5 MB is refused before any call', async () => {
+  it('an image over 5 MB is refused before any call', async () => {
     expect(await readDocument({ kind: 'passport', ...png(5 * 1024 * 1024 + 3) }, { client: failing }))
       .toEqual({ ok: false, reason: 'too_big' });
   });
@@ -164,11 +164,24 @@ describe('upload = typing', () => {
   });
 });
 
-describe('POST /api/v1/read-document', () => {
-  it('rejects a body without kind, media_type and data', async () => {
+describe('the upload endpoints refuse what they should', () => {
+  const call = async (url: string, payload: object) => {
     const app = await buildApp({ logger: false });
-    const res = await app.inject({ method: 'POST', url: '/api/v1/read-document', payload: { kind: 'selfie' } });
-    expect(res.statusCode).toBe(400);
+    const res = await app.inject({ method: 'POST', url, payload });
     await app.close();
+    return res.statusCode;
+  };
+
+  it('no upload link for an unknown kind or file type', async () => {
+    expect(await call('/api/v1/upload-link', { kind: 'selfie', media_type: 'image/png' })).toBe(400);
+    expect(await call('/api/v1/upload-link', { kind: 'passport', media_type: 'text/html' })).toBe(400);
+  });
+
+  it.each([
+    ['a path of our own making only', 'uploads/passport/../../secrets'],
+    ['not another kind folder', 'uploads/visa/1b4e28ba-2fa1-41d2-883f-0016d3cca427'],
+    ['not a bare name', 'passport.png'],
+  ])('read-document reads %s', async (_, key) => {
+    expect(await call('/api/v1/read-document', { kind: 'passport', key })).toBe(400);
   });
 });

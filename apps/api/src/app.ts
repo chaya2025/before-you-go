@@ -2,7 +2,8 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import { Profile, evaluate, ALL_VISA_PROFILES, ALL_PROCESSES, LicenseClass } from '@byg/engine';
 import { explain, modelIsConfigured, type Lang } from './explain';
-import { readDocument, DOC_KINDS, MAX_BYTES, type DocKind } from './read-document';
+import { readDocument, DOC_KINDS, MEDIA_TYPES, type DocKind } from './read-document';
+import { createUploadLink, fetchDocument, isOurKey, maxBytesFor } from './storage';
 
 /**
  * ============================================================================
@@ -183,34 +184,41 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
   });
 
   /**
-   * ⭐ M3: READ A DOCUMENT. A photo or PDF in, the printed expiry date out.
+   * ⭐ M3: UPLOAD A DOCUMENT, in two calls.
    *
-   * ⚠️ Returns a SUGGESTION, never a judgement. The website drops it into the
-   * box he would have typed into; he confirms it; only then does /readiness
-   * see it. Always 200 with `ok: false` for anything the reader could not do,
-   * so the screen can say "try again or type it" instead of an error.
+   *   1. /upload-link  → a one-time ticket to put ONE file straight into the
+   *      private S3 bucket (5 minutes, size cap, file type fixed). The file
+   *      never passes through this server, so Lambda's 6 MB limit is gone.
+   *   2. /read-document → we fetch that file from the bucket and read it.
+   *
+   * ⚠️ The reading is a SUGGESTION. The website drops it into the boxes he
+   * would have typed into; he confirms; only then does /readiness see it.
+   * Always 200 with `ok: false` for anything the reader could not do, so the
+   * screen can say "try again or type it".
    *
    * ⚠️ Fake documents only until SEC (D-190). Login and the 6-read limit come
    * in milestone 3; this branch is not deployed before then.
    */
-  app.post(
-    '/api/v1/read-document',
-    // base64 makes the file ~33% bigger; room for a 5 MB file plus the JSON.
-    { bodyLimit: Math.ceil((MAX_BYTES * 4) / 3) + 64 * 1024 },
-    async (request, reply) => {
-      const body = request.body as { kind?: unknown; media_type?: unknown; data?: unknown } | null;
-      if (
-        !body ||
-        typeof body !== 'object' ||
-        !DOC_KINDS.includes(body.kind as DocKind) ||
-        typeof body.media_type !== 'string' ||
-        typeof body.data !== 'string'
-      ) {
-        return reply.status(400).send({ error: 'expected { kind, media_type, data }' });
-      }
-      return readDocument({ kind: body.kind as DocKind, media_type: body.media_type, data: body.data });
-    },
-  );
+  app.post('/api/v1/upload-link', async (request, reply) => {
+    const body = request.body as { kind?: unknown; media_type?: unknown } | null;
+    if (!body || !DOC_KINDS.includes(body.kind as DocKind) || !(MEDIA_TYPES as readonly unknown[]).includes(body.media_type)) {
+      return reply.status(400).send({ error: 'expected { kind, media_type }' });
+    }
+    const link = await createUploadLink(body.kind as DocKind, body.media_type as string);
+    if (!link) return reply.status(503).send({ error: 'upload is not configured here' });
+    return { ...link, max_bytes: maxBytesFor(body.media_type as string) };
+  });
+
+  app.post('/api/v1/read-document', async (request, reply) => {
+    const body = request.body as { kind?: unknown; key?: unknown } | null;
+    const kind = body?.kind as DocKind;
+    if (!body || !DOC_KINDS.includes(kind) || !isOurKey(body.key, kind)) {
+      return reply.status(400).send({ error: 'expected { kind, key }' });
+    }
+    const file = await fetchDocument(body.key);
+    if (!file) return { ok: false, reason: 'call_failed' };
+    return readDocument({ kind, ...file });
+  });
 
   /**
    * So the website can tell the difference between "the plain-language layer is
