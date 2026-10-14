@@ -153,6 +153,13 @@ async function run(call: () => Promise<{ error: unknown }>): Promise<AuthResult>
   }
 }
 
+/** His login token, for the API calls that need to know who he is (M3 upload). */
+export async function getAccessToken(): Promise<string | undefined> {
+  if (!client) return undefined;
+  const { data } = await client.auth.getSession();
+  return data.session?.access_token;
+}
+
 export async function getAccount(): Promise<Account> {
   if (!client) return null;
   const { data } = await client.auth.getSession();

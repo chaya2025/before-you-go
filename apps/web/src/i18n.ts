@@ -465,6 +465,11 @@ export const UI = {
   up_wrong: { he: 'זה לא נראה כמו המסמך הנכון. נסו שוב, או הקלידו.', en: 'This does not look like the right document. Try again, or type it.' },
   up_too_big: { he: 'הקובץ גדול מדי (תמונה עד 5MB, PDF עד 20MB). נסו קובץ קטן יותר, או הקלידו.', en: 'That file is too big (photo up to 5 MB, PDF up to 20 MB). Try a smaller file, or type it.' },
   up_failed: { he: 'הקריאה לא זמינה כרגע. הקלידו את הפרטים.', en: 'Reading is not available right now. Please type it.' },
+  up_login: { he: 'כדי להעלות מסמך יש להתחבר. אפשר גם להקליד את הפרטים.', en: 'Log in to upload a document. You can also type the details.' },
+  up_login_btn: { he: 'התחברות', en: 'Log in' },
+  up_limit: { he: 'לא ניתן לקרוא מסמכים נוספים בחשבון זה. הקלידו את הפרטים.', en: 'No more document reads on this account. Please type the details.' },
+  live_bad: { he: 'לא תקין:', en: 'Not in order:' },
+  live_more: { he: 'ההסבר המלא במפת הדרכים.', en: 'The full explanation is on your roadmap.' },
   up_fake_only: { he: 'גרסת ניסיון: מסמכים לדוגמה בלבד.', en: 'Test version: sample documents only.' },
 
   d_visa_title: { he: 'האשרה', en: 'Your visa' },

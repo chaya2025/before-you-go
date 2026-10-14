@@ -4,6 +4,7 @@ import { Profile, evaluate, ALL_VISA_PROFILES, ALL_PROCESSES, LicenseClass } fro
 import { explain, modelIsConfigured, type Lang } from './explain';
 import { readDocument, DOC_KINDS, MEDIA_TYPES, type DocKind } from './read-document';
 import { createUploadLink, fetchDocument, isOurKey, maxBytesFor } from './storage';
+import { supabaseQuota, bearer, type QuotaFn } from './quota';
 
 /**
  * ============================================================================
@@ -43,7 +44,8 @@ export const ALLOWED_ORIGINS = [
   ...(process.env.WEB_ORIGIN ? [process.env.WEB_ORIGIN] : []),
 ];
 
-export async function buildApp(opts: { logger?: boolean } = {}): Promise<FastifyInstance> {
+export async function buildApp(opts: { logger?: boolean; quota?: QuotaFn } = {}): Promise<FastifyInstance> {
+  const quota = opts.quota ?? supabaseQuota;
   const app = Fastify({
     logger: opts.logger === false
       ? false
@@ -196,25 +198,45 @@ export async function buildApp(opts: { logger?: boolean } = {}): Promise<Fastify
    * Always 200 with `ok: false` for anything the reader could not do, so the
    * screen can say "try again or type it".
    *
-   * ⚠️ Fake documents only until SEC (D-190). Login and the 6-read limit come
-   * in milestone 3; this branch is not deployed before then.
+   * ⭐ LOGIN + THE QUIET LIMIT (M3.3). Both calls need his login token. The
+   * ticket only asks how many reads are left; the read uses one up. Files are
+   * stored under his user id, and only his own can be read back. Out of reads
+   * → `ok: false, reason: 'limit'`, and the screen says to type it instead.
+   *
+   * ⚠️ Fake documents only until SEC (D-190).
    */
   app.post('/api/v1/upload-link', async (request, reply) => {
     const body = request.body as { kind?: unknown; media_type?: unknown } | null;
     if (!body || !DOC_KINDS.includes(body.kind as DocKind) || !(MEDIA_TYPES as readonly unknown[]).includes(body.media_type)) {
       return reply.status(400).send({ error: 'expected { kind, media_type }' });
     }
-    const link = await createUploadLink(body.kind as DocKind, body.media_type as string);
+    const q = await quota(bearer(request.headers.authorization), false);
+    if (q.status === 'no_login') return reply.status(401).send({ error: 'log in to upload' });
+    if (q.status === 'unavailable') return reply.status(503).send({ error: 'upload is not available right now' });
+    if (!q.allowed) return { ok: false, reason: 'limit' };
+
+    const link = await createUploadLink(body.kind as DocKind, body.media_type as string, q.user_id);
     if (!link) return reply.status(503).send({ error: 'upload is not configured here' });
-    return { ...link, max_bytes: maxBytesFor(body.media_type as string) };
+    return { ok: true, ...link, max_bytes: maxBytesFor(body.media_type as string) };
   });
 
   app.post('/api/v1/read-document', async (request, reply) => {
     const body = request.body as { kind?: unknown; key?: unknown } | null;
     const kind = body?.kind as DocKind;
-    if (!body || !DOC_KINDS.includes(kind) || !isOurKey(body.key, kind)) {
+    if (!body || !DOC_KINDS.includes(kind) || typeof body.key !== 'string') {
       return reply.status(400).send({ error: 'expected { kind, key }' });
     }
+    const token = bearer(request.headers.authorization);
+    const who = await quota(token, false);
+    if (who.status === 'no_login') return reply.status(401).send({ error: 'log in to upload' });
+    if (who.status === 'unavailable') return reply.status(503).send({ error: 'upload is not available right now' });
+    // His own file only, checked BEFORE a read is used up.
+    if (!isOurKey(body.key, kind, who.user_id)) return reply.status(400).send({ error: 'expected { kind, key }' });
+
+    const use = await quota(token, true);
+    if (use.status !== 'ok') return reply.status(503).send({ error: 'upload is not available right now' });
+    if (!use.allowed) return { ok: false, reason: 'limit' };
+
     const file = await fetchDocument(body.key);
     if (!file) return { ok: false, reason: 'call_failed' };
     return readDocument({ kind, ...file });

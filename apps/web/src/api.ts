@@ -146,14 +146,23 @@ export type Reading =
   | { ok: true; kind: DocKind; fields: { expires?: string; number?: string; passport_number?: string; name_latin?: string; language?: 'he' | 'en' | 'other' } }
   | { ok: false; reason: string; seen?: string };
 
-export async function readDocument(kind: DocKind, file: File): Promise<Reading> {
+export async function readDocument(kind: DocKind, file: File, token: string | undefined): Promise<Reading> {
+  if (!token) return { ok: false, reason: 'no_login' };
   const post = (path: string, body: object) =>
-    fetch(`${BASE}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    fetch(`${BASE}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    });
   try {
-    // 1. A one-time ticket for this one file.
+    // 1. A one-time ticket for this one file (needs his login, and reads left).
     const linkRes = await post('/api/v1/upload-link', { kind, media_type: file.type });
+    if (linkRes.status === 401) return { ok: false, reason: 'no_login' };
     if (!linkRes.ok) return { ok: false, reason: linkRes.status === 400 ? 'bad_file' : 'call_failed' };
-    const link = (await linkRes.json()) as { url: string; fields: Record<string, string>; key: string; max_bytes: number };
+    const link = (await linkRes.json()) as
+      | { ok: true; url: string; fields: Record<string, string>; key: string; max_bytes: number }
+      | { ok: false; reason: string };
+    if (!link.ok) return link;
     if (file.size > link.max_bytes) return { ok: false, reason: 'too_big' };
 
     // 2. Straight into the private bucket. The file never passes through our server.
@@ -163,8 +172,9 @@ export async function readDocument(kind: DocKind, file: File): Promise<Reading> 
     const up = await fetch(link.url, { method: 'POST', body: form });
     if (!up.ok) return { ok: false, reason: up.status === 400 ? 'too_big' : 'call_failed' };
 
-    // 3. We read it from the bucket.
+    // 3. We read it from the bucket (this is what uses up one of his reads).
     const res = await post('/api/v1/read-document', { kind, key: link.key });
+    if (res.status === 401) return { ok: false, reason: 'no_login' };
     if (!res.ok) return { ok: false, reason: 'call_failed' };
     return (await res.json()) as Reading;
   } catch {

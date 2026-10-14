@@ -3421,3 +3421,8 @@ body {
 .upload-read-btn { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; }
 .upload-read-btn svg { transition: none; }
 .upload-read-btn:hover svg { transform: none; }
+
+/* M3.3: live check under a documents section */
+.live-check { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; padding: 10px 14px; border-inline-start: 3px solid var(--amber); background: color-mix(in srgb, var(--amber) 8%, transparent); border-radius: 6px; }
+.live-check p { margin: 0; }
+.link-button { background: none; border: 0; padding: 0; color: inherit; font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }

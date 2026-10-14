@@ -42,16 +42,18 @@ const s3 = bucket ? new S3Client({ region: process.env.AWS_REGION ?? 'eu-central
 export const storageIsConfigured = () => s3 !== null;
 
 /**
- * ⚠️ Only names WE made are ever read back: uploads/{kind}/{random id}. A
- * browser cannot send "../" or another path and have us fetch it.
+ * ⚠️ Only names WE made are ever read back: uploads/{kind}/{user id}/{random id}.
+ * A browser cannot send "../" or another path, or another user's file, and
+ * have us fetch it.
  */
-const KEY = /^uploads\/(form_89|passport|visa|licence)\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
-export const isOurKey = (key: unknown, kind: DocKind): key is string =>
-  typeof key === 'string' && KEY.test(key) && key.startsWith(`uploads/${kind}/`);
+const UUID = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+const KEY = new RegExp(`^uploads/(form_89|passport|visa|licence)/${UUID}/${UUID}$`);
+export const isOurKey = (key: unknown, kind: DocKind, userId: string): key is string =>
+  typeof key === 'string' && KEY.test(key) && key.startsWith(`uploads/${kind}/${userId}/`);
 
-export async function createUploadLink(kind: DocKind, mediaType: string, expires = UPLOAD_LINK_SECONDS) {
+export async function createUploadLink(kind: DocKind, mediaType: string, userId: string, expires = UPLOAD_LINK_SECONDS) {
   if (!s3 || !bucket) return null;
-  const key = `uploads/${kind}/${randomUUID()}`;
+  const key = `uploads/${kind}/${userId}/${randomUUID()}`;
   const { url, fields } = await createPresignedPost(s3, {
     Bucket: bucket,
     Key: key,

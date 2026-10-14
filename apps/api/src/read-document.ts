@@ -50,7 +50,7 @@ export type Reading =
   | { ok: true; kind: DocKind; fields: ReadFields }
   | {
       ok: false;
-      reason: 'unreadable' | 'wrong_document' | 'no_key' | 'call_failed' | 'bad_file' | 'too_big';
+      reason: 'unreadable' | 'wrong_document' | 'no_key' | 'call_failed' | 'bad_file' | 'too_big' | 'limit';
       /** For wrong_document: what it looked like instead, so the screen can say so. */
       seen?: string;
     };
