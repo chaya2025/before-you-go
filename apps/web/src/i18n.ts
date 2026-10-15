@@ -720,8 +720,6 @@ export const UI = {
   expired: { he: 'עבר', en: 'Passed' },
   days_left: { he: 'ימים נותרו', en: 'days left' },
   days_ago: { he: 'ימים אחורה', en: 'days ago' },
-  not_started_clock: { he: 'עוד לא התחיל', en: 'Not started yet' },
-  unknown_clock: { he: 'חסרה תשובה כדי להתחיל את הספירה', en: 'We need one answer to start counting' },
 
   blocked_orgs: { he: 'ארגונים שיכולים לעזור', en: 'Organisations that can help' },
   blocked_expected: { he: 'צפי הכרעה', en: 'Decision expected' },

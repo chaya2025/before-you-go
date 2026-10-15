@@ -68,16 +68,13 @@ function Clock({ clock, lang }: { clock: ClockState; lang: Lang }) {
         <div className="small">{pick(clock.clock.on_expiry, lang)}</div>
       </>
     );
-  } else if (clock.status === 'running') {
+  } else {
+    /* Running. RoadSide only ever hands this a clock that counts. */
     detail = (
       <strong className={clock.warning ? 'clock-warning' : undefined}>
         <span className="num">{clock.days_left}</span> {t('days_left')}
       </strong>
     );
-  } else if (clock.status === 'unknown') {
-    detail = <span className="muted small">{t('unknown_clock')}</span>;
-  } else {
-    detail = <span className="muted small">{t('not_started_clock')}</span>;
   }
 
   return (
@@ -468,13 +465,17 @@ function Step({
  */
 export function RoadSide({ result, lang }: { result: Result; lang: Lang }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
+  /* ⚠️ Only clocks that actually count for him: running, or run out (an
+     expired clock still tells him what changed). "Missing an answer" and "not
+     started yet" are nothing to count and only confused people. Hers, 15.10. */
+  const counting = result.clocks.filter((c) => c.status === 'running' || c.status === 'expired');
 
   return (
     <>
-      {result.clocks.length > 0 && (
+      {counting.length > 0 && (
         <section className="note note-clocks">
           <h3>{t('clocks_title')}</h3>
-          {result.clocks.map((c) => (
+          {counting.map((c) => (
             <Clock key={c.clock.id} clock={c} lang={lang} />
           ))}
         </section>
