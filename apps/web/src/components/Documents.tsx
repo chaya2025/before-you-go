@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   checkForm89Number,
   checkPassportNumber,
@@ -7,8 +7,10 @@ import {
   type FieldProblem,
 } from '@byg/engine';
 import { UI, pick, type Lang } from '../i18n';
-import type { Diagnosis, DocumentQuestion } from '@byg/engine';
+import type { Diagnosis, DocumentQuestion, Result } from '@byg/engine';
 import type { Answers } from './Intake';
+import { readDocument, type DocKind, type ReadFlags, type Reading } from '../api';
+import { getAccessToken } from '../account';
 
 /**
  * ============================================================================
@@ -59,6 +61,10 @@ type Props = {
    */
   questions: Diagnosis['document_questions'];
   onSubmit: (documents: Answers) => void;
+  /** M3.3: the engine run on what is filled in right now. null if it could not run. */
+  liveCheck: (documents: Answers) => Promise<Result | null>;
+  /** M3.3: uploading needs a login; this opens the login panel. */
+  onLogin: () => void;
   onSkip: () => void;
   busy: boolean;
 };
@@ -254,7 +260,114 @@ function Section({
   );
 }
 
-export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
+/**
+ * ⭐ M3: "upload a photo instead". The reading lands in the SAME box he would
+ * have typed into, so he sees it, can fix it, and nothing reaches the engine
+ * until he presses continue. Upload and typing are one path.
+ *
+ * ⚠️ The month is also shown in words ("May 2031"): a date like 11/04/2029 can
+ * be read two ways, and a word makes a wrong reading easy to spot.
+ */
+export function UploadRead({ kind, lang, onRead, onLogin }: { kind: DocKind; lang: Lang; onRead: (r: Extract<Reading, { ok: true }>) => void; onLogin?: () => void }) {
+  const t = (k: keyof typeof UI) => pick(UI[k], lang);
+  const input = useRef<HTMLInputElement>(null);
+  const [state, setState] = useState<'idle' | 'reading' | Reading>('idle');
+
+  async function pickFile(file: File | undefined) {
+    if (!file) return;
+    setState('reading');
+    const r = await readDocument(kind, file, await getAccessToken());
+    setState(r);
+    if (r.ok) onRead(r);
+  }
+
+  const inWords = (ym: string) =>
+    new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-GB', { month: 'long', year: 'numeric' })
+      .format(new Date(`${ym}-01T12:00:00`));
+
+  const failure = (r: Extract<Reading, { ok: false }>) =>
+    r.reason === 'wrong_document' ? t('up_wrong')
+      : r.reason === 'unreadable' ? t('up_unreadable')
+      : r.reason === 'too_big' ? t('up_too_big')
+      : r.reason === 'limit' ? t('up_limit')
+      : t('up_failed');
+
+  return (
+    <div className="upload-read">
+      <button
+        type="button"
+        className="btn btn-quiet upload-read-btn"
+        disabled={state === 'reading'}
+        onClick={async () => {
+          // ⚠️ Login first, THEN the file picker: never let him pick a file we will refuse.
+          if (!(await getAccessToken())) return setState({ ok: false, reason: 'no_login' });
+          setState('idle');
+          input.current?.click();
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 16V4M7 9l5-5 5 5M4 20h16" />
+        </svg>
+        {state === 'reading' ? t('up_reading') : t('up_button')}
+      </button>
+      <input
+        ref={input}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,application/pdf"
+        hidden
+        onChange={(e) => { void pickFile(e.target.files?.[0]); e.target.value = ''; }}
+      />
+      {typeof state === 'object' && state.ok && (
+        <p className="small" role="status">
+          {t('up_read')}
+          {state.fields.expires && <> <strong>{inWords(state.fields.expires)}</strong>.</>} {t('up_check')}
+        </p>
+      )}
+      {typeof state === 'object' && !state.ok && state.reason === 'no_login' && (
+        <p className="small" role="status">
+          {t('up_login')}{' '}
+          {onLogin && <button type="button" className="link-button" onClick={onLogin}>{t('up_login_btn')}</button>}
+        </p>
+      )}
+      {typeof state === 'object' && !state.ok && state.reason !== 'no_login' && (
+        <p className="small field-error" role="status">{failure(state)}</p>
+      )}
+      <p className="small muted">{t('up_fake_only')}</p>
+    </div>
+  );
+}
+
+/**
+ * ⭐ M3.3 LIVE CHECK, under each section. What the engine said about THIS
+ * document, from the same result the report will show. No rule lives here:
+ * the list is filtered by the engine's own ids, nothing is decided.
+ */
+const ABOUT: Record<DocKind, RegExp> = {
+  form_89: /89/,
+  passport: /passport/,
+  visa: /visa/,
+  licence: /licen[cs]e|idp/,
+};
+
+function LiveNotes({ kind, result, lang }: { kind: DocKind; result: Result | null; lang: Lang }) {
+  if (!result) return null;
+  // One line each: what is wrong. The roadmap explains it (her call, M3 D-24).
+  const notes = [
+    ...result.urgent.filter((u) => ABOUT[kind].test(u.id)).map((u) => ({ id: u.id, line: `${pick(u.title, lang)}.` })),
+    ...(result.readiness?.mismatched ?? [])
+      .filter((i) => ABOUT[kind].test(i.id))
+      .map((i) => ({ id: i.id, line: `${pick(UI.live_bad, lang)} ${pick(i.title, lang)}.` })),
+  ];
+  if (!notes.length) return null;
+  return (
+    <div className="live-check" role="status">
+      {notes.map((n) => <p key={n.id} className="small"><strong>{n.line}</strong></p>)}
+      <p className="small muted">{pick(UI.live_more, lang)}</p>
+    </div>
+  );
+}
+
+export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSkip, busy }: Props) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
 
   /**
@@ -284,6 +397,23 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
   const [licenceLang, setLicenceLang] = useState<'he' | 'en' | 'other' | null>(null);
 
   /**
+   * ⭐ D-25: what the last read of each section could not fill, and why. The
+   * flag shows only while the box is still empty: once he types, his value is
+   * checked like any typed value and the flag has done its job.
+   */
+  const [readFlags, setReadFlags] = useState<Partial<Record<DocKind, ReadFlags>>>({});
+  const flagged = (kind: DocKind, field: keyof ReadFlags, value: string): FieldProblem | null => {
+    const flag = value.trim() ? undefined : readFlags[kind]?.[field];
+    if (!flag) return null;
+    if (flag === 'missing') return { severity: 'advisory', message: UI.flag_missing };
+    return {
+      severity: 'advisory',
+      message: field === 'expires' ? UI.flag_bad_date : field === 'name_latin' ? UI.flag_bad_name : UI.flag_bad_number,
+    };
+  };
+  const onRead = (kind: DocKind, flags: ReadFlags) => setReadFlags((all) => ({ ...all, [kind]: flags }));
+
+  /**
    * ⭐ Checked as he types, in the engine, in his language.
    *
    * ⚠️ `today` comes from the browser here and that is fine: it feeds a
@@ -293,15 +423,15 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
    */
   const today = new Date().toISOString().slice(0, 10);
   const problems = {
-    form_89_number: checkForm89Number(form89Number),
-    form_89_passport_number: checkPassportNumber(form89Passport),
-    form_89_name_latin: checkLatinName(form89Name),
-    passport_number: checkPassportNumber(passportNumber),
-    passport_expires: checkExpiryMonth(passportExpires, today),
-    passport_name_latin: checkLatinName(passportName),
-    visa_expires: checkExpiryMonth(visaExpires, today),
-    licence_expires: checkExpiryMonth(licenceExpires, today),
-    licence_name: checkLatinName(licenceName),
+    form_89_number: checkForm89Number(form89Number) ?? flagged('form_89', 'number', form89Number),
+    form_89_passport_number: checkPassportNumber(form89Passport) ?? flagged('form_89', 'passport_number', form89Passport),
+    form_89_name_latin: checkLatinName(form89Name) ?? flagged('form_89', 'name_latin', form89Name),
+    passport_number: checkPassportNumber(passportNumber) ?? flagged('passport', 'number', passportNumber),
+    passport_expires: checkExpiryMonth(passportExpires, today) ?? flagged('passport', 'expires', passportExpires),
+    passport_name_latin: checkLatinName(passportName) ?? flagged('passport', 'name_latin', passportName),
+    visa_expires: checkExpiryMonth(visaExpires, today) ?? flagged('visa', 'expires', visaExpires),
+    licence_expires: checkExpiryMonth(licenceExpires, today) ?? flagged('licence', 'expires', licenceExpires),
+    licence_name: checkLatinName(licenceName) ?? flagged('licence', 'name_latin', licenceName),
   };
 
   /**
@@ -318,10 +448,7 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
    * namesAgree both return 'unknown' unless BOTH sides are present, which is
    * what stops a half-filled form inventing a mismatch.
    */
-  function submit() {
-    // ⚠️ Refuses rather than sending something the engine would reject. The
-    // button is already disabled; this is the second lock, for the Enter key.
-    if (blocked) return;
+  function collect(): Answers {
     const trimmed = (v: string) => (v.trim() ? v.trim() : undefined);
     const documents: Answers = {
       /**
@@ -352,8 +479,41 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
           }
         : {}),
     };
-    onSubmit(documents);
+    return documents;
   }
+
+  function submit() {
+    // ⚠️ Refuses rather than sending something the engine would reject. The
+    // button is already disabled; this is the second lock, for the Enter key.
+    if (blocked) return;
+    onSubmit(collect());
+  }
+
+  /**
+   * ⭐ Re-checked every time a field changes (after a short pause, so typing a
+   * date doesn't fire on every key). Nothing is sent while a field has a
+   * problem typing would refuse.
+   */
+  const [live, setLive] = useState<Result | null>(null);
+  const snapshot = JSON.stringify(collect());
+  useEffect(() => {
+    if (blocked) return;
+    let stale = false;
+    const timer = setTimeout(async () => {
+      const r = await liveCheck(JSON.parse(snapshot) as Answers);
+      if (!stale) setLive(r);
+    }, 400);
+    return () => { stale = true; clearTimeout(timer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot, blocked]);
+
+  const filled = {
+    form_89: Boolean(form89Number || form89Passport || form89Name),
+    passport: Boolean(passportNumber || passportExpires || passportName),
+    visa: Boolean(visaExpires || visaValid !== null),
+    licence: Boolean(licenceExpires || licenceName || licenceLang),
+  };
+  const notes = (kind: DocKind) => (filled[kind] ? <LiveNotes kind={kind} result={live} lang={lang} /> : null);
 
   return (
     <div className="stack">
@@ -385,6 +545,17 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
           }
         }}
       >
+        <UploadRead
+          kind="form_89"
+          lang={lang}
+          onLogin={onLogin}
+          onRead={({ fields: f, flags }) => {
+            onRead('form_89', flags);
+            if (f.number) setForm89Number(f.number);
+            if (f.passport_number) setForm89Passport(f.passport_number);
+            if (f.name_latin) setForm89Name(f.name_latin);
+          }}
+        />
         <Field label={t('d_89_number')} problem={problems.form_89_number} lang={lang}>
           <input
             className="ltr"
@@ -419,6 +590,7 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
             onChange={(e) => setForm89Name(upper(e.target.value))}
           />
         </Field>
+        {notes('form_89')}
       </Section>
 
       {/* ── the passport ─────────────────────────────────────────────────── */}
@@ -431,6 +603,17 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
         help={questions.form_89.ask ? t('d_passport_help_89') : t('d_passport_help')}
         lang={lang}
       >
+        <UploadRead
+          kind="passport"
+          lang={lang}
+          onLogin={onLogin}
+          onRead={({ fields: f, flags }) => {
+            onRead('passport', flags);
+            if (f.number) setPassportNumber(f.number);
+            if (f.expires) setPassportExpires(f.expires);
+            if (f.name_latin) setPassportName(f.name_latin);
+          }}
+        />
         <Field label={t('d_passport_number')} problem={problems.passport_number} lang={lang}>
           <input
             className="ltr"
@@ -465,6 +648,7 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
             onChange={(e) => setPassportName(upper(e.target.value))}
           />
         </Field>
+        {notes('passport')}
       </Section>
 
       {/* ── the visa ─────────────────────────────────────────────────────── */}
@@ -487,6 +671,7 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
         help={t('d_visa_help')}
         lang={lang}
       >
+        <UploadRead kind="visa" lang={lang} onLogin={onLogin} onRead={({ fields: f, flags }) => { onRead('visa', flags); if (f.expires) setVisaExpires(f.expires); }} />
         <Field label={t('d_visa_expires')} problem={problems.visa_expires} lang={lang}>
           <input
             type="month"
@@ -555,6 +740,7 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
             ))}
           </div>
         )}
+        {notes('visa')}
       </Section>
 
       {/* ── the foreign licence, conversion only ─────────────────────────── */}
@@ -563,6 +749,17 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
         title={t('d_licence_title')}
         lang={lang}
       >
+        <UploadRead
+          kind="licence"
+          lang={lang}
+          onLogin={onLogin}
+          onRead={({ fields: f, flags }) => {
+            onRead('licence', flags);
+            if (f.expires) setLicenceExpires(f.expires);
+            if (f.name_latin) setLicenceName(f.name_latin);
+            if (f.language) setLicenceLang(f.language);
+          }}
+        />
           <Field label={t('d_licence_expires')} problem={problems.licence_expires} lang={lang}>
             <input
               type="month"
@@ -601,6 +798,7 @@ export function Documents({ lang, questions, onSubmit, onSkip, busy }: Props) {
               ))}
             </div>
           </Field>
+        {notes('licence')}
       </Section>
 
       <div className="stack-sm">

@@ -135,3 +135,52 @@ export const fetchCapabilities = () => get<{ plain_language: boolean }>('/api/v1
  * process becomes real, the landing page changes without this app being edited.
  */
 export const fetchProcesses = () => get<{ processes: Process[] }>('/api/v1/processes');
+
+/**
+ * ⭐ M3: send a photo or PDF to be read. The answer is a SUGGESTION for one
+ * field on the documents screen; he confirms it there. Never throws for a
+ * reading failure: `ok: false` means "try again or type it".
+ */
+export type DocKind = 'form_89' | 'passport' | 'visa' | 'licence';
+type ReadFields = { expires?: string; number?: string; passport_number?: string; name_latin?: string; language?: 'he' | 'en' | 'other' };
+/** D-25: why a box the read could not fill is empty. */
+export type ReadFlags = Partial<Record<keyof ReadFields, 'invalid' | 'missing'>>;
+export type Reading =
+  | { ok: true; kind: DocKind; fields: ReadFields; flags: ReadFlags }
+  | { ok: false; reason: string; seen?: string };
+
+export async function readDocument(kind: DocKind, file: File, token: string | undefined): Promise<Reading> {
+  if (!token) return { ok: false, reason: 'no_login' };
+  const post = (path: string, body: object) =>
+    fetch(`${BASE}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    });
+  try {
+    // 1. A one-time ticket for this one file (needs his login, and reads left).
+    const linkRes = await post('/api/v1/upload-link', { kind, media_type: file.type });
+    if (linkRes.status === 401) return { ok: false, reason: 'no_login' };
+    if (!linkRes.ok) return { ok: false, reason: linkRes.status === 400 ? 'bad_file' : 'call_failed' };
+    const link = (await linkRes.json()) as
+      | { ok: true; url: string; fields: Record<string, string>; key: string; max_bytes: number }
+      | { ok: false; reason: string };
+    if (!link.ok) return link;
+    if (file.size > link.max_bytes) return { ok: false, reason: 'too_big' };
+
+    // 2. Straight into the private bucket. The file never passes through our server.
+    const form = new FormData();
+    for (const [k, v] of Object.entries(link.fields)) form.append(k, v);
+    form.append('file', file); // S3 requires the file last.
+    const up = await fetch(link.url, { method: 'POST', body: form });
+    if (!up.ok) return { ok: false, reason: up.status === 400 ? 'too_big' : 'call_failed' };
+
+    // 3. We read it from the bucket (this is what uses up one of his reads).
+    const res = await post('/api/v1/read-document', { kind, key: link.key });
+    if (res.status === 401) return { ok: false, reason: 'no_login' };
+    if (!res.ok) return { ok: false, reason: 'call_failed' };
+    return (await res.json()) as Reading;
+  } catch {
+    return { ok: false, reason: 'call_failed' };
+  }
+}

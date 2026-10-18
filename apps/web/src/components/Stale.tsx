@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { UploadRead } from './Documents';
+import type { DocKind } from '../api';
 import type { Result } from '@byg/engine';
 import type { StatusOption } from '../api';
 import { UI, pick, type Lang } from '../i18n';
@@ -37,29 +39,41 @@ const docName = (t: T, f: DocField) =>
  * then the next. Every answer is applied to the answers; the road is rebuilt
  * once, at the end, by the caller.
  */
+/** Which upload belongs to which watched date. */
+const KIND_OF: Partial<Record<DocField, DocKind>> = {
+  visa_expires: 'visa',
+  passport_expires: 'passport',
+  license_expires: 'licence',
+};
+
 export function StaleAsk({
   docs,
   answers,
   lang,
   busy,
   onDone,
+  onLogin,
 }: {
   docs: StaleDoc[];
   answers: Record<string, unknown>;
   lang: Lang;
   busy: boolean;
   onDone: (next: Record<string, unknown>) => void;
+  onLogin?: () => void;
 }) {
   const t = useT(lang);
   const [i, setI] = useState(0);
   const [working, setWorking] = useState(answers);
   const [renewed, setRenewed] = useState(false);
   const [until, setUntil] = useState('');
+  // A renewed passport's new number and name, if he uploaded it.
+  const [extra, setExtra] = useState<Record<string, string>>({});
   const doc = docs[i];
   if (!doc) return null;
 
   const next = (renewedUntil: string | null) => {
-    const updated = applyRenewal(working, doc.field, renewedUntil);
+    const updated = { ...applyRenewal(working, doc.field, renewedUntil), ...(renewedUntil ? extra : {}) };
+    setExtra({});
     setRenewed(false);
     setUntil('');
     if (i + 1 < docs.length) {
@@ -96,6 +110,18 @@ export function StaleAsk({
             if (until > doc.expires) next(until);
           }}
         >
+          {KIND_OF[doc.field] && (
+            <UploadRead kind={KIND_OF[doc.field]!} lang={lang} onLogin={onLogin} onRead={({ fields: f }) => {
+                if (f.expires) setUntil(f.expires);
+                if (doc.field === 'passport_expires') {
+                  setExtra({
+                    ...(f.number ? { passport_number: f.number } : {}),
+                    ...(f.name_latin ? { passport_name_latin: f.name_latin } : {}),
+                  });
+                }
+              }}
+            />
+          )}
           <div className="field">
             <label htmlFor="st-until">{t('st_valid_until')}</label>
             <input
@@ -136,6 +162,7 @@ export function QuickCheck({
   busy,
   onConfirm,
   onUpdate,
+  onLogin,
 }: {
   answers: Record<string, unknown>;
   statuses: StatusOption[];
@@ -143,6 +170,7 @@ export function QuickCheck({
   busy: boolean;
   onConfirm: () => void;
   onUpdate: (next: Record<string, unknown>) => void;
+  onLogin?: () => void;
 }) {
   // ⭐ Sits INSIDE the welcome-back card (D-160, the founder): one card on return,
   // with "nothing changed" and "change details", not two cards to read.
@@ -151,6 +179,8 @@ export function QuickCheck({
   const [visaType, setVisaType] = useState(String(answers.visa_type ?? ''));
   const [visaExp, setVisaExp] = useState(readExpiry(answers, 'visa_expires') ?? '');
   const [passExp, setPassExp] = useState(readExpiry(answers, 'passport_expires') ?? '');
+  // ⚠️ A renewed passport has a NEW number; the engine checks it against the 89.
+  const [newPassport, setNewPassport] = useState<{ passport_number?: string; passport_name_latin?: string }>({});
   const label = (v: unknown) => {
     const s = statuses.find((x) => x.value === v);
     return s ? pick(s.label, lang) : t('st_not_given');
@@ -182,6 +212,7 @@ export function QuickCheck({
           const next: Record<string, unknown> = { ...answers, visa_type: visaType };
           if (visaExp) next.visa_expires = visaExp;
           if (passExp) next.passport_expires = passExp;
+          Object.assign(next, newPassport);
           onUpdate(next);
         }}
       >
@@ -193,10 +224,23 @@ export function QuickCheck({
             ))}
           </select>
         </div>
+        <UploadRead kind="visa" lang={lang} onLogin={onLogin} onRead={({ fields: f }) => f.expires && setVisaExp(f.expires)} />
         <div className="field">
           <label htmlFor="qc-visa">{t('qc_visa_until')}</label>
           <input id="qc-visa" type="month" className="num" min={MONTH_MIN} max={MONTH_MAX} value={visaExp} onChange={(e) => setVisaExp(e.target.value)} />
         </div>
+        <UploadRead
+          kind="passport"
+          lang={lang}
+          onLogin={onLogin}
+          onRead={({ fields: f }) => {
+            if (f.expires) setPassExp(f.expires);
+            setNewPassport({
+              ...(f.number ? { passport_number: f.number } : {}),
+              ...(f.name_latin ? { passport_name_latin: f.name_latin } : {}),
+            });
+          }}
+        />
         <div className="field">
           <label htmlFor="qc-pass">{t('qc_passport_until')}</label>
           <input id="qc-pass" type="month" className="num" min={MONTH_MIN} max={MONTH_MAX} value={passExp} onChange={(e) => setPassExp(e.target.value)} />

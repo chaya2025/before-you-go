@@ -456,6 +456,27 @@ export const UI = {
   d_passport_expires: { he: 'תוקף עד', en: 'Valid until' },
   d_passport_name: { he: 'השם באותיות לטיניות, כפי שמופיע בדרכון', en: 'Name in Latin letters, as printed' },
 
+  // ── M3: upload instead of typing ──
+  up_button: { he: 'העלאת מסמך', en: 'Upload document' },
+  up_reading: { he: 'קורא את המסמך…', en: 'Reading the document…' },
+  up_read: { he: 'השדות מולאו מהמסמך.', en: 'Filled in from your document.' },
+  up_check: { he: 'בדקו את הפרטים ותקנו במידת הצורך.', en: 'Check the details and correct anything wrong.' },
+  up_unreadable: { he: 'המסמך לא ברור. נסו שוב או מלאו ידנית.', en: 'Document not clear. Try again or fill in manually.' },
+  up_wrong: { he: 'מסמך שגוי. נסו שוב.', en: 'Wrong document. Try again.' },
+  // D-25: per box, after a read. Short, no tips.
+  flag_missing: { he: 'לא מולא, יש למלא ידנית.', en: 'Not filled in, fill in manually.' },
+  flag_bad_date: { he: 'תאריך לא תקין.', en: 'Date not valid.' },
+  flag_bad_number: { he: 'מספר לא תקין.', en: 'Number not valid.' },
+  flag_bad_name: { he: 'שם לא תקין.', en: 'Name not valid.' },
+  up_too_big: { he: 'הקובץ גדול מדי (תמונה עד 5MB, PDF עד 20MB). נסו קובץ קטן יותר, או הקלידו.', en: 'That file is too big (photo up to 5 MB, PDF up to 20 MB). Try a smaller file, or type it.' },
+  up_failed: { he: 'הקריאה לא זמינה כרגע. הקלידו את הפרטים.', en: 'Reading is not available right now. Please type it.' },
+  up_login: { he: 'כדי להעלות מסמך יש להתחבר. אפשר גם להקליד את הפרטים.', en: 'Log in to upload a document. You can also type the details.' },
+  up_login_btn: { he: 'התחברות', en: 'Log in' },
+  up_limit: { he: 'לא ניתן לקרוא מסמכים נוספים בחשבון זה. הקלידו את הפרטים.', en: 'No more document reads on this account. Please type the details.' },
+  live_bad: { he: 'לא תקין:', en: 'Not in order:' },
+  live_more: { he: 'ההסבר המלא במפת הדרכים.', en: 'The full explanation is on your roadmap.' },
+  up_fake_only: { he: 'גרסת ניסיון: מסמכים לדוגמה בלבד.', en: 'Test version: sample documents only.' },
+
   d_visa_title: { he: 'האשרה', en: 'Your visa' },
   d_visa_expires: { he: 'האשרה בתוקף עד', en: 'Visa valid until' },
   d_visa_help: {
@@ -704,8 +725,6 @@ export const UI = {
   expired: { he: 'עבר', en: 'Passed' },
   days_left: { he: 'ימים נותרו', en: 'days left' },
   days_ago: { he: 'ימים אחורה', en: 'days ago' },
-  not_started_clock: { he: 'עוד לא התחיל', en: 'Not started yet' },
-  unknown_clock: { he: 'חסרה תשובה כדי להתחיל את הספירה', en: 'We need one answer to start counting' },
 
   blocked_orgs: { he: 'ארגונים שיכולים לעזור', en: 'Organisations that can help' },
   blocked_expected: { he: 'צפי הכרעה', en: 'Decision expected' },
