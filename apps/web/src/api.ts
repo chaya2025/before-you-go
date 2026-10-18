@@ -142,8 +142,11 @@ export const fetchProcesses = () => get<{ processes: Process[] }>('/api/v1/proce
  * reading failure: `ok: false` means "try again or type it".
  */
 export type DocKind = 'form_89' | 'passport' | 'visa' | 'licence';
+type ReadFields = { expires?: string; number?: string; passport_number?: string; name_latin?: string; language?: 'he' | 'en' | 'other' };
+/** D-25: why a box the read could not fill is empty. */
+export type ReadFlags = Partial<Record<keyof ReadFields, 'invalid' | 'missing'>>;
 export type Reading =
-  | { ok: true; kind: DocKind; fields: { expires?: string; number?: string; passport_number?: string; name_latin?: string; language?: 'he' | 'en' | 'other' } }
+  | { ok: true; kind: DocKind; fields: ReadFields; flags: ReadFlags }
   | { ok: false; reason: string; seen?: string };
 
 export async function readDocument(kind: DocKind, file: File, token: string | undefined): Promise<Reading> {

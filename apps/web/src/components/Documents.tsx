@@ -9,7 +9,7 @@ import {
 import { UI, pick, type Lang } from '../i18n';
 import type { Diagnosis, DocumentQuestion, Result } from '@byg/engine';
 import type { Answers } from './Intake';
-import { readDocument, type DocKind, type Reading } from '../api';
+import { readDocument, type DocKind, type ReadFlags, type Reading } from '../api';
 import { getAccessToken } from '../account';
 
 /**
@@ -397,6 +397,23 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
   const [licenceLang, setLicenceLang] = useState<'he' | 'en' | 'other' | null>(null);
 
   /**
+   * ⭐ D-25: what the last read of each section could not fill, and why. The
+   * flag shows only while the box is still empty: once he types, his value is
+   * checked like any typed value and the flag has done its job.
+   */
+  const [readFlags, setReadFlags] = useState<Partial<Record<DocKind, ReadFlags>>>({});
+  const flagged = (kind: DocKind, field: keyof ReadFlags, value: string): FieldProblem | null => {
+    const flag = value.trim() ? undefined : readFlags[kind]?.[field];
+    if (!flag) return null;
+    if (flag === 'missing') return { severity: 'advisory', message: UI.flag_missing };
+    return {
+      severity: 'advisory',
+      message: field === 'expires' ? UI.flag_bad_date : field === 'name_latin' ? UI.flag_bad_name : UI.flag_bad_number,
+    };
+  };
+  const onRead = (kind: DocKind, flags: ReadFlags) => setReadFlags((all) => ({ ...all, [kind]: flags }));
+
+  /**
    * ⭐ Checked as he types, in the engine, in his language.
    *
    * ⚠️ `today` comes from the browser here and that is fine: it feeds a
@@ -406,15 +423,15 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
    */
   const today = new Date().toISOString().slice(0, 10);
   const problems = {
-    form_89_number: checkForm89Number(form89Number),
-    form_89_passport_number: checkPassportNumber(form89Passport),
-    form_89_name_latin: checkLatinName(form89Name),
-    passport_number: checkPassportNumber(passportNumber),
-    passport_expires: checkExpiryMonth(passportExpires, today),
-    passport_name_latin: checkLatinName(passportName),
-    visa_expires: checkExpiryMonth(visaExpires, today),
-    licence_expires: checkExpiryMonth(licenceExpires, today),
-    licence_name: checkLatinName(licenceName),
+    form_89_number: checkForm89Number(form89Number) ?? flagged('form_89', 'number', form89Number),
+    form_89_passport_number: checkPassportNumber(form89Passport) ?? flagged('form_89', 'passport_number', form89Passport),
+    form_89_name_latin: checkLatinName(form89Name) ?? flagged('form_89', 'name_latin', form89Name),
+    passport_number: checkPassportNumber(passportNumber) ?? flagged('passport', 'number', passportNumber),
+    passport_expires: checkExpiryMonth(passportExpires, today) ?? flagged('passport', 'expires', passportExpires),
+    passport_name_latin: checkLatinName(passportName) ?? flagged('passport', 'name_latin', passportName),
+    visa_expires: checkExpiryMonth(visaExpires, today) ?? flagged('visa', 'expires', visaExpires),
+    licence_expires: checkExpiryMonth(licenceExpires, today) ?? flagged('licence', 'expires', licenceExpires),
+    licence_name: checkLatinName(licenceName) ?? flagged('licence', 'name_latin', licenceName),
   };
 
   /**
@@ -532,7 +549,8 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
           kind="form_89"
           lang={lang}
           onLogin={onLogin}
-          onRead={({ fields: f }) => {
+          onRead={({ fields: f, flags }) => {
+            onRead('form_89', flags);
             if (f.number) setForm89Number(f.number);
             if (f.passport_number) setForm89Passport(f.passport_number);
             if (f.name_latin) setForm89Name(f.name_latin);
@@ -589,7 +607,8 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
           kind="passport"
           lang={lang}
           onLogin={onLogin}
-          onRead={({ fields: f }) => {
+          onRead={({ fields: f, flags }) => {
+            onRead('passport', flags);
             if (f.number) setPassportNumber(f.number);
             if (f.expires) setPassportExpires(f.expires);
             if (f.name_latin) setPassportName(f.name_latin);
@@ -652,7 +671,7 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
         help={t('d_visa_help')}
         lang={lang}
       >
-        <UploadRead kind="visa" lang={lang} onLogin={onLogin} onRead={({ fields: f }) => f.expires && setVisaExpires(f.expires)} />
+        <UploadRead kind="visa" lang={lang} onLogin={onLogin} onRead={({ fields: f, flags }) => { onRead('visa', flags); if (f.expires) setVisaExpires(f.expires); }} />
         <Field label={t('d_visa_expires')} problem={problems.visa_expires} lang={lang}>
           <input
             type="month"
@@ -734,7 +753,8 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
           kind="licence"
           lang={lang}
           onLogin={onLogin}
-          onRead={({ fields: f }) => {
+          onRead={({ fields: f, flags }) => {
+            onRead('licence', flags);
             if (f.expires) setLicenceExpires(f.expires);
             if (f.name_latin) setLicenceName(f.name_latin);
             if (f.language) setLicenceLang(f.language);
