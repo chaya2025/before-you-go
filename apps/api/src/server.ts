@@ -64,6 +64,8 @@ if (existsSync(WEB_DIST)) {
   // The privacy page has its own address (Google links to it, D-164). The
   // site opens it from the path; the server only has to hand over the page.
   app.get('/privacy', (_req, reply) => reply.sendFile('index.html'));
+  // Where the Google login popup lands (D-193); the site closes it from there.
+  app.get('/login-done', (_req, reply) => reply.sendFile('index.html'));
   app.log.info(`serving the website from ${WEB_DIST}`);
 }
 

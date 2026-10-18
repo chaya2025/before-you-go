@@ -463,6 +463,10 @@ export const UI = {
   up_check: { he: 'בדקו את הפרטים ותקנו במידת הצורך.', en: 'Check the details and correct anything wrong.' },
   up_unreadable: { he: 'המסמך לא ברור. נסו שוב או מלאו ידנית.', en: 'Document not clear. Try again or fill in manually.' },
   up_wrong: { he: 'מסמך שגוי. נסו שוב.', en: 'Wrong document. Try again.' },
+  // D-193: the Google popup.
+  login_done: { he: 'מתחברים…', en: 'Logging in…' },
+  login_done_failed: { he: 'ההתחברות לא הושלמה. סגרו את החלון ונסו שוב.', en: 'Login did not finish. Close this window and try again.' },
+  acct_google_wait: { he: 'ממשיכים בחלון של Google…', en: 'Continue in the Google window…' },
   // D-25: per box, after a read. Short, no tips.
   flag_missing: { he: 'לא מולא, יש למלא ידנית.', en: 'Not filled in, fill in manually.' },
   flag_bad_date: { he: 'תאריך לא תקין.', en: 'Date not valid.' },

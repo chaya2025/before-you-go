@@ -195,6 +195,39 @@ export async function signUp(email: string, password: string): Promise<AuthResul
 export const logIn = (email: string, password: string) =>
   run(() => client!.auth.signInWithPassword({ email: email.trim(), password }));
 
+/**
+ * ⭐ D-193: Google in a small window, so the page he is on never reloads and
+ * nothing he filled is lost (document numbers live only in the page's memory,
+ * never in storage, so a reload would wipe them). The window lands on
+ * /login-done, which closes itself; Supabase tells this window about the login
+ * on its own (same site, shared storage).
+ *
+ * ⚠️ The window is opened BEFORE anything is awaited. A window opened later
+ * no longer counts as coming from his click, and the browser blocks it.
+ * Blocked anyway: the old full-page way, which still logs him in.
+ */
+export const LOGIN_DONE = '/login-done';
+
+export async function logInWithGooglePopup(): Promise<AuthResult> {
+  const w = window.open('', 'byg-google-login', 'popup,width=480,height=640');
+  if (!w) return logInWithGoogle();
+  try {
+    const { data, error } = await client!.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin + LOGIN_DONE, skipBrowserRedirect: true },
+    });
+    if (error || !data.url) {
+      w.close();
+      return { ok: false, problem: problemFrom(error as never) };
+    }
+    w.location.href = data.url;
+    return { ok: true };
+  } catch {
+    w.close();
+    return { ok: false, problem: 'network' };
+  }
+}
+
 /** Leaves the page for Google, and comes back logged in. */
 export const logInWithGoogle = () =>
   run(() => client!.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: home() } }));

@@ -5,7 +5,7 @@ import {
   checkCredentials,
   emailLogin,
   logIn,
-  logInWithGoogle,
+  logInWithGooglePopup,
   sendReset,
   setNewPassword,
   signUp,
@@ -38,6 +38,8 @@ export function AccountPanel({
   const [password, setPassword] = useState('');
   const [problem, setProblem] = useState<AuthProblem | null>(null);
   const [busy, setBusy] = useState(false);
+  /** The Google window is open. The button stays live: he may have closed it. */
+  const [googleWait, setGoogleWait] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -78,12 +80,12 @@ export function AccountPanel({
 
   async function google() {
     setBusy(true);
-    const r = await logInWithGoogle();
-    // On success the browser is already leaving for Google.
-    if (!r.ok) {
-      setBusy(false);
-      setProblem(r.problem);
-    }
+    setProblem(null);
+    // The panel stays open until the login arrives; App closes it then.
+    const r = await logInWithGooglePopup();
+    setBusy(false);
+    setGoogleWait(r.ok);
+    if (!r.ok) setProblem(r.problem);
   }
 
   const title =
@@ -117,7 +119,7 @@ export function AccountPanel({
                 <path fill="#FBBC05" d="M5.8 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.1a11 11 0 0 0 0 9.8l3.7-2.8z" />
                 <path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z" />
               </svg>
-              {t('acct_google')}
+              {t(googleWait ? 'acct_google_wait' : 'acct_google')}
             </button>
             {emailLogin && mode !== 'google-only' && <p className="acct-or muted small">{t('acct_or')}</p>}
           </>

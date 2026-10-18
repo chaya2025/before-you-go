@@ -112,7 +112,11 @@ export function App() {
       clearLinkProblem();
     }
     getAccount().then(setAccount);
-    return onAccountChange((a, recovering, canReset) => {
+    // Backup for the Google popup (D-193): Supabase normally tells this window
+    // itself; coming back to it checks once more.
+    const recheck = () => getAccount().then((a) => a && setAccount((prev) => prev ?? a));
+    window.addEventListener('focus', recheck);
+    const stop = onAccountChange((a, recovering, canReset) => {
       setAccount(a);
       if (!recovering) return;
       if (canReset) return setPanel('newpass');
@@ -120,7 +124,16 @@ export function App() {
       logOut();
       setPanel('google-only');
     });
+    return () => {
+      window.removeEventListener('focus', recheck);
+      stop();
+    };
   }, []);
+
+  // Logged in from the panel (also from the Google window): the panel's job is done.
+  useEffect(() => {
+    if (account) setPanel((p) => (p === 'login' || p === 'signup' ? null : p));
+  }, [account]);
 
   /**
    * ⭐ The saved case (M1 milestone 2).
@@ -1211,7 +1224,9 @@ export function App() {
           questions={result.diagnosis.document_questions}
           onSubmit={submitDocuments}
           liveCheck={liveCheck}
-          onLogin={() => setPanel('login')}
+          // ⭐ D-193: logging in from here continues HERE, as "save my case"
+          // does, instead of opening an older saved case.
+          onLogin={saveAsGuest}
           onSkip={() => setScreen('roadmap')}
           busy={busy}
         />
