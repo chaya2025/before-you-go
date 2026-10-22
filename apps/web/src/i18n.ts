@@ -491,10 +491,10 @@ export const UI = {
   d_licence_title: { he: 'רישיון הנהיגה הזר', en: 'Your foreign driving licence' },
   d_licence_expires: { he: 'תוקף עד', en: 'Valid until' },
   d_licence_name: { he: 'השם כפי שמופיע ברישיון', en: 'The name as it appears on the licence' },
-  d_licence_lang: { he: 'באיזו שפה כתוב הרישיון?', en: 'What language is the licence written in?' },
-  d_lang_he: { he: 'עברית', en: 'Hebrew' },
-  d_lang_en: { he: 'אנגלית', en: 'English' },
-  d_lang_other: { he: 'שפה אחרת', en: 'Another language' },
+  d_licence_lang: { he: 'האם הרישיון כתוב באנגלית?', en: 'Is the licence written in English?' },
+  d_lang_en: { he: 'כן', en: 'Yes' },
+  d_lang_other: { he: 'לא', en: 'No' },
+  d_lang_unknown: { he: 'לא בטוח/ה', en: 'Not sure' },
   start_over: { he: 'להתחיל מחדש', en: 'Start over' },
 
   diagnosis_title: { he: 'זה מה שהבנו', en: 'This is what we understood' },
@@ -709,7 +709,7 @@ export const UI = {
   f_passport_89_name_match: { he: 'השם שעל מסמך ה-89', en: 'the name on your 89' },
   f_passport_license_name_match: { he: 'השם שעל הרישיון הזר', en: 'the name on your foreign licence' },
   f_months_until_license_expiry: { he: 'עד מתי הרישיון הזר בתוקף', en: 'when your foreign licence expires' },
-  f_foreign_license_language: { he: 'באיזו שפה כתוב הרישיון', en: 'what language your licence is in' },
+  f_foreign_license_language: { he: 'האם הרישיון כתוב באנגלית', en: 'whether your licence is in English' },
   f_holds_form_89: { he: 'אם מסמך ה-89 בידך', en: 'whether you hold your 89' },
   done: { he: 'הושלם', en: 'Done' },
   /* The state of a step, in a word. ⚠️ A word, never an emoji on its own: a

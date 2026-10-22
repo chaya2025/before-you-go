@@ -394,7 +394,7 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
 
   const [licenceExpires, setLicenceExpires] = useState('');
   const [licenceName, setLicenceName] = useState('');
-  const [licenceLang, setLicenceLang] = useState<'he' | 'en' | 'other' | null>(null);
+  const [licenceLang, setLicenceLang] = useState<'en' | 'other' | 'unknown' | null>(null);
 
   /**
    * ⭐ D-25: what the last read of each section could not fill, and why. The
@@ -757,7 +757,8 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
             onRead('licence', flags);
             if (f.expires) setLicenceExpires(f.expires);
             if (f.name_latin) setLicenceName(f.name_latin);
-            if (f.language) setLicenceLang(f.language);
+            // Only English matters to the נוהל; a read of "he" is just "not English".
+            if (f.language) setLicenceLang(f.language === 'en' ? 'en' : 'other');
           }}
         />
           <Field label={t('d_licence_expires')} problem={problems.licence_expires} lang={lang}>
@@ -782,10 +783,13 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
             />
           </Field>
           {/* Drives doc.translation, which existed in the data with no way to
-              know whether it applied to this person. */}
+              know whether it applied to this person. Asked as "is it in
+              English?" because the נוהל exempts English only: a foreign
+              licence in Hebrew is not a real case. "Not sure" keeps the
+              translation on the list. */}
           <Field label={t('d_licence_lang')}>
             <div className="stack-sm">
-              {(['he', 'en', 'other'] as const).map((code) => (
+              {(['en', 'other', 'unknown'] as const).map((code) => (
                 <button
                   key={code}
                   type="button"
@@ -793,7 +797,7 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
                   aria-pressed={licenceLang === code}
                   onClick={() => setLicenceLang(code)}
                 >
-                  <span>{t(code === 'he' ? 'd_lang_he' : code === 'en' ? 'd_lang_en' : 'd_lang_other')}</span>
+                  <span>{t(code === 'en' ? 'd_lang_en' : code === 'other' ? 'd_lang_other' : 'd_lang_unknown')}</span>
                 </button>
               ))}
             </div>
