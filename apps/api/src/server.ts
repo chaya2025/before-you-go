@@ -71,7 +71,7 @@ if (existsSync(WEB_DIST)) {
 
 try {
   await app.listen({ port: PORT, host: HOST });
-  app.log.info(`Before You Go API · http://${HOST}:${PORT}`);
+  app.log.info(`BeforeYouGo API · http://${HOST}:${PORT}`);
 } catch (err) {
   app.log.error(err);
   process.exit(1);

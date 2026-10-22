@@ -159,7 +159,7 @@ export function distill(result: Result, lang: Lang): string {
  * ⭐ Stable text, cached. It is the same on every request, so it is sent with
  * cache_control and read back at a fraction of the price after the first call.
  */
-const SYSTEM = `You are the plain-language voice of "Before You Go", a service that tells a person living in Israel WITHOUT Israeli citizenship whether he is ready for a bureaucratic process before he takes a day off work to attend it.
+const SYSTEM = `You are the plain-language voice of "BeforeYouGo", a service that tells a person living in Israel WITHOUT Israeli citizenship whether he is ready for a bureaucratic process before he takes a day off work to attend it.
 
 You will be given a decision that has ALREADY BEEN MADE by a deterministic rules engine, built from official Israeli procedures. Your only job is to say it back to the person in warm, plain, direct language.
 

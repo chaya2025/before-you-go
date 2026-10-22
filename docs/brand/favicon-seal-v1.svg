@@ -1,0 +1,9 @@
+<!-- The seal from the masthead (App.tsx), redrawn for a 16px tab:
+     a solid ink disc so it reads on light and dark tab bars,
+     one paper ring, the amber point, four compass marks. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <circle cx="16" cy="16" r="16" fill="#132e2b"/>
+  <circle cx="16" cy="16" r="10.5" fill="none" stroke="#faf7f1" stroke-width="1.6"/>
+  <circle cx="16" cy="16" r="5" fill="#c8781e"/>
+  <path d="M16 2.5v3.5M16 26v3.5M2.5 16h3.5M26 16h3.5" stroke="#faf7f1" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

@@ -27,7 +27,7 @@ export const dirFor = (lang: Lang): 'rtl' | 'ltr' => (lang === 'he' ? 'rtl' : 'l
 
 /** Interface strings. Content comes from the engine; this is only the chrome. */
 export const UI = {
-  brand: { he: 'Before You Go', en: 'Before You Go' },
+  brand: { he: 'BeforeYouGo', en: 'BeforeYouGo' },
   tagline: { he: 'לדעת לפני שמגיעים', en: 'Know before you go' },
   /* Names the progress rail for a screen reader; the marks carry no text. */
   progress_label: { he: 'התקדמות בשאלון', en: 'Progress through the questions' },

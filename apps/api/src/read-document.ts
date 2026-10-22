@@ -117,7 +117,7 @@ const TOOL: Anthropic.Tool = {
   },
 };
 
-const SYSTEM = `You read identity documents for "Before You Go", a service that checks whether a person living in Israel is ready for a government process.
+const SYSTEM = `You read identity documents for "BeforeYouGo", a service that checks whether a person living in Israel is ready for a government process.
 
 You will be shown ONE image or PDF and told which document the person says it is. Fill in the report_document tool and nothing else.
 

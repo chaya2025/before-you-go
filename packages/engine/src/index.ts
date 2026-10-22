@@ -1,5 +1,5 @@
 /**
- * @byg/engine — the rules of "Before You Go".
+ * @byg/engine — the rules of "BeforeYouGo".
  *
  * This package is the product. Everything else (the website, the server) is a
  * way to reach it. It is deliberately pure: it never touches the network, the

@@ -40,7 +40,7 @@ import { useReveal } from './useReveal';
 
 /**
  * ============================================================================
- * Before You Go
+ * BeforeYouGo
  * ============================================================================
  *
  * Four screens:
@@ -704,21 +704,19 @@ export function App() {
           }}
         >
           {/**
-           * ⭐ The seal. The PRD's own statement of the brand is
-           * "נקודת אור אחת בענבר שמסמנת היכן אתה עומד", drawn here as a stamp:
-           * a ruled circle, a dashed inner ring, the amber point at the centre,
-           * four marks at the compass points. Drawn rather than an image file,
-           * so it takes the ink colour and needs no load.
+           * ⭐ The doorway (D-198). The site is the moment before you walk into
+           * the office: an arched door on its threshold, with the brand's one
+           * amber point ("נקודת אור אחת בענבר שמסמנת היכן אתה עומד") standing
+           * in it. Same drawing as public/favicon.svg. Drawn rather than an
+           * image file, so it takes the ink colour and needs no load.
            */}
-          <svg className="seal" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-            <circle cx="20" cy="20" r="18.25" stroke="currentColor" strokeWidth="1.5" />
-            <circle cx="20" cy="20" r="13.5" stroke="currentColor" strokeWidth="0.75" strokeDasharray="2 3" />
-            <circle cx="20" cy="20" r="4.6" fill="var(--amber)" />
-            <path d="M20 2.2v4M20 33.8v4M2.2 20h4M33.8 20h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          <svg className="seal" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <path d="M9 27V14a7 7 0 0 1 14 0v13" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M4 27h24" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+            <circle cx="16" cy="20" r="3.4" fill="var(--amber)" />
           </svg>
           <span className="mark-txt">
             <h1 className="ltr">{t('brand')}</h1>
-            <i>{t('tagline')}</i>
           </span>
         </a>
 
