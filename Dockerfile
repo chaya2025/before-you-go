@@ -1,6 +1,6 @@
 # =============================================================================
-# How Before You Go is packaged. GitHub Actions builds this file for AWS Lambda
-# (aws-image workflow). Render's render.yaml can still run it if resumed.
+# How BeforeYouGo is packaged. GitHub Actions builds this file for AWS Lambda
+# (aws-image workflow).
 # =============================================================================
 #
 # One container, one Node server serving both the website and the API. Nothing

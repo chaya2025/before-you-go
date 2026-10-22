@@ -49,7 +49,7 @@ const PAGE: Record<Lang, { title: string; updated: string; back: string; section
           'שרתי האתר לא שומרים את התשובות שלך ולא רושמים אותן.',
           'אנחנו לא מוכרים מידע, לא מציגים פרסומות ולא משתמשים בכלי מעקב.',
         ],
-        note: 'Storage: Supabase (EU, Frankfurt). Hosting: Render.',
+        note: 'Storage: Supabase (EU, Frankfurt). Hosting: AWS (EU, Frankfurt).',
       },
       {
         h: 'מחיקה',
@@ -87,7 +87,7 @@ const PAGE: Record<Lang, { title: string; updated: string; back: string; section
           'The site’s servers do not keep or log your answers.',
           'We do not sell data, show ads, or use tracking tools.',
         ],
-        note: 'Storage: Supabase (EU, Frankfurt). Hosting: Render.',
+        note: 'Storage: Supabase (EU, Frankfurt). Hosting: AWS (EU, Frankfurt).',
       },
       {
         h: 'Deleting',

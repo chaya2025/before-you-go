@@ -1,52 +1,73 @@
-# Before You Go (לדעת לפני שמגיעים)
+# BeforeYouGo · לדעת לפני שמגיעים
 
-Checks whether a non-citizen resident of Israel is ready for a bureaucratic process before they show up. First process: getting or converting a driver's licence.
+Checks whether a person living in Israel without citizenship is ready for a government process before they go to the office: which documents they need, what is missing, and the steps in order. The first process covered is getting or converting an Israeli driver's licence.
 
-Live demo: https://8mt068hzw3.execute-api.eu-central-1.amazonaws.com (AWS Lambda, Frankfurt; a few seconds to wake after a quiet stretch)
+**Live:** https://8mt068hzw3.execute-api.eu-central-1.amazonaws.com
+(The first load after a quiet stretch can take a few seconds.)
 
-## In short
-- **Who it's for:** people who live in Israel without citizenship. Every office visit is a gamble on whether you brought the right papers, and the rules for your status are scattered or missing.
-- **What it does:** you answer a short form, it tells you if you're ready, what's missing, and the steps in order. A plain-language explanation sits on top.
-- **How it's built:** the rules are written as data and checked by a pure logic engine, so the answer comes from the rules, never from an AI guess. AI only rewords the result, and the site still works without it.
-- **Stack:** TypeScript, React + Vite, Fastify, Zod, Supabase (Postgres with row-level security), Docker, AWS Lambda.
-- **Quality:** automated tests run on every push, and a failing test blocks the deploy.
-- **Hosting:** runs on AWS Lambda (Frankfurt) behind API Gateway. GitHub Actions builds the image and deploys it only after the tests pass, logging in to AWS with a short-lived pass (OIDC), no stored keys. Render is suspended as a backup.
-- **Next:** a second feature: reading the user's documents and deleting them right after.
+## Features
+- **Readiness check.** A short form produces a verdict (ready, or what is missing) and an ordered roadmap of the steps, each tied to the rule it comes from.
+- **Plain-language summary.** An AI layer rewords the result in plain words. The verdict itself always comes from the rules; if the AI is unavailable, the site falls back to fixed text.
+- **Document upload.** Upload a photo or PDF of a passport, visa or foreign licence. The fields are read automatically, the user confirms or corrects them, and the rules engine judges. Wrong or unreadable documents are refused, and fields that could not be read are flagged for manual entry.
+- **Live checks.** Problems show up while the user fills in their details, for example a passport that expires before the likely test date.
+- **Accounts.** Email or Google sign-in. A case is saved and resumes where the user left off. Answers that may have gone out of date are asked again.
+- **Hebrew and English.**
 
-## The map
+## How it works
 
 ```
-packages/engine/     THE BRAIN. Pure logic, no internet, no screen.
-  src/                 evaluate.ts, readiness.ts, domain.ts (the data shapes, Zod)
-  src/data/            the licence rules, written as data
-  fixtures/            fake test people
-apps/api/            THE SERVER. Fastify. Validates, calls the engine, asks Claude for plain words.
-  src/                 app.ts (routes), server.ts (starts it), explain.ts (Claude layer)
-apps/web/            THE WEBSITE. React + Vite.
-  src/                 App.tsx (which screen), api.ts (calls the server), components/ (the screens)
-docs/                the POC build plan, the PRD template
-Dockerfile           the recipe for the container
-render.yaml          kept only to resume the suspended Render backup
-package.json         the 3 packages + the commands below
+Browser (React)
+   │  answers, or an uploaded document
+   ▼
+API (Fastify on AWS Lambda) ── validates input (Zod)
+   │
+   ├─► Rules engine ── pure TypeScript, no network
+   │     the licence rules are stored as data and evaluated deterministically
+   │
+   ├─► Claude ── reads fields from documents · writes the plain-language summary
+   │
+   ├─► S3 (private) ── uploads go straight from the browser via short-lived signed links
+   │
+   └─► Supabase ── accounts, saved cases (Postgres with row-level security)
 ```
 
-**Ignore, all automatic:** `node_modules/` (downloaded libraries), `dist/` (built site), `.git/`, `package-lock.json`, `tsconfig*.json`, `.gitignore`, `.dockerignore`. **Never share:** `.env` (the secret key).
+The rules are the source of truth. The AI never decides whether someone is eligible: it only reads documents (and the user confirms what it read) and rewords results.
 
-## One request, end to end
-Form (web) → `POST /api/v1/readiness` (api) → `evaluate()` reads `data/` (engine) → `buildReadiness()` → JSON back → roadmap + report on screen → `POST /api/v1/explain` → plain words. With no `ANTHROPIC_API_KEY` set (the case now, D-139) that returns the fixed text from the rules and calls nothing paid. If Claude is down, the site still works from the rules.
+## Stack
+TypeScript throughout · React + Vite · Fastify · Zod · Supabase (Auth + Postgres) · AWS Lambda, API Gateway, S3, ECR · Docker · Claude API · Vitest · GitHub Actions
 
-## Commands
-Needs Node 22 (the version the Dockerfile uses; at least 20.12). Run `npm install` once first.
+## Security and privacy
+- Users can only read and write their own rows (Postgres row-level security).
+- The document bucket is private and encrypted, with all public access blocked. Uploads use signed links that expire after 5 minutes and are capped in size.
+- Document reading requires a signed-in user and has a usage limit.
+- Deploys authenticate to AWS with short-lived OIDC credentials; no AWS keys are stored in GitHub.
+- The browser only ever receives the public Supabase key.
+- Development and tests use fake documents only.
 
-| What | Command |
+## Repository layout
+```
+packages/engine/   rules engine: data model, licence rules as data, evaluation, fixtures
+apps/api/          Fastify server: routes, document reading, plain-language layer, storage
+apps/web/          React website
+Dockerfile         single container serving the API and the built website
+.github/workflows/ tests, AWS deploy, keep-alive
+```
+
+## Running locally
+Requires Node 22.
+
+```bash
+npm install
+cp .env.example .env          # fill in your own values
+npm run dev:api               # API
+npm run dev:web               # website on http://localhost:5173
+```
+
+| Command | What it does |
 |---|---|
-| Install everything | `npm install` |
-| Run the server | `npm run dev:api` |
-| Run the website | `npm run dev:web`, then http://localhost:5173 |
-| All tests | `npm test` |
-| Check the rules data | `npm run audit` |
+| `npm test` | all test suites (engine, API, web) |
+| `npm run typecheck` | type-check every package |
+| `npm run audit` | check the rules data for consistency |
 
-## Decisions and status
-Not in this repo, on purpose. They live in the project notes: `project-notes/`
-- `decisions/decision-log.md`: every decision, with the why
-- `status.md`: where the project is now
+## Deployment
+Every push to `main` runs the tests. Only when they pass does GitHub Actions build the container, push it to Amazon ECR, switch the Lambda function to the new image and confirm the site answers.
