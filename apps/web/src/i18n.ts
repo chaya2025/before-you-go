@@ -77,7 +77,7 @@ export const UI = {
   },
   hero_cta: { he: 'התחלת בדיקת מוכנות', en: 'Begin the readiness check' },
   hero_cta_secondary: { he: 'איך זה עובד', en: 'How it works' },
-  hero_meta: { he: 'כ־4 דקות · ללא הרשמה', en: 'About 4 minutes · no registration' },
+  hero_meta: { he: 'כ־4 דקות · אפשר גם בלי הרשמה', en: 'About 4 minutes · sign-up optional' },
 
   // ── what the person receives ─────────────────────────────────────────────
   gets_kicker: { he: 'מה אנחנו מציעים', en: 'What we offer' },
@@ -141,8 +141,8 @@ export const UI = {
     en: 'Four minutes here, instead of a wasted day there.',
   },
   close_note: {
-    he: 'ללא הרשמה, ללא שמירת פרטים, וכל דרישה נושאת את הסעיף שממנו נלקחה.',
-    en: 'No registration, nothing stored, and every requirement carries the clause it came from.',
+    he: 'אפשר להתחיל כאורח או לשמור את התיק בחשבון. כל דרישה נושאת את הסעיף שממנו נלקחה.',
+    en: 'Start as a guest or save your case to an account. Every requirement carries the clause it came from.',
   },
   at_authority: { he: 'מול', en: 'With' },
 
