@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import type { DocKind } from './read-document';
 
@@ -17,12 +17,15 @@ import type { DocKind } from './read-document';
  * presigned POST can (`content-length-range`). Without a cap, one ticket
  * could fill the bucket. (M3 D-20)
  *
- * ⚠️ FILES ARE KEPT (decision M3 D-13). The bucket is private, blocks
- * all public access, and is encrypted by AWS by default. Tel Aviv region,
- * our own encryption key, retention rules and an access log are SEC (D-190).
+ * ⚠️ FILES ARE DELETED AFTER A GOOD READ (D-202, replaces M3 D-13). Once
+ * Claude has read the file and the reading passed our checks, we delete it.
+ * A FAILED read keeps it (SEC D-1): the bucket's lifecycle rule deletes every
+ * file 1 day after upload (infra/s3-lifecycle.json). That same rule covers
+ * abandoned uploads and deleted accounts (SEC D-5). The bucket is private,
+ * blocks all public access, and is encrypted by AWS by default.
  *
- * ⚠️ Locally the key comes from .env (an IAM user that can only put and get
- * in this one bucket). On Lambda there is no key: the function's role
+ * ⚠️ Locally the key comes from .env (an IAM user that can only put, get and
+ * delete in this one bucket, see infra/iam-docs-bucket-policy.json). On Lambda there is no key: the function's role
  * carries the permission. Same code, the SDK finds whichever is there.
  */
 
@@ -78,5 +81,18 @@ export async function fetchDocument(key: string): Promise<{ media_type: string; 
   } catch {
     // ⚠️ Nothing logged: the key names a person's document.
     return null;
+  }
+}
+
+/**
+ * ⭐ Delete the file after a good read. Never throws: if S3 refuses, he still
+ * gets his reading and the 1-day lifecycle rule removes the file anyway.
+ */
+export async function deleteDocument(key: string): Promise<void> {
+  if (!s3 || !bucket) return;
+  try {
+    await s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
+  } catch {
+    // ⚠️ Nothing logged: the key names a person's document.
   }
 }

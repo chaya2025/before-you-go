@@ -1,9 +1,10 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
+import type Anthropic from '@anthropic-ai/sdk';
 import { Profile, evaluate, ALL_VISA_PROFILES, ALL_PROCESSES, LicenseClass } from '@byg/engine';
 import { explain, modelIsConfigured, type Lang } from './explain';
 import { readDocument, DOC_KINDS, MEDIA_TYPES, type DocKind } from './read-document';
-import { createUploadLink, fetchDocument, isOurKey, maxBytesFor } from './storage';
+import { createUploadLink, deleteDocument, fetchDocument, isOurKey, maxBytesFor } from './storage';
 import { supabaseQuota, bearer, type QuotaFn } from './quota';
 
 /**
@@ -44,7 +45,9 @@ export const ALLOWED_ORIGINS = [
   ...(process.env.WEB_ORIGIN ? [process.env.WEB_ORIGIN] : []),
 ];
 
-export async function buildApp(opts: { logger?: boolean; quota?: QuotaFn } = {}): Promise<FastifyInstance> {
+export async function buildApp(
+  opts: { logger?: boolean; quota?: QuotaFn; /** Tests only: a stand-in for Claude. */ readClient?: Anthropic | null } = {},
+): Promise<FastifyInstance> {
   const quota = opts.quota ?? supabaseQuota;
   const app = Fastify({
     logger: opts.logger === false
@@ -203,6 +206,9 @@ export async function buildApp(opts: { logger?: boolean; quota?: QuotaFn } = {})
    * stored under his user id, and only his own can be read back. Out of reads
    * → `ok: false, reason: 'limit'`, and the screen says to type it instead.
    *
+   * ⭐ After a good read the file is deleted from the bucket (D-202). A failed
+   * read leaves it for the bucket's 1-day lifecycle rule (SEC D-1).
+   *
    * ⚠️ Fake documents only until SEC (D-190).
    */
   app.post('/api/v1/upload-link', async (request, reply) => {
@@ -239,7 +245,12 @@ export async function buildApp(opts: { logger?: boolean; quota?: QuotaFn } = {})
 
     const file = await fetchDocument(body.key);
     if (!file) return { ok: false, reason: 'call_failed' };
-    return readDocument({ kind, ...file });
+    const reading = await readDocument({ kind, ...file }, { client: opts.readClient });
+    // ⭐ Good read: the file has done its job, delete it now (D-202).
+    // Failed read: keep it, the 1-day lifecycle rule deletes it (SEC D-1).
+    // Awaited, because Lambda may freeze the moment we answer.
+    if (reading.ok) await deleteDocument(body.key);
+    return reading;
   });
 
   /**
