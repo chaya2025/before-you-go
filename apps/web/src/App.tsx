@@ -195,6 +195,12 @@ export function App() {
     window.addEventListener('popstate', back);
     return () => window.removeEventListener('popstate', back);
   }, []);
+  /** The other language, remembered on any device when logged in (D-152). */
+  const switchLang = async () => {
+    const next = lang === 'he' ? 'en' : 'he';
+    setLang(next);
+    if (account) await saveLang(next).catch(() => {});
+  };
   const openPage = (p: 'settings' | 'privacy' | null) => {
     const path = p === 'privacy' ? '/privacy' : '/';
     if (window.location.pathname !== path) window.history.pushState(null, '', path);
@@ -745,10 +751,8 @@ export function App() {
           <button
             className="btn btn-quiet"
             onClick={() => {
-            const next = lang === 'he' ? 'en' : 'he';
-            setLang(next);
-            if (account) saveLang(next).catch(() => {}); // remembered on any device (D-152)
-          }}
+              switchLang();
+            }}
             aria-label={lang === 'he' ? 'Switch to English' : 'עבור לעברית'}
           >
             {lang === 'he' ? 'EN' : 'עב'}
@@ -788,15 +792,23 @@ export function App() {
       </>
     );
   }
-  if (page === 'settings' && account) {
+  // Logged out while here: Settings shows only "nothing is saved" (SEC M3).
+  if (page === 'settings') {
     return (
       <>
         {header}
         <Settings
           account={account}
           lang={lang}
+          statuses={statuses?.statuses ?? []}
           onBack={() => openPage(null)}
           onPrivacy={() => openPage('privacy')}
+          onChangeLang={switchLang}
+          onEditCase={() => {
+            // The questions, filled in with his answers (Intake starts from them).
+            openPage(null);
+            setScreen('intake');
+          }}
           onDeleted={() => {
             setDeletedNote(true);
             openPage(null);

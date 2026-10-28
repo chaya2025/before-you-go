@@ -3415,6 +3415,14 @@ body {
 .site-foot { text-align: center; padding: 1.25rem var(--gap); background: var(--ink-deep); }
 .site-foot a { color: var(--paper); font-size: 0.9rem; }
 .deleted-note { margin: 0; padding: 0.75rem var(--gap); text-align: center; background: var(--amber-soft); color: var(--amber-ink); }
+/* SEC M3: "my data". Same fact tiles as the quick check; each fix is a quiet link under its fact. */
+.my-data h4 { margin: 0; font-family: var(--font-display); font-size: 1rem; }
+.my-data .qc-facts dd { overflow-wrap: anywhere; }
+/* .qc-facts zeroes its margin; inside this card the tiles need the card's rhythm back. */
+.my-data.stack-sm > * + *, .my-case.stack-sm > * + * { margin-block-start: var(--gap); }
+.my-fix { display: inline-block; margin-block-start: 0.3rem; background: none; border: 0; padding: 0; font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--amber-ink); text-decoration: underline; cursor: pointer; }
+.my-fix:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.my-delete { color: var(--uncertain); }
 
 /* M3: upload a document, top of each documents section */
 .upload-read { display: flex; flex-direction: column; gap: 6px; padding-bottom: 14px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
