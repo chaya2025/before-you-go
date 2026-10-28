@@ -400,3 +400,43 @@ export function takePending(): { answers: Record<string, unknown>; done: string[
     return null;
   }
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SEC M3: "my data". Still the only file that talks to Supabase.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** The quiet limit in `document_read` (migration 20261014180000). */
+export const READ_LIMIT = 6;
+
+/**
+ * Everything the database holds about him (definitions doc, table 3), minus
+ * the login itself, which the session already has.
+ * `reads` is null when the counter could not be asked.
+ */
+export type MyData = { lang: 'he' | 'en' | null; cases: SavedCase[]; reads: number | null };
+
+/**
+ * ⭐ Read through the SAME public client and HIS login as every other screen,
+ * so RLS decides what comes back: only his own rows. Three reads, no writes:
+ *   - profiles: his language (no row = never chose one)
+ *   - cases: every case he saved, newest first (not only the newest one the
+ *     road opens, so nothing saved is left out)
+ *   - document_read(consume = false): the counter's own "how many left", which
+ *     never uses one. The table itself has no rights for the site at all.
+ */
+export async function loadMyData(): Promise<MyData> {
+  if (!client) throw new Error('accounts off');
+  const [p, c, r] = await Promise.all([
+    client.from('profiles').select('lang').maybeSingle(),
+    client.from('cases').select('id, answers, done, confirmed_at, updated_at').order('updated_at', { ascending: false }),
+    client.rpc('document_read', { consume: false }),
+  ]);
+  if (p.error) throw p.error;
+  if (c.error) throw c.error;
+  const left = (r.data as { left?: unknown } | null)?.left;
+  return {
+    lang: (p.data?.lang as 'he' | 'en' | undefined) ?? null,
+    cases: ((c.data ?? []) as CaseRow[]).map(toCase),
+    reads: !r.error && typeof left === 'number' ? READ_LIMIT - left : null,
+  };
+}

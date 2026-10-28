@@ -8,6 +8,8 @@ import {
   type Account,
   type AuthProblem,
 } from '../account';
+import type { StatusOption } from '../api';
+import { MyDataCard, MyDataView } from './MyData';
 
 /**
  * M1 milestone 4 (D-152): the account settings page, from the account menu.
@@ -19,15 +21,54 @@ import {
 export function Settings({
   account,
   lang,
+  statuses,
   onBack,
   onPrivacy,
   onDeleted,
+  onEditCase,
+  onChangeLang,
 }: {
-  account: NonNullable<Account>;
+  /** null: logged out while on this page. Only the "nothing saved" line shows (SEC M3). */
+  account: Account;
   lang: Lang;
+  statuses: StatusOption[];
   onBack: () => void;
   onPrivacy: () => void;
   onDeleted: () => void;
+  onEditCase: () => void;
+  onChangeLang: () => Promise<void>;
+}) {
+  const t = (k: keyof typeof UI) => pick(UI[k], lang);
+  if (!account)
+    return (
+      <main className="page stack settings">
+        <button className="btn btn-quiet back-link" onClick={onBack}>
+          {t('set_back')}
+        </button>
+        <MyDataView account={null} lang={lang} data={null} statuses={statuses} onEditCase={onEditCase} onChangeLang={onChangeLang} />
+      </main>
+    );
+  return <SignedIn {...{ account, lang, statuses, onBack, onPrivacy, onDeleted, onEditCase, onChangeLang }} />;
+}
+
+function SignedIn({
+  account,
+  lang,
+  statuses,
+  onBack,
+  onPrivacy,
+  onDeleted,
+  onEditCase,
+  onChangeLang,
+}: {
+  account: NonNullable<Account>;
+  lang: Lang;
+  statuses: StatusOption[];
+  onBack: () => void;
+  onPrivacy: () => void;
+  onDeleted: () => void;
+  onEditCase: () => void;
+  onChangeLang: () => Promise<void>;
 }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
   const err = (p: AuthProblem) => t(`acct_err_${p}` as keyof typeof UI);
@@ -103,6 +144,8 @@ export function Settings({
           </>
         )}
       </section>
+
+      <MyDataCard account={account} lang={lang} statuses={statuses} onEditCase={onEditCase} onChangeLang={onChangeLang} />
 
       <section className="card stack-sm" aria-labelledby="set-data">
         <h3 id="set-data">{t('set_data')}</h3>
