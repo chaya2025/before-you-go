@@ -899,6 +899,17 @@ export const UI = {
   ch_urgent_cleared: { he: 'כבר לא דחוף:', en: 'No longer urgent:' },
   ch_step_added: { he: 'נוסף שלב:', en: 'Step added:' },
   ch_step_removed: { he: 'ירד שלב:', en: 'Step removed:' },
+
+  // ── the notice before he enters anything (SEC M2, D-6, D-7) ──────────────
+  // ⚠️ English is the founder's approved text, word for word. It must not say
+  // "optional" (D-7): the more he fills in, the better his report.
+  consent_title: { he: 'לפני שמתחילים.', en: 'Before you start.' },
+  consent_body: {
+    he: 'ככל שתמלא יותר פרטים, הדוח שלך יהיה מדויק יותר. אין חובה חוקית למסור את המידע הזה, והוא משמש רק להכנת הדוח שלך. המידע מעובד אצל ספקי הענן שלנו באיחוד האירופי, AWS ו-Supabase, וקריאת המסמכים וההסברים באמצעות בינה מלאכותית נעשים ב-Claude של חברת Anthropic בארה״ב. מסמכים שהועלו נמחקים לאחר הקריאה.',
+    en: "The more you fill in, the more accurate your report. There's no legal obligation to provide this information, and it's used only to build your report. It's processed by our cloud providers in the EU (AWS, Supabase), and AI reading and explanations run on Claude (Anthropic, USA). Uploaded documents are deleted after reading.",
+  },
+  consent_agree: { he: 'הבנתי ואני מסכים', en: 'I understand and agree' },
+  consent_continue: { he: 'המשך', en: 'Continue' },
 } as const;
 
 /**
