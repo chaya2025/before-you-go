@@ -17,6 +17,8 @@ import { GuestSave, SavedMark, WelcomeBack, type SaveState } from './components/
 import { ChangedNote, QuickCheck, StaleAsk, dmy } from './components/Stale';
 import { Settings } from './components/Settings';
 import { Privacy } from './components/Privacy';
+import { Consent } from './components/Consent';
+import { forgetConsent, hasConsented, needsConsent, rememberConsent } from './consent';
 import { staleDocs, whatChanged, type Change, type StaleDoc } from './stale';
 import {
   accountsEnabled,
@@ -95,6 +97,8 @@ export function App() {
   const [processes, setProcesses] = useState<Process[]>([]);
   /** The plain-words panel, opened from the button in the corner. */
   const [asking, setAsking] = useState(false);
+  /** SEC M2: he ticked the notice this visit (browser only, D-2). */
+  const [consented, setConsented] = useState(hasConsented);
 
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
 
@@ -611,6 +615,9 @@ export function App() {
     setChange(null);
     setSameRoad(false);
     setConfirmedAt(null);
+    // A new case, or the next person at a shared screen: the notice asks again.
+    forgetConsent();
+    setConsented(false);
     // ⚠️ Back to the landing page, not into the visa question. Starting over
     // should not drop somebody straight back into the coldest screen.
     setScreen('welcome');
@@ -795,6 +802,34 @@ export function App() {
             openPage(null);
           }}
         />
+      </>
+    );
+  }
+
+  /**
+   * ⭐ SEC M2 (D-6): the notice comes before ANY screen of the flow, not only
+   * after "start". A saved case opens on the road, the return from Google and
+   * the browser's back/forward land anywhere, and the road's back button leads
+   * to the upload. One gate here covers every way in.
+   */
+  if (needsConsent(screen, consented)) {
+    return (
+      <>
+        {header}
+        <section className="screen-band screen-band-form">
+          <div className="screen-band-in">
+            <p className="kicker">{t('band_kicker_intake')}</p>
+          </div>
+        </section>
+        <div className="page stack">
+          <Consent
+            lang={lang}
+            onAgree={() => {
+              rememberConsent();
+              setConsented(true);
+            }}
+          />
+        </div>
       </>
     );
   }
