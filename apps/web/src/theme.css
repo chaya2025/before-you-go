@@ -2368,6 +2368,7 @@ h1, h2, h3 { text-wrap: balance; }
 .nav-back:dir(ltr):hover svg { transform: translateX(-2px); }
 .nav-back:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 3px; }
 .seal { width: 34px; height: 34px; flex: none; }
+.logo-3d { width: 34px; height: 34px; flex: none; border-radius: 8px; display: block; }
 .mark-txt { display: flex; flex-direction: column; line-height: 1.05; }
 .mark-txt h1 { font-size: 1.05rem; letter-spacing: 0.01em; margin: 0; }
 
