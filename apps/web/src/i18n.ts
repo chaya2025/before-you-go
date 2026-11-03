@@ -799,7 +799,8 @@ export const UI = {
   my_fix_case: { he: 'עריכת התשובות', en: 'Edit answers' },
   my_reads: { he: 'מסמכים שהמערכת קראה', en: 'Documents the system read' },
   my_uploads: { he: 'צילומי מסמכים', en: 'Document photos' },
-  my_uploads_body: { he: 'צילום שהעלית נמחק מיד אחרי שהמערכת קוראת אותו.', en: 'A photo you upload is deleted right after the system reads it.' },
+  my_uploads_body: { he: 'נמחקים אוטומטית, תוך יומיים לכל היותר', en: 'Deleted automatically, within 2 days at most' },
+  my_privacy: { he: 'מדיניות הפרטיות', en: 'Privacy policy' },
   my_delete: { he: 'מחיקת החשבון וכל המידע', en: 'Delete my account and all of this' },
   my_yes: { he: 'כן', en: 'Yes' },
   my_no: { he: 'לא', en: 'No' },
@@ -956,15 +957,11 @@ export const UI = {
   ch_step_added: { he: 'נוסף שלב:', en: 'Step added:' },
   ch_step_removed: { he: 'ירד שלב:', en: 'Step removed:' },
 
-  // ── the notice before he enters anything (SEC M2, D-6, D-7) ──────────────
-  // ⚠️ English is the founder's approved text, word for word. It must not say
-  // "optional" (D-7): the more he fills in, the better his report.
-  consent_title: { he: 'לפני שמתחילים.', en: 'Before you start.' },
-  consent_body: {
-    he: 'ככל שתמלא יותר פרטים, הדוח שלך יהיה מדויק יותר. אין חובה חוקית למסור את המידע הזה, והוא משמש רק להכנת הדוח שלך. המידע מעובד אצל ספקי הענן שלנו באיחוד האירופי, AWS ו-Supabase, וקריאת המסמכים וההסברים באמצעות בינה מלאכותית נעשים ב-Claude של חברת Anthropic בארה״ב. מסמכים שהועלו נמחקים לאחר הקריאה.',
-    en: "The more you fill in, the more accurate your report. There's no legal obligation to provide this information, and it's used only to build your report. It's processed by our cloud providers in the EU (AWS, Supabase), and AI reading and explanations run on Claude (Anthropic, USA). Uploaded documents are deleted after reading.",
-  },
-  consent_agree: { he: 'הבנתי ואני מסכים', en: 'I understand and agree' },
+  // ── the consent before he enters anything (SEC M2, D-6, D-7, D-206) ──────
+  // D-206 (her call): the standard "I have read and agree to the Privacy
+  // Policy" checkbox; the full text is on /privacy. Never "optional" (D-7).
+  consent_agree: { he: 'קראתי ואני מאשר את ', en: 'I have read and agree to the ' },
+  consent_privacy: { he: 'מדיניות הפרטיות', en: 'Privacy Policy' },
   consent_continue: { he: 'המשך', en: 'Continue' },
 } as const;
 

@@ -92,25 +92,12 @@ describe('remembered for the session, in the browser only', () => {
 });
 
 describe('both languages', () => {
-  it('English says the approved text', () => {
-    const html = view('en', false);
-    expect(html).toContain('Before you start.');
-    expect(html).toContain('The more you fill in, the more accurate your report.');
-    expect(html).toContain("There&#x27;s no legal obligation to provide this information");
-    expect(html).toContain('AWS, Supabase');
-    expect(html).toContain('Claude (Anthropic, USA)');
-    expect(html).toContain('Uploaded documents are deleted after reading.');
-    expect(html).toContain('I understand and agree');
+  it('English: the standard checkbox, linked to the privacy policy', () => {
+    expect(view('en', false)).toMatch(/I have read and agree to the <a href="\/privacy"[^>]*>Privacy Policy<\/a>/);
   });
 
   it('Hebrew says the same, in Hebrew', () => {
-    const html = view('he', false);
-    expect(html).toContain('לפני שמתחילים');
-    expect(html).toContain('אין חובה חוקית');
-    expect(html).toContain('AWS ו-Supabase');
-    expect(html).toContain('Anthropic');
-    expect(html).toContain('נמחקים');
-    expect(html).toContain('הבנתי ואני מסכים');
+    expect(view('he', false)).toMatch(/קראתי ואני מאשר את <a href="\/privacy"[^>]*>מדיניות הפרטיות<\/a>/);
   });
 
   // D-7: she wants people to fill in everything.

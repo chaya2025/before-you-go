@@ -178,6 +178,9 @@ export function MyDataView({
       <p>
         <a className="my-fix my-delete" data-fix="delete" href="#set-del">{t('my_delete')}</a>
       </p>
+      <p className="small">
+        <a href="/privacy">{t('my_privacy')}</a>
+      </p>
     </section>
   );
 }

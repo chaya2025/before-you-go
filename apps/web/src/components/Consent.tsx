@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { UI, pick, type Lang } from '../i18n';
 
 /**
- * SEC M2: the notice and its one checkbox. "Continue" stays off until it is
- * ticked. Wording: hers in English (D-7), never "optional".
+ * SEC M2: the consent and its one checkbox. "Continue" stays off until it is
+ * ticked. Never "optional" (D-7). D-206: the standard checkbox, "I have read and
+ * agree to the Privacy Policy"; the legal details live on /privacy.
  *
  * ConsentView only draws; Consent holds the tick. Split so a test can draw
  * both states without a browser.
@@ -18,12 +19,13 @@ type ViewProps = {
 export function ConsentView({ lang, checked, onCheck, onContinue }: ViewProps) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
   return (
-    <section className="notice notice-advisory consent" aria-labelledby="consent-title">
-      <h3 id="consent-title">{t('consent_title')}</h3>
-      <p>{t('consent_body')}</p>
+    <section className="card stack-sm consent" aria-label={t('consent_privacy')}>
       <label className="step-tick consent-tick">
         <input type="checkbox" checked={checked} onChange={(e) => onCheck(e.target.checked)} />
-        <span>{t('consent_agree')}</span>
+        <span>
+          {t('consent_agree')}
+          <a href="/privacy" target="_blank" rel="noreferrer">{t('consent_privacy')}</a>
+        </span>
       </label>
       <div>
         <button className="btn btn-primary" disabled={!checked} onClick={onContinue}>
