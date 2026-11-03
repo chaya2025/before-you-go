@@ -102,8 +102,8 @@ export const UI = {
      official. Saying it plainly is what earns the right to ask about a visa. */
   not_gov_title: { he: 'זה אינו אתר ממשלתי', en: 'This is not a government website' },
   not_gov_body: {
-    he: 'המערכת אינה מגישה בקשות ואינה מדברת עם אף רשות בשמך. היא מסבירה מה נדרש ובודקת מול מה שיש לך. אין הרשמה, ושום פרט שתזין אינו נשמר.',
-    en: 'It does not submit applications and does not contact any authority on your behalf. It explains what is required and checks it against what you have. There is no sign-up, and nothing you enter is saved.',
+    he: 'המערכת אינה מגישה בקשות ואינה מדברת עם אף רשות בשמך. היא מסבירה מה נדרש ובודקת מול מה שיש לך.',
+    en: 'It does not submit applications and does not contact any authority on your behalf. It explains what is required and checks it against what you have.',
   },
 
   how_kicker: { he: 'שלושה שלבים', en: 'Three stages' },
