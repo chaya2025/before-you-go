@@ -1,7 +1,7 @@
 import { RECORD_RELEVANT } from './rules';
 import type { RequiredDocumentInput } from '../domain';
 import type { Condition } from '../condition';
-import { nohal, servicePage, official, fieldReport, notChecked } from './sources';
+import { nohal, servicePage, official, fieldReport, notChecked, conversionPage } from './sources';
 
 /**
  * ============================================================================
@@ -205,9 +205,13 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
      * first stop, and `fz.doc_89` produces it. This narrows the document to
      * that track, it does not delete it.
      */
-    applies_when: {
-      all: [NO_TEUDAT_ZEHUT, { field: 'track', op: 'ne', value: 'conversion' }],
-    },
+    /**
+     * ⭐⭐ BACK ON CONVERSION 4.11.2026 (D-209), superseding the 23.9 scoping
+     * above. The conversion service page, tab תושבי חוץ: "להגיע עם תעודת זהות
+     * ישראלית מקורית או עם מספר מזהה (89)". The נוהל's lists are still short;
+     * the service page is the longer, more recent word.
+     */
+    applies_when: NO_TEUDAT_ZEHUT,
     issued_by: { he: "משרד הרישוי", en: 'The licensing office' },
     must_be_original: true,
     notes: {
@@ -374,22 +378,29 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
 
   {
     id: 'doc.entry_exit_form',
-    name: { he: "טופס כניסות ויציאות", en: 'Entries and exits form' },
-    // ⚠️ ONE category only. כל-זכות demands it of everyone and contradicts the
-    // נוהל — and a תושב מדינת חוץ is not merely exempt from it, he is not
-    // entitled to request it at all.
-    applies_when: { field: 'nohal_category', op: 'eq', value: 'toshav_israel' },
+    name: { he: "אישור כניסות ויציאות (5 השנים האחרונות)", en: 'Entries and exits report (last 5 years)' },
+    // ⚠️ WIDENED 4.11.2026 (D-209). It was one category only (תושב ישראל ששב,
+    // the נוהל's list). The conversion service page asks תושבי חוץ for it too,
+    // "מ-5 השנים האחרונות". עולה חדש is still not asked. Whether a תושב מדינת
+    // חוץ can actually get it from the Population Authority is OPEN, and the
+    // step (cv.entry_exit_form) says so to him.
+    applies_when: { field: 'nohal_category', op: 'in', value: ['toshav_israel', 'toshav_medinat_chutz'] },
     issued_by: { he: "רשות האוכלוסין", en: 'The Population Authority' },
     must_be_original: true,
     notes: {
-      he: "נדרש רק מתושב ישראל ששב מחו\"ל, כדי להוכיח שישה חודשים רצופים.",
-      en: 'Required only from an Israeli resident returning from abroad, to prove six consecutive months.',
+      he: "מרשות האוכלוסין, על 5 השנים האחרונות. מראה כמה זמן היית בישראל ומחוצה לה.",
+      en: 'From the Population Authority, covering the last 5 years. It shows how long you were in and out of Israel.',
     },
     evidence: [
       nohal(
         "פרק \"מסמכים נדרשים\" ← \"תושב ישראל ששהה בחו\"ל לפחות 6 חודשים\", ס' 3",
         "הטופס מופיע רק ברשימה של תושב ישראל ששב, ולא ברשימות האחרות",
         "טופס כניסות ויציאות ממשרד הפנים.",
+      ),
+      conversionPage(
+        "מה צריך לצרף לבקשה",
+        "תושב חוץ נדרש לצרף אישור כניסות ויציאות ממשרד הפנים מ-5 השנים האחרונות",
+        "אישור כניסות ויציאות ממשרד הפנים, מ-5 השנים האחרונות",
       ),
     ],
   },
@@ -411,16 +422,22 @@ export const DOCUMENTS: RequiredDocumentInput[] = [
     issued_by: { he: "עו\"ד או נוטריון דובר השפה", en: 'A lawyer or notary who speaks the language' },
     must_be_original: true,
     notes: {
-      // ⚠️ "רשאית לדרוש" — an authority, not an obligation. We may never tell
-      // someone he must obtain a translation.
-      he: "רשות הרישוי רשאית לדרוש תרגום לכל מסמך שאינו באנגלית. רשאית — לא חייבת, ולא תמיד דורשת.",
-      en: 'The licensing authority may require a translation of any document not in English. May — it is not automatic, and it is not always required.',
+      // ⚠️ CHANGED 4.11.2026 (D-209). This used to say "may, not must", off the
+      // נוהל's "רשאית לדרוש". The conversion service page says "יש לצרף" for a
+      // licence that is not in English.
+      he: "נדרש כשהרישיון לא כתוב באנגלית. התרגום נעשה אצל עורך דין נוטריון שדובר את השפה.",
+      en: 'Required when your licence is not in English. The translation is done by a notary who speaks the language.',
     },
     evidence: [
       nohal(
         "פרק \"הערות\", תבליט 4",
         "רשות הרישוי רשאית לדרוש תרגום — סמכות, לא חובה",
         "רשות הרישוי רשאית לדרוש תרגום של רישיון הנהיגה הלאומי, ו/או כל מסמך הנדרש לצורך המרת רישיון (מלבד אנגלית) התרגום יתבצע ע\"י עו\"ד/נוטריון דובר השפה.",
+      ),
+      conversionPage(
+        "מה צריך לצרף לבקשה",
+        "רישיון שאינו באנגלית מחייב תרגום מעורך דין נוטריון דובר השפה",
+        "כשהרישיון לא כתוב באנגלית, יש לצרף לרישיון תרגום מעורך דין נוטריון דובר השפה",
       ),
     ],
   },

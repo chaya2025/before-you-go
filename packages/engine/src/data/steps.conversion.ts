@@ -1,7 +1,7 @@
 import { RECORD_RELEVANT, GRADES_176_181, GRADES_182_185 } from './rules';
 import type { StepInput } from '../domain';
 import type { Condition } from '../condition';
-import { nohal, servicePage, official, fieldReport, inferred, notChecked, LAST_VERIFIED_LATE } from './sources';
+import { nohal, servicePage, official, fieldReport, inferred, notChecked, conversionPage, LAST_VERIFIED_LATE } from './sources';
 
 /**
  * ============================================================================
@@ -22,6 +22,18 @@ import { nohal, servicePage, official, fieldReport, inferred, notChecked, LAST_V
 
 const NO_TEUDAT_ZEHUT: Condition = { field: 'has_teudat_zehut', op: 'eq', value: false };
 const EVERYONE: Condition = { always: true };
+
+/**
+ * D-209 (4.11.2026). The service page's tab for תושבי חוץ asks for the
+ * entries-and-exits report too, so it is no longer one category only.
+ */
+const ENTRY_EXIT_CATEGORIES: Condition = {
+  field: 'nohal_category',
+  op: 'in',
+  value: ['toshav_israel', 'toshav_medinat_chutz'],
+};
+const LICENCE_NOT_ENGLISH: Condition = { field: 'foreign_license_language', op: 'ne', value: 'en' };
+const UNDER_FIVE_YEARS: Condition = { field: 'foreign_license_years', op: 'lt', value: 5 };
 
 /**
  * ס' 2 לנוהל. Five years on a PERMANENT national licence, in a grade equivalent
@@ -186,40 +198,119 @@ export const CONVERSION_STEPS: StepInput[] = [
    */
 
   /**
-   * ⭐⭐ DELETED 23.9 (the founder). There was a step here, "הוצאת מספר מזהה 89",
-   * sending him to the licensing office BEFORE the appointment.
+   * ⭐⭐ BACK 4.11.2026 (D-209, the founder). Deleted on 23.9 because the נוהל
+   * never names it. The conversion SERVICE page does, word for word, for תושבי
+   * חוץ: no 89, walk in without an appointment, show a valid passport, get one.
+   * Her hunch from 23.9 ("at the visit the person will get the 89 anyway") was
+   * right about the number and wrong only about when: it comes BEFORE the form,
+   * because the form's "מספר זהות" field takes it.
    *
-   * The נוהל does not mention the 89 anywhere — not in פרק "התהליך" and not on
-   * any of the three document lists. It came from a gov.il page about foreign
-   * WORKERS and from field reports. Its effect on the road was concrete: a
-   * licensing-office trip before the one the נוהל describes, and a document on
-   * the visit list that the נוהל never asks him to bring.
-   *
-   * Her words: "the user doesn't have to bring an 89 for the conversion
-   * because he doesn't have one... most probably at the visit the person will
-   * get the 89 anyway as his identifying number, but that is just for your
-   * information — it doesn't really say it anywhere."
-   *
-   * ⚠️ So it is NOT re-stated as "you will receive an 89 at the visit" either.
-   * That is her reading, she flagged it as undocumented, and an undocumented
-   * claim does not get printed as fact. The 89 simply leaves this road.
-   *
-   * ⚠️ The FROM-ZERO road keeps `fz.doc_89`, untouched. That track is not this
-   * one, and there the 89 is evidenced.
+   * The `do you already have it?` question comes for free: the step produces
+   * doc.form_89, so D-129 asks before sending him (holds_form_89).
    */
+  {
+    id: 'cv.doc_89',
+    track: 'conversion',
+    produces_document: 'doc.form_89',
+    title: { he: "הוצאת מספר מזהה 89 (\"הטופס הלבן\")", en: 'Get your 89 identity number (the "white form")' },
+    action: {
+      he:
+        "הגע למשרד הרישוי בלי זימון תור, עם דרכון בתוקף. תקבל מספר מזהה שמתחיל ב-89.\n\n" +
+        "⭐ את המספר הזה תרשום בטופס המקוון בשדה \"מספר זהות\", ואת המסמך תביא לתחנת הצילום ולתור במשרד הרישוי.",
+      en:
+        'Go to a licensing office without an appointment, with a valid passport. You get an identity number starting with 89.\n\n' +
+        '⭐ You enter this number in the online form as your "ID number", and bring the document to the photo station and to your licensing office appointment.',
+    },
+    applies_when: NO_TEUDAT_ZEHUT,
+    sequence_position: 1,
+    channel: 'licensing_office',
+    authority: "משרד הרישוי",
+    requires_appointment: false,
+    requires_documents: ['doc.passport'],
+    checklist: [{ he: "הדרכון מקורי ובתוקף?", en: 'Is your passport the original, and valid?' }],
+    evidence: [
+      conversionPage(
+        "איך מגישים את הבקשה",
+        "מי שאין לו מספר 89 מגיע למשרד הרישוי בלי תור, מציג דרכון בתוקף ומקבל מספר מזהה",
+        "אם אין ברשותכם מספר מזהה (89), יש להגיע למשרד הרישוי ללא זימון תור, להציג דרכון בתוקף ולקבל מספר מזהה (89).",
+      ),
+    ],
+  },
 
   /**
-   * ⭐ DELETED 23.9 (the founder): "טופס כניסות ויציאות" and "תרגום מסמכים" were both
-   * steps here. Neither is in פרק "התהליך".
+   * ⭐ BACK 4.11.2026 (D-209). Deleted 23.9 as "not in פרק התהליך". The
+   * service page's document list for תושבי חוץ names it.
    *
-   * The entries-and-exits form is item 3 on the נוהל's DOCUMENT list for תושב
-   * ישראל ששב. The translation lives in פרק "הערות" as "רשות הרישוי רשאית
-   * לדרוש" — a power the clerk holds, on no list at all.
-   *
-   * Both still exist as documents (`doc.entry_exit_form`, `doc.translation`)
-   * and still appear on the visit, which is where the נוהל puts them. What
-   * they stopped being is actions on a road that the נוהל describes in five.
+   * ⚠️ CONFLICT, kept visible rather than resolved by guessing: our earlier
+   * research says the Population Authority issues this report to citizens and
+   * residents, so a תושב מדינת חוץ may not be able to get it at all. The
+   * founder's D-092 decides the direction: a needless requirement costs a
+   * question, a missed one costs a trip. So it is on the road, with a check.
    */
+  {
+    id: 'cv.entry_exit_form',
+    track: 'conversion',
+    // ⚠️ No produces_document: doc.entry_exit_form has no held_when, so the
+    // step could never be marked done and the report would read "missing"
+    // forever. Silence stays "unconfirmed" (readiness.ts, rule 5).
+    title: { he: "אישור כניסות ויציאות מרשות האוכלוסין", en: 'Entries and exits report from the Population Authority' },
+    action: {
+      he: "בקש מרשות האוכלוסין אישור על הכניסות והיציאות שלך מישראל ב-5 השנים האחרונות.",
+      en: 'Ask the Population Authority for a report of your entries to and exits from Israel over the last 5 years.',
+    },
+    applies_when: ENTRY_EXIT_CATEGORIES,
+    sequence_position: 5,
+    channel: 'population_authority',
+    authority: "רשות האוכלוסין",
+    notes: [
+      {
+        he: "⚠️ לא ברור שרשות האוכלוסין מנפיקה את האישור למי שאינו אזרח או תושב. בדוק איתם לפני שאתה מגיע למשרד הרישוי.",
+        en: "⚠️ It is not clear the Population Authority issues this report to someone who is not a citizen or resident. Check with them before your licensing office visit.",
+        when: { field: 'nohal_category', op: 'eq', value: 'toshav_medinat_chutz' },
+      },
+    ],
+    evidence: [
+      conversionPage(
+        "מה צריך לצרף לבקשה",
+        "תושב חוץ נדרש לצרף אישור כניסות ויציאות ממשרד הפנים מ-5 השנים האחרונות",
+        "אישור כניסות ויציאות ממשרד הפנים, מ-5 השנים האחרונות",
+      ),
+      nohal(
+        "פרק \"מסמכים נדרשים\" ← \"תושב ישראל ששהה בחו\"ל לפחות 6 חודשים\", ס' 3",
+        "לתושב ישראל ששב הטופס מופיע גם בנוהל",
+        "טופס כניסות ויציאות ממשרד הפנים.",
+      ),
+      notChecked("איך תושב חוץ מקבל את האישור, האם הוא זכאי לבקש אותו, והאם יש אגרה"),
+    ],
+  },
+
+  /**
+   * ⭐ BACK 4.11.2026 (D-209). On 23.9 the translation was read as a power the
+   * clerk holds ("רשאית לדרוש"). The service page makes it a requirement:
+   * "כשהרישיון לא כתוב באנגלית, יש לצרף". Same condition as doc.translation:
+   * only a stated "it is in English" removes it.
+   */
+  {
+    id: 'cv.translation',
+    track: 'conversion',
+    // ⚠️ No produces_document, same reason as cv.entry_exit_form.
+    title: { he: "תרגום נוטריוני של הרישיון", en: 'Notarised translation of your licence' },
+    action: {
+      he: "הרישיון שלך לא באנגלית: תרגם אותו אצל עורך דין נוטריון שדובר את השפה.",
+      en: 'Your licence is not in English: have it translated by a notary who speaks the language.',
+    },
+    applies_when: LICENCE_NOT_ENGLISH,
+    sequence_position: 5,
+    channel: 'unknown',
+    authority: "עו\"ד נוטריון",
+    evidence: [
+      conversionPage(
+        "מה צריך לצרף לבקשה",
+        "רישיון שאינו באנגלית מחייב תרגום מעורך דין נוטריון דובר השפה",
+        "כשהרישיון לא כתוב באנגלית, יש לצרף לרישיון תרגום מעורך דין נוטריון דובר השפה",
+      ),
+    ],
+  },
 
   {
     id: 'cv.online_form',
@@ -230,6 +321,15 @@ export const CONVERSION_STEPS: StepInput[] = [
       en: 'Fill in the licence application on the Ministry of Transport site. There is no separate conversion form; it is the same one used for the from-scratch route.',
     },
     applies_when: EVERYONE,
+    // D-209: the form's ID field takes the 89, so the 89 comes first.
+    must_come_after: ['cv.doc_89'],
+    notes: [
+      {
+        he: "בשדה \"מספר זהות\" רשום את מספר ה-89 שקיבלת.",
+        en: 'In the "ID number" field, enter the 89 number you received.',
+        when: NO_TEUDAT_ZEHUT,
+      },
+    ],
     /**
      * ⭐ FIRST on the road now (23.9). The נוהל opens פרק "התהליך" with this and
      * nothing before it: "על המבקש למלא טופס בקשה להוצאת רישיון נהיגה באתר
@@ -251,6 +351,11 @@ export const CONVERSION_STEPS: StepInput[] = [
         "מומלץ להתחיל לפחות 60 יום לפני תום שנת השהייה",
         "מומלץ להגיש את הבקשה ולהתחיל את התהליך לכל הפחות 60 ימים לפני תום שנת שהייה בישראל.",
       ),
+      conversionPage(
+        "איך מגישים את הבקשה",
+        "מספר ה-89 נרשם בטופס הדיגיטלי בשדה מספר זהות",
+        "יש למלא טופס דיגיטלי להוצאת רישיון נהיגה למלא את מספר הזיהוי שהתקבל (89) ב\"מספר זהות\".",
+      ),
     ],
   },
 
@@ -259,8 +364,8 @@ export const CONVERSION_STEPS: StepInput[] = [
     track: 'conversion',
     title: { he: "תחנת צילום", en: 'Photo station' },
     action: {
-      he: "אחרי מילוי הטופס, גש לאחת מתחנות הצילום עם תעודה מזהה והצטלם. הצילום חינם.",
-      en: 'After submitting the form, go to a photo station with photo ID. The photo is free.',
+      he: "אחרי מילוי הטופס, גש לאחת מתחנות הצילום עם תעודה מזהה (תעודת זהות, דרכון או המסמך עם מספר ה-89) והצטלם. הצילום חינם.\n\nאחרי הצילום תקבל SMS או שיחה. רק אחריהם אפשר להתקדם להגעה למשרד הרישוי.",
+      en: 'After submitting the form, go to a photo station with photo ID (ID card, passport, or the document with your 89 number). The photo is free.\n\nAfterwards you get an SMS or a call. Only then can you move on to the licensing office visit.',
     },
     applies_when: EVERYONE,
     sequence_position: 3,
@@ -272,6 +377,11 @@ export const CONVERSION_STEPS: StepInput[] = [
         "פרק \"התהליך\"",
         "הצילום בא אחרי הטופס המקוון, עם תעודת זהות או דרכון",
         "לאחר מילוי הטופס הנ\"ל יש לגשת לאחת מתחנות הצילום עם תעודה מזהה (תעודת זהות/דרכון) ולהצטלם.",
+      ),
+      conversionPage(
+        "איך מגישים את הבקשה",
+        "בתחנת הצילום מציגים תעודה מזהה או את המסמך עם ה-89, ומתקדמים רק אחרי SMS או שיחה",
+        "יש לגשת לאחת מתחנות הצילום עם תעודה מזהה (תעודת זהות או דרכון) או המסמך עם מספר הזיהוי שהתקבל, להצטלם ולעבור בדיקות ראייה. לאחר קבלת מסרון או שיחה קולית ניתן להתקדם בתהליך.",
       ),
       official(
         'דף "תחנות צילום לרישיון נהיגה", משרד התחבורה',
@@ -292,6 +402,19 @@ export const CONVERSION_STEPS: StepInput[] = [
     },
     applies_when: { not: EXEMPT_FROM_TESTS },
     sequence_position: 4,
+    /**
+     * D-209, the founder's call: under five years stays a real route. The נוהל
+     * allows it (this step and the control test are its price) and she knows
+     * someone converting a ~1-year licence right now. The service page says
+     * "5 years at least". One small note, nothing louder.
+     */
+    notes: [
+      {
+        he: "⚠️ דף השירות של משרד התחבורה כותב שאפשר להמיר רק רישיון עם ותק של 5 שנים לפחות. הנוהל מאפשר גם פחות, בתנאי שעוברים בדיקת ראייה ומבחן שליטה.",
+        en: 'The Ministry of Transport service page says only a licence held 5+ years can be converted. The procedure allows less, with an eye test and a control test.',
+        when: UNDER_FIVE_YEARS,
+      },
+    ],
     // ⭐ 23.9: "כמו כן" in פרק התהליך attaches the eye test to the photo-station
     // stage, which the נוהל places "לאחר מילוי הטופס הנ\"ל". Same gate as the
     // photo, same station, same visit.
@@ -311,6 +434,14 @@ export const CONVERSION_STEPS: StepInput[] = [
         "בלי רקורד אין דרך להוכיח ותק, ולכן אין פטור בפועל גם למי שיש לו חמש שנים",
         "הצלבה של ס' 2 לנוהל עם פרק \"מסמכים נדרשים\"",
       ),
+      conversionPage(
+        "תנאים להגשת הבקשה",
+        "דף השירות מציין ותק של 5 שנים לפחות, בסתירה לנוהל שמאפשר פחות עם בדיקות",
+        "ניתן להמיר רישיון נהיגה זר בעל ותק של 5 שנים לפחות במדינת המוצא",
+      ),
+      fieldReport("ממירה עם ותק של כשנה נמצאת כעת בתהליך (מכרה של המייסדת, 11.2026)", {
+        last_verified_at: '2026-11-04',
+      }),
     ],
   },
 
@@ -318,7 +449,10 @@ export const CONVERSION_STEPS: StepInput[] = [
     id: 'cv.book_appointment',
     track: 'conversion',
     title: { he: "זימון תור למשרד הרישוי", en: 'Book a licensing office appointment' },
-    action: { he: "קבע תור לסניף משרד הרישוי דרך GoVisit.", en: 'Book an appointment at a licensing office branch through GoVisit.' },
+    action: {
+      he: "קבע תור לסניף משרד הרישוי דרך GoVisit. אפשר לקבוע בכל שלב, רק להגיע מוכן.\n\n⚠️ הסניפים האלה לא מטפלים בהמרה: בית שאן, צפת, יקנעם, דלית אל כרמל, קריית ארבע, אריאל, אופקים ורהט.",
+      en: "Book an appointment at a licensing office branch through GoVisit. You can book at any point, just arrive ready.\n\n⚠️ These branches don't handle conversions: Beit She'an, Safed, Yokne'am, Daliyat al-Karmel, Kiryat Arba, Ariel, Ofakim and Rahat.",
+    },
     applies_when: EVERYONE,
     sequence_position: 5,
     channel: 'online',
@@ -329,6 +463,11 @@ export const CONVERSION_STEPS: StepInput[] = [
         "פרק \"התהליך\"",
         "התור נקבע דרך GoVisit, והקישור מופיע בנוהל עצמו",
         "לקבוע תור לסניף משרד הרישוי ולגשת באופן אישי עם המסמכים הדרושים.",
+      ),
+      conversionPage(
+        "איך מגישים את הבקשה",
+        "שמונה סניפים אינם מטפלים בהמרה",
+        "ניתן להגיש בקשה להמרת רישיון נהיגה זר לרישיון ישראלי בכל סניפי הרישוי ברחבי הארץ, מלבד הסניפים הבאים: בית שאן, צפת, יקנעם, דלית אל כרמל, קריית ארבע, אריאל, אופקים ורהט.",
       ),
     ],
   },
@@ -364,7 +503,18 @@ export const CONVERSION_STEPS: StepInput[] = [
      *                    is in, since an unknown condition keeps a step on the
      *                    road. That is "unknown rendered as yes".
      */
-    must_come_after: ['cv.book_appointment', 'cv.online_form', 'cv.photo', 'cv.eye_test'],
+    // D-209: the 89 and the entries-and-exits report are now things he
+    // obtains first, so the visit waits on them too.
+    must_come_after: [
+      'cv.book_appointment',
+      'cv.online_form',
+      'cv.photo',
+      'cv.eye_test',
+      'cv.doc_89',
+      'cv.entry_exit_form',
+      // ⚠️ NOT cv.translation: an unanswered licence language keeps that step
+      // on the road, and the visit must not wait on an unknown.
+    ],
     channel: 'licensing_office',
     requires_appointment: true,
     /**
@@ -408,6 +558,8 @@ export const CONVERSION_STEPS: StepInput[] = [
      */
     requires_documents: [
       'doc.identity',
+      // D-209: "להגיע עם תעודת זהות ישראלית מקורית או עם מספר מזהה (89)".
+      'doc.form_89',
       'doc.passport',
       'doc.visa',
       'doc.foreign_license',
@@ -440,6 +592,7 @@ export const CONVERSION_STEPS: StepInput[] = [
       },
       { he: "הרישיון הזר בתוקף — לא רק קיים?", en: 'Is your foreign licence valid, not merely in your possession?' },
       { he: "כל המסמכים במקור?", en: 'Are all documents originals?' },
+      { he: "קיבלת SMS או שיחה אחרי תחנת הצילום?", en: 'Did you get the SMS or call after the photo station?' },
       {
         /**
          * ⭐ SCOPED 23.9. It had no `when`, so a two-year holder — who has no
@@ -457,6 +610,11 @@ export const CONVERSION_STEPS: StepInput[] = [
         "פרק \"התהליך\"",
         "הנוהל מגדיר הגעה פרונטלית עם המסמכים",
         "לקבוע תור לסניף משרד הרישוי ולגשת באופן אישי עם המסמכים הדרושים.",
+      ),
+      conversionPage(
+        "איך מגישים את הבקשה",
+        "מגיעים לתור עם תעודת זהות מקורית או עם מספר 89, ועם המסמכים הנדרשים",
+        "יש לזמן תור מראש למשרד הרישוי ולהגיע עם תעודת זהות ישראלית מקורית או עם מספר מזהה (89), ולצרף את המסמכים הנדרשים.",
       ),
       // ⚠️ Careful wording. "There is no online route" is a NEGATIVE claim the
       // נוהל never makes. It describes one route, and that route is physical.
@@ -480,8 +638,8 @@ export const CONVERSION_STEPS: StepInput[] = [
       en: 'The licensing office checks and approves the conversion',
     },
     action: {
-      he: "רשות הרישוי בודקת ומאמתת את המסמכים על פי שיקול דעתה, וככל הניתן בתוך 14 ימי עבודה. ⚠️ זהו יעד רך ולא התחייבות.",
-      en: 'The licensing authority checks and verifies your documents at its discretion, as far as possible within 14 working days. ⚠️ That is a soft target, not a commitment.',
+      he: "רשות הרישוי בודקת ומאמתת את המסמכים על פי שיקול דעתה, וככל הניתן בתוך 14 ימי עבודה. ⚠️ זהו יעד רך ולא התחייבות.\n\nייתכן שיזמנו אותך שוב למשרד הרישוי לבדיקת סטטוס הרישיון.",
+      en: 'The licensing authority checks and verifies your documents at its discretion, as far as possible within 14 working days. ⚠️ That is a soft target, not a commitment.\n\nYou may be called back to the licensing office for a licence status check.',
     },
     applies_when: EVERYONE,
     sequence_position: 7,
@@ -510,6 +668,11 @@ export const CONVERSION_STEPS: StepInput[] = [
         last_verified_at: '2026-08-21',
         variation_factors: ['clerk_discretion'],
       },
+      conversionPage(
+        "איך מגישים את הבקשה",
+        "ייתכן זימון נוסף למשרד הרישוי לבדיקת סטטוס הרישיון",
+        "ייתכן שמגישי הבקשה יזומנו שוב למשרד הרישוי לצורך בדיקת סטטוס הרישיון.",
+      ),
     ],
   },
 
@@ -692,11 +855,11 @@ export const CONVERSION_STEPS: StepInput[] = [
     title: { he: "קבלת הרישיון", en: 'Receiving your licence' },
     action: {
       he:
-        "הרישיון הקבוע נשלח לכתובת המעודכנת ברשות האוכלוסין.\n\n" +
-        "⚠️ הנוהל אינו מתאר את שלב המסירה בהמרה כלל, ואיש לא דיווח לנו איך הוא עובד בפועל. ככל הנראה זה עובד כמו במסלול מאפס — אבל אין לנו ודאות.",
+        "במשרד הרישוי תקבל רישיון זמני. אחריו משלמים את האגרה באחד מסניפי דואר ישראל. התשלום מתעדכן אחרי 14 ימי עסקים.\n\n" +
+        "הרישיון הקבוע נשלח לכתובת הרשומה ברשות האוכלוסין.",
       en:
-        'The permanent licence is posted to the address registered with the Population Authority.\n\n' +
-        '⚠️ The procedure does not describe this stage for conversion at all, and nobody has reported to us how it works in practice. It most likely works as it does on the from-scratch route, but we are not certain.',
+        'At the licensing office you receive a temporary licence. Then you pay the fee at an Israel Post branch. The payment updates after 14 business days.\n\n' +
+        'The permanent licence is posted to the address registered with the Population Authority.',
     },
     applies_when: EVERYONE,
     sequence_position: 10,
@@ -719,21 +882,12 @@ export const CONVERSION_STEPS: StepInput[] = [
         "הרישיון הקבוע נשלח לכתובת המעודכנת ברשות האוכלוסין",
         "רישיון נהיגה קבוע (פלסטיק) יישלח לכתובת המעודכנת ברשות האוכלוסין.",
       ),
-      // ⚠️ Read cover to cover. The נוהל ends at the document list and the notes.
-      // Not one word about a temporary licence, a plastic card, post, or delivery.
-      notChecked(
-        "הנוהל אינו מתאר את שלב המסירה בהמרה כלל — מה שידוע מגיע ממסלול מאפס, שהוא מסלול אחר",
-      ),
-      // ⭐ the founder's call, 25.8: assume it works like the from-zero route, and flag
-      // it. 🟡 rather than ⬜ because there IS a reason — delivery depends on
-      // IDENTIFICATION, and identification does not change between tracks. If the
-      // online channel needs a national ID, it needs one here too.
-      //
-      // ⚠️ But it has never been observed on this route. Her words: "most probably
-      // that's how you do it, but not for sure. There's no ודאות for this."
-      inferred(
-        "ככל הנראה המסירה עובדת כמו במסלול מאפס — כלומר למי שאין תעודת זהות היא פיזית ולא מקוונת. הבסיס: המסירה תלויה בזיהוי, והזיהוי אינו משתנה בין המסלולים. ⚠️ לא נצפה בפועל באף מקרה של המרה",
-        'הסקה בין-מסלולית · שאלה 23 · לא אומת',
+      // D-209: the uncertainty that lived here (23.9, "the נוהל never describes
+      // delivery") is answered by the service page.
+      conversionPage(
+        "אפשרויות תשלום",
+        "רישיון זמני במשרד הרישוי, תשלום בדואר ישראל, עדכון אחרי 14 ימי עסקים, הרישיון הקבוע נשלח בדואר",
+        "לאחר קבלת הרישיון הזמני במשרד הרישוי יש לבצע את התשלום באחד מסניפי דואר ישראל. התשלום יתעדכן לאחר 14 ימי עסקים. הרישיון הקבוע יישלח לכתובת הרשומה ברשות האוכלוסין וההגירה.",
       ),
       // ⭐ the founder said a converter with under two years on his foreign licence is
       // a נהג חדש, and then produced a source for it. 🟡 rather than 🟢 because

@@ -328,7 +328,10 @@ describe('the first thing to do', () => {
     // position 1 made first_action null and every other step 'later'.
     const r = readinessOf(p(CONVERTER));
     expect(r.first_action).not.toBeNull();
-    expect(r.first_action!.step_id).toBe('cv.online_form');
+    // D-209: with no teudat zehut, the 89 comes before the form.
+    expect(r.first_action!.step_id).toBe('cv.doc_89');
+    const held = readinessOf(p({ ...CONVERTER, holds_form_89: true }));
+    expect(held.first_action!.step_id).toBe('cv.online_form');
   });
 
   /** A broken document comes before everything, including the long-lead work. */
@@ -365,11 +368,18 @@ describe('the verdict is about the documents, never about him', () => {
   it('ranks a mismatch above a gap, and a gap above an unanswered question', () => {
     expect(readinessOf(p({ ...CONVERTER, visa_valid_now: false })).verdict).toBe('mismatch');
     expect(readinessOf(p(FROM_ZERO)).verdict).toBe('gaps');
-    expect(readinessOf(p(CONVERTER)).verdict).toBe('unknown');
+    // D-209: a converter with no teudat zehut needs an 89 again, so the
+    // unanswered case is one who already holds it.
+    expect(readinessOf(p({ ...CONVERTER, holds_form_89: true })).verdict).toBe('unknown');
+  });
+
+  it('⭐ D-209: a converter with no teudat zehut and no 89 has a real gap', () => {
+    expect(readinessOf(p({ ...CONVERTER, holds_form_89: false })).verdict).toBe('gaps');
   });
 
   it('⭐ an absent רקורד alone never reads as a gap — the נוהל offers it', () => {
-    expect(readinessOf(p({ ...CONVERTER, has_record_document: 'no' })).verdict).not.toBe('gaps');
+    // holds_form_89 so the record is the only thing under test (D-209).
+    expect(readinessOf(p({ ...CONVERTER, holds_form_89: true, has_record_document: 'no' })).verdict).not.toBe('gaps');
   });
 
   /**

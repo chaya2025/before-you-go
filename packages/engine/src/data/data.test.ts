@@ -299,10 +299,12 @@ describe('the research rules hold across the whole file', () => {
     expect(evaluateCondition(doc, junior)).toBe(false);
   });
 
-  it('the conversion route admits it does not know how delivery works', () => {
-    // The נוהל was read cover to cover and says nothing about this stage.
+  it('D-209: delivery on the conversion route now cites the service page', () => {
+    // The נוהל says nothing about this stage; the conversion service page does
+    // (temporary licence, post office payment, permanent licence by mail).
     const receive = stepById('cv.receive');
-    expect(receive.evidence.some((e) => e.certainty === 'unchecked')).toBe(true);
+    expect(receive.evidence.some((e) => e.url?.includes('convert_driving_license'))).toBe(true);
+    expect(receive.action.he).toContain('דואר ישראל');
   });
 
   it('no fee is presented without a mark, and no total is precomputed', () => {
@@ -360,7 +362,7 @@ describe('the exemption — the highest-consequence rule in the conversion route
   });
 });
 
-describe('the entries-and-exits form is asked of exactly one category', () => {
+describe('the entries-and-exits form is asked of exactly two categories (D-209)', () => {
   // כל-זכות demands it from everyone and contradicts the נוהל. The נוהל wins.
   //
   // ⚠️ Re-pointed 23.9 from the STEP to the DOCUMENT. `cv.entry_exit_form` was
@@ -374,8 +376,8 @@ describe('the entries-and-exits form is asked of exactly one category', () => {
     expect(evaluateCondition(form(), { ...veteranConverter, nohal_category: 'toshav_israel' })).toBe(true);
   });
 
-  it('is never asked of a תושב מדינת חוץ, who is not even entitled to request it', () => {
-    expect(evaluateCondition(form(), veteranConverter)).toBe(false);
+  it('D-209: is asked of a תושב מדינת חוץ, because the conversion service page lists it', () => {
+    expect(evaluateCondition(form(), veteranConverter)).toBe(true);
   });
 
   it('is never asked of an עולה חדש', () => {

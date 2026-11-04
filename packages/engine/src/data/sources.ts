@@ -53,6 +53,28 @@ export function servicePage(section: string, claim: string, quote: string): Sour
   };
 }
 
+/**
+ * 🟢 The CONVERSION service page, tab "תושבי חוץ". Read 4.11.2026 (D-209).
+ * It names steps the נוהל leaves out (the 89, the entries-and-exits report,
+ * the SMS go-ahead, payment at the post office), so it is a source in its own
+ * right, not a summary of the נוהל. The page says the law wins on conflict.
+ */
+const CONVERSION_TITLE = 'דף השירות "בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי", משרד התחבורה · תושבי חוץ';
+const CONVERSION_URL = 'https://www.gov.il/he/service/convert_driving_license';
+export const CONVERSION_VERIFIED = '2026-11-04';
+
+export function conversionPage(section: string, claim: string, quote: string): SourcePart {
+  return {
+    claim,
+    certainty: 'verified',
+    citation: `${CONVERSION_TITLE} · סעיף "${section}"`,
+    quote,
+    url: CONVERSION_URL,
+    last_verified_at: CONVERSION_VERIFIED,
+    variation_factors: [],
+  };
+}
+
 /** 🟢 Any other official page. */
 export function official(
   citation: string,

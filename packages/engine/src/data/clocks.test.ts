@@ -185,18 +185,18 @@ describe('documents', () => {
     expect(licence.notes!.he).toContain('בתוקף');
   });
 
-  it('the entries-and-exits form is scoped to one category, against כל-זכות', () => {
+  it('D-209: the entries-and-exits report covers a returning resident and a תושב מדינת חוץ, never an עולה', () => {
     const form = documentById('doc.entry_exit_form')!;
     expect(form.applies_when).toEqual({
       field: 'nohal_category',
-      op: 'eq',
-      value: 'toshav_israel',
+      op: 'in',
+      value: ['toshav_israel', 'toshav_medinat_chutz'],
     });
   });
 
-  it('the translation is worded as an authority, never as an obligation', () => {
-    expect(documentById('doc.translation')!.notes!.he).toContain('רשאית');
-    expect(documentById('doc.translation')!.notes!.he).toContain('לא חייבת');
+  it('D-209: the translation is a requirement for a non-English licence, per the service page', () => {
+    expect(documentById('doc.translation')!.notes!.he).toContain('נדרש');
+    expect(documentById('doc.translation')!.notes!.he).not.toContain('רשאית');
   });
 
   it('the 89 document says where the number is NOT valid, which nobody tells you', () => {

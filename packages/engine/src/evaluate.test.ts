@@ -247,17 +247,17 @@ describe('persona 4 — ב/1 foreign worker, 2 years on his licence, no רקור
     expect(ids).toContain('cv.control_test');
   });
 
-  it('⭐ is NOT sent for an 89 — the נוהל never asks a converter for one', () => {
-    // ⚠️ REVERSED 23.9. This used to assert the opposite. The נוהל's document
-    // list for תושב מדינת חוץ is three lines and an 89 is not among them:
-    // רישיון לאומי בתוקף · דרכון עם אשרת שהייה בתוקף · רקורד.
-    expect(ids).not.toContain('cv.doc_89');
+  it('⭐ D-209: IS sent for an 89 — the conversion service page says so for תושבי חוץ', () => {
+    // ⚠️ REVERSED AGAIN 4.11.2026. 23.9 cut it because the נוהל's lists don't
+    // name it. The service page does: no 89, walk in with a passport, get one.
+    expect(ids).toContain('cv.doc_89');
+    expect(ids.indexOf('cv.doc_89')).toBeLessThan(ids.indexOf('cv.online_form'));
   });
 
-  it('is not asked for the entries-and-exits form — that is one category only', () => {
-    // Now a DOCUMENT rather than a step; the step was deleted on 23.9.
+  it('D-209: is asked for the entries-and-exits report, and told to check he can get it', () => {
     const attend = r.roadmap.find((s) => s.step.id === 'cv.attend')!;
-    expect(attend.documents.map((d) => d.id)).not.toContain('doc.entry_exit_form');
+    expect(attend.documents.map((d) => d.id)).toContain('doc.entry_exit_form');
+    expect(ids).toContain('cv.entry_exit_form');
   });
 
   it('is inside both clocks, having entered five months ago', () => {
@@ -575,18 +575,16 @@ describe('⭐ answers that must actually change the answer (audit, 27.8)', () =>
     // documents existed in the data, fully sourced, required by NO step:
     // doc.record, doc.translation, doc.entry_exit_form, doc.teudat_oleh.
     //
-    // ⚠️ `doc.form_89` was on this list and came OFF on 23.9. The נוהל's three
-    // document lists are short and none of them contains an 89:
-    //   תושב מדינת חוץ — רישיון לאומי בתוקף · דרכון עם אשרת שהייה בתוקף · רקורד
-    // The founder: "the user doesn't have to bring an 89 for the conversion because
-    // he doesn't have one."
+    // ⚠️ `doc.form_89` came off on 23.9 and is BACK since 4.11.2026 (D-209):
+    // the conversion service page says to come "עם תעודת זהות ישראלית מקורית
+    // או עם מספר מזהה (89)".
     const noTz = run({
       foreign_license: { kind: 'national', valid_now: true, language: 'other' },
       has_record_document: 'no',
     });
     const attend = noTz.roadmap.find((s) => s.step.id === 'cv.attend')!;
     const ids = attend.documents.map((d) => d.id);
-    expect(ids).not.toContain('doc.form_89');
+    expect(ids).toContain('doc.form_89');
     expect(ids).toContain('doc.record');
     expect(ids).toContain('doc.translation');
 
@@ -1340,15 +1338,12 @@ describe('⭐ the system follows where the person actually is', () => {
     expect(q.foreign_license.ask).toBe(true);
 
     /**
-     * ⭐⭐ CHANGED 23.9, and this is the whole point of the cut-back. He is no
-     * longer asked ANYTHING about an 89, because the נוהל does not put one on
-     * his road and nothing on it needs one. The founder: "the user doesn't have to
-     * bring an 89 for the conversion because he doesn't have one."
-     *
-     * ⚠️ The from-zero road is untouched — there the 89 is the first stop and
-     * every one of these questions is still asked.
+     * ⭐⭐ CHANGED BACK 4.11.2026 (D-209). 23.9 stopped asking about an 89 on
+     * this road; the conversion service page puts one on it. He is asked, and
+     * since cv.doc_89 produces it, asked whether he holds one first (D-129).
      */
-    expect(q.form_89.ask).toBe(false);
+    expect(q.form_89.ask).toBe(true);
+    expect(q.form_89.confirm_possession).toBe(true);
     // Nobody issues him a passport, a visa or a foreign licence on this route.
     expect(q.passport.confirm_possession).toBe(false);
     expect(q.visa.confirm_possession).toBe(false);
