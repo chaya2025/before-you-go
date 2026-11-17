@@ -4,7 +4,9 @@
 # paused project means nobody can log in or open a saved case. Once a week this
 # runs the smallest real query (public.keepalive(), returns 1).
 #
-# Tuesday 09:00 UTC: mid-week, far from Shabbos and from her Sunday routines.
+# Sun, Tue, Thu 09:00 UTC (D-165, tightened 2026-11-17): a weekly ping left no slack
+# against the 7-day pause, and GitHub runs schedules hours late, so the project
+# paused on 2026-11-16. Never Fri/Sat (Shabbos). Longest gap is Thu to Sun, 3 days.
 # The two values are repository secrets (Settings → Secrets → Actions); the
 # publishable key is public anyway, it is kept there so it is not in a file.
 #
@@ -14,7 +16,7 @@ name: keepalive
 
 on:
   schedule:
-    - cron: '0 9 * * 2'
+    - cron: '0 9 * * 0,2,4'
   workflow_dispatch: {}
 
 permissions:
