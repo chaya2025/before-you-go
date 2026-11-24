@@ -1,0 +1,254 @@
+/* ==========================================================================
+   SITE REFRESH (2026-11-24, her ask: "nicer, more visual, more up to date
+   with today's sites. Don't change anything important.")
+   ==========================================================================
+
+   ⭐ ONE SWITCH. Everything here is a layer on top of theme.css, loaded after
+   it in main.tsx. Delete that one import line and the site is exactly what
+   it was. No component logic, wording, order or data depends on this file.
+
+   ⚠️ WHAT THIS FILE NEVER TOUCHES
+   - The certainty scale colours (information, not design).
+   - Amber's one meaning: "you are here / the next action / progress". The
+     scroll bar at the top is progress, so it may be amber; nothing else new is.
+   - Print (every effect sits inside `@media screen`), reduced motion (all
+     motion is switched off at the end), RTL (logical properties only).
+
+   The language is the Tal chat's (D-236): layered soft depth, glass where
+   something floats, generous radius, motion that explains instead of
+   decorating, all from the existing tokens.
+   ========================================================================== */
+
+:root {
+  --r-xl: 24px;
+  /* Depth in three steps, all tinted with the ink green, never grey. */
+  --depth-1: 0 1px 2px rgba(19, 46, 43, 0.05), 0 4px 14px -6px rgba(19, 46, 43, 0.12);
+  --depth-2: 0 1px 2px rgba(19, 46, 43, 0.05), 0 18px 40px -22px rgba(19, 46, 43, 0.32);
+  --depth-3: 0 2px 6px rgba(19, 46, 43, 0.06), 0 34px 70px -34px rgba(12, 31, 29, 0.55);
+  /* A 1px light line along the top edge of a raised surface: reads as light. */
+  --edge-light: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --ink-glow: linear-gradient(160deg, #1f4741 0%, var(--ink) 55%, var(--ink-deep) 100%);
+}
+
+@media screen {
+  html { scroll-behavior: smooth; }
+  ::selection { background: rgba(200, 120, 30, 0.22); color: var(--ink); }
+
+  /* ---- The room: a quiet living light behind everything ----------------
+     Two slow glows (sage and warm sand) and a fine paper grain, fixed behind
+     the page. Sections with their own ground still cover it; it shows in the
+     gaps, so the page never reads as flat beige again. */
+  body { position: relative; isolation: isolate; }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: -20vmax;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(38vmax 30vmax at 85% 8%, rgba(219, 233, 225, 0.9), transparent 70%),
+      radial-gradient(34vmax 28vmax at 10% 60%, rgba(239, 223, 198, 0.75), transparent 70%),
+      radial-gradient(30vmax 24vmax at 70% 95%, rgba(219, 233, 225, 0.6), transparent 70%);
+    animation: rf-drift 38s ease-in-out infinite alternate;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.07 0 0 0 0 0.18 0 0 0 0 0.17 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  @keyframes rf-drift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(-3vmax, 2vmax, 0) scale(1.06); }
+  }
+
+  /* ---- The header: a floating glass bar -------------------------------- */
+  .mast {
+    /* The page fades out under the bar, so text never peeks above it. */
+    background: linear-gradient(180deg, var(--paper) 0%, rgba(250, 247, 241, 0.85) 55%, rgba(250, 247, 241, 0) 100%);
+    backdrop-filter: none;
+    border-block-end: 0;
+    padding: 0.6rem clamp(0.6rem, 2vw, 1.2rem) 0;
+  }
+  .mast-in {
+    background: rgba(255, 253, 249, 0.72);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    border: 1px solid rgba(19, 46, 43, 0.08);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--depth-1), var(--edge-light);
+    padding-block: 0.5rem;
+    padding-inline: clamp(0.9rem, 2.5vw, 1.4rem);
+  }
+  .mark .logo-3d, .mark img, .mark svg { transition: transform var(--t-move) var(--ease); }
+  .mark:hover .logo-3d, .mark:hover img, .mark:hover svg { transform: rotate(-6deg) scale(1.06); }
+
+  /* Reading progress: a thin amber line across the very top (amber = progress). */
+  @supports (animation-timeline: scroll()) {
+    .mast::after {
+      content: '';
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--amber), #e0a860);
+      transform-origin: left;
+      transform: scaleX(0);
+      animation: rf-progress linear both;
+      animation-timeline: scroll(root);
+      z-index: 60;
+    }
+    [dir='rtl'] .mast::after, .mast:dir(rtl)::after { transform-origin: right; }
+  }
+  @keyframes rf-progress { to { transform: scaleX(1); } }
+
+  /* ---- Surfaces: cards that sit on the page, not drawn on it ----------- */
+  .card,
+  .beat-card,
+  .notice,
+  .bucket,
+  .quick-check {
+    border-radius: var(--r-xl);
+    box-shadow: var(--depth-2), var(--edge-light);
+    border-color: rgba(19, 46, 43, 0.07);
+  }
+  .card-action:hover,
+  .beat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--depth-3), var(--edge-light);
+  }
+  .beat-card { transition: transform var(--t-move) var(--ease), box-shadow var(--t-move) var(--ease); }
+
+  /* ---- Buttons: a little light, a little lift --------------------------- */
+  .btn { box-shadow: 0 1px 1px rgba(19, 46, 43, 0.06); }
+  .btn-primary {
+    background: var(--ink-glow);
+    box-shadow: 0 10px 24px -12px rgba(12, 31, 29, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+  .btn-amber, .close .btn {
+    box-shadow: 0 12px 26px -12px rgba(200, 120, 30, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .btn-quiet {
+    background: rgba(255, 253, 249, 0.75);
+    backdrop-filter: blur(6px);
+  }
+  .btn:focus-visible,
+  .option:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px rgba(19, 46, 43, 0.55);
+  }
+
+  /* ---- The questions: answers you want to press ------------------------ */
+  .option {
+    border-color: rgba(19, 46, 43, 0.12);
+    box-shadow: var(--depth-1);
+    transition: border-color var(--t-quick) var(--ease), box-shadow var(--t-move) var(--ease),
+      background var(--t-quick) var(--ease), transform var(--t-move) var(--ease);
+  }
+  .option:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--depth-2);
+  }
+  input[type='text'], input[type='email'], input[type='date'], input[type='number'],
+  input[type='password'], select, textarea {
+    transition: border-color var(--t-quick) var(--ease), box-shadow var(--t-quick) var(--ease);
+  }
+
+  /* ---- The numbers band: the chat's dark header, as a dashboard -------- */
+  .figures {
+    border-radius: var(--r-xl);
+    border: 0;
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: var(--depth-3);
+  }
+  .figure {
+    background:
+      radial-gradient(120% 140% at 100% 0%, rgba(217, 180, 120, 0.12), transparent 60%),
+      var(--ink-glow);
+    padding-block: 1.15rem;
+  }
+  .figure b { font-size: clamp(1.9rem, 3vw, 2.4rem); letter-spacing: -0.02em; }
+
+  /* ---- Dark bands on the landing page: depth instead of flat ink ------- */
+  .ground-ink, .close, .gets {
+    background:
+      radial-gradient(70% 120% at 90% 0%, rgba(217, 180, 120, 0.12), transparent 60%),
+      radial-gradient(60% 100% at 0% 100%, rgba(127, 194, 155, 0.08), transparent 60%),
+      var(--ink-glow);
+  }
+  .get { transition: transform var(--t-move) var(--ease); }
+  .get:hover { transform: translateY(-3px); }
+  .get svg { filter: drop-shadow(0 4px 10px rgba(200, 120, 30, 0.35)); }
+
+  /* ---- Screen titles: bigger, tighter, more confident ------------------ */
+  .screen-band h1, .band-head h2, .svc h2, .hero h1 { letter-spacing: -0.015em; }
+  .screen-band {
+    background:
+      radial-gradient(60% 140% at 12% 0%, rgba(219, 233, 225, 0.7), transparent 65%),
+      radial-gradient(90% 130% at 82% 0%, rgba(200, 120, 30, 0.12) 0%, rgba(200, 120, 30, 0) 62%),
+      linear-gradient(180deg, var(--sand-deep) 0%, var(--sand) 52%, transparent 100%);
+    border-block-end: 0;
+  }
+
+  /* ---- The road: the step the person stands on glows ------------------- */
+  .road-part-now {
+    border-radius: 28px;
+    box-shadow: var(--depth-2), var(--edge-light);
+  }
+  .step-row { transition: background var(--t-quick) var(--ease); }
+  .step-row .step-head { border-radius: 14px; }
+  .step-do_now .step-index { text-shadow: 0 6px 18px rgba(200, 120, 30, 0.35); }
+
+  /* ---- Photos: framed like a magazine, a slow zoom on hover ------------ */
+  .svc-photo, .hero-photo { overflow: hidden; }
+  .svc-photo img { transition: transform 1.2s var(--ease); }
+  .svc:hover .svc-photo img { transform: scale(1.04); }
+
+  /* ---- The footer -------------------------------------------------------- */
+  .site-foot {
+    background: var(--ink-glow);
+    padding-block: 1.6rem;
+  }
+
+  /* ---- Scrolling in: each block rises into place as it enters ----------
+     Native CSS (scroll-driven animations); browsers without it simply show
+     everything, so nothing can ever stay hidden. */
+  @supports (animation-timeline: view()) {
+    .card, .notice, .bucket, .figures, .beat-card, .decl, .svc-in {
+      animation: rf-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+  /* `translate`, not `transform`: an animation that holds `transform` would
+     override the cards' hover lift. The two properties add up instead. */
+  @keyframes rf-rise {
+    from { opacity: 0; translate: 0 22px; }
+    to { opacity: 1; translate: 0 0; }
+  }
+
+  /* ---- Scrollbar ---------------------------------------------------------- */
+  html { scrollbar-color: rgba(19, 46, 43, 0.28) transparent; scrollbar-width: thin; }
+
+  /* ---- Phone: the floating bar hugs the edges a little closer ---------- */
+  @media (max-width: 30rem) {
+    .mast { padding: 0.4rem 0.4rem 0; }
+    .mast-in { padding-inline: 0.75rem; }
+  }
+}
+
+/* Motion off means off: the room stops, nothing rises, nothing lifts. */
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+  .mast::after { display: none; }
+  .card, .notice, .bucket, .figures, .beat-card, .decl, .svc-in { animation: none !important; }
+  .card-action:hover, .beat-card:hover, .option:hover, .get:hover { transform: none; }
+  .svc:hover .svc-photo img { transform: none; }
+  html { scroll-behavior: auto; }
+}
