@@ -312,7 +312,8 @@
     transition: background var(--t-move) var(--ease), color var(--t-move) var(--ease);
   }
   /* Answered: the number becomes a tick, the card settles. */
-  .page-intake section.card:has(.option[aria-pressed='true'])::before {
+  .page-intake section.card:has(.option[aria-pressed='true'])::before,
+  .page-intake section.card:has(.month-trigger:not(.month-empty))::before {
     content: '\2713';
     background: var(--ink-glow);
     color: var(--paper);
