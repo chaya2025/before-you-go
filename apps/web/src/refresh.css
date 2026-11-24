@@ -135,14 +135,8 @@
     background: rgba(255, 253, 249, 0.75);
     backdrop-filter: blur(6px);
   }
-  .btn:focus-visible,
-  .option:focus-visible,
-  input:focus-visible,
-  select:focus-visible,
-  textarea:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px var(--paper), 0 0 0 5px rgba(19, 46, 43, 0.55);
-  }
+  /* ⚠️ Focus rings are NOT restyled here: theme.css draws them amber on
+     purpose ("focus IS where you are standing"). */
 
   /* ---- The questions: answers you want to press ------------------------ */
   .option {
@@ -251,4 +245,263 @@
   .card-action:hover, .beat-card:hover, .option:hover, .get:hover { transform: none; }
   .svc:hover .svc-photo img { transform: none; }
   html { scroll-behavior: auto; }
+}
+
+/* ==========================================================================
+   ROUND 2 (her feedback: "the middle pages are dead: the questions, the
+   document input"). Life for the flow screens: a real progress bar, numbered
+   questions that tick when answered, answer tiles that respond, an upload
+   that looks like a drop zone. Same rules: style only, amber only for
+   "here", motion off when the system asks.
+   ========================================================================== */
+@media screen {
+  /* ---- The flow bar: four segments you can actually see ---------------- */
+  .progress { gap: 0.45rem; }
+  .progress li {
+    height: 8px;
+    background: rgba(19, 46, 43, 0.1);
+    box-shadow: inset 0 1px 2px rgba(19, 46, 43, 0.12);
+    position: relative;
+    overflow: hidden;
+  }
+  .progress li[data-state='done'] {
+    background: linear-gradient(90deg, #2c5a53, var(--ink));
+  }
+  .progress li[data-state='here'] {
+    background: linear-gradient(90deg, var(--amber), #e0a860);
+    box-shadow: 0 0 0 3px rgba(200, 120, 30, 0.15), 0 4px 14px -4px rgba(200, 120, 30, 0.6);
+  }
+  /* A light that runs along the segment he is on: "this is live". */
+  .progress li[data-state='here']::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.65) 50%, transparent 100%);
+    translate: -100% 0;
+    animation: rf-sheen 2.4s ease-in-out infinite;
+  }
+  @keyframes rf-sheen { to { translate: 100% 0; } }
+
+  /* ---- Questions: numbered, alive, ticked when answered ---------------- */
+  .page-intake .stack:has(> section.card) { counter-reset: rf-q; }
+  .page-intake section.card {
+    counter-increment: rf-q;
+    position: relative;
+    padding-inline-start: clamp(3.6rem, 6vw, 4.4rem);
+    animation: rf-pop 420ms var(--ease) both;
+    transition: box-shadow var(--t-move) var(--ease), border-color var(--t-move) var(--ease);
+  }
+  .page-intake section.card > h3 { font-size: 1.18rem; letter-spacing: -0.01em; }
+  /* The number, in a round badge at the start of the card. */
+  .page-intake section.card::before {
+    content: counter(rf-q);
+    position: absolute;
+    inset-inline-start: clamp(0.9rem, 2vw, 1.25rem);
+    inset-block-start: 1.45rem;
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1.5px solid rgba(19, 46, 43, 0.16);
+    box-shadow: var(--depth-1);
+    transition: background var(--t-move) var(--ease), color var(--t-move) var(--ease);
+  }
+  /* Answered: the number becomes a tick, the card settles. */
+  .page-intake section.card:has(.option[aria-pressed='true'])::before {
+    content: '\2713';
+    background: var(--ink-glow);
+    color: var(--paper);
+    border-color: transparent;
+    animation: rf-tick 380ms var(--ease) both;
+  }
+  .page-intake section.card:has(.option[aria-pressed='true']) {
+    border-color: rgba(19, 46, 43, 0.14);
+  }
+  /* A thin line joining one question to the next, like the road. */
+  .page-intake section.card + section.card::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: calc(clamp(0.9rem, 2vw, 1.25rem) + 1.07rem);
+    inset-block-start: calc(-1 * var(--gap) - 2px);
+    height: calc(var(--gap) + 1.45rem);
+    border-inline-start: 2px dashed rgba(19, 46, 43, 0.18);
+  }
+  @keyframes rf-pop {
+    from { opacity: 0; translate: 0 18px; scale: 0.98; }
+    to { opacity: 1; translate: 0 0; scale: 1; }
+  }
+  @keyframes rf-tick {
+    0% { transform: scale(0.6); }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  /* ---- Answer tiles: they respond to the hand -------------------------- */
+  .option {
+    overflow: hidden;
+    background: linear-gradient(180deg, #fffefb, var(--surface));
+  }
+  .option::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(219, 233, 225, 0.55) 50%, transparent 70%);
+    translate: -120% 0;
+    transition: translate 700ms var(--ease);
+    pointer-events: none;
+  }
+  .option:hover:not(:disabled)::after { translate: 120% 0; }
+  .option[aria-pressed='true'] {
+    background: linear-gradient(180deg, #fff8ee, var(--amber-soft));
+    box-shadow: inset 3px 0 0 0 var(--amber), 0 10px 24px -16px rgba(200, 120, 30, 0.7);
+  }
+  [dir='ltr'] .option[aria-pressed='true'] {
+    box-shadow: inset -3px 0 0 0 var(--amber), 0 10px 24px -16px rgba(200, 120, 30, 0.7);
+  }
+  .option[aria-pressed='true']::before { animation: rf-tick 320ms var(--ease) both; }
+  /* Once a question is answered, the other answers step back a little. */
+  .card:has(.option[aria-pressed='true']) .option[aria-pressed='false']:not(:hover) { opacity: 0.82; }
+  /* Long lists of answers sit in two columns on a wide screen. */
+  @media (min-width: 760px) {
+    .page-intake .card .stack-sm:has(> .option:nth-child(4)) {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.6rem;
+    }
+    .page-intake .card .stack-sm:has(> .option:nth-child(4)) > * { margin: 0; }
+  }
+
+  /* ---- Fields: soft wells that light up when you type ------------------ */
+  /* A text box with no `type` (the document numbers and names) never got the
+     site's input style and showed the browser's grey default. Same look as
+     every other input now, including the amber focus. */
+  input:not([type]) {
+    min-height: 54px;
+    width: 100%;
+    padding: 0 var(--gap);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--ink);
+    font: inherit;
+    transition: border-color var(--t-quick) var(--ease), box-shadow var(--t-quick) var(--ease);
+  }
+  input:not([type]):hover { border-color: var(--muted); }
+  input:not([type]):focus-visible {
+    outline: none;
+    border-color: var(--amber);
+    box-shadow: 0 0 0 4px var(--amber-soft);
+  }
+  .field input, .field select, .field textarea {
+    background: linear-gradient(180deg, #fbf8f2, var(--surface));
+    border-radius: 14px;
+  }
+  .field input:not(:focus-visible), .field select:not(:focus-visible) {
+    box-shadow: inset 0 1px 2px rgba(19, 46, 43, 0.06);
+  }
+  .field-label { font-weight: 500; }
+
+  /* ---- Documents: each group is a document, with its own icon ---------- */
+  .doc-group h3 { display: flex; align-items: center; gap: 0.6rem; }
+  .page .card.doc-group > h3:first-child::before,
+  .doc-group h3::before {
+    content: '';
+    flex: none;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 12px;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23faf7f1' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h4'/%3E%3C/svg%3E") center / 1.15rem no-repeat,
+      var(--ink-glow);
+    box-shadow: 0 6px 14px -8px rgba(12, 31, 29, 0.7);
+    transform: none;
+  }
+  /* The questions carry a number now, so the small gold diamond steps aside. */
+  .page-intake section.card > h3:first-child::before { display: none; }
+  .page .card.doc-group:has(.option[aria-pressed='true']) > h3:first-child::before,
+  .doc-group:has(.option[aria-pressed='true']) h3::before {
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23faf7f1' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 1.1rem no-repeat,
+      var(--ink-glow);
+    animation: rf-tick 380ms var(--ease) both;
+  }
+  .doc-group-note { padding-inline-start: 2.7rem; }
+
+  /* Upload: a drop zone, not a small grey button. */
+  .upload-read { border-bottom: 0; }
+  .upload-read-btn {
+    align-self: stretch;
+    justify-content: center;
+    min-height: 3.4rem;
+    border: 1.5px dashed rgba(19, 46, 43, 0.25) !important;
+    border-radius: 16px !important;
+    background:
+      radial-gradient(80% 120% at 50% 0%, rgba(219, 233, 225, 0.7), transparent 70%),
+      var(--paper) !important;
+    color: var(--ink);
+    box-shadow: none;
+  }
+  .upload-read-btn:hover {
+    border-color: var(--ink) !important;
+    background:
+      radial-gradient(80% 120% at 50% 0%, rgba(219, 233, 225, 1), transparent 70%),
+      var(--surface) !important;
+    color: var(--ink) !important;
+  }
+  .upload-read-btn::before { display: none; }
+
+  /* The live check while he types: a pulse that says "listening". */
+  .live-check {
+    position: relative;
+    border-radius: 14px;
+    background: linear-gradient(180deg, var(--sage-top), var(--surface));
+    border: 1px solid var(--line-sage);
+    padding: 0.7rem 0.9rem;
+    padding-inline-start: 2rem;
+  }
+  .live-check::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0.85rem;
+    inset-block-start: 1.05rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #4f8f73;
+    box-shadow: 0 0 0 0 rgba(79, 143, 115, 0.5);
+    animation: rf-pulse 1.8s ease-out infinite;
+  }
+  @keyframes rf-pulse { to { box-shadow: 0 0 0 9px rgba(79, 143, 115, 0); } }
+
+  /* ---- Diagnosis: facts as a clean, scannable sheet -------------------- */
+  .facts-row {
+    border-radius: 10px;
+    padding-inline: 0.6rem;
+    transition: background var(--t-quick) var(--ease);
+  }
+  .facts-row:nth-child(odd) { background: rgba(243, 233, 216, 0.4); }
+  .facts-row:hover { background: rgba(219, 233, 225, 0.6); }
+
+  /* ---- The big "next" button at the foot of a flow screen -------------- */
+  .page-intake .btn-primary,
+  .page-documents .btn-primary,
+  .page-diagnosis .btn-primary {
+    min-height: 3.3rem;
+    padding-inline: 2rem;
+    font-size: 1.02rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress li[data-state='here']::after { animation: none; display: none; }
+  .page-intake section.card,
+  .page-intake section.card:has(.option[aria-pressed='true'])::before,
+  .option[aria-pressed='true']::before,
+  .doc-group:has(.option[aria-pressed='true']) h3::before { animation: none; }
+  .option::after { display: none; }
+  .live-check::before { animation: none; }
 }
