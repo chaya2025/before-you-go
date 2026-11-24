@@ -3950,3 +3950,20 @@ body {
 .welcome-back:has(.month-pop),
 .notice:has(.month-pop),
 .bucket:has(.month-pop) { position: relative; z-index: 45; }
+
+/* SelectPick: the same card as MonthInput, for a choice from a list. */
+.pick-pop.pick-list { width: min(24rem, 100%); padding: 0.5rem; }
+.pick-list {
+  display: grid;
+  gap: 0.2rem;
+  max-height: 18rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.pick-row {
+  min-height: 2.6rem;
+  padding: 0 0.85rem;
+  text-align: start;
+}
+.pick-grid { grid-template-columns: repeat(4, 1fr); }
+.pick-pop .month-cell[aria-selected='true']::after { display: none; }

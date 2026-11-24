@@ -6,6 +6,7 @@ import type { StatusOption } from '../api';
 import { UI, pick, type Lang } from '../i18n';
 import { applyRenewal, readExpiry, type Change, type DocField, type StaleDoc, type Watched } from '../stale';
 import { MonthInput } from './MonthInput';
+import { SelectPick } from './SelectPick';
 
 /**
  * M1 milestone 3: the screens for stale answers (D-127). The logic lives in
@@ -218,11 +219,12 @@ export function QuickCheck({
       >
         <div className="field">
           <label htmlFor="qc-type">{t('qc_visa_type')}</label>
-          <select id="qc-type" value={visaType} onChange={(e) => setVisaType(e.target.value)}>
-            {statuses.map((s) => (
-              <option key={s.value} value={s.value}>{pick(s.label, lang)}</option>
-            ))}
-          </select>
+          <SelectPick
+            id="qc-type"
+            value={visaType}
+            onChange={(v) => setVisaType(v)}
+            options={statuses.map((s) => ({ value: s.value, label: pick(s.label, lang) }))}
+          />
         </div>
         <UploadRead kind="visa" lang={lang} onLogin={onLogin} onRead={({ fields: f }) => f.expires && setVisaExp(f.expires)} />
         <div className="field">
