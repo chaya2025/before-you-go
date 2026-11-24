@@ -1,0 +1,3096 @@
+{
+  "generated_at": "2026-11-23",
+  "engine_commit": "d352377",
+  "items": [
+    {
+      "id": "step:fix.renew_visa",
+      "kind": "step",
+      "engine_id": "fix.renew_visa",
+      "general": false,
+      "title": {
+        "he": "חידוש האשרה",
+        "en": "Renew your visa"
+      },
+      "text": {
+        "he": "מה עושים: חדש את אשרת השהייה מול רשות האוכלוסין וההגירה. החידוש מקוון ואורך כחודש.\nWhere: population_authority, רשות האוכלוסין וההגירה; appointment: unknown; track: both; lead time 30 days\nStart now, regardless of position\nהערות\n- ⚠️ זה קודם לכל השאר, כולל עדכון מסמך ה-89. כל עוד האשרה אינה בתוקף, גם עדכון המסמכים עצמו לא יתבצע.\nקישורים\n- רשות האוכלוסין: https://www.gov.il/he/departments/population_and_immigration_authority",
+        "en": "Action: Renew your residence visa with the Population and Immigration Authority. It is done online and takes about a month.\nWhere: population_authority, רשות האוכלוסין וההגירה; appointment: unknown; track: both; lead time 30 days\nStart now, regardless of position\nNotes\n- ⚠️ This comes before everything else, including updating your 89 document. While the visa is not valid, even updating your documents will not go through.\nLinks\n- Population and Immigration Authority: https://www.gov.il/he/departments/population_and_immigration_authority"
+      },
+      "applies_when_text": "(visa_valid_now is known AND visa_valid_now is false)",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ג)",
+          "claim": "הזכאות נבחנת לרגע ההגשה — נדרש רישיון ישיבה בתוקף בעת הגשת הבקשה",
+          "quote": "תושב מדינת חוץ שהגיש את בקשתו בעת שהיה ברשותו רישיון ישיבה בישראל.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "אשרה שאינה בתוקף חוסמת כל התנהלות מול רשויות המדינה, ולכן גם את עדכון מסמך ה-89 עצמו",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "חידוש אשרה מתבצע מקוון ואורך חודש לפחות",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "document:doc.visa",
+        "document:doc.passport"
+      ]
+    },
+    {
+      "id": "step:fix.update_89",
+      "kind": "step",
+      "engine_id": "fix.update_89",
+      "general": false,
+      "title": {
+        "he": "עדכון מסמך ה-89 לדרכון הנוכחי",
+        "en": "Update your 89 document to your current passport"
+      },
+      "text": {
+        "he": "מה עושים: קבע תור למשרד הרישוי והצג את הדרכון החדש. הפקיד מדפיס מסמך 89 מעודכן. כדאי להביא גם את הדרכון הישן אם הוא עדיין בידך.\nWhere: licensing_office, משרד הרישוי; appointment: true; track: both\nStart now, regardless of position\nלבדוק לפני\n- הדרכון שבידך והמסמך 89 נושאים את אותו מספר דרכון\nהערות\n- ⭐ מספר ה-89 עצמו קבוע ואינו משתנה לעולם. מה שמתעדכן הוא רק הקישור שלו לדרכון החדש.\n- ⚠️ העדכון מחייב תור, בניגוד להנפקה הראשונה שהיא כניסה חופשית.",
+        "en": "Action: Book a licensing office appointment and show your new passport. The clerk prints an updated 89. Bring the old passport too if you still have it.\nWhere: licensing_office, משרד הרישוי; appointment: true; track: both\nStart now, regardless of position\nChecklist\n- The passport in your hand and the 89 carry the same passport number\nNotes\n- ⭐ The 89 number itself is permanent and never changes. All that is updated is its link to your new passport.\n- ⚠️ This update requires an appointment, unlike the first issue, which is a walk-in."
+      },
+      "applies_when_text": "(passport_89_number_match is known AND passport_89_number_match is false)",
+      "sources": [
+        {
+          "citation": null,
+          "claim": "אי-התאמה בין מספר הדרכון שבמסמך ה-89 לדרכון שברשות הנבחן מונעת את קיום הטסט, והוא נרשם ככישלון ולא כאי-התייצבות",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "מספר ה-89 עצמו קבוע — חידוש דרכון שובר רק את הקישור, והעדכון מחייב תור",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "document:doc.passport",
+        "document:doc.form_89",
+        "step:fix.renew_visa"
+      ]
+    },
+    {
+      "id": "step:fix.name_on_89",
+      "kind": "step",
+      "engine_id": "fix.name_on_89",
+      "general": false,
+      "title": {
+        "he": "בדיקת השם במסמך ה-89 מול הדרכון",
+        "en": "Check the name on your 89 against your passport"
+      },
+      "text": {
+        "he": "מה עושים: השם במסמך ה-89 ובדרכון אינו נקרא אותו הדבר. גש למשרד הרישוי עם הדרכון וברר אם יש לעדכן את המסמך.\nWhere: licensing_office, משרד הרישוי; appointment: unknown; track: both\nStart now, regardless of position\nהערות\n- ⚠️ ההשוואה מתעלמת מסדר השמות, מרווחים ומסימני ניקוד — \"SMITH JOHN\" ו-\"John Smith\" נחשבים זהים. אם בכל זאת עלה הבדל, מדובר בכתיב שונה ממש. אנחנו לא יכולים לדעת אם הפקיד יקבל אותו, ולכן זו בדיקה ולא אזהרה.",
+        "en": "Action: The name on your 89 and the name in your passport do not read the same. Take your passport to the licensing office and ask whether the document needs updating.\nWhere: licensing_office, משרד הרישוי; appointment: unknown; track: both\nStart now, regardless of position\nNotes\n- ⚠️ The comparison ignores name order, spacing and accents: \"SMITH JOHN\" and \"John Smith\" count as identical. So a difference here is a genuinely different spelling. We cannot know whether a clerk will accept it, which is why this is a check and not a warning."
+      },
+      "applies_when_text": "(passport_89_name_match is known AND passport_89_name_match is false)",
+      "sources": [
+        {
+          "citation": "גיליון 03 שורה 3 · הסקה מדרישת ההתאמה בין הדרכון לרישום ברשות האוכלוסין",
+          "claim": "מסמכים הנושאים כתיב שונה של אותו שם יוצרים חיכוך בדלפק",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        }
+      ],
+      "links": [
+        "document:doc.form_89"
+      ]
+    },
+    {
+      "id": "step:fix.name_on_license",
+      "kind": "step",
+      "engine_id": "fix.name_on_license",
+      "general": false,
+      "title": {
+        "he": "בדיקת השם ברישיון הזר מול הדרכון",
+        "en": "Check the name on your foreign licence against your passport"
+      },
+      "text": {
+        "he": "מה עושים: השם ברישיון הנהיגה הזר ובדרכון אינו נקרא אותו הדבר. ודא מול משרד הרישוי לפני ההגשה שהם מקבלים את ההבדל, או הבא תרגום נוטריוני שמראה שמדובר באותו אדם.\nWhere: licensing_office, משרד הרישוי; appointment: unknown; track: conversion\nStart now, regardless of position\nהערות\n- הפרש כזה נפוץ כששם נכתב במקור באלפבית אחר — קירילי, אמהרי, ערבי או סיני. כל מסמך מתעתק אותו בנפרד, והתוצאות אינן זהות.",
+        "en": "Action: The name on your foreign licence and the name in your passport do not read the same. Check with the licensing office before submitting whether they accept the difference, or bring a notarised translation showing it is the same person.\nWhere: licensing_office, משרד הרישוי; appointment: unknown; track: conversion\nStart now, regardless of position\nNotes\n- A difference like this is common when a name was originally written in another alphabet: Cyrillic, Amharic, Arabic or Chinese. Each document transliterates it separately and the results do not match."
+      },
+      "applies_when_text": "(passport_license_name_match is known AND passport_license_name_match is false)",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הגשת בקשה להוצאת רישיון נהיגה\"",
+          "claim": "נדרש שהשם יהיה מעודכן באנגלית ברשות האוכלוסין",
+          "quote": "יש לוודא כי שמם של מגישי הבקשה מעודכן בשפה האנגלית ברשות האוכלוסין וההגירה.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "גיליון 05 שורה 13 · הסקה מדרישת ההתאמה",
+          "claim": "כתיב שונה בין הרישיון הזר לדרכון יוצר חיכוך בהמרה",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        }
+      ],
+      "links": [
+        "document:doc.foreign_license"
+      ]
+    },
+    {
+      "id": "step:fz.doc_89",
+      "kind": "step",
+      "engine_id": "fz.doc_89",
+      "general": false,
+      "title": {
+        "he": "הוצאת מספר מזהה 89 (\"הטופס הלבן\")",
+        "en": "Get your 89 identity number (the \"white form\")"
+      },
+      "text": {
+        "he": "מה עושים: הגע למשרד הרישוי עם דרכון מקורי ואשרת שהייה בתוקף. תקבל דף A4 מודפס עם מספר שמתחיל ב-89.\n\n⭐ הדף הזה הוא תעודת הזיהוי שלך לכל מה שקשור לרישיון. קח אותו איתך לכל תור במשרד הרישוי, לתחנת הצילום ולטסט.\nWhere: licensing_office, משרד הרישוי; appointment: false; track: from_zero\nלבדוק לפני\n- הדרכון מקורי, לא צילום?\nאם לא מסתדר: לך בלי תור. אם דוחים אותך — קבע תור באותו רגע, במקום.\nקישורים\n- זימון תור למשרד הרישוי: https://www.gov.il/he/Departments/General/govisit",
+        "en": "Action: Go to a licensing office with your original passport and a valid visa. You get an identity number starting with 89, printed on an A4 sheet.\nWhere: licensing_office, משרד הרישוי; appointment: false; track: from_zero\nChecklist\n- Is the passport the original, not a copy?\nFallback: Go without an appointment. If they turn you away, book one there and then.\nLinks\n- Book a licensing office appointment: https://www.gov.il/he/Departments/General/govisit"
+      },
+      "applies_when_text": "has_teudat_zehut is false",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הוצאת רישיון נהיגה לעובד זר\"",
+          "claim": "משרד הרישוי מנפיק מספר זיהוי המתחיל ב-89",
+          "quote": "במשרד הרישוי יונפק מספר זיהוי פיקטיבי המתחיל בספרות 89.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "חל על כל מי שאין לו תעודת זהות, לא רק על עובד זר — בעלת א/2 קיבלה מספר 89 בפועל",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "להנפקה הראשונה אין צורך בתור מראש. כל ביקור אחר מחייב תור",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "השלב חייב לבוא לפני הטופס המקוון ולפני בדיקת הראייה — שדה הזיהוי בטופס מקבל את מספר ה-89",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "כל נהג בישראל חייב מספר מזהה. מי שאין לו תעודת זהות מקבל מספר 89 — וזה נכון בשני המסלולים, המרה ומאפס, והוא התחנה הראשונה",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "document:doc.passport",
+        "document:doc.visa",
+        "document:doc.form_89"
+      ]
+    },
+    {
+      "id": "step:fz.online_form",
+      "kind": "step",
+      "engine_id": "fz.online_form",
+      "general": true,
+      "title": {
+        "he": "מילוי בקשה מקוונת (\"הטופס הירוק\")",
+        "en": "Fill in the online application"
+      },
+      "text": {
+        "he": "מה עושים: מלא את הבקשה להוצאת רישיון נהיגה: פרטים אישיים, בחירת דרגות, והצהרה רפואית. המילוי ללא תשלום.\nWhere: online, משרד התחבורה; appointment: unknown; track: from_zero\nהערות\n- הטופס מקוון בלבד — אין ממנו דף להביא. הדף שאתה נושא הוא הטופס הלבן (89). [only when has_teudat_zehut is false]\nקישורים\n- טופס הבקשה: https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+        "en": "Action: Complete the licence application: personal details, the grades you want, and the medical declaration. Filling it in is free.\nWhere: online, משרד התחבורה; appointment: unknown; track: from_zero\nNotes\n- The form is online only — there is no printout to carry. The sheet you carry is the white form (89). [only when has_teudat_zehut is false]\nLinks\n- The application form: https://www.gov.il/he/service/apply_for_new_driver_drivers_license"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הגשת בקשה להוצאת רישיון נהיגה\"",
+          "claim": "ההצהרה הרפואית תקפה חמש שנים",
+          "quote": "ההצהרה הרפואית תקפה ל5 שנים.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "\"טופס ירוק\" הוא הכינוי שבשימוש במשרד הרישוי ובקהילה",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:fz.doc_89"
+      ]
+    },
+    {
+      "id": "step:fz.photo_and_eye",
+      "kind": "step",
+      "engine_id": "fz.photo_and_eye",
+      "general": true,
+      "title": {
+        "he": "תחנת צילום ובדיקת ראייה",
+        "en": "Photo station and eye test"
+      },
+      "text": {
+        "he": "מה עושים: הגע לתחנת צילום עם תעודה מזהה. הצילום חינם; בדיקת הראייה בתשלום ומתבצעת באותו מקום.\nWhere: photo_station; appointment: unknown; track: from_zero\nלבדוק לפני\n- הטופס הלבן (89) איתך? [only when has_teudat_zehut is false]\nעלות: 50 ₪\nהצילום חינם. התשלום הוא על בדיקת הראייה.\nקישורים\n- תחנות צילום: https://www.gov.il/he/service/drivers_license_photo_stations",
+        "en": "Action: Go to a photo station with photo ID. The photo is free; the eye test is paid and happens there.\nWhere: photo_station; appointment: unknown; track: from_zero\nChecklist\n- Do you have the white form (89) with you? [only when has_teudat_zehut is false]\nCost: 50 ILS\nThe photo is free. The payment is for the eye test.\nLinks\n- Photo stations: https://www.gov.il/he/service/drivers_license_photo_stations"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "דף \"תחנות צילום לרישיון נהיגה\", משרד התחבורה",
+          "claim": "מסמך מזהה מתקבל: תעודת זהות, דרכון או רישיון נהיגה",
+          "quote": "תעודה מזהה בתוקף: תעודת זהות, דרכון או רישיון נהיגה.",
+          "url": "https://www.gov.il/he/service/drivers_license_photo_stations",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "בלי הטופס הלבן (89) בדיקת הראייה אינה מתבצעת",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": "דף \"תחנות צילום לרישיון נהיגה\", משרד התחבורה",
+          "claim": "הצילום להנפקת רישיון חדש אינו כרוך בתשלום",
+          "quote": "לא נדרש לבצע תשלום עבור צילום להנפקת רישיון נהיגה חדש או חידוש רישיון",
+          "url": "https://www.gov.il/he/service/drivers_license_photo_stations",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "בדיקת הראייה עלתה 50 ₪",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "document:doc.identity",
+        "document:doc.passport",
+        "document:doc.form_89",
+        "step:fz.doc_89"
+      ]
+    },
+    {
+      "id": "step:fz.theory",
+      "kind": "step",
+      "engine_id": "fz.theory",
+      "general": true,
+      "title": {
+        "he": "מבחן תיאוריה",
+        "en": "Theory test"
+      },
+      "text": {
+        "he": "מה עושים: היבחן במבחן העיוני: 30 שאלות, 40 דקות, עוברים ב-26 תשובות נכונות. תוקף התוצאה חמש שנים.\nWhere: test_center; appointment: unknown; track: from_zero\nלבדוק לפני\n- צריך להיבחן בעל-פה ולא במחשב? התקשר ל-*5678 לברר באילו שפות זה אפשרי — אנחנו לא יודעים.\nקישורים\n- הרשמה למבחן תיאוריה: https://www.theorytest.org.il/",
+        "en": "Action: 30 questions, 40 minutes, 26 correct to pass. The result is valid for five years.\nWhere: test_center; appointment: unknown; track: from_zero\nChecklist\n- Need to take it orally rather than on a computer? Call *5678 to ask which languages that is offered in. We do not know.\nLinks\n- Register for the theory test: https://www.theorytest.org.il/"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"המבחן העיוני (תאוריה)\"",
+          "claim": "מבנה המבחן ותוקפו",
+          "quote": "משך המבחן הוא 40 דקות. המבחן מתבצע על מחשב. המבחן מורכב מ-30 שאלות. נבחנים שהשיבו נכון על 26 שאלות מתוך 30, עוברים את המבחן העיוני בהצלחה. תוקף המבחן העיוני הוא ל-5 שנים.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "כל-זכות, \"מבחן נהיגה עיוני (תיאוריה)\", עודכן 9.7.2026",
+          "claim": "המבחן הממוחשב קיים בשבע שפות: עברית, ערבית, רוסית, אמהרית, אנגלית, צרפתית וספרדית",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        },
+        {
+          "citation": null,
+          "claim": "באילו שפות מוצע המבחן בעל-פה — ייתכן שבכל שבע השפות. נבדק פעמיים ולא אותר מקור לשום כיוון. לבירור מול *5678 או מרכז בחינות",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": [
+        "step:fz.online_form",
+        "step:fz.photo_and_eye"
+      ]
+    },
+    {
+      "id": "step:fz.lessons",
+      "kind": "step",
+      "engine_id": "fz.lessons",
+      "general": true,
+      "title": {
+        "he": "שיעורי נהיגה",
+        "en": "Driving lessons"
+      },
+      "text": {
+        "he": "מה עושים: לרישיון רכב פרטי נדרשים 28 שיעורים לפחות. זו מכסת מינימום, לא הערכה.\nWhere: driving_school; appointment: unknown; track: from_zero",
+        "en": "Action: A private car licence requires at least 28 lessons. That is a minimum, not an estimate.\nWhere: driving_school; appointment: unknown; track: from_zero"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"לימוד נהיגה מעשי\"",
+          "claim": "מכסת מינימום של 28 שיעורים, ולרוב אינה מספיקה",
+          "quote": "לדוגמה: לרישיון רכב פרטי נדרש לבצע 28 שיעורים מינימום. לרוב התלמידים מספר השיעורים המינימלי אינו מספיק.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "step:fz.online_form",
+        "step:fz.photo_and_eye"
+      ]
+    },
+    {
+      "id": "step:fz.internal_test",
+      "kind": "step",
+      "engine_id": "fz.internal_test",
+      "general": true,
+      "title": {
+        "he": "מבחן פנימי ותשלום אגרת בחינה",
+        "en": "Internal test and exam fee"
+      },
+      "text": {
+        "he": "מה עושים: שלם את אגרת הבחינה מקוון, ואז גש למבחן הפנימי מטעם בית הספר.\nWhere: driving_school; appointment: unknown; track: from_zero",
+        "en": "Action: Pay the exam fee online, then take the driving school’s internal test.\nWhere: driving_school; appointment: unknown; track: from_zero"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"לימוד נהיגה מעשי\"",
+          "claim": "תשלום אגרת בחינה נדרש לפני המבחן הפנימי",
+          "quote": "לפני ביצוע מבחן פנימי יש לבצע תשלום אגרת בחינה.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "אגרת הבחינה משולמת מקוון ועובדת גם עם מספר 89 — אין כאן חסם",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:fz.lessons"
+      ]
+    },
+    {
+      "id": "step:fz.book_permit_appointment",
+      "kind": "step",
+      "engine_id": "fz.book_permit_appointment",
+      "general": false,
+      "title": {
+        "he": "⭐ קבע תור להוצאת ההיתר — עוד לפני הטסט",
+        "en": "⭐ Book the permit appointment BEFORE your test"
+      },
+      "text": {
+        "he": "מה עושים: קבע תור למשרד הרישוי להוצאת ההיתר כשבועיים מראש, לתאריך שאחרי הטסט.\n\nאם עברת — התור כבר מחכה. אם לא — מבטלים אותו. מי שממתין לתוצאה ורק אז מזמן תור, ממתין כשבועיים נוספים.\nWhere: online, משרד הרישוי; appointment: true; track: from_zero\nMust be done before step fz.test\nקישורים\n- זימון תור: https://www.gov.il/he/Departments/General/govisit",
+        "en": "Action: Book the licensing office appointment about two weeks ahead, for a date after your test.\n\nIf you pass, it is already waiting. If you do not, you cancel it. Booking only after the result costs about two more weeks.\nWhere: online, משרד הרישוי; appointment: true; track: from_zero\nMust be done before step fz.test\nLinks\n- Book an appointment: https://www.gov.il/he/Departments/General/govisit"
+      },
+      "applies_when_text": "has_teudat_zehut is false",
+      "sources": [
+        {
+          "citation": null,
+          "claim": "יש לקבוע את התור לפני הטסט, לתאריך שאחריו. המתנה לתוצאה עולה כשבועיים",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הגשת בקשה להוצאת רישיון נהיגה\"",
+          "claim": "תקופת הליווי נספרת מיום הוצאת הרישיון, לא מיום הטסט",
+          "quote": "מתחת לגיל 24 - הרישיון יישלח רק לאחר הצהרת נהג חדש על סיום תכנית הליווי, בתנאי שעברה חצי שנה מיום הוצאת רישיון הנהיגה.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "step:fz.test"
+      ]
+    },
+    {
+      "id": "step:fz.test",
+      "kind": "step",
+      "engine_id": "fz.test",
+      "general": true,
+      "title": {
+        "he": "מבחן מעשי (טסט)",
+        "en": "Practical driving test"
+      },
+      "text": {
+        "he": "מה עושים: הגע לטסט עם המסמכים שברשימה למטה.\nWhere: test_center; appointment: unknown; track: from_zero\nלבדוק לפני\n- קבעת כבר תור להוצאת ההיתר? [only when has_teudat_zehut is false]\n- מרכיבי משקפיים או עדשות מגע — יש להביא אותם לטסט.\nהערות\n- אגרת הטסט משולמת מקוון, ומי שקובע לך את הטסט רואה את התשלום במערכת וקובע על סמכו. אין צורך להגיע עם אישור מודפס.\n⚠️ הרשימה הרשמית עדיין מזכירה אישור תשלום, ולכן מומלץ לשמור צילום מסך של התשלום.\nעלות: 165-394 ₪\nאגרת הטסט, ובנפרד העמדת רכב מטעם המורה.",
+        "en": "Action: Come to the test with the documents listed below.\nWhere: test_center; appointment: unknown; track: from_zero\nChecklist\n- Have you already booked the permit appointment? [only when has_teudat_zehut is false]\n- If you wear glasses or contact lenses, bring them to the test.\nNotes\n- The test fee is paid online, and whoever books your test sees the payment in the system and books it on that basis. You do not need to arrive with a printed receipt.\n⚠️ The official list still mentions a payment receipt, so keep a screenshot of the payment.\nCost: 165-394 ILS\nThe government test fee, plus the instructor’s charge for providing the car."
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"מה להביא למבחן המעשי (טסט)\"",
+          "claim": "רשימת המסמכים לטסט",
+          "quote": "תעודת זהות, דרכון או רישיון נהיגה · אישור על תשלום האגרה · משקפיים או עדשות מגע, אם יש צורך.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "אי-התאמה בין מספר הדרכון שבמסמך ה-89 לדרכון שבידך מונעת את קיום הטסט, והוא נרשם ככישלון",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "אגרת הטסט משולמת מקוון ונראית במערכת למי שקובע את הטסט; בפועל לא מתבקש אישור תשלום מודפס בטסט",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-31",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": "כל-זכות, \"מבחן נהיגה מעשי (טסט) לרכב פרטי\", עודכן 14.4.2026",
+          "claim": "אגרת טסט 165 ₪ והעמדת רכב עד 229 ₪",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        }
+      ],
+      "links": [
+        "document:doc.identity",
+        "document:doc.passport",
+        "document:doc.form_89",
+        "step:fz.theory",
+        "step:fz.lessons",
+        "step:fz.internal_test"
+      ]
+    },
+    {
+      "id": "step:fz.permit_online",
+      "kind": "step",
+      "engine_id": "fz.permit_online",
+      "general": false,
+      "title": {
+        "he": "קבלת היתר נהיגה — מקוון",
+        "en": "Receive your driving permit online"
+      },
+      "text": {
+        "he": "מה עושים: הרישיון הזמני מנייר יישלח אליך מקוון תוך 72 שעות מסיום הטסט, אם אין הגבלות.\nWhere: online; appointment: unknown; track: from_zero",
+        "en": "Action: The temporary paper licence is sent to you online within 72 hours of passing, if there are no restrictions.\nWhere: online; appointment: unknown; track: from_zero"
+      },
+      "applies_when_text": "has_teudat_zehut is true",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הגשת בקשה להוצאת רישיון נהיגה\"",
+          "claim": "הרישיון הזמני נשלח מקוון תוך 72 שעות",
+          "quote": "הנבחנים יקבלו את רישיון הנהיגה הזמני מנייר (אם אין הגבלות), לא יאוחר מ-72 שעות.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "step:fz.test"
+      ]
+    },
+    {
+      "id": "step:fz.permit_in_person",
+      "kind": "step",
+      "engine_id": "fz.permit_in_person",
+      "general": false,
+      "title": {
+        "he": "קבלת היתר נהיגה — בהגעה פיזית",
+        "en": "Collect your driving permit in person"
+      },
+      "text": {
+        "he": "מה עושים: ההיתר אינו נשלח מקוון. הגע למשרד הרישוי בתור שקבעת, עם כל המסמכים. ההיתר נמסר במקום, על נייר.\nWhere: licensing_office; appointment: true; track: from_zero",
+        "en": "Action: The permit is not sent online. Go to the licensing office on the appointment you booked, with all your documents. It is handed over there, on paper.\nWhere: licensing_office; appointment: true; track: from_zero"
+      },
+      "applies_when_text": "has_teudat_zehut is false",
+      "sources": [
+        {
+          "citation": null,
+          "claim": "מי שאין לו תעודת זהות אינו מקבל את הרישיון הזמני מקוון — נדרשים תור והגעה פיזית, וההיתר נמסר במקום",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "במשרד הרישוי אמרו במפורש שהסיבה שההיתר לא נשלח מקוון היא שאין לה תעודת זהות",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "האם החסימה מהמסלול המקוון היא מגבלת מערכת ארצית או תלוית סניף — שאלה פתוחה 22",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": [
+        "document:doc.passport",
+        "document:doc.form_89",
+        "step:fz.test"
+      ]
+    },
+    {
+      "id": "step:fz.permit_fee",
+      "kind": "step",
+      "engine_id": "fz.permit_fee",
+      "general": false,
+      "title": {
+        "he": "תשלום אגרת ההיתר בסניף דואר",
+        "en": "Pay the permit fee at a post office"
+      },
+      "text": {
+        "he": "מה עושים: ההיתר אינו בתוקף עד שתשלם את האגרה בסניף דואר. לא ניתן לשלם מקוון.\nWhere: post_office; appointment: false; track: from_zero\nעלות: 15-20 ₪\nמשולם בסניף דואר. לא ניתן לשלם מקוון.",
+        "en": "Action: The permit is not valid until you pay the fee at a post office. It cannot be paid online.\nWhere: post_office; appointment: false; track: from_zero\nCost: 15-20 ILS\nPaid at a post office. Cannot be paid online."
+      },
+      "applies_when_text": "has_teudat_zehut is false",
+      "sources": [
+        {
+          "citation": null,
+          "claim": "ההיתר אינו בתוקף עד תשלום אגרה בסניף דואר, ולא ניתן לשלם מקוון",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "התור בדואר הוא תור רגיל לסניף ולא הזמנה לשירות ייעודי",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "האגרה עמדה על כ-15-20 ₪, שולמה בסניף דואר",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:fz.permit_in_person"
+      ]
+    },
+    {
+      "id": "step:fz.new_driver",
+      "kind": "step",
+      "engine_id": "fz.new_driver",
+      "general": true,
+      "title": {
+        "he": "מגבלות נהג חדש",
+        "en": "New-driver restrictions"
+      },
+      "text": {
+        "he": "מה עושים: אתה \"נהג חדש\" למשך שנתיים מיום קבלת הרישיון. כל עוד אתה נהג חדש, חובה להצמיד שלט \"נהג חדש\" לשוליים התחתונים של השמשה האחורית בכל רכב שאתה נוהג בו — 12X20 ס\"מ, אותיות בגובה 40 מ\"מ, שחור על רקע צהוב מחזיר אור. ⚠️ וכשאתה כבר לא נהג חדש, חובה להוריד אותו.\nWhere: unknown; appointment: unknown; track: from_zero\nהערות\n- מתחת לגיל 24 — חובת ליווי של שישה חודשים מיום הוצאת ההיתר. ⚠️ מיום ההיתר, לא מיום הטסט. שלושת החודשים הראשונים ליווי מלא ביום ובלילה, ושלושת הבאים בשעות הלילה בלבד (21:00–06:00). [only when age_years < 24]\n- בסך הכול 50 שעות נהיגה לפחות: 20 בדרך עירונית, 15 בדרך בין-עירונית, ו-15 בשעות הלילה. אין הגבלה על מספר המלווים. אם לא סיימת בתוך שישה חודשים — תקבל היתר נוסף לשישה חודשים עד להשלמה. [only when age_years < 24]\n- ⚠️ מתחת לגיל 21 — אסור להסיע יותר משני נוסעים, עד שימלאו לך 21. אם יושב מלווה במושב שלצידך, ההגבלה אינה חלה. [only when age_years < 21]\n- מגיל 24 ומעלה אין חובת ליווי ואין הגבלת נוסעים — אבל שאר תנאי נהג חדש עדיין חלים עליך. [only when age_years >= 24]",
+        "en": "Action: You are a \"new driver\" for two years from the day you receive the licence. Throughout, you must fix a \"new driver\" sign to the lower edge of the rear window of any car you drive — 12x20 cm, 40 mm letters, black on reflective yellow. ⚠️ And once you are no longer a new driver, you must take it off.\nWhere: unknown; appointment: unknown; track: from_zero\nNotes\n- Under 24 — six months of accompanied driving from the day the permit issues. ⚠️ From the permit, not from the test. The first three months fully accompanied day and night, the next three at night only (21:00–06:00). [only when age_years < 24]\n- Fifty hours of driving at least: 20 urban, 15 interurban, 15 at night. No limit on how many different people accompany you. If you have not finished within six months, you get a further six-month permit until you do. [only when age_years < 24]\n- ⚠️ Under 21 — you may not carry more than two passengers, until you turn 21. If an accompanying driver sits beside you, the restriction does not apply. [only when age_years < 21]\n- From 24 upwards there is no accompaniment requirement and no passenger limit — but the rest of the new-driver conditions still apply to you. [only when age_years >= 24]"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"נהג חדש ומלווה\"",
+          "claim": "נהג חדש לשנתיים; מתחת ל-24 נקרא \"נהג חדש צעיר\"; מגיל 24 יש פטור מליווי",
+          "quote": "נהג מוגדר כנהג חדש בשנתיים הראשונות לאחר קבלת רישיון הנהיגה. נהג חדש צעיר הוא נהג חדש, שטרם מלאו לו 24 שנים... נהג חדש שגילו 24 שנים או יותר פטור מליווי.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"נהג חדש ומלווה\"",
+          "claim": "שישה חודשי ליווי מיום ההיתר: שלושה מלאים ושלושה בשעות הלילה בלבד",
+          "quote": "חובת הליווי תחול לתקופה של שישה חודשים מיום קבלת היתר הנהיגה הראשון, מהם שלושה חודשי ליווי מלא במהלך נהיגה ביום ובלילה, ושלושה חודשי ליווי בשעות הלילה בלבד. שעות הלילה הן השעות שבין 21:00 ל-06:00.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"נהג חדש ומלווה\"",
+          "claim": "מכסת השעות, ריבוי מלווים, והיתר נוסף אם לא הסתיים בזמן",
+          "quote": "50 שעות לפחות, מהן 20 שעות נהיגה בדרך עירונית, 15 שעות נהיגה בדרך בין עירונית, ו-15 שעות נהיגה בשעות הלילה... אין הגבלה על מספר המלווים לשם ביצוע תכנית הליווי... אם בתום שישה חודשים לא הסתיימה תוכנית הליווי, יינתן לנהג היתר נהיגה לשישה חודשים נוספים עד להשלמתה.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"נהג חדש ומלווה\"",
+          "claim": "הגבלת שני הנוסעים עד גיל 21, ומלווה שמסיר אותה",
+          "quote": "נהג חדש צעיר, שטרם מלאו לו 21 שנים, לא יורשה להסיע יותר משני נוסעים, אלא אם יושב מלווה במושב שלצידו. נהג חדש, כל עוד רשום ברישיון הנהיגה שלו שהוא נהג חדש, אינו רשאי להסיע יותר משני נוסעים ברכב, אלא לאחר שימלאו לו 21 שנים.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"נהג חדש ומלווה\"",
+          "claim": "חובת השלט, מידותיו ומיקומו — וחובת הסרתו כשאינך עוד נהג חדש",
+          "quote": "כל נהג המוגדר כנהג חדש חייב לתלות על השמשה האחורית של כלי הרכב בו הוא נוהג שלט המיידע את הנהגים האחרים כי לפניהם נהג חסר ניסיון. ברכב פרטי וברכב מסחרי עד 4 טונות, יש להציג שלט בגודל של 12X20 סנטימטרים. גובה האותיות יהיה 40 מילימטרים בצבע שחור על גבי רקע צהוב המחזיר אור. השלט יוצמד לשוליים התחתונים של השמשה האחורית... נהג שאינו נהג חדש לא ינהג ברכב כאשר מוצמד שלט זה לשמשה האחורית.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "מספר התקנה המדויק שמחייב את שלט \"נהג חדש\"",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": [
+        "step:fz.permit_online",
+        "step:fz.permit_in_person"
+      ]
+    },
+    {
+      "id": "step:fz.completion_online",
+      "kind": "step",
+      "engine_id": "fz.completion_online",
+      "general": false,
+      "title": {
+        "he": "הצהרת סיום ליווי",
+        "en": "Declare the accompaniment period complete"
+      },
+      "text": {
+        "he": "מה עושים: הגש את הצהרת נהג חדש על סיום תכנית הליווי — שישה חודשים מיום מתן ההיתר, בטופס מקוון.\n\nסיימת את הליווי מוקדם יותר? אפשר להצהיר כבר עכשיו. הרישיון הקבוע עדיין יישלח בתום שישה החודשים.\n\n⭐ ברגע שההצהרה אושרה — מותר לך לנהוג עם תעודה מזהה בלבד. אין צורך לחכות שהרישיון יגיע בדואר.\nWhere: online; appointment: unknown; track: from_zero",
+        "en": "Action: Submit the new-driver declaration that the accompaniment period is over — six months from the day the permit was issued, on the online form.\n\nFinished the accompaniment early? You can declare now. The permanent licence is still sent at the six-month mark.\n\n⭐ Once the declaration is confirmed you may drive with photo ID alone. There is no need to wait for the licence to arrive by post.\nWhere: online; appointment: unknown; track: from_zero"
+      },
+      "applies_when_text": "(has_teudat_zehut is true AND age_years < 24)",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הגשת בקשה להוצאת רישיון נהיגה\"",
+          "claim": "הרישיון הקבוע נשלח רק אחרי הצהרת סיום הליווי",
+          "quote": "הרישיון יישלח רק לאחר הצהרת נהג חדש על סיום תכנית הליווי.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"נהג חדש ומלווה\"",
+          "claim": "מתי מגישים, שההגשה מקוונת בלבד, ושאפשר להגיש מוקדם",
+          "quote": "על הנהג, כתנאי לקבלת רישיון נהיגה כנהג חדש אשר סיים את תכנית הליווי, להצהיר על כך באופן מקוון בלבד, באמצעות הטופס המקוון, שישה חודשים מיום מתן ההיתר. ניתן להגיש את ההצהרה גם אם הסתיים הליווי וטרם חלפו שישה חודשים. במקרה זה, יישלח הרישיון הקבוע לביתו של הנהג החדש בתום שישה חודשים.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"נהג חדש ומלווה\"",
+          "claim": "אחרי אישור ההצהרה מותר לנהוג עם תעודה מזהה בלבד",
+          "quote": "בסיום תהליך ההצהרה וקבלת אישור כי התהליך הושלם בהצלחה, רשאי הנהג לנהוג ברכב כשברשותו תעודה מזהה ללא צורך בהמתנה לקבלת הרישיון בדואר.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "לבעלי תעודת זהות ההצהרה אכן מוגשת מקוון",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:fz.new_driver"
+      ]
+    },
+    {
+      "id": "step:fz.completion_in_person",
+      "kind": "step",
+      "engine_id": "fz.completion_in_person",
+      "general": false,
+      "title": {
+        "he": "הצהרת סיום ליווי — בהגעה פיזית",
+        "en": "Declare completion in person"
+      },
+      "text": {
+        "he": "מה עושים: ההצהרה מוגשת שישה חודשים מיום מתן ההיתר. סיימת את הליווי מוקדם יותר? אפשר להצהיר כבר עכשיו, והרישיון הקבוע עדיין יישלח בתום שישה החודשים.\n\n⚠️ עפ״י דיווחים, למי שאין תעודת זהות ההצהרה אינה מקוונת: קבע תור, הגע למשרד הרישוי עם כל המסמכים, והפקיד מצהיר במערכת במקומך.\n\n⭐ ברגע שההצהרה אושרה — מותר לך לנהוג עם תעודה מזהה בלבד. אין צורך לחכות שהרישיון יגיע בדואר.\nWhere: licensing_office; appointment: true; track: from_zero",
+        "en": "Action: The declaration is filed six months from the day the permit was issued. Finished the accompaniment early? You can declare now, and the permanent licence is still sent at the six-month mark.\n\n⚠️ From what people report, without a teudat zehut it is not online: book an appointment, bring all your documents, and the clerk files it for you.\n\n⭐ Once the declaration is confirmed you may drive with photo ID alone. No need to wait for the licence to arrive by post.\nWhere: licensing_office; appointment: true; track: from_zero"
+      },
+      "applies_when_text": "(has_teudat_zehut is false AND age_years < 24)",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"נהג חדש ומלווה\"",
+          "claim": "מתי מגישים, ושאפשר להגיש מוקדם",
+          "quote": "על הנהג, כתנאי לקבלת רישיון נהיגה כנהג חדש אשר סיים את תכנית הליווי, להצהיר על כך באופן מקוון בלבד, באמצעות הטופס המקוון, שישה חודשים מיום מתן ההיתר. ניתן להגיש את ההצהרה גם אם הסתיים הליווי וטרם חלפו שישה חודשים. במקרה זה, יישלח הרישיון הקבוע לביתו של הנהג החדש בתום שישה חודשים.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"נהג חדש ומלווה\"",
+          "claim": "אחרי אישור ההצהרה מותר לנהוג עם תעודה מזהה בלבד",
+          "quote": "בסיום תהליך ההצהרה וקבלת אישור כי התהליך הושלם בהצלחה, רשאי הנהג לנהוג ברכב כשברשותו תעודה מזהה ללא צורך בהמתנה לקבלת הרישיון בדואר.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "מי שאין לו תעודת זהות אינו יכול להצהיר מקוון — נדרשים תור והגעה פיזית, והפקיד מצהיר במערכת",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "הפקיד ידע בדיוק מה לעשות — זהו מסלול פנימי מתועד ולא אלתור",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:fz.new_driver"
+      ]
+    },
+    {
+      "id": "step:fz.plastic_fee",
+      "kind": "step",
+      "engine_id": "fz.plastic_fee",
+      "general": false,
+      "title": {
+        "he": "תשלום אגרת הרישיון הקבוע בסניף דואר",
+        "en": "Pay the permanent licence fee at a post office"
+      },
+      "text": {
+        "he": "מה עושים: שלם את אגרת כרטיס הפלסטיק בסניף דואר.\nWhere: post_office; appointment: unknown; track: from_zero\nעלות: 20-30 ₪\nמשולם בסניף דואר.",
+        "en": "Action: Pay the plastic card fee at a post office.\nWhere: post_office; appointment: unknown; track: from_zero\nCost: 20-30 ILS\nPaid at a post office."
+      },
+      "applies_when_text": "has_teudat_zehut is false",
+      "sources": [
+        {
+          "citation": null,
+          "claim": "אגרת כרטיס הפלסטיק משולמת בסניף דואר",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "אגרת ההנפקה הראשונה עמדה על כ-20-30 ₪, שולמה בסניף דואר",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:fz.completion_online",
+        "step:fz.completion_in_person",
+        "step:fz.no_declaration_needed"
+      ]
+    },
+    {
+      "id": "step:fz.no_declaration_needed",
+      "kind": "step",
+      "engine_id": "fz.no_declaration_needed",
+      "general": false,
+      "title": {
+        "he": "אין צורך בהצהרת סיום ליווי",
+        "en": "No completion declaration needed"
+      },
+      "text": {
+        "he": "מה עושים: מגיל 24 ומעלה אין חובת ליווי, ולכן אין גם טופס הצהרה להגיש. הרישיון יישלח אליך בדואר. ⚠️ אבל תנאי נהג חדש עדיין חלים עליך.\nWhere: unknown; appointment: unknown; track: from_zero",
+        "en": "Action: From 24 upwards there is no accompaniment requirement, so there is no declaration form to file either. The licence is posted to you. ⚠️ New-driver conditions still apply to you.\nWhere: unknown; appointment: unknown; track: from_zero"
+      },
+      "applies_when_text": "age_years >= 24",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"נהג חדש ומלווה\"",
+          "claim": "מגיל 24 יש פטור מהליווי ומטופס ההצהרה, אך לא מתנאי נהג חדש",
+          "quote": "נהג שגילו 24 ומעלה פטור מהגשת טופס הצהרת סיום הליווי, אולם עדיין חלים עליו תנאי נהג חדש. ורישיון הנהיגה יישלח אליו באמצעות הדואר.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "step:fz.receive_card",
+      "kind": "step",
+      "engine_id": "fz.receive_card",
+      "general": true,
+      "title": {
+        "he": "קבלת רישיון הנהיגה הקבוע",
+        "en": "Receive the permanent licence"
+      },
+      "text": {
+        "he": "מה עושים: כרטיס הפלסטיק נשלח בדואר לכתובת המעודכנת ברשות האוכלוסין, ואמור להגיע תוך כחודש.\nWhere: mail; appointment: unknown; track: from_zero\nלבדוק לפני\n- הכתובת שלך מעודכנת ברשות האוכלוסין? אליה יישלח הרישיון.",
+        "en": "Action: The plastic card is posted to the address registered with the Population Authority, and should arrive within about a month.\nWhere: mail; appointment: unknown; track: from_zero\nChecklist\n- Is your address up to date at the Population Authority? That is where it goes."
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הגשת בקשה להוצאת רישיון נהיגה\"",
+          "claim": "הרישיון הקבוע נשלח לכתובת המעודכנת ברשות האוכלוסין",
+          "quote": "רישיון נהיגה קבוע (פלסטיק) יישלח לכתובת המעודכנת ברשות האוכלוסין.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "נאמר לה שהכרטיס אמור להגיע תוך כחודש",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "בדיווח: שנה מאז הטסט והכרטיס לא הגיע, למרות שהכתובת הייתה רשומה ונכונה",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:fz.plastic_fee"
+      ]
+    },
+    {
+      "id": "step:duplicate.online",
+      "kind": "step",
+      "engine_id": "duplicate.online",
+      "general": false,
+      "title": {
+        "he": "הכרטיס לא הגיע — הוצאת העתק מקוונת",
+        "en": "The card never arrived: online replacement"
+      },
+      "text": {
+        "he": "מה עושים: הגש בקשה להוצאת העתק רישיון באתר משרד התחבורה. אין צורך בתור, ואין צורך להגיע למשרד הרישוי או לסניף דואר.\n\nלאחר התשלום, ותוך 48 שעות — היכנס ל-fastdl.co.il ובחר את אופן המסירה: איסוף עצמי בדפוס בארי (ללא תשלום), שליח עד הבית, דואר, נתב\"ג, דואר רשום או מעברי גבול.\nWhere: online; appointment: false; track: both\nאם לא מסתדר: אין לך כתובת רשומה? בחר איסוף עצמי בדפוס בארי — ללא תשלום, ואינו תלוי בכתובת.\nקישורים\n- הוצאת העתק רישיון: https://www.gov.il/he/service/duplicate_drivers_license_in_case_of_loss\n- בחירת אופן המסירה: https://fastdl.co.il/",
+        "en": "Action: Submit a duplicate licence request on the Ministry of Transport website. No appointment is needed, and there is no need to attend a licensing office or a post office.\n\nAfter payment, within 48 hours, go to fastdl.co.il and choose the delivery method: self-collection at Defus Bari (free), courier, post, Ben Gurion airport, registered post or border crossings.\nWhere: online; appointment: false; track: both\nFallback: No registered address? Choose self-collection at Defus Bari. It is free and does not depend on an address.\nLinks\n- Duplicate licence service: https://www.gov.il/he/service/duplicate_drivers_license_in_case_of_loss\n- Choose delivery: https://fastdl.co.il/"
+      },
+      "applies_when_text": "has_teudat_zehut is true",
+      "sources": [
+        {
+          "citation": "דף \"הוצאת העתק רישיון נהיגה\", משרד התחבורה",
+          "claim": "השירות מוצע כשירות מקוון, וחלון שינוי אופן המסירה מתועד",
+          "quote": "ביום שאחרי ביצוע התשלום ועד 2 ימי עסקים, ניתן לשנות את אופן קבלת הרישיון ואת יעד המסירה.",
+          "url": "https://www.gov.il/he/service/duplicate_drivers_license_in_case_of_loss",
+          "last_verified_at": "2026-08-24",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "מי שברשותו תעודת זהות מבצע את הבקשה מקוון ואינו נדרש להגיע למשרד הרישוי או לסניף דואר",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-31",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "גובה האגרה בערוץ המקוון — לא אומת. 23 ₪ נצפו בערוץ הפיזי בלבד",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": [
+        "step:fz.receive_card",
+        "step:cv.receive"
+      ]
+    },
+    {
+      "id": "step:duplicate.in_person",
+      "kind": "step",
+      "engine_id": "duplicate.in_person",
+      "general": false,
+      "title": {
+        "he": "הכרטיס לא הגיע — הוצאת העתק בהגעה אישית",
+        "en": "The card never arrived: replacement in person"
+      },
+      "text": {
+        "he": "מה עושים: קבע תור למשרד הרישוי ובקש הוצאת כפל רישיון. שלם 23 ₪ בסניף דואר.\n\nתוך 48 שעות מהתשלום — היכנס ל-fastdl.co.il ובחר איך לקבל את הרישיון:\n· איסוף עצמי בדפוס בארי — ללא תשלום, ואינו דורש כתובת רשומה\n· שליח עד הבית — בתשלום\n· דואר לכתובת\n· וגם: נתב\"ג · דואר רשום · מעברי גבול\nWhere: licensing_office; appointment: true; track: both\nאם לא מסתדר: אין לך כתובת רשומה? בחר איסוף עצמי בדפוס בארי — ללא תשלום, ואינו תלוי בכתובת.\nעלות: 23 ₪\nייתכן תשלום נוסף לפי אופן המשלוח שתבחר.\nקישורים\n- הוצאת העתק רישיון: https://www.gov.il/he/service/duplicate_drivers_license_in_case_of_loss\n- בחירת אופן המסירה: https://fastdl.co.il/\n- זימון תור: https://www.gov.il/he/Departments/General/govisit",
+        "en": "Action: Book a licensing office appointment and request a duplicate licence. Pay 23 ILS at a post office.\n\nWithin 48 hours of paying, go to fastdl.co.il and choose how to receive the licence:\n· Self-collection at Defus Bari — free, no registered address needed\n· Courier to your door — paid\n· Post to an address\n· Also: Ben Gurion airport · registered post · border crossings\nWhere: licensing_office; appointment: true; track: both\nFallback: No registered address? Choose self-collection at Defus Bari. It is free and does not depend on an address.\nCost: 23 ILS\nThere may be an extra charge depending on the delivery method chosen.\nLinks\n- Duplicate licence service: https://www.gov.il/he/service/duplicate_drivers_license_in_case_of_loss\n- Choose delivery: https://fastdl.co.il/\n- Book an appointment: https://www.gov.il/he/Departments/General/govisit"
+      },
+      "applies_when_text": "has_teudat_zehut is false",
+      "sources": [
+        {
+          "citation": "דף \"הוצאת העתק רישיון נהיגה\", משרד התחבורה",
+          "claim": "השירות קיים רשמית, וחלון שינוי אופן המסירה מתועד",
+          "quote": "ביום שאחרי ביצוע התשלום ועד 2 ימי עסקים, ניתן לשנות את אופן קבלת הרישיון ואת יעד המסירה.",
+          "url": "https://www.gov.il/he/service/duplicate_drivers_license_in_case_of_loss",
+          "last_verified_at": "2026-08-24",
+          "certainty": "verified"
+        },
+        {
+          "citation": "אתר דפוס בארי (fastdl.co.il), הקבלן המפיק עבור משרד התחבורה",
+          "claim": "אפשרויות המסירה, כולל איסוף עצמי ללא תשלום",
+          "quote": "איסוף בדפוס בארי · נתב\"ג · דואר רגיל · שליח עד הבית · דואר רשום · מעברי גבול",
+          "url": "https://fastdl.co.il/",
+          "last_verified_at": "2026-08-24",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "המסלול נמסר על ידי מנהלת במוקד *4515 ופקידה במשרד הרישוי",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "מה קורה למי שמפספס את חלון 48 השעות — לא אותר מקור. ההערכה היא שהרישיון יישלח בדואר",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        },
+        {
+          "citation": null,
+          "claim": "אגרת הפקת כפל רישיון 23 ₪, משולמת בסניף דואר",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:fz.receive_card",
+        "step:cv.receive"
+      ]
+    },
+    {
+      "id": "step:cv.record",
+      "kind": "step",
+      "engine_id": "cv.record",
+      "general": false,
+      "title": {
+        "he": "השגת \"רקורד\" ממדינת המוצא",
+        "en": "Get your \"record\" from your home country"
+      },
+      "text": {
+        "he": "מה עושים: בקש מהרשות המוסמכת במדינת המוצא אסמכתה המציינת את המועד שבו הוצא לך רישיון הנהיגה הקבוע. מתקבל גם בדוא\"ל — אפשר להתחיל מרחוק היום.\nWhere: origin_country, רשות הרישוי במדינת המוצא; appointment: unknown; track: conversion\nStart now, regardless of position\nשלב רשות, מה הוא נותן: פטור ממבחן שליטה ומבדיקת ראייה\nלבדוק לפני\n- ⚠️ האסמכתה חייבת לציין את מועד הוצאת הרישיון הקבוע — לא את מועד הנפקת הכרטיס הנוכחי. זו טעות שמייצרת רקורד חסר תועלת.",
+        "en": "Action: Ask the competent authority in your home country for a document stating when your permanent licence was issued. Email is accepted, so you can start this remotely today.\nWhere: origin_country, רשות הרישוי במדינת המוצא; appointment: unknown; track: conversion\nStart now, regardless of position\nOptional step, what it buys: Exemption from the control test and the eye test\nChecklist\n- ⚠️ It must state when the PERMANENT licence was first issued, not when your current card was printed. Getting this wrong produces a useless document."
+      },
+      "applies_when_text": "(foreign_license_years >= 5 AND has_record_document is not yes)",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"מסמכים נדרשים\", מופיע בשלוש הרשימות",
+          "claim": "הרקורד הוא אסמכתה מגורם מוסמך במדינת המוצא על מועד הוצאת הרישיון הקבוע, ומתקבל בדוא\"ל",
+          "quote": "רקורד - למעוניינים בקבלת פטור ממבחן שליטה ובדיקת ראיה (בעלי רישיון נהיגה לאומי קבוע במשך חמש שנים לפחות, כאמור) נדרש להציג אסמכתה מגורם מוסמך ממדינת המוצא המציינת את מועד הוצאת רישיון הנהיגה הקבוע (ניתן גם באמצעות דוא\"ל).",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 2",
+          "claim": "הפטור שהרקורד קונה הוא כפול: מבחן שליטה וגם בדיקת ראייה",
+          "quote": "מבקש שהיה בעל רישיון נהיגה לאומי קבוע במשך חמש שנים לפחות מדרגה המקבילה לאחת המנויות בתקנה 176 עד 180 לתקנות - פטור מבדיקת ראיה וממבחן שליטה.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "מיהו \"גורם מוסמך\", מה הפורמט הנדרש, ומה עושה מי שמדינת המוצא אינה מנפיקה מסמך כזה",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": [
+        "document:doc.record"
+      ]
+    },
+    {
+      "id": "step:cv.doc_89",
+      "kind": "step",
+      "engine_id": "cv.doc_89",
+      "general": false,
+      "title": {
+        "he": "הוצאת מספר מזהה 89 (\"הטופס הלבן\")",
+        "en": "Get your 89 identity number (the \"white form\")"
+      },
+      "text": {
+        "he": "מה עושים: הגע למשרד הרישוי בלי זימון תור, עם דרכון בתוקף. תקבל מספר מזהה שמתחיל ב-89.\n\n⭐ את המספר הזה תרשום בטופס המקוון בשדה \"מספר זהות\", ואת המסמך תביא לתחנת הצילום ולתור במשרד הרישוי.\nWhere: licensing_office, משרד הרישוי; appointment: false; track: conversion\nלבדוק לפני\n- הדרכון מקורי ובתוקף?",
+        "en": "Action: Go to a licensing office without an appointment, with a valid passport. You get an identity number starting with 89.\n\n⭐ You enter this number in the online form as your \"ID number\", and bring the document to the photo station and to your licensing office appointment.\nWhere: licensing_office, משרד הרישוי; appointment: false; track: conversion\nChecklist\n- Is your passport the original, and valid?"
+      },
+      "applies_when_text": "has_teudat_zehut is false",
+      "sources": [
+        {
+          "citation": "דף השירות \"בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", משרד התחבורה · תושבי חוץ · סעיף \"איך מגישים את הבקשה\"",
+          "claim": "מי שאין לו מספר 89 מגיע למשרד הרישוי בלי תור, מציג דרכון בתוקף ומקבל מספר מזהה",
+          "quote": "אם אין ברשותכם מספר מזהה (89), יש להגיע למשרד הרישוי ללא זימון תור, להציג דרכון בתוקף ולקבל מספר מזהה (89).",
+          "url": "https://www.gov.il/he/service/convert_driving_license",
+          "last_verified_at": "2026-11-04",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "document:doc.passport",
+        "document:doc.form_89"
+      ]
+    },
+    {
+      "id": "step:cv.entry_exit_form",
+      "kind": "step",
+      "engine_id": "cv.entry_exit_form",
+      "general": false,
+      "title": {
+        "he": "אישור כניסות ויציאות מרשות האוכלוסין",
+        "en": "Entries and exits report from the Population Authority"
+      },
+      "text": {
+        "he": "מה עושים: בקש מרשות האוכלוסין אישור על הכניסות והיציאות שלך מישראל ב-5 השנים האחרונות.\nWhere: population_authority, רשות האוכלוסין; appointment: unknown; track: conversion\nהערות\n- ⚠️ לא ברור שרשות האוכלוסין מנפיקה את האישור למי שאינו אזרח או תושב. בדוק איתם לפני שאתה מגיע למשרד הרישוי. [only when nohal_category is toshav_medinat_chutz]",
+        "en": "Action: Ask the Population Authority for a report of your entries to and exits from Israel over the last 5 years.\nWhere: population_authority, רשות האוכלוסין; appointment: unknown; track: conversion\nNotes\n- ⚠️ It is not clear the Population Authority issues this report to someone who is not a citizen or resident. Check with them before your licensing office visit. [only when nohal_category is toshav_medinat_chutz]"
+      },
+      "applies_when_text": "nohal_category is one of [toshav_israel, toshav_medinat_chutz]",
+      "sources": [
+        {
+          "citation": "דף השירות \"בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", משרד התחבורה · תושבי חוץ · סעיף \"מה צריך לצרף לבקשה\"",
+          "claim": "תושב חוץ נדרש לצרף אישור כניסות ויציאות ממשרד הפנים מ-5 השנים האחרונות",
+          "quote": "אישור כניסות ויציאות ממשרד הפנים, מ-5 השנים האחרונות",
+          "url": "https://www.gov.il/he/service/convert_driving_license",
+          "last_verified_at": "2026-11-04",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"מסמכים נדרשים\" ← \"תושב ישראל ששהה בחו\"ל לפחות 6 חודשים\", ס' 3",
+          "claim": "לתושב ישראל ששב הטופס מופיע גם בנוהל",
+          "quote": "טופס כניסות ויציאות ממשרד הפנים.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "איך תושב חוץ מקבל את האישור, האם הוא זכאי לבקש אותו, והאם יש אגרה",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "step:cv.translation",
+      "kind": "step",
+      "engine_id": "cv.translation",
+      "general": false,
+      "title": {
+        "he": "תרגום נוטריוני של הרישיון",
+        "en": "Notarised translation of your licence"
+      },
+      "text": {
+        "he": "מה עושים: הרישיון שלך לא באנגלית: תרגם אותו אצל עורך דין נוטריון שדובר את השפה.\nWhere: unknown, עו\"ד נוטריון; appointment: unknown; track: conversion",
+        "en": "Action: Your licence is not in English: have it translated by a notary who speaks the language.\nWhere: unknown, עו\"ד נוטריון; appointment: unknown; track: conversion"
+      },
+      "applies_when_text": "foreign_license_language is not en",
+      "sources": [
+        {
+          "citation": "דף השירות \"בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", משרד התחבורה · תושבי חוץ · סעיף \"מה צריך לצרף לבקשה\"",
+          "claim": "רישיון שאינו באנגלית מחייב תרגום מעורך דין נוטריון דובר השפה",
+          "quote": "כשהרישיון לא כתוב באנגלית, יש לצרף לרישיון תרגום מעורך דין נוטריון דובר השפה",
+          "url": "https://www.gov.il/he/service/convert_driving_license",
+          "last_verified_at": "2026-11-04",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "step:cv.online_form",
+      "kind": "step",
+      "engine_id": "cv.online_form",
+      "general": true,
+      "title": {
+        "he": "מילוי טופס בקשה מקוון",
+        "en": "Fill in the online application"
+      },
+      "text": {
+        "he": "מה עושים: מלא את טופס הבקשה להוצאת רישיון נהיגה באתר משרד התחבורה. אין טופס המרה נפרד — זה אותו טופס של המסלול מאפס.\nWhere: online, משרד התחבורה; appointment: unknown; track: conversion\nהערות\n- בשדה \"מספר זהות\" רשום את מספר ה-89 שקיבלת. [only when has_teudat_zehut is false]\nקישורים\n- טופס הבקשה: https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+        "en": "Action: Fill in the licence application on the Ministry of Transport site. There is no separate conversion form; it is the same one used for the from-scratch route.\nWhere: online, משרד התחבורה; appointment: unknown; track: conversion\nNotes\n- In the \"ID number\" field, enter the 89 number you received. [only when has_teudat_zehut is false]\nLinks\n- The application form: https://www.gov.il/he/service/apply_for_new_driver_drivers_license"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"התהליך\"",
+          "claim": "הבקשה מוגשת בטופס המקוון של משרד התחבורה, והנוהל עצמו מקשר לדף המסלול מאפס",
+          "quote": "על המבקש למלא טופס בקשה להוצאת רישיון נהיגה באתר משרד התחבורה.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"הערות\"",
+          "claim": "מומלץ להתחיל לפחות 60 יום לפני תום שנת השהייה",
+          "quote": "מומלץ להגיש את הבקשה ולהתחיל את התהליך לכל הפחות 60 ימים לפני תום שנת שהייה בישראל.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", משרד התחבורה · תושבי חוץ · סעיף \"איך מגישים את הבקשה\"",
+          "claim": "מספר ה-89 נרשם בטופס הדיגיטלי בשדה מספר זהות",
+          "quote": "יש למלא טופס דיגיטלי להוצאת רישיון נהיגה למלא את מספר הזיהוי שהתקבל (89) ב\"מספר זהות\".",
+          "url": "https://www.gov.il/he/service/convert_driving_license",
+          "last_verified_at": "2026-11-04",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "step:cv.doc_89"
+      ]
+    },
+    {
+      "id": "step:cv.photo",
+      "kind": "step",
+      "engine_id": "cv.photo",
+      "general": true,
+      "title": {
+        "he": "תחנת צילום",
+        "en": "Photo station"
+      },
+      "text": {
+        "he": "מה עושים: אחרי מילוי הטופס, גש לאחת מתחנות הצילום עם תעודה מזהה (תעודת זהות, דרכון או המסמך עם מספר ה-89) והצטלם. הצילום חינם.\n\nאחרי הצילום תקבל SMS או שיחה. רק אחריהם אפשר להתקדם להגעה למשרד הרישוי.\nWhere: photo_station; appointment: unknown; track: conversion\nקישורים\n- תחנות צילום: https://www.gov.il/he/service/drivers_license_photo_stations",
+        "en": "Action: After submitting the form, go to a photo station with photo ID (ID card, passport, or the document with your 89 number). The photo is free.\n\nAfterwards you get an SMS or a call. Only then can you move on to the licensing office visit.\nWhere: photo_station; appointment: unknown; track: conversion\nLinks\n- Photo stations: https://www.gov.il/he/service/drivers_license_photo_stations"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"התהליך\"",
+          "claim": "הצילום בא אחרי הטופס המקוון, עם תעודת זהות או דרכון",
+          "quote": "לאחר מילוי הטופס הנ\"ל יש לגשת לאחת מתחנות הצילום עם תעודה מזהה (תעודת זהות/דרכון) ולהצטלם.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", משרד התחבורה · תושבי חוץ · סעיף \"איך מגישים את הבקשה\"",
+          "claim": "בתחנת הצילום מציגים תעודה מזהה או את המסמך עם ה-89, ומתקדמים רק אחרי SMS או שיחה",
+          "quote": "יש לגשת לאחת מתחנות הצילום עם תעודה מזהה (תעודת זהות או דרכון) או המסמך עם מספר הזיהוי שהתקבל, להצטלם ולעבור בדיקות ראייה. לאחר קבלת מסרון או שיחה קולית ניתן להתקדם בתהליך.",
+          "url": "https://www.gov.il/he/service/convert_driving_license",
+          "last_verified_at": "2026-11-04",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף \"תחנות צילום לרישיון נהיגה\", משרד התחבורה",
+          "claim": "הצילום להנפקת רישיון אינו כרוך בתשלום",
+          "quote": "הצילום להנפקה או חידוש רישיון הוא ללא תשלום",
+          "url": "https://www.gov.il/he/service/drivers_license_photo_stations",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "step:cv.online_form"
+      ]
+    },
+    {
+      "id": "step:cv.eye_test",
+      "kind": "step",
+      "engine_id": "cv.eye_test",
+      "general": false,
+      "title": {
+        "he": "בדיקת ראייה",
+        "en": "Eye test"
+      },
+      "text": {
+        "he": "מה עושים: עבור בדיקת ראייה באחת מהתחנות. נדרש ממי שהוותק שלו ברישיון פחות מחמש שנים, או שאין לו רקורד להוכיח ותק.\nWhere: photo_station; appointment: unknown; track: conversion\nהערות\n- ⚠️ דף השירות של משרד התחבורה כותב שאפשר להמיר רק רישיון עם ותק של 5 שנים לפחות. הנוהל מאפשר גם פחות, בתנאי שעוברים בדיקת ראייה ומבחן שליטה. [only when foreign_license_years < 5]\nקישורים\n- תחנות צילום ובדיקת ראייה: https://www.gov.il/he/service/drivers_license_photo_stations",
+        "en": "Action: Take an eye test at one of the stations. Required if you have held your licence under five years, or cannot prove seniority with a record.\nWhere: photo_station; appointment: unknown; track: conversion\nNotes\n- The Ministry of Transport service page says only a licence held 5+ years can be converted. The procedure allows less, with an eye test and a control test. [only when foreign_license_years < 5]\nLinks\n- Photo stations and eye tests: https://www.gov.il/he/service/drivers_license_photo_stations"
+      },
+      "applies_when_text": "NOT ((foreign_license_years >= 5 AND has_record_document is yes AND held_class is one of [A2, A1, A, 1, B] AND requested_class is one of [A2, A1, A, 1, B]))",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"התהליך\"",
+          "claim": "חובת בדיקת ראייה למי שוותקו פחות מחמש שנים",
+          "quote": "בעל רישיון נהיגה בעל ותק פחות מחמש שנים מחוייב לעבור בדיקות ראייה באחת מהתחנות המצויינות בקישור.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "הצלבה של ס' 2 לנוהל עם פרק \"מסמכים נדרשים\"",
+          "claim": "בלי רקורד אין דרך להוכיח ותק, ולכן אין פטור בפועל גם למי שיש לו חמש שנים",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        },
+        {
+          "citation": "דף השירות \"בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", משרד התחבורה · תושבי חוץ · סעיף \"תנאים להגשת הבקשה\"",
+          "claim": "דף השירות מציין ותק של 5 שנים לפחות, בסתירה לנוהל שמאפשר פחות עם בדיקות",
+          "quote": "ניתן להמיר רישיון נהיגה זר בעל ותק של 5 שנים לפחות במדינת המוצא",
+          "url": "https://www.gov.il/he/service/convert_driving_license",
+          "last_verified_at": "2026-11-04",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "ממירה עם ותק של כשנה נמצאת כעת בתהליך (מכרה של המייסדת, 11.2026)",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-11-04",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:cv.online_form"
+      ]
+    },
+    {
+      "id": "step:cv.book_appointment",
+      "kind": "step",
+      "engine_id": "cv.book_appointment",
+      "general": true,
+      "title": {
+        "he": "זימון תור למשרד הרישוי",
+        "en": "Book a licensing office appointment"
+      },
+      "text": {
+        "he": "מה עושים: קבע תור לסניף משרד הרישוי דרך GoVisit. אפשר לקבוע בכל שלב, רק להגיע מוכן.\n\n⚠️ הסניפים האלה לא מטפלים בהמרה: בית שאן, צפת, יקנעם, דלית אל כרמל, קריית ארבע, אריאל, אופקים ורהט.\nWhere: online; appointment: true; track: conversion\nקישורים\n- GoVisit — זימון תור: https://www.gov.il/he/Departments/General/govisit",
+        "en": "Action: Book an appointment at a licensing office branch through GoVisit. You can book at any point, just arrive ready.\n\n⚠️ These branches don't handle conversions: Beit She'an, Safed, Yokne'am, Daliyat al-Karmel, Kiryat Arba, Ariel, Ofakim and Rahat.\nWhere: online; appointment: true; track: conversion\nLinks\n- GoVisit appointment booking: https://www.gov.il/he/Departments/General/govisit"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"התהליך\"",
+          "claim": "התור נקבע דרך GoVisit, והקישור מופיע בנוהל עצמו",
+          "quote": "לקבוע תור לסניף משרד הרישוי ולגשת באופן אישי עם המסמכים הדרושים.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", משרד התחבורה · תושבי חוץ · סעיף \"איך מגישים את הבקשה\"",
+          "claim": "שמונה סניפים אינם מטפלים בהמרה",
+          "quote": "ניתן להגיש בקשה להמרת רישיון נהיגה זר לרישיון ישראלי בכל סניפי הרישוי ברחבי הארץ, מלבד הסניפים הבאים: בית שאן, צפת, יקנעם, דלית אל כרמל, קריית ארבע, אריאל, אופקים ורהט.",
+          "url": "https://www.gov.il/he/service/convert_driving_license",
+          "last_verified_at": "2026-11-04",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "step:cv.attend",
+      "kind": "step",
+      "engine_id": "cv.attend",
+      "general": true,
+      "title": {
+        "he": "הגעה אישית עם המסמכים",
+        "en": "Attend in person with your documents"
+      },
+      "text": {
+        "he": "מה עושים: הגע פיזית לסניף משרד הרישוי בתור שקבעת, עם כל המסמכים הנדרשים לקטגוריה שלך.\nWhere: licensing_office; appointment: true; track: conversion\nלבדוק לפני\n- האשרה בתוקף היום? הזכאות נבחנת לרגע ההגשה. [only when (has_teudat_zehut is false OR nohal_category is toshav_medinat_chutz)]\n- הרישיון הזר בתוקף — לא רק קיים?\n- כל המסמכים במקור?\n- קיבלת SMS או שיחה אחרי תחנת הצילום?\n- הרקורד הגיע? [only when foreign_license_years >= 5]\nקישורים\n- הנוהל המלא: https://www.gov.il/he/pages/1961",
+        "en": "Action: Go to the licensing office branch on your appointment, with every document your category requires.\nWhere: licensing_office; appointment: true; track: conversion\nChecklist\n- Is your visa valid TODAY? Eligibility is judged at the moment you submit. [only when (has_teudat_zehut is false OR nohal_category is toshav_medinat_chutz)]\n- Is your foreign licence valid, not merely in your possession?\n- Are all documents originals?\n- Did you get the SMS or call after the photo station?\n- Has the record arrived? [only when foreign_license_years >= 5]\nLinks\n- The full procedure: https://www.gov.il/he/pages/1961"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"התהליך\"",
+          "claim": "הנוהל מגדיר הגעה פרונטלית עם המסמכים",
+          "quote": "לקבוע תור לסניף משרד הרישוי ולגשת באופן אישי עם המסמכים הדרושים.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", משרד התחבורה · תושבי חוץ · סעיף \"איך מגישים את הבקשה\"",
+          "claim": "מגיעים לתור עם תעודת זהות מקורית או עם מספר 89, ועם המסמכים הנדרשים",
+          "quote": "יש לזמן תור מראש למשרד הרישוי ולהגיע עם תעודת זהות ישראלית מקורית או עם מספר מזהה (89), ולצרף את המסמכים הנדרשים.",
+          "url": "https://www.gov.il/he/service/convert_driving_license",
+          "last_verified_at": "2026-11-04",
+          "certainty": "verified"
+        },
+        {
+          "citation": "גיליון 03 שורה 11 · טענת שלילה שאינה בנוהל",
+          "claim": "הנוהל מגדיר מסלול פרונטלי בלבד — אך אינו כותב שאין מסלול מקוון",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        }
+      ],
+      "links": [
+        "document:doc.identity",
+        "document:doc.form_89",
+        "document:doc.passport",
+        "document:doc.visa",
+        "document:doc.foreign_license",
+        "document:doc.record",
+        "document:doc.translation",
+        "document:doc.entry_exit_form",
+        "document:doc.teudat_oleh",
+        "step:cv.book_appointment",
+        "step:cv.online_form",
+        "step:cv.photo",
+        "step:cv.eye_test",
+        "step:cv.doc_89",
+        "step:cv.entry_exit_form"
+      ]
+    },
+    {
+      "id": "step:cv.verification",
+      "kind": "step",
+      "engine_id": "cv.verification",
+      "general": true,
+      "title": {
+        "he": "בדיקה ואישור ההמרה ע\"י משרד הרישוי",
+        "en": "The licensing office checks and approves the conversion"
+      },
+      "text": {
+        "he": "מה עושים: רשות הרישוי בודקת ומאמתת את המסמכים על פי שיקול דעתה, וככל הניתן בתוך 14 ימי עבודה. ⚠️ זהו יעד רך ולא התחייבות.\n\nייתכן שיזמנו אותך שוב למשרד הרישוי לבדיקת סטטוס הרישיון.\nWhere: licensing_office, רשות הרישוי; appointment: unknown; track: conversion; lead time 14 days",
+        "en": "Action: The licensing authority checks and verifies your documents at its discretion, as far as possible within 14 working days. ⚠️ That is a soft target, not a commitment.\n\nYou may be called back to the licensing office for a licence status check.\nWhere: licensing_office, רשות הרישוי; appointment: unknown; track: conversion; lead time 14 days"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"הערות\", תבליט 3",
+          "claim": "האימות נעשה על פי שיקול דעת הרשות וככל הניתן בתוך 14 ימי עבודה — יעד רך, לא SLA",
+          "quote": "רשות הרישוי רשאית לבדוק ולאמת מסמכים על פי שיקול דעתה וככל הניתן בתוך 14 ימי עבודה מיום הגשת הבקשה.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1",
+          "claim": "רשות הרישוי רשאית להורות מטעמים מיוחדים על בדיקות רפואיות לכל מבקש — והמונח אינו מוגדר בנוהל",
+          "quote": "עמידה בבדיקת ראיה כמפורט בתקנות, אלא אם רשות הרישוי הורתה מטעמים מיוחדים שעליו לעמוד גם בבדיקות רפואיות הקבועות בתקנות.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", משרד התחבורה · תושבי חוץ · סעיף \"איך מגישים את הבקשה\"",
+          "claim": "ייתכן זימון נוסף למשרד הרישוי לבדיקת סטטוס הרישיון",
+          "quote": "ייתכן שמגישי הבקשה יזומנו שוב למשרד הרישוי לצורך בדיקת סטטוס הרישיון.",
+          "url": "https://www.gov.il/he/service/convert_driving_license",
+          "last_verified_at": "2026-11-04",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "step:cv.attend"
+      ]
+    },
+    {
+      "id": "step:cv.control_test",
+      "kind": "step",
+      "engine_id": "cv.control_test",
+      "general": false,
+      "title": {
+        "he": "מבחן שליטה",
+        "en": "Control test"
+      },
+      "text": {
+        "he": "מה עושים: עבור מבחן שליטה. ⚠️ זהו מבחן שונה ומצומצם מטסט רגיל — לא מבחן מעשי מלא.\nWhere: test_center, בוחן משרד התחבורה; appointment: unknown; track: conversion\nלבדוק לפני\n- ⚠️ כישלון פעמיים מפיל אותך למסלול המלא לפי תקנות 191-210 — תיאוריה, שיעורים וטסט. שווה להתכונן ברצינות.",
+        "en": "Action: Take a control test. ⚠️ This is a different, narrower test than a full driving test.\nWhere: test_center, בוחן משרד התחבורה; appointment: unknown; track: conversion\nChecklist\n- ⚠️ Failing twice drops you into the full route under regulations 191-210: theory, lessons and a full test. Prepare seriously."
+      },
+      "applies_when_text": "(requested_class is one of [A2, A1, A, 1, B, C1] AND NOT ((foreign_license_years >= 5 AND has_record_document is yes AND held_class is one of [A2, A1, A, 1, B] AND requested_class is one of [A2, A1, A, 1, B])))",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1",
+          "claim": "מבחן שליטה נדרש לדרגות שבתקנות 176-181",
+          "quote": "לעניין דרגות נהיגה הקבועות בתקנות 176 עד 181 (דרגות C1, B, A, A1, A2, 1) נדרשת עמידה גם במבחן שליטה.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1",
+          "claim": "כישלון פעמיים מחייב מעבר למסלול המלא לפי תקנות 191-210",
+          "quote": "במידה ולא עמד המבקש פעמיים במבחן שליטה, לא יינתן לו רישיון נהיגה אלא אם עמד בבדיקות ובחינות כאמור בתקנות 191 עד 210 לתקנות התעבורה.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 2",
+          "claim": "הפטור חל רק על תקנות 176-180, ולכן דרגה C1 (תקנה 181) מחייבת מבחן שליטה תמיד",
+          "quote": "מבקש שהיה בעל רישיון נהיגה לאומי קבוע במשך חמש שנים לפחות מדרגה המקבילה לאחת המנויות בתקנה 176 עד 180 לתקנות - פטור מבדיקת ראיה וממבחן שליטה.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "במה בדיוק שונה מבחן שליטה מטסט רגיל — משך, תוכן, אגרה ומקום",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "step:cv.heavy_course",
+      "kind": "step",
+      "engine_id": "cv.heavy_course",
+      "general": false,
+      "title": {
+        "he": "קורס לנהגי רכב ציבורי/כבד",
+        "en": "Course for public-service and heavy-vehicle drivers"
+      },
+      "text": {
+        "he": "מה עושים: לדרגות C, D, D1, D2, D3 ו-E נדרש סיום קורס לנהגי רכב ציבורי/כבד. זו אינה המרה רגילה.\n\n⚠️ הנוהל קובע את הדרישה ואינו מתאר היכן הקורס ניתן, כמה הוא עולה או כמה זמן הוא אורך. אין לנו תשובה מאומתת לשאלות האלה.\nWhere: unknown, משרד התחבורה; appointment: unknown; track: conversion\nStart now, regardless of position\nלבדוק לפני\n- ⚠️ נדרש גם מילוי אחר תקנה 189(ד)(3), וכן שלא התקיים בך האמור בתקנה 15ב לתקנות. הנוהל מפנה לתקנות ואינו מצטט אותן — כדאי לברר מול אגף הרישוי מה חל עליך.",
+        "en": "Action: Grades C, D, D1, D2, D3 and E require completing a course for public-service and heavy-vehicle drivers. This is not an ordinary conversion.\n\n⚠️ The procedure sets the requirement and says nothing about where the course is given, what it costs or how long it takes. We have no verified answer to those questions.\nWhere: unknown, משרד התחבורה; appointment: unknown; track: conversion\nStart now, regardless of position\nChecklist\n- ⚠️ Regulation 189(d)(3) must also be satisfied, and the disqualification in regulation 15b must not apply to you. The procedure points at the regulations without quoting them — worth checking with the Licensing Division what applies to you."
+      },
+      "applies_when_text": "requested_class is one of [C, D, D1, D2, D3, E]",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1",
+          "claim": "דרגות 182-185 מחייבות קורס לנהגי רכב ציבורי/כבד, בדיקות רפואיות, בחינות, תקנה 189(ד)(3) ותקנה 15ב",
+          "quote": "לעניין דרגות נהיגה הקבועות בתקנות 182 עד 185 (E, C, D, D1, D2, D3) נדרש סיום קורס לנהגי רכב ציבורי/כבד, נדרשת עמידה בבדיקות רפואיות ובבחינות, מילוי אחר תקנה 189(ד)(3) וכן שלא התקיים במבקש האמור בתקנה 15ב לתקנות.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "היכן ניתן הקורס, מה משכו, מה עלותו, ומה בדיוק דורשות תקנה 189(ד)(3) ותקנה 15ב",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "step:cv.heavy_exams",
+      "kind": "step",
+      "engine_id": "cv.heavy_exams",
+      "general": false,
+      "title": {
+        "he": "בחינות לדרגות הכבדות",
+        "en": "Examinations for the heavy grades"
+      },
+      "text": {
+        "he": "מה עושים: לדרגות C, D, D1, D2, D3 ו-E נדרשת עמידה בבחינות.\n\n⚠️ הנוהל אינו מפרט אילו בחינות, היכן, או מה תוכנן. אין לנו תשובה מאומתת.\nWhere: unknown, משרד התחבורה; appointment: unknown; track: conversion",
+        "en": "Action: Grades C, D, D1, D2, D3 and E require passing examinations.\n\n⚠️ The procedure does not say which examinations, where, or what they cover. We have no verified answer.\nWhere: unknown, משרד התחבורה; appointment: unknown; track: conversion"
+      },
+      "applies_when_text": "requested_class is one of [C, D, D1, D2, D3, E]",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1",
+          "claim": "דרגות 182-185 מחייבות עמידה בבחינות, לצד הקורס והבדיקות הרפואיות",
+          "quote": "לעניין דרגות נהיגה הקבועות בתקנות 182 עד 185 (E, C, D, D1, D2, D3) נדרש סיום קורס לנהגי רכב ציבורי/כבד, נדרשת עמידה בבדיקות רפואיות ובבחינות, מילוי אחר תקנה 189(ד)(3) וכן שלא התקיים במבקש האמור בתקנה 15ב לתקנות.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1",
+          "claim": "מבחן שליטה שייך לדרגות 176-181 בלבד, ולכן אינו חל על הדרגות הכבדות",
+          "quote": "לעניין דרגות נהיגה הקבועות בתקנות 176 עד 181 (דרגות C1, B, A, A1, A2, 1) נדרשת עמידה גם במבחן שליטה.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "אילו בחינות בדיוק, היכן הן נערכות ומה תוכנן",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": [
+        "step:cv.heavy_course"
+      ]
+    },
+    {
+      "id": "step:cv.medical",
+      "kind": "step",
+      "engine_id": "cv.medical",
+      "general": false,
+      "title": {
+        "he": "בדיקות רפואיות",
+        "en": "Medical tests"
+      },
+      "text": {
+        "he": "מה עושים: עבור את הבדיקות הרפואיות הקבועות בתקנות.\nWhere: unknown, מרב\"ד; appointment: unknown; track: conversion",
+        "en": "Action: Complete the medical tests set out in the regulations.\nWhere: unknown, מרב\"ד; appointment: unknown; track: conversion"
+      },
+      "applies_when_text": "(requested_class is C1 OR requested_class is one of [C, D, D1, D2, D3, E])",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1",
+          "claim": "דרגה 181 מחייבת עמידה בבדיקות רפואיות",
+          "quote": "ולעניין הדרגה המנויה בתקנה 181 נדרשת עמידה בבדיקות רפואיות כקבוע בתקנות.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "step:cv.receive",
+      "kind": "step",
+      "engine_id": "cv.receive",
+      "general": true,
+      "title": {
+        "he": "קבלת הרישיון",
+        "en": "Receiving your licence"
+      },
+      "text": {
+        "he": "מה עושים: במשרד הרישוי תקבל רישיון זמני. אחריו משלמים את האגרה באחד מסניפי דואר ישראל. התשלום מתעדכן אחרי 14 ימי עסקים.\n\nהרישיון הקבוע נשלח לכתובת הרשומה ברשות האוכלוסין.\nWhere: mail; appointment: unknown; track: conversion\nלבדוק לפני\n- הכתובת שלך מעודכנת ברשות האוכלוסין?",
+        "en": "Action: At the licensing office you receive a temporary licence. Then you pay the fee at an Israel Post branch. The payment updates after 14 business days.\n\nThe permanent licence is posted to the address registered with the Population Authority.\nWhere: mail; appointment: unknown; track: conversion\nChecklist\n- Is your address up to date at the Population Authority?"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הגשת בקשה להוצאת רישיון נהיגה\"",
+          "claim": "הרישיון הקבוע נשלח לכתובת המעודכנת ברשות האוכלוסין",
+          "quote": "רישיון נהיגה קבוע (פלסטיק) יישלח לכתובת המעודכנת ברשות האוכלוסין.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", משרד התחבורה · תושבי חוץ · סעיף \"אפשרויות תשלום\"",
+          "claim": "רישיון זמני במשרד הרישוי, תשלום בדואר ישראל, עדכון אחרי 14 ימי עסקים, הרישיון הקבוע נשלח בדואר",
+          "quote": "לאחר קבלת הרישיון הזמני במשרד הרישוי יש לבצע את התשלום באחד מסניפי דואר ישראל. התשלום יתעדכן לאחר 14 ימי עסקים. הרישיון הקבוע יישלח לכתובת הרשומה ברשות האוכלוסין וההגירה.",
+          "url": "https://www.gov.il/he/service/convert_driving_license",
+          "last_verified_at": "2026-11-04",
+          "certainty": "verified"
+        },
+        {
+          "citation": "כל-זכות, \"המרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", סעיף \"למי זה רלוונטי?\"",
+          "claim": "ותק של פחות משנתיים ברישיון הזר ⟵ המבקש ייחשב \"נהג חדש\" בישראל, על כל המגבלות הנלוות",
+          "quote": "עולה חדש עם ותק של פחות מ-5 שנים נדרש לעבור מבחן נהיגה מעשי (טסט). אם יש לו ותק של פחות משנתיים הוא ייחשב \"נהג חדש\".",
+          "url": "https://www.kolzchut.org.il/he/המרת_רישיון_נהיגה_זר_לרישיון_נהיגה_ישראלי",
+          "last_verified_at": "2026-08-25",
+          "certainty": "likely"
+        },
+        {
+          "citation": "הסקה מכל-זכות · לא נכתב שם במפורש",
+          "claim": "מעמד \"נהג חדש\" נקבע לפי ותק הנהיגה — כמה זמן הוא כבר מחזיק ברישיון — ולא לפי מסמך הזיהוי (89 מול תעודת זהות) ולא לפי הקטגוריה בנוהל",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        },
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\" + כל-זכות · לא נכתב במפורש לגבי המרה",
+          "claim": "מתחת לגיל 24 חלה תקופת ליווי גם על ממיר — צירוף של כלל הליווי מדף gov.il עם מעמד \"נהג חדש\"",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        }
+      ],
+      "links": [
+        "step:cv.verification",
+        "step:cv.control_test",
+        "step:cv.medical",
+        "step:cv.heavy_course",
+        "step:cv.heavy_exams"
+      ]
+    },
+    {
+      "id": "document:doc.identity",
+      "kind": "document",
+      "engine_id": "doc.identity",
+      "general": true,
+      "title": {
+        "he": "תעודה מזהה בתוקף",
+        "en": "Valid photo ID"
+      },
+      "text": {
+        "he": "מנפיק: —\nMust be original: true; accepted by email: false\nתעודת זהות, דרכון או רישיון נהיגה — כל אחד מהם מתקבל.\nCounted as held when: (has_teudat_zehut is true OR passport_valid_now is true OR foreign_license_valid is true)",
+        "en": "Issued by: —\nMust be original: true; accepted by email: false\nA teudat zehut, a passport or a driving licence — any of the three is accepted.\nCounted as held when: (has_teudat_zehut is true OR passport_valid_now is true OR foreign_license_valid is true)"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "דף \"תחנות צילום לרישיון נהיגה\", משרד התחבורה",
+          "claim": "מסמכי הזיהוי המתקבלים",
+          "quote": "תעודה מזהה בתוקף: תעודת זהות, דרכון או רישיון נהיגה.",
+          "url": "https://www.gov.il/he/service/drivers_license_photo_stations",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "document:doc.foreign_license",
+      "kind": "document",
+      "engine_id": "doc.foreign_license",
+      "general": false,
+      "title": {
+        "he": "רישיון נהיגה לאומי בתוקף",
+        "en": "A valid national driving licence"
+      },
+      "text": {
+        "he": "מנפיק: מדינת המוצא\nMust be original: true; accepted by email: false\n⚠️ לאומי בלבד — רישיון בין-לאומי (IDP) אינו מתקבל להמרה. ⚠️ ובתוקף, לא רק קיים.\nCounted as held when: foreign_license_kind is national\nCounted as unusable when: foreign_license_valid is false",
+        "en": "Issued by: Your home country\nMust be original: true; accepted by email: false\n⚠️ National only. An International Driving Permit is not accepted for conversion. ⚠️ And valid, not merely in your possession.\nCounted as held when: foreign_license_kind is national\nCounted as unusable when: foreign_license_valid is false"
+      },
+      "applies_when_text": "track is conversion",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"מסמכים נדרשים\" — מופיע בשלוש הרשימות",
+          "claim": "נדרש רישיון נהיגה לאומי בתוקף",
+          "quote": "רישיון נהיגה לאומי בתוקף.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"הערות\", תבליט 1",
+          "claim": "רישיון בין-לאומי אינו מתקבל להמרה",
+          "quote": "אין להציג רישיון נהיגה בין לאומי לצורך המרה אלא רק רישיון לאומי.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "step:fix.name_on_license"
+      ]
+    },
+    {
+      "id": "document:doc.passport",
+      "kind": "document",
+      "engine_id": "doc.passport",
+      "general": false,
+      "title": {
+        "he": "דרכון עם אשרת שהייה בתוקף",
+        "en": "Passport with a valid residence visa"
+      },
+      "text": {
+        "he": "מנפיק: מדינת המוצא + רשות האוכלוסין\nMust be original: true; accepted by email: false\nהאשרה חייבת להיות בתוקף ברגע ההגשה — הזכאות נבחנת ליום ההגשה ולא ליום הכניסה.\nCounted as held when: (passport_valid_now is true AND visa_valid_now is true)\nCounted as unusable when: (passport_valid_now is false OR visa_valid_now is false)",
+        "en": "Issued by: Your home country + the Population Authority\nMust be original: true; accepted by email: false\nThe visa must be valid at the moment you submit. Eligibility is judged on the day you apply, not the day you entered.\nCounted as held when: (passport_valid_now is true AND visa_valid_now is true)\nCounted as unusable when: (passport_valid_now is false OR visa_valid_now is false)"
+      },
+      "applies_when_text": "nohal_category is toshav_medinat_chutz",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"מסמכים נדרשים\" ← \"תושב מדינת חוץ\", ס' 2",
+          "claim": "נדרש דרכון עם אשרת שהייה בתוקף",
+          "quote": "דרכון עם אשרת שהייה בתוקף.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "step:fix.renew_visa"
+      ]
+    },
+    {
+      "id": "document:doc.visa",
+      "kind": "document",
+      "engine_id": "doc.visa",
+      "general": false,
+      "title": {
+        "he": "אשרת שהייה בתוקף",
+        "en": "A valid residence visa"
+      },
+      "text": {
+        "he": "מנפיק: רשות האוכלוסין וההגירה\nMust be original: true; accepted by email: false\nנדרשת בכל פעולה מול משרד הרישוי, לא רק בהגשה הראשונה.\nCounted as held when: visa_valid_now is true\nCounted as unusable when: visa_valid_now is false",
+        "en": "Issued by: The Population and Immigration Authority\nMust be original: true; accepted by email: false\nRequired at every interaction with the licensing office, not only at first submission.\nCounted as held when: visa_valid_now is true\nCounted as unusable when: visa_valid_now is false"
+      },
+      "applies_when_text": "has_teudat_zehut is false",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ג)",
+          "claim": "רישיון ישיבה בתוקף הוא תנאי הזכאות עצמו",
+          "quote": "תושב מדינת חוץ שהגיש את בקשתו בעת שהיה ברשותו רישיון ישיבה בישראל.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "step:fix.renew_visa"
+      ]
+    },
+    {
+      "id": "document:doc.form_89",
+      "kind": "document",
+      "engine_id": "doc.form_89",
+      "general": false,
+      "title": {
+        "he": "מסמך 89 (\"הטופס הלבן\")",
+        "en": "The 89 document (the \"white form\")"
+      },
+      "text": {
+        "he": "מנפיק: משרד הרישוי\nMust be original: true; accepted by email: false\nדף A4 מודפס — מסמך נפרד שאפשר לאבד, לא חותמת בדרכון. ⚠️ המספר משמש אך ורק במשרד הרישוי: לא בביטוח לאומי, לא ברשות האוכלוסין, ולא בקופת חולים. ⭐ אין לו תאריך תפוגה: הדבר היחיד שיכול לשבור אותו הוא חידוש דרכון, שמשנה את מספר הדרכון שמודפס עליו.\nCounted as held when: holds_form_89 is true\nCounted as unusable when: (passport_89_number_match is false OR passport_89_name_match is false)",
+        "en": "Issued by: The licensing office\nMust be original: true; accepted by email: false\nA printed A4 sheet, a separate document you can lose, not a stamp in your passport. ⚠️ The number is used only at the licensing office: not at National Insurance, the Population Authority, or your health fund. ⭐ It has no expiry date: the only thing that can break it is renewing your passport, which changes the passport number printed on it.\nCounted as held when: holds_form_89 is true\nCounted as unusable when: (passport_89_number_match is false OR passport_89_name_match is false)"
+      },
+      "applies_when_text": "has_teudat_zehut is false",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הוצאת רישיון נהיגה לעובד זר\"",
+          "claim": "משרד הרישוי מנפיק מספר זיהוי המתחיל ב-89",
+          "quote": "במשרד הרישוי יונפק מספר זיהוי פיקטיבי המתחיל בספרות 89.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "המסמך הוא דף A4 מודפס, והמספר משמש רק במשרד הרישוי",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "מסמך ה-89 אינו נושא תאריך תפוגה — הוא נושא את מספר ה-89 ואת מספר הדרכון בלבד",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-30",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "מספר מסמך ה-89 בן תשע ספרות, ומתחיל בספרות 89",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-31",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:fix.update_89",
+        "step:fix.name_on_89",
+        "step:fz.doc_89",
+        "step:cv.doc_89"
+      ]
+    },
+    {
+      "id": "document:doc.record",
+      "kind": "document",
+      "engine_id": "doc.record",
+      "general": false,
+      "title": {
+        "he": "\"רקורד\" ממדינת המוצא",
+        "en": "The \"record\" from your home country"
+      },
+      "text": {
+        "he": "מנפיק: גורם מוסמך במדינת המוצא\nMust be original: false; accepted by email: true\nנדרש רק למי שרוצה פטור ממבחן שליטה ומבדיקת ראייה. מתקבל בדוא\"ל, אז אפשר להתחיל מרחוק היום. ⚠️ חייב לציין את מועד הוצאת הרישיון הקבוע — לא את מועד הנפקת הכרטיס הנוכחי.\nמסמך רשות, מה הוא נותן: פטור ממבחן שליטה ומבדיקת ראייה\nאם אין אותו: המסמך אינו ברשותך. הוא אינו תנאי להמרה — הוא קונה פטור ממבחן שליטה ומבדיקת ראייה. בלעדיו המסלול נותר פתוח, בתוספת שתי הבדיקות.\n- ציינת שהתחלת בתהליך. המסמך מונפק על ידי רשות זרה, ולכן זמן ההמתנה לו הארוך ביותר במסלול. מומלץ להמשיך לטפל בו במקביל לשלבים האחרים — הוא אינו עוצר אותך. [only when has_record_document is in_progress]\n- ציינת שמדינת המוצא אינה מנפיקה מסמך כזה. הנוהל אינו מתייחס למקרה הזה ואין לנו תשובה מאומתת — זו שאלה פתוחה. מה שידוע: הרקורד נדרש רק לצורך הפטור, ולכן המסלול נותר פתוח בפניך, בתוספת מבחן שליטה ובדיקת ראייה. [only when has_record_document is origin_country_does_not_issue]\nCounted as held when: has_record_document is yes",
+        "en": "Issued by: A competent authority in your home country\nMust be original: false; accepted by email: true\nOnly needed if you want exemption from the control test and eye test. Accepted by email, so you can start remotely today. ⚠️ It must state when your PERMANENT licence was issued, not when your current card was printed.\nOptional document, what it buys: Exemption from the control test and the eye test\nIf absent: You do not have it. It is not a condition of converting — it buys exemption from the control test and the eye test. Without it the route remains open, with those two tests included.\n- You indicated that you have started the process. The document is issued by a foreign authority and has the longest waiting time in the route. Keep pursuing it alongside the other steps — it is not holding you up. [only when has_record_document is in_progress]\n- You told us your home country does not issue one. The procedure does not address this case and we have no verified answer — it is an open question. What is known: the record is only ever needed for the exemption, so your route remains open, with the control test and the eye test included. [only when has_record_document is origin_country_does_not_issue]\nCounted as held when: has_record_document is yes"
+      },
+      "applies_when_text": "foreign_license_years >= 5",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"מסמכים נדרשים\" — מופיע בשלוש הרשימות",
+          "claim": "אסמכתה מגורם מוסמך במדינת המוצא על מועד הוצאת הרישיון הקבוע, מתקבלת בדוא\"ל",
+          "quote": "רקורד - למעוניינים בקבלת פטור ממבחן שליטה ובדיקת ראיה (בעלי רישיון נהיגה לאומי קבוע במשך חמש שנים לפחות, כאמור) נדרש להציג אסמכתה מגורם מוסמך ממדינת המוצא המציינת את מועד הוצאת רישיון הנהיגה הקבוע (ניתן גם באמצעות דוא\"ל).",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "מיהו \"גורם מוסמך\", מה הפורמט, ומה עושה מי שמדינת המוצא אינה מנפיקה מסמך כזה",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": [
+        "step:cv.record"
+      ]
+    },
+    {
+      "id": "document:doc.teudat_oleh",
+      "kind": "document",
+      "engine_id": "doc.teudat_oleh",
+      "general": false,
+      "title": {
+        "he": "תעודת עולה",
+        "en": "Immigrant certificate"
+      },
+      "text": {
+        "he": "מנפיק: משרד העלייה והקליטה\nMust be original: true; accepted by email: false",
+        "en": "Issued by: The Ministry of Aliyah and Integration\nMust be original: true; accepted by email: false"
+      },
+      "applies_when_text": "nohal_category is oleh_chadash",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"מסמכים נדרשים\" ← \"עולה חדש\", ס' 2",
+          "claim": "עולה חדש נדרש להציג תעודת עולה",
+          "quote": "תעודת עולה.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "document:doc.entry_exit_form",
+      "kind": "document",
+      "engine_id": "doc.entry_exit_form",
+      "general": false,
+      "title": {
+        "he": "אישור כניסות ויציאות (5 השנים האחרונות)",
+        "en": "Entries and exits report (last 5 years)"
+      },
+      "text": {
+        "he": "מנפיק: רשות האוכלוסין\nMust be original: true; accepted by email: false\nמרשות האוכלוסין, על 5 השנים האחרונות. מראה כמה זמן היית בישראל ומחוצה לה.",
+        "en": "Issued by: The Population Authority\nMust be original: true; accepted by email: false\nFrom the Population Authority, covering the last 5 years. It shows how long you were in and out of Israel."
+      },
+      "applies_when_text": "nohal_category is one of [toshav_israel, toshav_medinat_chutz]",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"מסמכים נדרשים\" ← \"תושב ישראל ששהה בחו\"ל לפחות 6 חודשים\", ס' 3",
+          "claim": "הטופס מופיע רק ברשימה של תושב ישראל ששב, ולא ברשימות האחרות",
+          "quote": "טופס כניסות ויציאות ממשרד הפנים.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", משרד התחבורה · תושבי חוץ · סעיף \"מה צריך לצרף לבקשה\"",
+          "claim": "תושב חוץ נדרש לצרף אישור כניסות ויציאות ממשרד הפנים מ-5 השנים האחרונות",
+          "quote": "אישור כניסות ויציאות ממשרד הפנים, מ-5 השנים האחרונות",
+          "url": "https://www.gov.il/he/service/convert_driving_license",
+          "last_verified_at": "2026-11-04",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "document:doc.translation",
+      "kind": "document",
+      "engine_id": "doc.translation",
+      "general": false,
+      "title": {
+        "he": "תרגום נוטריוני",
+        "en": "A notarised translation"
+      },
+      "text": {
+        "he": "מנפיק: עו\"ד או נוטריון דובר השפה\nMust be original: true; accepted by email: false\nנדרש כשהרישיון לא כתוב באנגלית. התרגום נעשה אצל עורך דין נוטריון שדובר את השפה.",
+        "en": "Issued by: A lawyer or notary who speaks the language\nMust be original: true; accepted by email: false\nRequired when your licence is not in English. The translation is done by a notary who speaks the language."
+      },
+      "applies_when_text": "(track is conversion AND foreign_license_language is not en)",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"הערות\", תבליט 4",
+          "claim": "רשות הרישוי רשאית לדרוש תרגום — סמכות, לא חובה",
+          "quote": "רשות הרישוי רשאית לדרוש תרגום של רישיון הנהיגה הלאומי, ו/או כל מסמך הנדרש לצורך המרת רישיון (מלבד אנגלית) התרגום יתבצע ע\"י עו\"ד/נוטריון דובר השפה.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "דף השירות \"בקשה להמרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", משרד התחבורה · תושבי חוץ · סעיף \"מה צריך לצרף לבקשה\"",
+          "claim": "רישיון שאינו באנגלית מחייב תרגום מעורך דין נוטריון דובר השפה",
+          "quote": "כשהרישיון לא כתוב באנגלית, יש לצרף לרישיון תרגום מעורך דין נוטריון דובר השפה",
+          "url": "https://www.gov.il/he/service/convert_driving_license",
+          "last_verified_at": "2026-11-04",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "clock:clock.foreign_driving",
+      "kind": "clock",
+      "engine_id": "clock.foreign_driving",
+      "general": false,
+      "title": {
+        "he": "עד מתי מותר לנהוג ברישיון הזר",
+        "en": "How long you may keep driving on your foreign licence"
+      },
+      "text": {
+        "he": "Counts 365 days from: entry_to_israel; warn 60 days before\nמה קורה כשהזמן נגמר: מכאן אסור לנהוג ברישיון הזר — אבל עדיין אפשר להמיר אותו. אלה שני דברים נפרדים.",
+        "en": "Counts 365 days from: entry_to_israel; warn 60 days before\nWhen it runs out: From here you may no longer drive on your foreign licence. You can still convert it. These are two separate things."
+      },
+      "applies_when_text": "track is conversion",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"הערות\", תבליט 2",
+          "claim": "מותר לנהוג ברישיון הזר שנה מיום הכניסה לישראל",
+          "quote": "ניתן לנהוג באמצעות רישיון נהיגה זר במשך שנה מיום הכניסה לישראל בכפוף לתקנות.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"הערות\"",
+          "claim": "הנוהל עצמו ממליץ להתחיל לפחות 60 יום לפני תום שנת השהייה",
+          "quote": "מומלץ להגיש את הבקשה ולהתחיל את התהליך לכל הפחות 60 ימים לפני תום שנת שהייה בישראל.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "clock:clock.conversion_window",
+      "kind": "clock",
+      "engine_id": "clock.conversion_window",
+      "general": false,
+      "title": {
+        "he": "עד מתי אפשר להגיש בקשת המרה",
+        "en": "How long you have to apply for conversion"
+      },
+      "text": {
+        "he": "Counts 1826 days from: category_anchor; warn 90 days before\nמה קורה כשהזמן נגמר: חלון ההמרה נסגר. עדיין אפשר להוציא רישיון ישראלי — במסלול מאפס.",
+        "en": "Counts 1826 days from: category_anchor; warn 90 days before\nWhen it runs out: The conversion window has closed. You can still get an Israeli licence, through the from-scratch route."
+      },
+      "applies_when_text": "track is conversion",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(א), 1(ב), 1(ג)",
+          "claim": "חמש שנים לכל אחת משלוש הקטגוריות — מיום העלייה, מיום השיבה, או מיום הכניסה",
+          "quote": "והגיש את בקשתו בתוך חמש שנים מיום עלייתו... בתוך חמש שנים מיום שובו לישראל... בתוך חמש שנים מיום כניסתו לישראל.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "clock:clock.accompaniment",
+      "kind": "clock",
+      "engine_id": "clock.accompaniment",
+      "general": false,
+      "title": {
+        "he": "תקופת הליווי",
+        "en": "The accompanied-driving period"
+      },
+      "text": {
+        "he": "Counts 182 days from: license_issued; warn 14 days before\nמה קורה כשהזמן נגמר: אפשר להגיש הצהרת סיום ליווי.",
+        "en": "Counts 182 days from: license_issued; warn 14 days before\nWhen it runs out: You can submit the declaration that the accompaniment period is complete."
+      },
+      "applies_when_text": "age_years < 24",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הגשת בקשה להוצאת רישיון נהיגה\"",
+          "claim": "התקופה נספרת מיום הוצאת רישיון הנהיגה, ולא מיום הטסט",
+          "quote": "מתחת לגיל 24 - הרישיון יישלח רק לאחר הצהרת נהג חדש על סיום תכנית הליווי, בתנאי שעברה חצי שנה מיום הוצאת רישיון הנהיגה ובתנאי שלא נעברה עבירה.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "תאריך תחילת התקופה מודפס על המסמך עצמו — כל עיכוב בהוצאת ההיתר נדחף לסוף התקופה. בדיווח: חודשיים עיכוב עלו בחודשיים ליווי נוספים",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "clock:clock.duplicate_delivery_choice",
+      "kind": "clock",
+      "engine_id": "clock.duplicate_delivery_choice",
+      "general": true,
+      "title": {
+        "he": "⏱️ החלון שבו אתה בוחר איך לקבל את הרישיון",
+        "en": "⏱️ Your window to choose how the licence reaches you"
+      },
+      "text": {
+        "he": "Counts 2 days from: duplicate_fee_paid; warn 1 days before\nמה קורה כשהזמן נגמר: לא ניתן לבחור יותר את אופן המסירה. ככל הנראה הרישיון יישלח בדואר.\nOnly starts once one of these steps is done: duplicate.online, duplicate.in_person",
+        "en": "Counts 2 days from: duplicate_fee_paid; warn 1 days before\nWhen it runs out: You can no longer choose a delivery method. It will most likely be sent by post.\nOnly starts once one of these steps is done: duplicate.online, duplicate.in_person"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "דף \"הוצאת העתק רישיון נהיגה\", משרד התחבורה",
+          "claim": "החלון לשינוי אופן המסירה מתועד רשמית",
+          "quote": "ביום שאחרי ביצוע התשלום ועד 2 ימי עסקים, ניתן לשנות את אופן קבלת הרישיון ואת יעד המסירה.",
+          "url": "https://www.gov.il/he/service/duplicate_drivers_license_in_case_of_loss",
+          "last_verified_at": "2026-08-24",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "החלון נפתח מיד עם התשלום בדואר, והבחירה נעשית באתר fastdl.co.il",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:duplicate.online",
+        "step:duplicate.in_person"
+      ]
+    },
+    {
+      "id": "blocker:block.section_2a5",
+      "kind": "blocker",
+      "engine_id": "block.section_2a5",
+      "general": false,
+      "title": {
+        "he": "היום אי אפשר להוציא רישיון נהיגה עם אישור שהייה לפי סעיף 2(א)(5)",
+        "en": "Today a licence cannot be issued on a stay permit under section 2(a)(5)"
+      },
+      "text": {
+        "he": "לפי מה שכתוב היום בדף השירות של משרד התחבורה, בעלי אישור שהייה מכוח סעיף 2(א)(5) לחוק הכניסה לישראל אינם רשאים להוציא רישיון נהיגה.\n\nחשוב שתדע מאיפה זה מגיע: האיסור מופיע בדף שירות של משרד התחבורה — הוא אינו כתוב בנוהל ההמרה ואינו כתוב בתקנות התעבורה.\n\nההיגיון המשפטי מאחוריו: חוק הכניסה לישראל מבחין בין אשרה (רשות להיכנס) לבין רישיון ישיבה (רשות לשהות). לשון סעיף 2(א)(5) מגדירה את המחזיק כמי שנמצא בישראל \"בלי רישיון ישיבה\" — ורישיון ישיבה הוא בדיוק מה שנוהל ההמרה דורש.\n\n⏳ הנושא אינו סגור. בג\"ץ הוציא צו על-תנאי המורה למדינה לנמק מדוע מבקשי מקלט אינם רשאים להוציא רישיון, להיבחן בתיאוריה ובטסט. העותרים: האגודה לזכויות האזרח, א.ס.ף, והמוקד לפליטים ולמהגרים. עמדת המדינה: קשיי זיהוי ואכיפה. למדינה ניתנו 90 יום להשיב.\n\nהאיסור הזה חל על הוצאת רישיון נהיגה בלבד. הוא אינו קובע דבר לגבי שאר תהליכי הקליטה.\nLegal status: in_litigation, expected resolution 2026-10-10\nלמי לפנות\n- המוקד לפליטים ולמהגרים: https://hotline.org.il/refugees-and-asylum-seekers/\n- HIAS Israel: https://hias.org.il/",
+        "en": "According to what the Ministry of Transport service page says today, holders of a stay permit under section 2(a)(5) of the Entry into Israel Law may not obtain a driving licence.\n\nYou should know where this comes from: the prohibition appears on a ministry service page. It is not in the conversion procedure and not in the traffic regulations.\n\nThe legal reasoning behind it: the Entry into Israel Law separates a visa (permission to enter) from a residence permit (permission to stay). The wording of section 2(a)(5) defines its holder as someone present in Israel \"without a residence permit\" — and a residence permit is exactly what the conversion procedure requires.\n\n⏳ This is not settled. The High Court has issued an order nisi requiring the state to justify why asylum seekers may not obtain a licence or sit the theory and practical tests. Petitioners: the Association for Civil Rights in Israel, ASSAF, and the Hotline for Refugees and Migrants. The state's position: identification and enforcement difficulties. The state was given 90 days to respond.\n\nThis prohibition concerns issuing a driving licence only. It determines nothing about any other absorption process.\nLegal status: in_litigation, expected resolution 2026-10-10\nWho can help\n- Hotline for Refugees and Migrants: https://hotline.org.il/refugees-and-asylum-seekers/\n- HIAS Israel: https://hias.org.il/"
+      },
+      "applies_when_text": "visa_type is section_2a5",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הוצאת רישיון נהיגה לעובד זר\"",
+          "claim": "האיסור עצמו, ומקורו הוא דף שירות ולא הנוהל ולא התקנות",
+          "quote": "בעלי אישור שהייה מכוח סעיף 2(א)(5) לחוק הכניסה לישראל אינם רשאים להוציא רישיון נהיגה.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "חוק הכניסה לישראל, תשי\"ב-1952, ס' 2(א)(5)",
+          "claim": "הבסיס המשפטי: לשון החוק מגדירה את המחזיק כמי שנמצא בישראל בלי רישיון ישיבה",
+          "quote": "רישיון זמני לישיבת ביקור למי שנמצא בישראל בלי רישיון ישיבה וניתן עליו צו הרחקה – עד ליציאתו מישראל או הרחקתו ממנה.",
+          "url": "https://www.nevo.co.il/law_html/law01/189_003.htm",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "וואלה רכב, 12.7.2026 · ⚠️ מקור עיתונאי — מספר התיק לא פורסם",
+          "claim": "בג\"ץ הוציא צו על-תנאי המורה למדינה לנמק. עותרים: האגודה לזכויות האזרח, א.ס.ף, המוקד לפליטים ולמהגרים. 90 יום להשיב מ-12.7.2026",
+          "quote": "בג\"ץ הוציא צו על-תנאי המורה למדינה לנמק מדוע מבקשי מקלט אינם רשאים להוציא רישיון נהיגה",
+          "url": "https://cars.walla.co.il/item/3852919",
+          "last_verified_at": "2026-08-21",
+          "certainty": "in_litigation"
+        },
+        {
+          "citation": "חישוב מתאריך הפרסום · גיליון 02 שורה 18",
+          "claim": "מועד היעד ~10.10.2026 — חישוב של 90 יום מפרסום הצו ב-12.7.2026",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "condition:cc.visa_valid",
+      "kind": "condition",
+      "engine_id": "cc.visa_valid",
+      "general": false,
+      "title": {
+        "he": "האשרה חייבת להיות בתוקף — בכל פעולה, לא רק בהתחלה",
+        "en": "Your visa must be valid at every step, not just the first"
+      },
+      "text": {
+        "he": "אם זה לא בתוקף: אשרה שפגה חוסמת כל פעולה מול הרשויות — לא רק במשרד הרישוי. הפקיד בודק, והמערכת חוסמת. כל עוד האשרה אינה בתוקף, שום שלב בתהליך לא יתקדם, כולל עדכון מסמך ה-89.\nמה עושים: חדש את האשרה לפחות חודש מראש. החידוש מקוון ואורך כחודש.\nRe-checked before each of these steps: fz.doc_89, fz.photo_and_eye, fz.test, fz.permit_in_person, fz.completion_in_person, cv.attend",
+        "en": "If it is not valid: An expired visa blocks every dealing with the authorities, not only the licensing office. The clerk checks and the system blocks. While it is not valid, no step moves forward, including updating your 89 document.\nWhat to do: Renew your visa at least a month in advance. Renewal is online and takes about a month.\nRe-checked before each of these steps: fz.doc_89, fz.photo_and_eye, fz.test, fz.permit_in_person, fz.completion_in_person, cv.attend"
+      },
+      "applies_when_text": "(has_teudat_zehut is false OR nohal_category is toshav_medinat_chutz)",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ג)",
+          "claim": "הזכאות נבחנת לרגע ההגשה — נדרש רישיון ישיבה בתוקף בעת הגשת הבקשה",
+          "quote": "תושב מדינת חוץ שהגיש את בקשתו בעת שהיה ברשותו רישיון ישיבה בישראל.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "הפקידה בדקה ואז המערכת חסמה — חסימת מערכת ולא שיקול דעת פקיד, ולכן סבירות ההכללה גבוהה מאוד",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "אשרה שאינה בתוקף חוסמת כל התנהלות מול רשויות המדינה — ביטוח לאומי, משרד הרישוי, וכל השאר. זהו כלל כללי ולא מגבלה של משרד הרישוי",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-24",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "חידוש אשרה מתבצע מקוון ואורך חודש לפחות",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "התנאי הורחב גם למי שמחזיק תעודת זהות ארעית (א/5), מתוך הנחה שהתעודה נשענת על האשרה (שאלה פתוחה — לא אומת מול אגף הרישוי)",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "uncertain"
+        }
+      ],
+      "links": [
+        "step:fz.doc_89",
+        "step:fz.photo_and_eye",
+        "step:fz.test",
+        "step:fz.permit_in_person",
+        "step:fz.completion_in_person",
+        "step:cv.attend"
+      ]
+    },
+    {
+      "id": "condition:cc.passport_number_match",
+      "kind": "condition",
+      "engine_id": "cc.passport_number_match",
+      "general": false,
+      "title": {
+        "he": "מספר הדרכון במסמך ה-89 חייב לתאום לדרכון שבידך",
+        "en": "The passport number on your 89 document must match the passport you hold"
+      },
+      "text": {
+        "he": "אם זה לא בתוקף: ⚠️ אי-התאמה מונעת את קיום הטסט, והוא נרשם ככישלון מלא ולא כ\"לא התייצב\", למרות שהמבחן לא התקיים. ניתן לערער, אך הערעור חוסם הרשמה לטסט חדש עד להכרעתו.\nמה עושים: חידשת דרכון? קבע תור למשרד הרישוי ועדכן את מסמך ה-89 לפני הטסט. ⚠️ מספר ה-89 עצמו קבוע ואינו משתנה — מעדכנים רק את הקישור לדרכון החדש. שים לב: העדכון מחייב תור, בניגוד להנפקה הראשונה.\nRe-checked before each of these steps: fz.photo_and_eye, fz.test, fz.permit_in_person",
+        "en": "If it is not valid: ⚠️ A mismatch prevents the test from taking place, and it is recorded as a full failure rather than \"did not attend\", even though the test never happened. You can appeal, but an appeal blocks you from booking a new test until it is decided.\nWhat to do: Renewed your passport? Book a licensing office appointment and update the 89 document before your test. ⚠️ The 89 number itself never changes; only its link to the passport is updated. Note this update DOES require an appointment, unlike the first issue.\nRe-checked before each of these steps: fz.photo_and_eye, fz.test, fz.permit_in_person"
+      },
+      "applies_when_text": "(has_teudat_zehut is false AND track is not conversion)",
+      "sources": [
+        {
+          "citation": null,
+          "claim": "אי-התאמה בין מספר הדרכון שבמסמך ה-89 לדרכון שברשות הנבחן מונעת את קיום הטסט, והוא נרשם ככישלון",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        },
+        {
+          "citation": null,
+          "claim": "מספר ה-89 עצמו קבוע — חידוש דרכון שובר רק את הקישור, והעדכון מחייב תור",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:fz.photo_and_eye",
+        "step:fz.test",
+        "step:fz.permit_in_person"
+      ]
+    },
+    {
+      "id": "condition:cc.foreign_license_valid",
+      "kind": "condition",
+      "engine_id": "cc.foreign_license_valid",
+      "general": false,
+      "title": {
+        "he": "הרישיון הזר חייב להיות בתוקף ביום ההגשה",
+        "en": "Your foreign licence must be valid on the day you submit"
+      },
+      "text": {
+        "he": "אם זה לא בתוקף: רישיון זר שפג אינו כשיר להמרה — גם אם החזקת בו עשרים שנה. \"בתוקף\", לא \"קיים\".\nמה עושים: אם הרישיון עומד לפוג בזמן שאתה ממתין לרקורד — חדש אותו במדינת המוצא במקביל, ואל תחכה שהתהליך כאן יסתיים.\nRe-checked before each of these steps: cv.attend, cv.control_test",
+        "en": "If it is not valid: An expired foreign licence cannot be converted, even after twenty years of holding it. The word is \"valid\", not \"held\".\nWhat to do: If your licence is due to expire while you wait for the record, renew it in your home country in parallel. Do not wait for the process here to finish.\nRe-checked before each of these steps: cv.attend, cv.control_test"
+      },
+      "applies_when_text": "track is conversion",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · פרק \"מסמכים נדרשים\"",
+          "claim": "נדרש רישיון נהיגה לאומי בתוקף",
+          "quote": "רישיון נהיגה לאומי בתוקף.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "גיליון F2 מקרה קצה 2 — הסקה משני תנאים מצוטטים",
+          "claim": "הרישיון עלול לפוג בזמן ההמתנה לרקורד, שאורכת חודשים",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        }
+      ],
+      "links": [
+        "step:cv.attend",
+        "step:cv.control_test"
+      ]
+    },
+    {
+      "id": "condition:cc.english_name_match",
+      "kind": "condition",
+      "engine_id": "cc.english_name_match",
+      "general": false,
+      "title": {
+        "he": "השם באנגלית ברשות האוכלוסין חייב להיות זהה לדרכון",
+        "en": "Your name in English at the Population Authority must match your passport"
+      },
+      "text": {
+        "he": "אם זה לא בתוקף: אי-התאמה בין הדרכון לרישום ברשות האוכלוסין עוצרת את התהליך.\nמה עושים: אצל רוב האנשים השם כבר רשום כראוי ואין מה לעשות. אם יש לך ספק שהכתיב ברשות האוכלוסין זהה לדרכון — בדוק, ועדכן לפני מילוי הטופס.\nRe-checked before each of these steps: fz.online_form, cv.online_form",
+        "en": "If it is not valid: A mismatch between your passport and the Population Authority registry stalls the process.\nWhat to do: For most people the name is already registered correctly and there is nothing to do. If you have any doubt that the spelling at the Population Authority matches your passport, check it, and update it before filling in the form.\nRe-checked before each of these steps: fz.online_form, cv.online_form"
+      },
+      "applies_when_text": "has_teudat_zehut is false",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הגשת בקשה להוצאת רישיון נהיגה\"",
+          "claim": "נדרש שהשם יהיה מעודכן באנגלית ברשות האוכלוסין",
+          "quote": "יש לוודא כי שמם של מגישי הבקשה מעודכן בשפה האנגלית ברשות האוכלוסין וההגירה.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "גיליון 03 שורה 3 · גיליון 05 שורה 13",
+          "claim": "שהכתיב חייב להיות זהה לדרכון — הדף דורש עדכון, לא התאמה",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        }
+      ],
+      "links": [
+        "step:fz.online_form",
+        "step:cv.online_form"
+      ]
+    },
+    {
+      "id": "condition:cc.address_registered",
+      "kind": "condition",
+      "engine_id": "cc.address_registered",
+      "general": true,
+      "title": {
+        "he": "כתובת מעודכנת ברשות האוכלוסין",
+        "en": "A current address at the Population Authority"
+      },
+      "text": {
+        "he": "אם זה לא בתוקף: הרישיון הקבוע נשלח לכתובת המעודכנת ברשות האוכלוסין. בלי כתובת רשומה — הוא לא יגיע.\nמה עושים: עדכן כתובת ברשות האוכלוסין. אין לך כתובת רשומה? אנחנו לא יודעים אם אפשר לאסוף את הרישיון בסניף. במסלול הפקת כפל אפשר לבחור איסוף עצמי בדפוס בארי — חינם, ובלי כתובת.\nRe-checked before each of these steps: fz.receive_card, cv.receive",
+        "en": "If it is not valid: The permanent licence is posted to the address registered with the Population Authority. With no registered address, it will not arrive.\nWhat to do: Register an address with the Population Authority. No registered address? We do not know whether the licence can be collected at a branch. In the duplicate route you can choose self-collection at Defus Bari — free, and no address needed.\nRe-checked before each of these steps: fz.receive_card, cv.receive"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "דף השירות \"הוצאת רישיון נהיגה\", משרד התחבורה · סעיף \"הגשת בקשה להוצאת רישיון נהיגה\"",
+          "claim": "הרישיון הקבוע נשלח לכתובת המעודכנת ברשות האוכלוסין",
+          "quote": "רישיון נהיגה קבוע (פלסטיק) יישלח לכתובת המעודכנת ברשות האוכלוסין.",
+          "url": "https://www.gov.il/he/service/apply_for_new_driver_drivers_license",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "איסוף עצמי בדפוס בארי אינו תלוי בכתובת רשומה",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "first_hand"
+        }
+      ],
+      "links": [
+        "step:fz.receive_card",
+        "step:cv.receive"
+      ]
+    },
+    {
+      "id": "condition:cc.treaty_country",
+      "kind": "condition",
+      "engine_id": "cc.treaty_country",
+      "general": false,
+      "title": {
+        "he": "למדינת המוצא ייתכן הסכם המרה עם ישראל",
+        "en": "Your home country may have a conversion treaty with Israel"
+      },
+      "text": {
+        "he": "אם זה לא בתוקף: אם בין מדינת המוצא לישראל קיימת אמנה בנושא המרת רישיונות נהיגה, הבקשה שלך תיבחן לפי תנאי אותה אמנה ולא לפי התנאים הרגילים. התנאים עשויים להיות שונים — לטובה או לרעה.\nמה עושים: ⚠️ אין בידינו את רשימת המדינות שיש להן אמנה, והנוהל אינו כולל אותה. זו שאלה פתוחה. כדאי לברר מול אגף הרישוי, 02-6663050, אם למדינה שלך יש אמנה עם ישראל.\nRe-checked before each of these steps: cv.online_form, cv.attend",
+        "en": "If it is not valid: If a conversion treaty exists between your home country and Israel, your application is judged under that treaty rather than the ordinary conditions. Those terms may differ, in either direction.\nWhat to do: ⚠️ We do not hold the list of treaty countries and the procedure does not include it. This is an open question. Worth asking the Licensing Division, 02-6663050, whether your country has a treaty with Israel.\nRe-checked before each of these steps: cv.online_form, cv.attend"
+      },
+      "applies_when_text": "track is conversion",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 3",
+          "claim": "קיימת אמנה — הבקשה נבחנת לפי תנאי האמנה ולא לפי התנאים הרגילים",
+          "quote": "ככל ורישיון הנהיגה הלאומי שברשות המבקש ניתן לו ממדינה שבינה לבין ישראל קיימת אמנה בנושא המרת רישיונות נהיגה – תיבחן הבקשה להמרה בהתאם לתנאים שנקבעו באותה אמנה.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "אילו מדינות חתומות על אמנה עם ישראל, ומה קובעת כל אמנה",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": [
+        "step:cv.online_form",
+        "step:cv.attend"
+      ]
+    },
+    {
+      "id": "condition:cc.age_condition",
+      "kind": "condition",
+      "engine_id": "cc.age_condition",
+      "general": false,
+      "title": {
+        "he": "תנאי גיל לפי התקנות",
+        "en": "The age conditions set out in the regulations"
+      },
+      "text": {
+        "he": "אם זה לא בתוקף: ההמרה מותנית בעמידה בתנאי הגיל הקבועים בתקנות, לצד שאר התנאים. גיל מינימלי חל על כל דרגה.\nמה עושים: ⚠️ הנוהל מפנה לתקנות ואינו נוקב בגילים, ולא בדקנו אותם. אם אתה קרוב לגיל המינימלי לדרגה שביקשת — ברר מול אגף הרישוי, 02-6663050, לפני שתתחיל.\nRe-checked before each of these steps: cv.online_form",
+        "en": "If it is not valid: Conversion is conditional on meeting the age requirements set out in the regulations, alongside the other conditions. A minimum age applies to every grade.\nWhat to do: ⚠️ The procedure points at the regulations without naming the ages, and we have not checked them. If you are near the minimum age for the grade you asked for, check with the Licensing Division, 02-6663050, before you start.\nRe-checked before each of these steps: cv.online_form"
+      },
+      "applies_when_text": "track is conversion",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1",
+          "claim": "עמידה בתנאי הגיל הקבועים בתקנות היא אחד התנאים המצטברים להמרה",
+          "quote": "עמידה בתנאי הגיל הקבועים בתקנות.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": null,
+          "claim": "מהו הגיל המינימלי לכל דרגה לפי התקנות",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": [
+        "step:cv.online_form"
+      ]
+    },
+    {
+      "id": "visa_profile:a1",
+      "kind": "visa_profile",
+      "engine_id": "a1",
+      "general": true,
+      "title": {
+        "he": "א/1 · אשרת עולה",
+        "en": "A/1 · Oleh visa"
+      },
+      "text": {
+        "he": "Visa type: a1; procedure category: oleh_chadash; usually has a teudat zehut: false\nהמסמך המזהה: דרכון + אשרה\nעד לעלייה בפועל. אחריה מתקבלת תעודת זהות.",
+        "en": "Visa type: a1; procedure category: oleh_chadash; usually has a teudat zehut: false\nIdentity document: Passport + visa\nUntil aliyah itself. After it, you receive a teudat zehut."
+      },
+      "applies_when_text": "visa_type is a1",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(א)",
+          "claim": "עולה חדש זכאי להמרה בתוך חמש שנים מיום העלייה",
+          "quote": "נמצא בישראל לפי אשרת עולה או תעודת עולה לפי חוק השבות, התש\"י-1950 והגיש את בקשתו בתוך חמש שנים מיום עלייתו.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "category_rule:oleh_chadash"
+      ]
+    },
+    {
+      "id": "visa_profile:a2",
+      "kind": "visa_profile",
+      "engine_id": "a2",
+      "general": true,
+      "title": {
+        "he": "א/2 · תלמיד / סטודנט",
+        "en": "A/2 · Student"
+      },
+      "text": {
+        "he": "Visa type: a2; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nהמסמך המזהה: דרכון + אשרת שהייה\nהאשרה תלויה במוסד הלימודים. סיום לימודים עלול להפיל את הזכאות באמצע התהליך.",
+        "en": "Visa type: a2; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nIdentity document: Passport + residence visa\nThe visa depends on your institution. Finishing your studies can void eligibility mid-process."
+      },
+      "applies_when_text": "visa_type is a2",
+      "sources": [
+        {
+          "citation": "תקנות הכניסה לישראל, תשל\"ד-1974 · תקנה 5 (ביקור) ותקנה 6 (ארעי)",
+          "claim": "הקוד א/2 הוא רישיון ישיבה לפי שמו בתקנות, ולכן נכנס לקטגוריית \"תושב מדינת חוץ\" שבנוהל ס' 1(ג)",
+          "quote": "אשרה ורשיון לישיבת ארעי מסוג א/2",
+          "url": "https://www.nevo.co.il/law_html/law00/70322.htm",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ג)",
+          "claim": "תושב מדינת חוץ זכאי להמרה אם החזיק רישיון ישיבה בעת ההגשה, בתוך 5 שנים מהכניסה, ומוגבל לתקנות 176-181",
+          "quote": "תושב מדינת חוץ שהגיש את בקשתו בעת שהיה ברשותו רישיון ישיבה בישראל, ובלבד שהגיש את בקשתו בתוך חמש שנים מיום כניסתו לישראל ובלבד שרשות הרישוי לא תיתן לו רישיון נהיגה אלא לפי תקנות 176-181 (דרגות C1, B, A, A1, A2, 1).",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "category_rule:toshav_medinat_chutz"
+      ]
+    },
+    {
+      "id": "visa_profile:a3",
+      "kind": "visa_profile",
+      "engine_id": "a3",
+      "general": true,
+      "title": {
+        "he": "א/3 · איש דת",
+        "en": "A/3 · Clergy"
+      },
+      "text": {
+        "he": "Visa type: a3; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nהמסמך המזהה: דרכון + אשרה",
+        "en": "Visa type: a3; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nIdentity document: Passport + visa"
+      },
+      "applies_when_text": "visa_type is a3",
+      "sources": [
+        {
+          "citation": "תקנות הכניסה לישראל, תשל\"ד-1974 · תקנה 5 (ביקור) ותקנה 6 (ארעי)",
+          "claim": "הקוד א/3 הוא רישיון ישיבה לפי שמו בתקנות, ולכן נכנס לקטגוריית \"תושב מדינת חוץ\" שבנוהל ס' 1(ג)",
+          "quote": "אשרה ורשיון לישיבת ארעי מסוג א/3",
+          "url": "https://www.nevo.co.il/law_html/law00/70322.htm",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ג)",
+          "claim": "תושב מדינת חוץ זכאי להמרה אם החזיק רישיון ישיבה בעת ההגשה, בתוך 5 שנים מהכניסה, ומוגבל לתקנות 176-181",
+          "quote": "תושב מדינת חוץ שהגיש את בקשתו בעת שהיה ברשותו רישיון ישיבה בישראל, ובלבד שהגיש את בקשתו בתוך חמש שנים מיום כניסתו לישראל ובלבד שרשות הרישוי לא תיתן לו רישיון נהיגה אלא לפי תקנות 176-181 (דרגות C1, B, A, A1, A2, 1).",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "category_rule:toshav_medinat_chutz"
+      ]
+    },
+    {
+      "id": "visa_profile:a4",
+      "kind": "visa_profile",
+      "engine_id": "a4",
+      "general": true,
+      "title": {
+        "he": "א/4 · נלווה (קרוב)",
+        "en": "A/4 · Accompanying family member"
+      },
+      "text": {
+        "he": "Visa type: a4; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nהמסמך המזהה: דרכון + אשרה\n⚠️ האשרה נגזרת מהמחזיק העיקרי. אם שלו פגה — גם שלך פגה.",
+        "en": "Visa type: a4; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nIdentity document: Passport + visa\n⚠️ Your visa derives from the primary holder. If theirs lapses, so does yours."
+      },
+      "applies_when_text": "visa_type is a4",
+      "sources": [
+        {
+          "citation": "תקנות הכניסה לישראל, תשל\"ד-1974 · תקנה 5 (ביקור) ותקנה 6 (ארעי)",
+          "claim": "הקוד א/4 הוא רישיון ישיבה לפי שמו בתקנות, ולכן נכנס לקטגוריית \"תושב מדינת חוץ\" שבנוהל ס' 1(ג)",
+          "quote": "אשרה ורשיון לישיבת ארעי מסוג א/4",
+          "url": "https://www.nevo.co.il/law_html/law00/70322.htm",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ג)",
+          "claim": "תושב מדינת חוץ זכאי להמרה אם החזיק רישיון ישיבה בעת ההגשה, בתוך 5 שנים מהכניסה, ומוגבל לתקנות 176-181",
+          "quote": "תושב מדינת חוץ שהגיש את בקשתו בעת שהיה ברשותו רישיון ישיבה בישראל, ובלבד שהגיש את בקשתו בתוך חמש שנים מיום כניסתו לישראל ובלבד שרשות הרישוי לא תיתן לו רישיון נהיגה אלא לפי תקנות 176-181 (דרגות C1, B, A, A1, A2, 1).",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "גיליון F1 מקרה קצה 4 — הנוהל אינו מזכיר א/4",
+          "claim": "התלות באשרת המחזיק העיקרי",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        }
+      ],
+      "links": [
+        "category_rule:toshav_medinat_chutz"
+      ]
+    },
+    {
+      "id": "visa_profile:a5",
+      "kind": "visa_profile",
+      "engine_id": "a5",
+      "general": true,
+      "title": {
+        "he": "א/5 · תושב ארעי",
+        "en": "A/5 · Temporary resident"
+      },
+      "text": {
+        "he": "Visa type: a5; procedure category: toshav_medinat_chutz; usually has a teudat zehut: true\nהמסמך המזהה: תעודת זהות + ספח\n⚠️ יש לך תעודת זהות — ולכן הערוץ מקוון. אבל הקטגוריה בנוהל היא \"תושב מדינת חוץ\", ולכן תקרת הדרגות היא 176-181. שני דברים נפרדים.",
+        "en": "Visa type: a5; procedure category: toshav_medinat_chutz; usually has a teudat zehut: true\nIdentity document: Teudat zehut with the attached page\n⚠️ You hold a teudat zehut, so your channel is online. But your category is still \"foreign resident\", so your grade ceiling is 176-181. Two separate things."
+      },
+      "applies_when_text": "visa_type is a5",
+      "sources": [
+        {
+          "citation": "תקנות הכניסה לישראל, תשל\"ד-1974 · תקנה 5 (ביקור) ותקנה 6 (ארעי)",
+          "claim": "הקוד א/5 הוא רישיון ישיבה לפי שמו בתקנות, ולכן נכנס לקטגוריית \"תושב מדינת חוץ\" שבנוהל ס' 1(ג)",
+          "quote": "אשרה ורשיון לישיבת ארעי מסוג א/5",
+          "url": "https://www.nevo.co.il/law_html/law00/70322.htm",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ג)",
+          "claim": "תושב מדינת חוץ זכאי להמרה אם החזיק רישיון ישיבה בעת ההגשה, בתוך 5 שנים מהכניסה, ומוגבל לתקנות 176-181",
+          "quote": "תושב מדינת חוץ שהגיש את בקשתו בעת שהיה ברשותו רישיון ישיבה בישראל, ובלבד שהגיש את בקשתו בתוך חמש שנים מיום כניסתו לישראל ובלבד שרשות הרישוי לא תיתן לו רישיון נהיגה אלא לפי תקנות 176-181 (דרגות C1, B, A, A1, A2, 1).",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "כל-זכות, \"המרת רישיון נהיגה זר לרישיון נהיגה ישראלי\", עודכן 6.8.2025",
+          "claim": "אישוש עקיף: תושב ארעי מנוי במפורש ברשימת הזכאים להמרה",
+          "quote": "עולה חדש, תושב חוזר, תייר ותושב ארעי (לרבות דיפלומטים)",
+          "url": "https://www.kolzchut.org.il/he/המרת_רישיון_נהיגה_זר_לרישיון_נהיגה_ישראלי",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "category_rule:toshav_medinat_chutz"
+      ]
+    },
+    {
+      "id": "visa_profile:b1",
+      "kind": "visa_profile",
+      "engine_id": "b1",
+      "general": true,
+      "title": {
+        "he": "ב/1 · עובד זמני",
+        "en": "B/1 · Temporary worker"
+      },
+      "text": {
+        "he": "Visa type: b1; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nהמסמך המזהה: דרכון + אשרת עבודה",
+        "en": "Visa type: b1; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nIdentity document: Passport + work visa"
+      },
+      "applies_when_text": "visa_type is b1",
+      "sources": [
+        {
+          "citation": "תקנות הכניסה לישראל, תשל\"ד-1974 · תקנה 5 (ביקור) ותקנה 6 (ארעי)",
+          "claim": "הקוד ב/1 הוא רישיון ישיבה לפי שמו בתקנות, ולכן נכנס לקטגוריית \"תושב מדינת חוץ\" שבנוהל ס' 1(ג)",
+          "quote": "אשרה ורשיון לישיבת ביקור מסוג ב/1",
+          "url": "https://www.nevo.co.il/law_html/law00/70322.htm",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ג)",
+          "claim": "תושב מדינת חוץ זכאי להמרה אם החזיק רישיון ישיבה בעת ההגשה, בתוך 5 שנים מהכניסה, ומוגבל לתקנות 176-181",
+          "quote": "תושב מדינת חוץ שהגיש את בקשתו בעת שהיה ברשותו רישיון ישיבה בישראל, ובלבד שהגיש את בקשתו בתוך חמש שנים מיום כניסתו לישראל ובלבד שרשות הרישוי לא תיתן לו רישיון נהיגה אלא לפי תקנות 176-181 (דרגות C1, B, A, A1, A2, 1).",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "category_rule:toshav_medinat_chutz"
+      ]
+    },
+    {
+      "id": "visa_profile:b2",
+      "kind": "visa_profile",
+      "engine_id": "b2",
+      "general": true,
+      "title": {
+        "he": "ב/2 · תייר",
+        "en": "B/2 · Tourist"
+      },
+      "text": {
+        "he": "Visa type: b2; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nהמסמך המזהה: דרכון + חותמת או אשרה\n⚠️ חלון ההמרה הוא חמש שנים, אבל אשרת ביקור היא עד שלושה חודשים — והזכאות נבחנת ליום ההגשה. בפועל החלון שלך הוא מה שנותר באשרה, לא חמש שנים. [only when track is conversion]",
+        "en": "Visa type: b2; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nIdentity document: Passport + stamp or visa\n⚠️ The conversion window is five years, but a visit permit lasts up to three months, and eligibility is judged on the day you submit. In practice your window is whatever is left on your visa, not five years. [only when track is conversion]"
+      },
+      "applies_when_text": "visa_type is b2",
+      "sources": [
+        {
+          "citation": "תקנות הכניסה לישראל, תשל\"ד-1974 · תקנה 5 (ביקור) ותקנה 6 (ארעי)",
+          "claim": "הקוד ב/2 הוא רישיון ישיבה לפי שמו בתקנות, ולכן נכנס לקטגוריית \"תושב מדינת חוץ\" שבנוהל ס' 1(ג)",
+          "quote": "אשרה ורשיון לישיבת ביקור מסוג ב/2",
+          "url": "https://www.nevo.co.il/law_html/law00/70322.htm",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ג)",
+          "claim": "תושב מדינת חוץ זכאי להמרה אם החזיק רישיון ישיבה בעת ההגשה, בתוך 5 שנים מהכניסה, ומוגבל לתקנות 176-181",
+          "quote": "תושב מדינת חוץ שהגיש את בקשתו בעת שהיה ברשותו רישיון ישיבה בישראל, ובלבד שהגיש את בקשתו בתוך חמש שנים מיום כניסתו לישראל ובלבד שרשות הרישוי לא תיתן לו רישיון נהיגה אלא לפי תקנות 176-181 (דרגות C1, B, A, A1, A2, 1).",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "חוק הכניסה לישראל, תשי\"ב-1952, ס' 2(א)(2)",
+          "claim": "אשרה ורישיון לישיבת ביקור ניתנים עד שלושה חודשים",
+          "quote": "אשרה ורשיון לישיבת ביקור – עד לשלושה חדשים",
+          "url": "https://www.nevo.co.il/law_html/law01/189_003.htm",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "category_rule:toshav_medinat_chutz"
+      ]
+    },
+    {
+      "id": "visa_profile:b3",
+      "kind": "visa_profile",
+      "engine_id": "b3",
+      "general": true,
+      "title": {
+        "he": "ב/3 · נכנס מסופק",
+        "en": "B/3 · Conditional entrant"
+      },
+      "text": {
+        "he": "Visa type: b3; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nהמסמך המזהה: דרכון + אשרה",
+        "en": "Visa type: b3; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nIdentity document: Passport + visa"
+      },
+      "applies_when_text": "visa_type is b3",
+      "sources": [
+        {
+          "citation": "תקנות הכניסה לישראל, תשל\"ד-1974 · תקנה 5 (ביקור) ותקנה 6 (ארעי)",
+          "claim": "הקוד ב/3 הוא רישיון ישיבה לפי שמו בתקנות, ולכן נכנס לקטגוריית \"תושב מדינת חוץ\" שבנוהל ס' 1(ג)",
+          "quote": "אשרה ורשיון לישיבת ביקור מסוג ב/3",
+          "url": "https://www.nevo.co.il/law_html/law00/70322.htm",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ג)",
+          "claim": "תושב מדינת חוץ זכאי להמרה אם החזיק רישיון ישיבה בעת ההגשה, בתוך 5 שנים מהכניסה, ומוגבל לתקנות 176-181",
+          "quote": "תושב מדינת חוץ שהגיש את בקשתו בעת שהיה ברשותו רישיון ישיבה בישראל, ובלבד שהגיש את בקשתו בתוך חמש שנים מיום כניסתו לישראל ובלבד שרשות הרישוי לא תיתן לו רישיון נהיגה אלא לפי תקנות 176-181 (דרגות C1, B, A, A1, A2, 1).",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "category_rule:toshav_medinat_chutz"
+      ]
+    },
+    {
+      "id": "visa_profile:b4",
+      "kind": "visa_profile",
+      "engine_id": "b4",
+      "general": true,
+      "title": {
+        "he": "ב/4 · מתנדב",
+        "en": "B/4 · Volunteer"
+      },
+      "text": {
+        "he": "Visa type: b4; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nהמסמך המזהה: דרכון + אשרה",
+        "en": "Visa type: b4; procedure category: toshav_medinat_chutz; usually has a teudat zehut: false\nIdentity document: Passport + visa"
+      },
+      "applies_when_text": "visa_type is b4",
+      "sources": [
+        {
+          "citation": "תקנות הכניסה לישראל, תשל\"ד-1974 · תקנה 5 (ביקור) ותקנה 6 (ארעי)",
+          "claim": "הקוד ב/4 הוא רישיון ישיבה לפי שמו בתקנות, ולכן נכנס לקטגוריית \"תושב מדינת חוץ\" שבנוהל ס' 1(ג)",
+          "quote": "אשרה ורשיון לישיבת ביקור מסוג ב/4",
+          "url": "https://www.nevo.co.il/law_html/law00/70322.htm",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ג)",
+          "claim": "תושב מדינת חוץ זכאי להמרה אם החזיק רישיון ישיבה בעת ההגשה, בתוך 5 שנים מהכניסה, ומוגבל לתקנות 176-181",
+          "quote": "תושב מדינת חוץ שהגיש את בקשתו בעת שהיה ברשותו רישיון ישיבה בישראל, ובלבד שהגיש את בקשתו בתוך חמש שנים מיום כניסתו לישראל ובלבד שרשות הרישוי לא תיתן לו רישיון נהיגה אלא לפי תקנות 176-181 (דרגות C1, B, A, A1, A2, 1).",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "category_rule:toshav_medinat_chutz"
+      ]
+    },
+    {
+      "id": "visa_profile:permanent_resident",
+      "kind": "visa_profile",
+      "engine_id": "permanent_resident",
+      "general": true,
+      "title": {
+        "he": "תושב קבע",
+        "en": "Permanent resident"
+      },
+      "text": {
+        "he": "Visa type: permanent_resident; procedure category: toshav_israel; usually has a teudat zehut: true\nהמסמך המזהה: תעודת זהות\nמסלול ההמרה נפתח רק אם שהית שישה חודשים רצופים בחו\"ל אחרי שקיבלת את הרישיון הזר. [only when track is conversion]",
+        "en": "Visa type: permanent_resident; procedure category: toshav_israel; usually has a teudat zehut: true\nIdentity document: Teudat zehut\nThe conversion route only opens if you spent six consecutive months abroad after getting your foreign licence. [only when track is conversion]"
+      },
+      "applies_when_text": "visa_type is permanent_resident",
+      "sources": [
+        {
+          "citation": "חוק הכניסה לישראל, תשי\"ב-1952, ס' 2(א)(4)",
+          "claim": "תושב קבע מחזיק אשרה ורישיון לישיבת קבע",
+          "quote": "אשרה ורשיון לישיבת קבע",
+          "url": "https://www.nevo.co.il/law_html/law01/189_003.htm",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל ס' 1(ב) · גיליון 14 סעיף ה",
+          "claim": "הסיווג כתושב ישראל — הנוהל נוקט \"תושב ישראל\" ולא \"אזרח ישראלי\"",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "likely"
+        }
+      ],
+      "links": [
+        "category_rule:toshav_israel"
+      ]
+    },
+    {
+      "id": "visa_profile:citizen",
+      "kind": "visa_profile",
+      "engine_id": "citizen",
+      "general": true,
+      "title": {
+        "he": "אזרח ישראלי",
+        "en": "Israeli citizen"
+      },
+      "text": {
+        "he": "Visa type: citizen; procedure category: toshav_israel; usually has a teudat zehut: true\nהמסמך המזהה: תעודת זהות\nמסלול ההמרה רלוונטי רק אם שבת מחו\"ל אחרי שישה חודשים רצופים לפחות. [only when track is conversion]",
+        "en": "Visa type: citizen; procedure category: toshav_israel; usually has a teudat zehut: true\nIdentity document: Teudat zehut\nThe conversion route is only relevant if you returned after at least six consecutive months abroad. [only when track is conversion]"
+      },
+      "applies_when_text": "visa_type is citizen",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ב)",
+          "claim": "תושב ישראל ששב זכאי להמרה בתוך חמש שנים מהשיבה, בתנאי שישה חודשים רצופים בחו\"ל",
+          "quote": "תושב ישראל ששהה מחוץ לישראל שישה חודשים רצופים לפחות לאחר קבלת הרישיון הלאומי והגיש את בקשתו בתוך חמש שנים מיום שובו לישראל.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "category_rule:toshav_israel"
+      ]
+    },
+    {
+      "id": "visa_profile:diplomat",
+      "kind": "visa_profile",
+      "engine_id": "diplomat",
+      "general": true,
+      "title": {
+        "he": "דיפלומט",
+        "en": "Diplomat"
+      },
+      "text": {
+        "he": "Visa type: diplomat; procedure category: not_defined_in_nohal; usually has a teudat zehut: false\nהמסמך המזהה: תעודה דיפלומטית\nהנוהל אינו מזכיר דיפלומטים כלל. כל-זכות מונה אותם כזכאים ואף פטורים מאגרה — אבל זהו מקור משני שכבר נמצא סותר את הנוהל בנושא אחר. כדאי לברר ישירות מול אגף הרישוי.",
+        "en": "Visa type: diplomat; procedure category: not_defined_in_nohal; usually has a teudat zehut: false\nIdentity document: Diplomatic card\nThe procedure does not mention diplomats at all. Kol-Zchut lists them as eligible and fee-exempt, but that is a secondary source already found contradicting the procedure elsewhere. Worth checking directly with the Licensing Division."
+      },
+      "applies_when_text": "visa_type is diplomat",
+      "sources": [
+        {
+          "citation": null,
+          "claim": "מעמד הדיפלומטים בנוהל ההמרה — הנוהל שותק, וכל-זכות סותר אותו בנושאים אחרים (גיליון 02 שורה 17)",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "uncertain"
+        }
+      ],
+      "links": [
+        "category_rule:not_defined_in_nohal"
+      ]
+    },
+    {
+      "id": "visa_profile:section_2a5",
+      "kind": "visa_profile",
+      "engine_id": "section_2a5",
+      "general": true,
+      "title": {
+        "he": "2(א)(5) · אישור שהייה",
+        "en": "Section 2(a)(5) · Stay permit"
+      },
+      "text": {
+        "he": "Visa type: section_2a5; procedure category: not_defined_in_nohal; usually has a teudat zehut: false\nהמסמך המזהה: כרטיס רישיון שהייה\n⏳ נכון להיום אין אפשרות להוציא רישיון נהיגה עם אישור שהייה לפי סעיף זה. הנושא תלוי ועומד בבג\"ץ.",
+        "en": "Visa type: section_2a5; procedure category: not_defined_in_nohal; usually has a teudat zehut: false\nIdentity document: Stay permit card\n⏳ As things stand today, a licence cannot be issued on a permit under this section. The matter is before the High Court."
+      },
+      "applies_when_text": "visa_type is section_2a5",
+      "sources": [
+        {
+          "citation": "חוק הכניסה לישראל, תשי\"ב-1952, ס' 2(א)(5)",
+          "claim": "לשון החוק מגדירה את המחזיק כמי שנמצא בישראל בלי רישיון ישיבה — וזה בדיוק התנאי שהנוהל דורש",
+          "quote": "רישיון זמני לישיבת ביקור למי שנמצא בישראל בלי רישיון ישיבה וניתן עליו צו הרחקה – עד ליציאתו מישראל או הרחקתו ממנה.",
+          "url": "https://www.nevo.co.il/law_html/law01/189_003.htm",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": [
+        "category_rule:not_defined_in_nohal"
+      ]
+    },
+    {
+      "id": "category_rule:oleh_chadash",
+      "kind": "category_rule",
+      "engine_id": "oleh_chadash",
+      "general": true,
+      "title": {
+        "he": "עולה חדש",
+        "en": "New immigrant"
+      },
+      "text": {
+        "he": "Conversion window: 5 years, counted from aliyah\nLicence grades available: regulations 176-185\n- לדרגות 182-185 נדרשים גם קורס לנהגי רכב ציבורי/כבד, בדיקות רפואיות, בחינות, ותקנה 189(ד)(3) — אין המרה אוטומטית.\nעולה חדש",
+        "en": "Conversion window: 5 years, counted from aliyah\nLicence grades available: regulations 176-185\n- Grades 182-185 also require a professional driver course, medical tests, exams and regulation 189(d)(3). Not an automatic conversion.\nNew immigrant"
+      },
+      "applies_when_text": "nohal_category is oleh_chadash",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(א)",
+          "claim": "חלון של חמש שנים מיום העלייה",
+          "quote": "והגיש את בקשתו בתוך חמש שנים מיום עלייתו.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        },
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1",
+          "claim": "תקנה 216 חלה על הדרגות שבתקנות 176 עד 185, ולדרגות הכבדות נדרשים תנאים נוספים",
+          "quote": "לעניין דרגות נהיגה הקבועות בתקנות 182 עד 185 (E, C, D, D1, D2, D3) נדרש סיום קורס לנהגי רכב ציבורי/כבד, נדרשת עמידה בבדיקות רפואיות ובבחינות, מילוי אחר תקנה 189(ד)(3) וכן שלא התקיים במבקש האמור בתקנה 15ב לתקנות.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "category_rule:toshav_israel",
+      "kind": "category_rule",
+      "engine_id": "toshav_israel",
+      "general": true,
+      "title": {
+        "he": "תושב ישראל ששב מחו\"ל",
+        "en": "Israeli resident returning from abroad"
+      },
+      "text": {
+        "he": "Conversion window: 5 years, counted from return\nLicence grades available: regulations 176-185\n- ⚠️ שישה חודשים רצופים לפחות בחו\"ל, אחרי קבלת הרישיון הלאומי. רצופים — לא במצטבר.\n- נדרש טופס כניסות ויציאות ממשרד הפנים. זו הקטגוריה היחידה שנדרשת בו.\nתושב ישראל ששב מחו\"ל",
+        "en": "Conversion window: 5 years, counted from return\nLicence grades available: regulations 176-185\n- ⚠️ At least six CONSECUTIVE months abroad, after receiving your national licence. Consecutive, not cumulative.\n- An entries-and-exits form from the Interior Ministry is required. This is the only category that needs it.\nIsraeli resident returning from abroad"
+      },
+      "applies_when_text": "nohal_category is toshav_israel",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ב)",
+          "claim": "חמש שנים מיום השיבה, בתנאי שישה חודשים רצופים בחו\"ל אחרי קבלת הרישיון",
+          "quote": "תושב ישראל ששהה מחוץ לישראל שישה חודשים רצופים לפחות לאחר קבלת הרישיון הלאומי והגיש את בקשתו בתוך חמש שנים מיום שובו לישראל.",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "category_rule:toshav_medinat_chutz",
+      "kind": "category_rule",
+      "engine_id": "toshav_medinat_chutz",
+      "general": true,
+      "title": {
+        "he": "תושב מדינת חוץ",
+        "en": "Foreign resident"
+      },
+      "text": {
+        "he": "Conversion window: 5 years, counted from entry\nLicence grades available: regulations 176-181\n- רישיון הישיבה חייב להיות בתוקף ביום ההגשה — לא רק ביום הכניסה.\n- ⚠️ תקרת הדרגות היא 176-181. אין מסלול המרה לאוטובוס (D) או למשאית כבדה (C, E) בשום תנאי.\nתושב מדינת חוץ",
+        "en": "Conversion window: 5 years, counted from entry\nLicence grades available: regulations 176-181\n- Your residence permit must be valid on the day you submit, not merely on the day you entered.\n- ⚠️ The ceiling is regulations 176-181. There is no conversion route to bus (D) or heavy truck (C, E) under any conditions.\nForeign resident"
+      },
+      "applies_when_text": "nohal_category is toshav_medinat_chutz",
+      "sources": [
+        {
+          "citation": "נוהל אופן המרת רישיון נהיגה ממדינת חוץ · אגף הרישוי, משרד התחבורה · 15.2.2024 · סימוכין 4000-0017-2024-0000298 · ס' 1(ג)",
+          "claim": "תושב מדינת חוץ זכאי להמרה אם החזיק רישיון ישיבה בעת ההגשה, בתוך 5 שנים מהכניסה, ומוגבל לתקנות 176-181",
+          "quote": "תושב מדינת חוץ שהגיש את בקשתו בעת שהיה ברשותו רישיון ישיבה בישראל, ובלבד שהגיש את בקשתו בתוך חמש שנים מיום כניסתו לישראל ובלבד שרשות הרישוי לא תיתן לו רישיון נהיגה אלא לפי תקנות 176-181 (דרגות C1, B, A, A1, A2, 1).",
+          "url": "https://www.gov.il/he/pages/1961",
+          "last_verified_at": "2026-08-21",
+          "certainty": "verified"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "category_rule:not_defined_in_nohal",
+      "kind": "category_rule",
+      "engine_id": "not_defined_in_nohal",
+      "general": true,
+      "title": {
+        "he": "לא מוגדר בנוהל",
+        "en": "Not defined in the procedure"
+      },
+      "text": {
+        "he": "- הנוהל אינו מתייחס למעמד הזה. אנחנו לא יודעים מה חל עליך — כדאי לברר ישירות מול אגף הרישוי, 02-6663050.\nלא מוגדר בנוהל",
+        "en": "- The procedure does not address this status. We do not know what applies to you. Worth checking directly with the Licensing Division, 02-6663050.\nNot defined in the procedure"
+      },
+      "applies_when_text": "nohal_category is not_defined_in_nohal",
+      "sources": [
+        {
+          "citation": null,
+          "claim": "הנוהל מגדיר שלוש קטגוריות בלבד, ומעמדות מסוימים אינם נופלים באף אחת מהן",
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-08-21",
+          "certainty": "unchecked"
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "about:what_it_is",
+      "kind": "about",
+      "engine_id": "what_it_is",
+      "general": true,
+      "title": {
+        "he": "חי בישראל בלי תעודת זהות ישראלית? תגיע מוכן.",
+        "en": "Living in Israel without an Israeli ID? Arrive prepared."
+      },
+      "text": {
+        "he": "לדעת לפני שמגיעים\nשירות עצמאי · אינו גוף ממשלתי\nתהליכים בירוקרטיים בישראל — רישיון נהיגה, חידוש אשרה, פתיחת חשבון בנק — בנויים למי שמחזיק תעודת זהות ישראלית. אנחנו ממפים עבורך את התהליך מול הרשות, שלב אחר שלב, ובודקים את המסמכים שברשותך מול הדרישות הרשמיות: מה תקין, מה חסר, ובמה לטפל ראשון.",
+        "en": "Know before you go\nAn independent service · not a government body\nBureaucratic processes in Israel — a driving licence, a visa renewal, a bank account — are built for people who hold an Israeli ID. We map your process at the authority, step by step, and check the documents you hold against the official requirements: what is in order, what is missing, and what to handle first."
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "BeforeYouGo site",
+          "claim": null,
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-11-23",
+          "certainty": null
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "about:not_government",
+      "kind": "about",
+      "engine_id": "not_government",
+      "general": true,
+      "title": {
+        "he": "זה אינו אתר ממשלתי",
+        "en": "This is not a government website"
+      },
+      "text": {
+        "he": "המערכת אינה מגישה בקשות ואינה מדברת עם אף רשות בשמך. היא מסבירה מה נדרש ובודקת מול מה שיש לך.\nשירות עצמאי · אינו גוף ממשלתי",
+        "en": "It does not submit applications and does not contact any authority on your behalf. It explains what is required and checks it against what you have.\nAn independent service · not a government body"
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "BeforeYouGo site",
+          "claim": null,
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-11-23",
+          "certainty": null
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "about:what_you_get",
+      "kind": "about",
+      "engine_id": "what_you_get",
+      "general": true,
+      "title": {
+        "he": "מה אנחנו מציעים",
+        "en": "What we offer"
+      },
+      "text": {
+        "he": "התהליך המלא: כל שלב לפי הסדר, איפה מבצעים אותו, ומה לוח הזמנים.\nבדיקת מסמכים: הדרכון, האשרה והרישיון נבדקים זה מול זה ומול הדרישה.\nפעולה ראשונה אחת: מה לעשות ראשון, והסיבה שזה קודם לכל השאר.",
+        "en": "The full route: Every step in order, where it is done, and its timing.\nA document check: Your passport, visa and licence checked against each other and against the requirement.\nOne first action: What to do first, and the reason it comes before everything else."
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "BeforeYouGo site",
+          "claim": null,
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-11-23",
+          "certainty": null
+        }
+      ],
+      "links": []
+    },
+    {
+      "id": "about:how_to_start",
+      "kind": "about",
+      "engine_id": "how_to_start",
+      "general": true,
+      "title": {
+        "he": "איך זה עובד",
+        "en": "How it works"
+      },
+      "text": {
+        "he": "שלושה שלבים, ובסופם מפת הדרכים שלך. כל דרישה נושאת את הסעיף שממנו נלקחה.\nהמעמד שלך: כמה שאלות קצרות: סוג האשרה, התאריכים, והרישיון שכבר ברשותך.\nהמסמכים שלך: מזינים את הפרטים בדיוק כפי שהם רשומים; המערכת משווה ביניהם ומול הדרישה.\nמפת הדרכים: המסלול, כל השלבים לפי הסדר, ופעולה ראשונה אחת — כל דרישה עם הסעיף שממנו נלקחה.\nכמה שאלות קצרות, ואז מפת הדרכים שלך — כל השלבים לפי הסדר, מה נדרש בכל אחד, ומה כדאי להתחיל כבר עכשיו.\nכ־4 דקות · אפשר גם בלי הרשמה\nאין צורך בהרשמה. בלי חשבון, שום דבר לא נשמר.",
+        "en": "Three stages, then your roadmap. Every requirement carries the clause it came from.\nYour status: A few short questions: visa type, dates, and the licence you already hold.\nYour documents: You enter the details exactly as they appear; the system compares them against each other and against the requirement.\nYour roadmap: The route, every step in order, and one first action, each requirement with the clause it came from.\nA few short questions, then your roadmap — every step in order, what each one needs, and what to start today.\nAbout 4 minutes · sign-up optional\nNo sign-up needed. Without an account, nothing is saved."
+      },
+      "applies_when_text": "always",
+      "sources": [
+        {
+          "citation": "BeforeYouGo site",
+          "claim": null,
+          "quote": null,
+          "url": null,
+          "last_verified_at": "2026-11-23",
+          "certainty": null
+        }
+      ],
+      "links": []
+    }
+  ]
+}

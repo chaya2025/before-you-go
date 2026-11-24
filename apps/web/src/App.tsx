@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Result, Process } from '@byg/engine';
-import { fetchStatuses, fetchReadiness, fetchCapabilities, fetchProcesses, ValidationError, type StatusesResponse } from './api';
+import { fetchStatuses, fetchReadiness, fetchProcesses, ValidationError, type StatusesResponse } from './api';
 import { UI, pick, dirFor, type Lang } from './i18n';
 import { Intake, type Answers } from './components/Intake';
 import { Diagnosis, Blocked } from './components/Diagnosis';
@@ -8,7 +8,7 @@ import { Documents } from './components/Documents';
 import { Roadmap, RoadSide } from './components/Roadmap';
 import { Urgent } from './components/Urgent';
 import { Readiness } from './components/Readiness';
-import { PlainWords } from './components/PlainWords';
+import { AskPanel, askModeFor, useAskChat, type OtherPersonAction } from './components/AskPanel';
 import { Warnings } from './components/Warnings';
 import { Welcome } from './components/Welcome';
 import { AccountPanel, type PanelMode } from './components/AccountPanel';
@@ -91,14 +91,46 @@ export function App() {
   /** Which step's tick is in flight, so the row he pressed can say so. */
   const [pendingStep, setPendingStep] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  /** Whether the plain-language layer is switched on where this is deployed. */
-  const [plainLanguage, setPlainLanguage] = useState(false);
   /** What the system can check readiness for. Served, never hardcoded here. */
   const [processes, setProcesses] = useState<Process[]>([]);
   /** The plain-words panel, opened from the button in the corner. */
   const [asking, setAsking] = useState(false);
   /** SEC M2: he ticked the notice this visit (browser only, D-2). */
   const [consented, setConsented] = useState(hasConsented);
+
+  /**
+   * ⭐ M6: the chat. "case" once there is a road to talk about, "general"
+   * before (D-228). `askStep` is the step he pressed "ask about this step" on
+   * (D-227); the panel shows it as a chip he can clear.
+   */
+  const askWhere = askModeFor({
+    screen,
+    hasResult: Boolean(result),
+    blocked: Boolean(result?.blocked),
+    hasAnswers: Boolean(answers),
+  });
+  const askMode: 'case' | 'general' = askWhere ?? 'general';
+  const [askStep, setAskStep] = useState<{ id: string; title: string } | null>(null);
+  const chat = useAskChat({
+    lang,
+    mode: askMode,
+    // The same body the readiness call sends, so the service rebuilds the same road.
+    profile: askMode === 'case' && answers ? { ...answers, completed_steps: done } : undefined,
+    stepId: askStep?.id,
+  });
+  /** Where focus goes back to when the panel closes (the button that opened it). */
+  const askFab = useRef<HTMLButtonElement>(null);
+  const refocusFab = useRef(false);
+  useEffect(() => {
+    if (!asking && refocusFab.current) askFab.current?.focus();
+    refocusFab.current = false;
+  }, [asking]);
+  // Another screen: the panel closes, so it never reopens by itself later on
+  // a screen he did not open it on.
+  useEffect(() => {
+    setAsking(false);
+    setAskStep(null);
+  }, [screen]);
 
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
 
@@ -523,11 +555,6 @@ export function App() {
     fetchStatuses()
       .then(setStatuses)
       .catch(() => setError(t('error_offline')));
-    // ⚠️ Asked, not assumed. "Switched off here" and "it failed" are different
-    // sentences and the user gets the true one.
-    fetchCapabilities()
-      .then((c) => setPlainLanguage(c.plain_language))
-      .catch(() => setPlainLanguage(false));
     fetchProcesses()
       .then((p) => setProcesses(p.processes))
       .catch(() => setProcesses([]));
@@ -755,6 +782,77 @@ export function App() {
       </div>
       {panel && <AccountPanel lang={lang} mode={panel} onClose={() => setPanel(null)} />}
     </header>
+  );
+
+  /**
+   * ⭐ Her call, 22.9, built in M6: the corner button opens a chat about his
+   * own case. It opens on the plain-words summary, then his questions.
+   *
+   * ⚠️ It REPLACES nothing, and nothing depends on it. The road and the
+   * report are complete before it is ever opened, and they stay exactly as
+   * they are if the chat service is switched off or wrong.
+   *
+   * ONE element, used on the road (case mode) and before it (general mode,
+   * D-228), so the two can never drift into different designs.
+   */
+  const closeAsk = () => {
+    refocusFab.current = true;
+    setAsking(false);
+    setAskStep(null);
+  };
+  /**
+   * D-226: "only your case" offers a way to start a road for the other person.
+   * ⚠️ Starting reuses this same page, and once he is logged in with a case
+   * every answer auto-saves into it. So if he has answers or a saved case,
+   * starting would overwrite HIS case: the button only goes to the landing
+   * page then. With nothing of his on screen, it opens the questions fresh.
+   */
+  const otherPerson: OtherPersonAction = answers || caseId.current ? 'home' : 'start';
+  const goOtherPerson = () => {
+    setAsking(false);
+    setAskStep(null);
+    if (otherPerson === 'start') setScreen('intake');
+    else goHome();
+  };
+  // ⚠️ Second lock: even placed on a screen by mistake, the chat draws nothing
+  // where askModeFor says no (a blocked road above all).
+  const ask = askWhere === null ? null : (
+    <>
+      {!asking && (
+        <button ref={askFab} type="button" className="ask-fab" onClick={() => setAsking(true)}>
+          <svg className="seal" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <circle cx="20" cy="20" r="18.25" stroke="currentColor" strokeWidth="2" />
+            <circle cx="20" cy="20" r="5" fill="var(--amber)" />
+          </svg>
+          {t(askMode === 'case' ? 'ask_open' : 'ask_open_general')}
+        </button>
+      )}
+      {asking && (
+        <AskPanel
+          lang={lang}
+          mode={askMode}
+          loggedIn={Boolean(account)}
+          canLogin={accountsEnabled}
+          log={chat.log}
+          busy={chat.busy}
+          quiet={chat.quiet}
+          step={askStep}
+          onSend={chat.send}
+          onClearStep={() => setAskStep(null)}
+          onClose={closeAsk}
+          otherPerson={otherPerson}
+          onOtherPerson={goOtherPerson}
+          onLogin={() => {
+            // The same way in as the header's login button: answers on screen
+            // are kept through the login (D-161).
+            if (answers) stashPending(answers, done, true);
+            // Closed without pulling focus back: the login window takes it.
+            setAsking(false);
+            setPanel('login');
+          }}
+        />
+      )}
+    </>
   );
 
   /**
@@ -1050,7 +1148,16 @@ export function App() {
               {/* ⭐ Whether what he is CARRYING will work, and the one thing to
                   do next. The road is the detail under it. */}
               <Readiness result={result} lang={lang} />
-              <Roadmap result={result} lang={lang} onToggle={toggleStep} pending={pendingStep} />
+              <Roadmap
+                result={result}
+                lang={lang}
+                onToggle={toggleStep}
+                pending={pendingStep}
+                onAsk={(id, title) => {
+                  setAskStep({ id, title });
+                  setAsking(true);
+                }}
+              />
 
               {/* ⭐ The paper sheet was built in M1 and had no door. This is
                   the door. It is the product's own thesis — they walk into an
@@ -1071,46 +1178,7 @@ export function App() {
             </aside>
           </div>
 
-          {/**
-            * ⭐ Her call, 22.9: this becomes a chat about his own case, so the
-            * way in is built now and the panel behind it does the one thing it
-            * can do today — say the finished answer in plain words.
-            *
-            * ⚠️ It REPLACES nothing, and nothing depends on it. The road and
-            * the report are complete before it is ever opened, and they stay
-            * exactly as they are if the model is switched off or wrong.
-            */}
-          {!asking && (
-            <button type="button" className="ask-fab" onClick={() => setAsking(true)}>
-              <svg className="seal" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-                <circle cx="20" cy="20" r="18.25" stroke="currentColor" strokeWidth="2" />
-                <circle cx="20" cy="20" r="5" fill="var(--amber)" />
-              </svg>
-              {t('ask_open')}
-            </button>
-          )}
-
-          {asking && (
-            <aside className="ask-panel" role="dialog" aria-label={t('ask_open')}>
-              <div className="ask-head">
-                <h2>{t('ask_open')}</h2>
-                <button
-                  type="button"
-                  className="ask-close"
-                  aria-label={t('ask_close')}
-                  onClick={() => setAsking(false)}
-                >
-                  ×
-                </button>
-              </div>
-              <p className="ask-soon">{t('ask_soon')}</p>
-              <PlainWords
-                profile={answers ? { ...answers, completed_steps: done } : null}
-                lang={lang}
-                available={plainLanguage}
-              />
-            </aside>
-          )}
+          {ask}
         </div>
       </>
     );
@@ -1126,6 +1194,8 @@ export function App() {
           </p>
         )}
         <Welcome processes={processes} lang={lang} onStart={() => setScreen('intake')} />
+        {/* M6 (D-228): before a road, the same corner button, about the process. */}
+        {ask}
         <footer className="site-foot">
           <a
             href="/privacy"
@@ -1276,6 +1346,9 @@ export function App() {
         <Blocked result={result} lang={lang} onBack={() => setScreen('intake')} />
       )}
       </div>
+      {/* M6 (D-228): the questions screen too, in general mode. Not on
+          diagnosis/documents: the road is one press away there. */}
+      {screen === 'intake' && ask}
     </>
   );
 }

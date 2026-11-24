@@ -22,7 +22,7 @@ type Section = { h: string; p?: string; li?: string[]; note?: string };
 const PAGE: Record<Lang, { title: string; updated: string; back: string; sections: Section[]; contact: string }> = {
   he: {
     title: 'פרטיות',
-    updated: 'עודכן לאחרונה: 3.11.2026',
+    updated: 'עודכן לאחרונה: 23.11.2026',
     back: 'חזרה',
     sections: [
       {
@@ -35,6 +35,15 @@ const PAGE: Record<Lang, { title: string; updated: string; back: string; section
           'צילום שהעלית נשלח ל-Claude של חברת Anthropic בארה״ב כדי לקרוא אותו.',
           'הצילום נמחק מיד אחרי קריאה מוצלחת. אם הקריאה נכשלה או שההעלאה לא הושלמה, הוא נמחק אוטומטית תוך יומיים לכל היותר.',
           'נשמר רק מספר המסמכים שהמערכת קראה בשבילך, כדי לשמור על מגבלת השימוש.',
+        ],
+      },
+      {
+        h: 'שאלות על התיק',
+        li: [
+          'נשלחים השאלה שלך ופרטי הדרך שלך, בלי מספרי מסמכים ובלי שמות. מספרים בשאלה שנראים כמו מספר זהות, דרכון או רישיון מוסרים לפני השליחה.',
+          'השאלה נשלחת ל-Voyage AI בארה״ב כדי להפוך אותה לווקטור חיפוש, ול-Claude של חברת Anthropic בארה״ב כדי לכתוב את התשובה.',
+          'שום דבר מהצ׳אט לא נשמר. נשמר רק מספר השאלות שלך בכל יום, והוא נמחק עם החשבון.',
+          'אפשר לשאול עד 20 שאלות ביום.',
         ],
       },
       {
@@ -55,10 +64,10 @@ const PAGE: Record<Lang, { title: string; updated: string; back: string; section
         li: [
           'המידע שלך שמור אצל ספק ענן מאובטח באיחוד האירופי. רק לך יש גישה לתיק שלך.',
           'שרתי האתר לא שומרים את התשובות שלך ולא רושמים אותן.',
-          'לקריאת מסמכים ולכתיבת הסברים, הפרטים הנדרשים נשלחים ל-Claude של חברת Anthropic בארה״ב. Anthropic לא משתמשת בהם לאימון המודלים שלה.',
+          'לקריאת מסמכים, לכתיבת הסברים ולתשובות בצ׳אט, הפרטים הנדרשים נשלחים ל-Claude של חברת Anthropic בארה״ב. Anthropic לא משתמשת בהם לאימון המודלים שלה.',
           'אנחנו לא מוכרים מידע, לא מציגים פרסומות ולא משתמשים בכלי מעקב.',
         ],
-        note: 'Storage: Supabase (EU, Frankfurt). Hosting and uploads: AWS (EU, Frankfurt). Document reading and explanations: Claude, Anthropic (USA).',
+        note: 'Storage: Supabase (EU, Frankfurt). Hosting and uploads: AWS (EU, Frankfurt). Document reading, explanations and chat answers: Claude, Anthropic (USA). Chat search: Voyage AI (USA).',
       },
       {
         h: 'מחיקה',
@@ -69,7 +78,7 @@ const PAGE: Record<Lang, { title: string; updated: string; back: string; section
   },
   en: {
     title: 'Privacy',
-    updated: 'Last updated: 3 November 2026',
+    updated: 'Last updated: 23 November 2026',
     back: 'Back',
     sections: [
       {
@@ -82,6 +91,15 @@ const PAGE: Record<Lang, { title: string; updated: string; back: string; section
           'A photo you upload is sent to Claude (Anthropic, USA) to be read.',
           "The photo is deleted right after a successful read. If the read fails or the upload isn't finished, it's deleted automatically within 2 days at most.",
           'Only the number of documents the system read for you is kept, to enforce the usage limit.',
+        ],
+      },
+      {
+        h: 'Questions about your case',
+        li: [
+          'Your question and the details of your road are sent, without document numbers or names. Numbers in your question that look like an ID, passport or licence number are removed before sending.',
+          'Your question goes to Voyage AI (USA) to turn it into a search vector, and to Claude (Anthropic, USA) to write the answer.',
+          'Nothing from the chat is saved. Only the number of questions you ask each day is kept, and it is deleted with your account.',
+          'Up to 20 questions a day.',
         ],
       },
       {
@@ -102,10 +120,10 @@ const PAGE: Record<Lang, { title: string; updated: string; back: string; section
         li: [
           'Your data is stored with a secure cloud provider in the EU. Only you can access your case.',
           'The site’s servers do not keep or log your answers.',
-          'To read documents and write explanations, the details needed are sent to Claude (Anthropic, USA). Anthropic does not use them to train its models.',
+          'To read documents, write explanations and answer chat questions, the details needed are sent to Claude (Anthropic, USA). Anthropic does not use them to train its models.',
           'We do not sell data, show ads, or use tracking tools.',
         ],
-        note: 'Storage: Supabase (EU, Frankfurt). Hosting and uploads: AWS (EU, Frankfurt). Document reading and explanations: Claude, Anthropic (USA).',
+        note: 'Storage: Supabase (EU, Frankfurt). Hosting and uploads: AWS (EU, Frankfurt). Document reading, explanations and chat answers: Claude, Anthropic (USA). Chat search: Voyage AI (USA).',
       },
       {
         h: 'Deleting',
