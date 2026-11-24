@@ -101,6 +101,7 @@ function Step({
   onToggle,
   pending,
   compact,
+  onAsk,
 }: {
   item: RoadmapStep;
   index: number;
@@ -112,6 +113,8 @@ function Step({
   pending?: string | null;
   /** A step that is not for today: one row, opened on a tap. */
   compact?: boolean;
+  /** M6 (D-227): open the chat about THIS step. */
+  onAsk?: (id: string, title: string) => void;
 }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
   const [open, setOpen] = useState(false);
@@ -377,6 +380,15 @@ function Step({
         </p>
       ))}
 
+      {/* ⭐ M6 (D-227): a question about this one step, asked where he is
+          reading it. Small and quiet: the step is the instruction, this is
+          only a way to ask about it. */}
+      {onAsk && (
+        <button type="button" className="ask-step" onClick={() => onAsk(step.id, pick(step.title, lang))}>
+          {t('ask_step')}
+        </button>
+      )}
+
       {/* ── the sources, folded ──────────────────────────────────────────
           Nothing is hidden — principle 20 — the sources just stopped
           shouting over the instruction. */}
@@ -521,12 +533,15 @@ export function Roadmap({
   lang,
   onToggle,
   pending,
+  onAsk,
 }: {
   result: Result;
   lang: Lang;
   onToggle?: (id: string, done: boolean) => void;
   /** The id of the step whose tick is in flight, if any. */
   pending?: string | null;
+  /** M6 (D-227): "ask about this step". Left out, no step shows the link. */
+  onAsk?: (id: string, title: string) => void;
 }) {
   const t = (k: keyof typeof UI) => pick(UI[k], lang);
 
@@ -571,6 +586,7 @@ export function Roadmap({
           onToggle={onToggle}
           pending={pending}
           compact={compact}
+          onAsk={onAsk}
         />
       ))}
     </div>

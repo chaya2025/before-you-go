@@ -120,3 +120,60 @@ jobs:
             echo "not answering yet ($i)"; sleep 10
           done
           exit 1
+
+  # ⭐ M6: the "ask your case" chat, its own small Lambda (Python).
+  # Same shelf (ECR repo before-you-go), tagged ask-<commit> so it never
+  # mixes with the site's images. Same trigger and the same pass as above.
+  ask:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SHA }}
+
+      - name: Log in to AWS with the pass
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-central-1
+          mask-aws-account-id: true
+
+      - name: Log in to the shelf (ECR)
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push the chat image
+        env:
+          IMAGE: ${{ secrets.ECR_REGISTRY }}/before-you-go:ask-${{ env.SHA }}
+        run: |
+          if aws ecr describe-images --repository-name before-you-go \
+               --image-ids imageTag="ask-$SHA" >/dev/null 2>&1; then
+            echo "chat image for $SHA already on the shelf, not rebuilding"
+            exit 0
+          fi
+          # provenance off: Lambda only accepts a plain single image.
+          docker build --provenance=false -t "$IMAGE" apps/assistant
+          docker push "$IMAGE"
+          echo "pushed $IMAGE"
+
+      # ⚠️ The first time, the Lambda does not exist yet: it is created by hand
+      # in the console FROM this image. So a missing function is a note, not a
+      # failure. After that, every push to main updates it here.
+      - name: Switch the chat Lambda to the new image
+        env:
+          IMAGE: ${{ secrets.ECR_REGISTRY }}/before-you-go:ask-${{ env.SHA }}
+        run: |
+          if ! aws lambda get-function --function-name before-you-go-ask >/dev/null 2>&1; then
+            echo "::notice::Lambda before-you-go-ask not found (or no permission yet). Image is on the shelf: create the function from it."
+            exit 0
+          fi
+          aws lambda update-function-code --function-name before-you-go-ask \
+            --image-uri "$IMAGE" --query LastUpdateStatus --output text
+          aws lambda wait function-updated-v2 --function-name before-you-go-ask
+          echo "chat now on: $(aws lambda get-function --function-name before-you-go-ask --query Code.ImageUri --output text)"

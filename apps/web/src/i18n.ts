@@ -587,9 +587,69 @@ export const UI = {
   ask_open: { he: 'שאלה על התיק שלך', en: 'Ask about your case' },
   ask_close: { he: 'סגירה', en: 'Close' },
   ask_soon: {
-    he: 'כרגע כאן אפשר לקבל סיכום במילים פשוטות. שאלות חופשיות יתווספו בהמשך.',
-    en: 'For now this gives a summary in plain words. Free questions will come later.',
+    he: 'אפשר לשאול על הדרך שלך. התשובות מגיעות רק מהמקורות שהדרך בנויה עליהם.',
+    en: 'Ask about your road. Answers come only from the sources the road is built on.',
   },
+  /* M6 (D-228): the same panel before there is a road. */
+  ask_open_general: { he: 'שאלה על התהליך', en: 'Ask about the process' },
+  ask_intro_general: {
+    he: 'אפשר לשאול על המרת רישיון נהיגה זר. לתשובה על המקרה שלך, עונים קודם על השאלות.',
+    en: 'Ask about converting a foreign driving licence. For an answer about your own case, answer the questions first.',
+  },
+  ask_label: { he: 'השאלה שלך', en: 'Your question' },
+  ask_placeholder: { he: 'למשל: מה להביא לתור?', en: 'For example: what do I bring to the appointment?' },
+  ask_send: { he: 'שליחה', en: 'Send' },
+  /* D-235 (hers): Tal greets first, and the wait sounds like a person, not a search. */
+  ask_name: { he: 'טל', en: 'Tal' },
+  ask_hello: {
+    he: 'היי, אני טל, העוזר שלך ב-BeforeYouGo. במה אפשר לעזור?',
+    en: "Hi, I'm Tal, your BeforeYouGo assistant. How can I help?",
+  },
+  /* D-238: quick replies, same words as the server's small talk (D-237). */
+  ask_quick_thanks: { he: 'בשמחה! אם יש עוד שאלה, אני כאן.', en: "You're welcome! If anything else comes up, I'm here." },
+  ask_quick_hello: { he: 'היי! במה אפשר לעזור?', en: 'Hi! How can I help?' },
+  ask_quick_bye: { he: 'בהצלחה בדרך! אפשר לחזור לכאן בכל שלב.', en: 'Good luck on your road! Come back any time.' },
+  ask_quick_ok: { he: 'מעולה. אם יש עוד משהו, אפשר לשאול.', en: 'Great. Ask if anything else comes up.' },
+  /* D-236: ready questions under the greeting. */
+  ask_chip_bring: { he: 'מה להביא לתור?', en: 'What do I bring to the appointment?' },
+  ask_chip_cost: { he: 'כמה זה עולה?', en: 'How much does it cost?' },
+  ask_chip_next: { he: 'מה הצעד הבא שלי?', en: 'What is my next step?' },
+  ask_chip_what: { he: 'מה זה BeforeYouGo?', en: 'What is BeforeYouGo?' },
+  ask_chip_start: { he: 'איך מתחילים?', en: 'How do I start?' },
+  ask_chip_form: { he: 'מה זה טופס 89?', en: 'What is form 89?' },
+  ask_thinking: { he: 'רגע, בודק…', en: 'One second, checking…' },
+  ask_thinking_2: { he: 'עובר על השאלה שלך…', en: 'Reviewing your question…' },
+  ask_thinking_3: { he: 'מכין תשובה…', en: 'Putting your answer together…' },
+  ask_you: { he: 'שאלת', en: 'You asked' },
+  ask_reply: { he: 'תשובה', en: 'Answer' },
+  ask_sources: { he: 'מקורות', en: 'Sources' },
+  ask_checked: { he: 'נבדק', en: 'checked' },
+  ask_source_open: { he: 'למקור', en: 'Open' },
+  ask_not_sure: {
+    he: 'אין לי תשובה בטוחה לזה מהמקורות. כדאי לברר מול המשרד עצמו.',
+    en: "I don't have a sure answer to that from the sources. Best to check with the office itself.",
+  },
+  ask_other_person: {
+    he: 'אני עונה רק על המקרה שלך. למקרה של מישהו אחר, אפשר להתחיל בשבילו דרך חדשה.',
+    en: "I only answer about your own case. For someone else's, start a new road for them.",
+  },
+  ask_other_start: { he: 'להתחיל דרך חדשה', en: 'Start a new road' },
+  ask_other_home: { he: 'לעמוד הבית', en: 'Go to the home page' },
+  ask_limit: {
+    he: 'הגעת ל-20 שאלות להיום. אפשר לשאול שוב מחר. כל השאר באתר עובד כרגיל.',
+    en: "That's 20 questions for today. You can ask again tomorrow. Everything else on the site works as usual.",
+  },
+  ask_unavailable: {
+    he: 'השאלות לא זמינות כרגע. כל השאר באתר עובד כרגיל.',
+    en: "Questions aren't available right now. Everything else on the site works as usual.",
+  },
+  ask_no_login: {
+    he: 'כדי לשאול צריך להתחבר. אחרי ההתחברות הצ׳אט נפתח.',
+    en: 'Log in to ask. Logging in opens the chat.',
+  },
+  ask_about: { he: 'על:', en: 'About:' },
+  ask_about_clear: { he: 'שאלה כללית, לא על הצעד', en: 'Ask in general, not about this step' },
+  ask_step: { he: 'שאלה על הצעד הזה', en: 'Ask about this step' },
 
   road_now: { he: 'עכשיו', en: 'Now' },
   road_now_note: {

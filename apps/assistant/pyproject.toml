@@ -1,0 +1,41 @@
+[project]
+name = "byg-assistant"
+version = "0.1.0"
+description = "BeforeYouGo 'ask your case' answer service (M6)"
+requires-python = ">=3.12"
+# Pinned to exactly what is installed and tested in .venv. WHY: an unpinned
+# "anthropic" or "fastapi" can change behaviour on the next Lambda build with
+# no code change here. Bump on purpose, run the tests, then change the pin.
+dependencies = [
+  "fastapi==0.165.0",
+  "starlette==1.10.0",
+  "pydantic==2.14.4",
+  "uvicorn==0.54.0",
+  "mangum==0.22.0",
+  "httpx==0.28.1",
+  "anthropic==2.12.0",
+  "python-dotenv==1.2.4",
+  # Lets Python trust the Windows certificate store (needed on this laptop).
+  # Optional at runtime: main.py works without it (e.g. on Lambda).
+  "truststore==0.10.5",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==9.2.0"]
+
+[tool.setuptools]
+packages = ["app"]
+
+# The knowledge items ship inside the package, so any build (wheel, Lambda
+# zip) carries them. Without this, general mode would lose its step list.
+[tool.setuptools.package-data]
+app = ["data/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "tests"]
+markers = [
+  "live: calls real Claude/Voyage/Supabase; skipped when the keys are missing",
+]
+# Live tests cost money, so they only run when asked for: pytest -m live
+addopts = "-m 'not live'"

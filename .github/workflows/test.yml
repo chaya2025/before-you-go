@@ -37,3 +37,24 @@ jobs:
 
       - name: Tests (engine, API, web)
         run: npm test
+
+  # M6: the Python chat service. Its tests must pass before its image ships
+  # (aws-image.yml only runs after this whole workflow succeeds on main).
+  assistant:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/assistant
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install
+        run: pip install ".[dev]"
+
+      - name: Tests (no live calls, no keys)
+        run: pytest -q

@@ -1063,48 +1063,409 @@ h1, h2, h3 { text-wrap: balance; }
 .ask-fab:hover { transform: translateY(-2px); background: #1b3d39; }
 .ask-fab .seal { width: 22px; height: 22px; color: var(--paper); }
 
+/* ==========================================================================
+   D-236: the chat, as a real chat widget (her ask: "like regular chatbots").
+   Built only from the page's own tokens. Ink for the frame and his words,
+   paper for the room, amber only on the send button (the next action).
+   ========================================================================== */
 .ask-panel {
   position: fixed;
-  inset-block-end: 0;
-  inset-inline-end: 0;
+  inset-block-end: 1rem;
+  inset-inline-end: 1rem;
   z-index: 61;
-  width: min(30rem, 100vw);
-  max-height: min(80vh, 44rem);
-  overflow-y: auto;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-start-start-radius: var(--radius);
-  border-start-end-radius: var(--radius);
-  box-shadow: 0 -10px 60px -30px rgba(19, 46, 43, 0.95);
-  padding: var(--gap) var(--gap) var(--gap-lg);
-  display: grid;
-  gap: var(--gap-sm);
-  align-content: start;
+  width: min(25.5rem, calc(100vw - 2rem));
+  height: min(82vh, 44rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--paper);
+  border: 1px solid rgba(19, 46, 43, 0.12);
+  border-radius: 22px;
+  box-shadow:
+    0 30px 70px -28px rgba(12, 31, 29, 0.55),
+    0 8px 22px -12px rgba(12, 31, 29, 0.25);
+  animation: ask-rise 260ms var(--ease) both;
+}
+@keyframes ask-rise {
+  from { opacity: 0; transform: translateY(14px) scale(0.98); }
+  to { opacity: 1; transform: none; }
 }
 
-.ask-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.ask-head h2 { margin: 0; font-size: 1.25rem; }
+/* The header: who you are talking to, and that she is there. */
+.ask-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1rem 0.95rem 1.1rem;
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(217, 180, 120, 0.16), transparent 55%),
+    linear-gradient(160deg, #1b3d39, var(--ink) 70%);
+  color: var(--paper);
+}
+.ask-who { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+.ask-head h2 {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.2;
+  color: var(--paper);
+}
+.ask-status {
+  margin: 0.1rem 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: rgba(250, 247, 241, 0.72);
+}
+.ask-online {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #7fc29b;
+  box-shadow: 0 0 0 3px rgba(127, 194, 155, 0.22);
+}
 
 .ask-close {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
   border: 0;
-  background: transparent;
+  border-radius: 50%;
+  background: rgba(250, 247, 241, 0.1);
+  color: var(--paper);
   cursor: pointer;
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   line-height: 1;
-  color: var(--muted);
-  padding: 0.2rem 0.4rem;
+  transition: background var(--t-quick) var(--ease);
+}
+.ask-close:hover { background: rgba(250, 247, 241, 0.2); }
+
+/* Tal's face: one letter on a round, like a profile photo. */
+.ask-avatar {
+  flex: none;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(150deg, #24504a, var(--ink));
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.85rem;
+  box-shadow: 0 0 0 2px var(--paper);
+}
+.ask-avatar-big {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.1rem;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(250, 247, 241, 0.18);
 }
 
-/* ⚠️ Said plainly, because it is true today and will stop being true: the
-   panel summarises, it does not yet answer questions. Promising a chat that
-   is not there is the kind of small lie this product does not tell. */
-.ask-soon {
-  font-size: 0.85rem;
-  color: var(--muted);
-  background: #f4f0e8;
-  border-radius: var(--radius-sm);
-  padding: 0.55rem 0.7rem;
+/* Read by a screen reader, not drawn. */
+.ask-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
+
+/* The room the conversation happens in. It scrolls; head and box stay. */
+.ask-log {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.1rem 1rem 0.6rem;
+  background:
+    radial-gradient(90% 60% at 0% 0%, var(--sage-top), transparent 70%),
+    var(--paper);
+  scrollbar-width: thin;
+}
+
+/* One line from Tal: her avatar, then the bubble. */
+.ask-turn {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  max-width: 90%;
+  animation: ask-in 220ms var(--ease) both;
+}
+@keyframes ask-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.ask-msg {
+  padding: 0.65rem 0.9rem;
+  line-height: 1.6;
+  font-size: 0.94rem;
+  border-radius: 18px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.ask-msg p { margin: 0; }
+.ask-msg p + p { margin-block-start: 0.45rem; }
+
+.ask-msg-reply {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line-soft);
+  border-end-start-radius: 6px;
+  box-shadow: 0 2px 6px -3px rgba(19, 46, 43, 0.18);
+}
+
+.ask-msg-user {
+  align-self: flex-end;
+  max-width: 82%;
+  background: var(--ink);
+  color: var(--paper);
+  border-end-end-radius: 6px;
+  white-space: pre-wrap;
+  animation: ask-in 180ms var(--ease) both;
+}
+
+/* The answer's points: short and airy instead of one block of words. */
+.ask-points {
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+.ask-points li {
+  position: relative;
+  padding-inline-start: 1rem;
+}
+.ask-points li::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0.1rem;
+  top: 0.62em;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 50%;
+  background: var(--gold-quiet);
+}
+
+/* Sources: one small link under the answer, opened only when he wants them. */
+.ask-sources {
+  margin-block-start: 0.55rem;
+  padding-block-start: 0.45rem;
+  border-block-start: 1px dashed var(--line-soft);
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.ask-sources summary {
+  cursor: pointer;
+  width: fit-content;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.ask-sources summary::before {
+  content: '';
+  width: 0.35rem;
+  height: 0.35rem;
+  border-inline-end: 1.5px solid currentColor;
+  border-block-end: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--t-quick) var(--ease);
+}
+.ask-sources summary:dir(rtl)::before { transform: rotate(45deg); }
+.ask-sources[open] summary::before { transform: rotate(45deg) translateY(-2px); }
+.ask-sources[open] summary:dir(rtl)::before { transform: rotate(-45deg) translateY(-2px); }
+.ask-sources summary:hover { color: var(--ink); }
+/* D-237: the number of sources as a small round badge, not "( 5 )". */
+.ask-count {
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.3rem;
+  border-radius: var(--radius-pill);
+  display: inline-grid;
+  place-items: center;
+  background: var(--sage-deep);
+  color: var(--ink);
+  font-size: 0.7rem;
+  line-height: 1;
+}
+.ask-sources summary::-webkit-details-marker { display: none; }
+.ask-sources ul { margin: 0.35rem 0 0; padding-inline-start: 1rem; display: grid; gap: 0.2rem; }
+
+/* Ready questions under the greeting. */
+.ask-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding-inline-start: 2.3rem;
+  animation: ask-in 260ms 120ms var(--ease) both;
+}
+.ask-chip {
+  border: 1px solid var(--line-sage);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.84rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background var(--t-quick) var(--ease), border-color var(--t-quick) var(--ease), transform var(--t-quick) var(--ease);
+}
+.ask-chip:hover { background: var(--sage-deep); border-color: var(--sage-deep); transform: translateY(-1px); }
+
+/* While Tal thinks: three dots, and a few words beside them. */
+.ask-typing { display: inline-flex; align-items: center; gap: 0.6rem; padding-block: 0.7rem; }
+.ask-dots { display: inline-flex; gap: 0.25rem; }
+.ask-dots i {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: ask-dot 1.1s infinite ease-in-out;
+}
+.ask-dots i:nth-child(2) { animation-delay: 0.15s; }
+.ask-dots i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes ask-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.45; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+.ask-typing-text { font-size: 0.82rem; color: var(--muted); }
+
+/* A calm line: limit, unavailable, not logged in. */
+.ask-note {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--ink);
+  background: var(--sand);
+  border-radius: 14px;
+  padding: 0.6rem 0.8rem;
+}
+
+.ask-login {
+  flex: none;
+  display: grid;
+  gap: var(--gap-sm);
+  justify-items: start;
+  padding: 0.8rem 1rem 1rem;
+  border-block-start: 1px solid var(--line-soft);
+  background: var(--surface);
+}
+.ask-panel > .ask-note { margin: 0.8rem 1rem 1rem; }
+
+/* The box: a rounded bar at the foot, the send button inside it. */
+.ask-form {
+  flex: none;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.7rem 0.8rem 0.85rem;
+  background: var(--surface);
+  border-block-start: 1px solid var(--line-soft);
+}
+.ask-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem;
+  padding-inline-start: 1rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  transition: border-color var(--t-quick) var(--ease), box-shadow var(--t-quick) var(--ease);
+}
+.ask-row:focus-within {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(19, 46, 43, 0.08);
+}
+.ask-row input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  padding: 0.45rem 0;
+  font: inherit;
+  font-size: 0.94rem;
+  color: var(--ink);
+  outline: none;
+  box-shadow: none;
+}
+.ask-send {
+  flex: none;
+  width: 2.35rem;
+  height: 2.35rem;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--amber);
+  color: var(--on-amber);
+  cursor: pointer;
+  transition: transform var(--t-quick) var(--ease), opacity var(--t-quick) var(--ease);
+}
+.ask-send:hover:not(:disabled) { transform: scale(1.06); }
+.ask-send:disabled { opacity: 0.35; cursor: default; }
+.ask-send:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.ask-send svg:dir(rtl) { transform: scaleX(-1); }
+
+@media (max-width: 30rem) {
+  .ask-panel {
+    inset: auto 0 0 0;
+    width: 100vw;
+    height: 88vh;
+    border-radius: 22px 22px 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ask-panel, .ask-turn, .ask-msg-user, .ask-chips { animation: none; }
+  .ask-dots i { animation: none; opacity: 0.7; }
+}
+
+/* The step he asked from (D-227): a chip he can clear with one press. */
+.ask-about {
+  margin: 0;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding-block: 0.2rem;
+  padding-inline: 0.75rem 0.3rem;
+  border-radius: var(--radius-pill);
+  background: var(--amber-soft);
+  color: var(--amber-ink);
+  font-size: 0.85rem;
+}
+.ask-about button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0.15rem 0.35rem;
+}
+
+/* "Ask about this step", inside a step: a quiet link, not another button. */
+.ask-step {
+  justify-self: start;
+  align-self: start;
+  border: 0;
+  background: transparent;
+  padding: 0.35rem 0;
+  color: var(--amber-ink);
+  font: inherit;
+  font-size: 0.88rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.ask-step:hover { color: var(--ink); }
 
 /* ==========================================================================
    The road
@@ -3048,6 +3409,7 @@ body {
   .progress,
   .ask-fab,
   .ask-panel,
+  .ask-step,
   .working,
   .answer-actions,
   .sources-toggle,

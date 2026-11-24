@@ -1,4 +1,5 @@
 import type { Result, Text, NohalCategory, Process } from '@byg/engine';
+import { askProfile } from './askProfile';
 
 /**
  * ============================================================================
@@ -182,5 +183,88 @@ export async function readDocument(kind: DocKind, file: File, token: string | un
     return (await res.json()) as Reading;
   } catch {
     return { ok: false, reason: 'call_failed' };
+  }
+}
+
+/**
+ * ============================================================================
+ * ⭐ M6: ask about your case (CONTRACT.md section 3)
+ * ============================================================================
+ *
+ * The chat lives in its OWN small service (Python, apps/assistant), not in the
+ * TS API above, so it has its own address. Same rule as BASE: spelled out in
+ * development (the service runs on 8001), relative in production, and
+ * VITE_ASK_BASE wins when set at build time.
+ */
+const ASK_BASE = import.meta.env.VITE_ASK_BASE ?? (import.meta.env.PROD ? '' : 'http://127.0.0.1:8001');
+
+/** Every answer the service can give. The panel has a calm line for each. */
+export const ASK_STATUSES = ['answered', 'not_sure', 'other_person', 'limit', 'unavailable', 'no_login'] as const;
+export type AskStatus = (typeof ASK_STATUSES)[number];
+/**
+ * ⚠️ Contract amendment 1: a source may carry a `claim` and no `citation`, so
+ * both are optional and the screen shows `citation ?? claim`.
+ */
+export type AskSource = { citation?: string | null; claim?: string | null; url?: string | null; last_verified_at?: string | null };
+export type AskReply = { status: AskStatus; answer: string; sources: AskSource[] };
+export type AskTurn = { role: 'user' | 'assistant'; text: string };
+export type AskRequest = {
+  question: string;
+  lang: 'he' | 'en';
+  mode: 'case' | 'general';
+  /** Case mode only: the same body the readiness call takes, so the service rebuilds HIS road. */
+  profile?: Record<string, unknown>;
+  today?: string;
+  /** "Ask about this step" (D-227). */
+  step_id?: string;
+  history?: AskTurn[];
+};
+
+/**
+ * ⚠️ The service remembers nothing between questions (D-218), so the last few
+ * turns ride along with each one. Six, and only six: older turns cost money to
+ * re-read and rarely matter to the next question.
+ */
+export const ASK_HISTORY_MAX = 6;
+
+const quiet = (status: AskStatus): AskReply => ({ status, answer: '', sources: [] });
+
+/**
+ * ⚠️ NEVER THROWS. Same rule as fetchExplanation: the chat is extra, the road
+ * is the product. Down, slow, broken or changed, it all comes back as a status
+ * the panel can say calmly, and nothing else on the page notices.
+ *
+ * The token is the user's Supabase login (D-222): the service needs it to count
+ * his 20 questions a day. No token means no call at all.
+ */
+export async function askQuestion(req: AskRequest, token: string | undefined): Promise<AskReply> {
+  if (!token) return quiet('no_login');
+  const body: AskRequest = {
+    ...req,
+    // ⚠️ Cleaned HERE, in the one function that talks to the service, so no
+    // caller can send passport numbers or names by forgetting to (askProfile.ts).
+    ...(req.profile ? { profile: askProfile(req.profile) } : {}),
+    ...(req.history ? { history: req.history.slice(-ASK_HISTORY_MAX) } : {}),
+  };
+  try {
+    const res = await fetch(`${ASK_BASE}/api/v1/ask`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    });
+    // An expired or refused login: the way back in is to log in again.
+    if (res.status === 401) return quiet('no_login');
+    if (!res.ok) return quiet('unavailable');
+    const data = (await res.json()) as Partial<AskReply>;
+    // ⚠️ Trust only the shape the contract promises. A status this screen does
+    // not know would otherwise render as a blank bubble.
+    if (!data || !ASK_STATUSES.includes(data.status as AskStatus)) return quiet('unavailable');
+    return {
+      status: data.status as AskStatus,
+      answer: typeof data.answer === 'string' ? data.answer : '',
+      sources: Array.isArray(data.sources) ? data.sources : [],
+    };
+  } catch {
+    return quiet('unavailable');
   }
 }
