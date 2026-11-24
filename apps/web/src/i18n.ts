@@ -605,6 +605,12 @@ export const UI = {
     he: 'היי, אני טל, העוזר שלך ב-BeforeYouGo. במה אפשר לעזור?',
     en: "Hi, I'm Tal, your BeforeYouGo assistant. How can I help?",
   },
+  /* Site refresh: our own month picker (MonthInput). */
+  month_pick: { he: 'בחירת חודש', en: 'Pick a month' },
+  month_clear: { he: 'ניקוי', en: 'Clear' },
+  month_this: { he: 'החודש', en: 'This month' },
+  month_prev_year: { he: 'שנה קודמת', en: 'Previous year' },
+  month_next_year: { he: 'שנה הבאה', en: 'Next year' },
   /* D-238: quick replies, same words as the server's small talk (D-237). */
   ask_quick_thanks: { he: 'בשמחה! אם יש עוד שאלה, אני כאן.', en: "You're welcome! If anything else comes up, I'm here." },
   ask_quick_hello: { he: 'היי! במה אפשר לעזור?', en: 'Hi! How can I help?' },

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { StatusOption } from '../api';
 import { anchorFieldFor } from '@byg/engine';
 import { UI, pick, type Lang } from '../i18n';
+import { MonthInput } from './MonthInput';
 
 /**
  * ============================================================================
@@ -221,11 +222,10 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy, initial
                 : 'q_date_help_entered',
           )}
         >
-          <input
-            type="month"
+          <MonthInput
             value={dateAnswer}
             max="2026-12"
-            onChange={(e) => setDateAnswer(e.target.value)}
+            onChange={(v) => setDateAnswer(v)}
             aria-label={dateLabel}
           />
         </Question>

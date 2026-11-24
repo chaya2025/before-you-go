@@ -3797,3 +3797,156 @@ body {
 .live-check { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; padding: 10px 14px; border-inline-start: 3px solid var(--amber); background: color-mix(in srgb, var(--amber) 8%, transparent); border-radius: 6px; }
 .live-check p { margin: 0; }
 .link-button { background: none; border: 0; padding: 0; color: inherit; font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
+
+/* ==========================================================================
+   MonthInput: our own month picker (site refresh, 2026-11-24)
+   ==========================================================================
+   Replaces the browser's month popup, which no CSS can style. The trigger
+   looks like every other field; the popup is a small card: year with arrows,
+   twelve months, clear / this month. Amber marks the chosen month, because
+   the chosen answer is where he stands (same rule as .option). */
+.month-field { position: relative; width: 100%; }
+
+.month-trigger {
+  width: 100%;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0 var(--gap);
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fbf8f2, var(--surface));
+  box-shadow: inset 0 1px 2px rgba(19, 46, 43, 0.06);
+  color: var(--ink);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color var(--t-quick) var(--ease), box-shadow var(--t-quick) var(--ease);
+}
+.month-trigger:hover { border-color: var(--muted); }
+.month-trigger:focus-visible,
+.month-trigger[aria-expanded='true'] {
+  outline: none;
+  border-color: var(--amber);
+  box-shadow: 0 0 0 4px var(--amber-soft);
+}
+.month-trigger[aria-invalid='true'] { border-color: var(--uncertain); }
+.month-trigger.month-empty span { color: #a8b3af; }
+.month-trigger svg { flex: none; color: var(--muted); }
+
+.month-pop {
+  position: absolute;
+  z-index: 40;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-start: 0;
+  width: min(19rem, 100%);
+  min-width: 16.5rem;
+  padding: 0.9rem;
+  border-radius: 18px;
+  background: rgba(255, 253, 249, 0.96);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(19, 46, 43, 0.09);
+  box-shadow: 0 2px 6px rgba(19, 46, 43, 0.06), 0 28px 60px -26px rgba(12, 31, 29, 0.55);
+  animation: month-in 180ms var(--ease) both;
+}
+@keyframes month-in {
+  from { opacity: 0; translate: 0 -6px; scale: 0.97; }
+  to { opacity: 1; translate: 0 0; scale: 1; }
+}
+
+.month-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: 0.7rem;
+}
+.month-head strong { font-family: var(--font-display); font-size: 1.15rem; color: var(--ink); }
+.month-nav {
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sand);
+  color: var(--ink);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--t-quick) var(--ease);
+}
+.month-nav:hover:not(:disabled) { background: var(--sand-deep); }
+.month-nav:disabled { opacity: 0.35; cursor: default; }
+/* In Hebrew the arrows point the way the page reads. */
+.month-nav:dir(rtl) { transform: scaleX(-1); }
+
+.month-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+}
+.month-cell {
+  position: relative;
+  min-height: 2.6rem;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+  transition: background var(--t-quick) var(--ease), border-color var(--t-quick) var(--ease), transform var(--t-quick) var(--ease);
+}
+.month-cell:hover:not(:disabled) { background: var(--sage-top); border-color: var(--line-sage); }
+.month-cell:focus-visible { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px var(--amber-soft); }
+.month-cell:disabled { color: var(--line); cursor: default; }
+/* Today's month: a small dot under it, a hint not a choice. */
+.month-cell.is-now::after {
+  content: '';
+  position: absolute;
+  inset-block-end: 5px;
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.month-cell.is-picked {
+  background: linear-gradient(180deg, #d8892f, var(--amber));
+  color: var(--on-amber);
+  font-weight: 600;
+  box-shadow: 0 8px 18px -10px rgba(200, 120, 30, 0.9);
+}
+.month-cell.is-picked::after { background: var(--on-amber); }
+
+.month-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-block-start: 0.7rem;
+  padding-block-start: 0.6rem;
+  border-block-start: 1px solid var(--line-soft);
+}
+.month-link {
+  border: 0;
+  background: none;
+  padding: 0.3rem 0.4rem;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.86rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.month-link:hover:not(:disabled) { color: var(--ink); }
+.month-link:disabled { opacity: 0.4; cursor: default; }
+
+@media (prefers-reduced-motion: reduce) { .month-pop { animation: none; } }
+@media print { .month-pop { display: none; } }
+/* An open month popup lifts its whole card above the next one on the page;
+   otherwise the next section (a later sibling) paints over it. */
+.card:has(.month-pop),
+.quick-check:has(.month-pop),
+.welcome-back:has(.month-pop),
+.notice:has(.month-pop),
+.bucket:has(.month-pop) { position: relative; z-index: 45; }
