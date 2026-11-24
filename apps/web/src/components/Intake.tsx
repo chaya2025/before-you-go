@@ -2,6 +2,9 @@ import { useState } from 'react';
 import type { StatusOption } from '../api';
 import { anchorFieldFor } from '@byg/engine';
 import { UI, pick, type Lang } from '../i18n';
+import { MonthInput } from './MonthInput';
+import { NumberPick } from './NumberPick';
+import { SelectPick } from './SelectPick';
 
 /**
  * ============================================================================
@@ -221,11 +224,10 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy, initial
                 : 'q_date_help_entered',
           )}
         >
-          <input
-            type="month"
+          <MonthInput
             value={dateAnswer}
             max="2026-12"
-            onChange={(e) => setDateAnswer(e.target.value)}
+            onChange={(v) => setDateAnswer(v)}
             aria-label={dateLabel}
           />
         </Question>
@@ -267,15 +269,12 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy, initial
       {/* ── age · the field that went missing twice ─────────────────────── */}
       {visaType && licenceKind && (
         <Question title={t('q_born')} help={t('q_born_help')}>
-          <input
-            type="number"
-            inputMode="numeric"
-            className="num"
-            placeholder="1998"
+          <NumberPick
+            start={1998}
             min={1900}
             max={2026}
             value={bornYear}
-            onChange={(e) => setBornYear(e.target.value)}
+            onChange={(v) => setBornYear(v)}
             aria-label={t('q_born')}
           />
         </Question>
@@ -285,15 +284,12 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy, initial
       {converting && (
         <>
           <Question title={t('q_years')} help={t('q_years_help')}>
-            <input
-              type="number"
-              inputMode="numeric"
-              className="num"
-              placeholder="5"
+            <NumberPick
+              start={0}
               min={0}
               max={80}
               value={years}
-              onChange={(e) => setYears(e.target.value)}
+              onChange={(v) => setYears(v)}
               aria-label={t('q_years')}
             />
           </Question>
@@ -313,33 +309,25 @@ export function Intake({ lang, statuses, licenseClasses, onSubmit, busy, initial
             facts: what he has, then what he wants. ס' 2 reads the first.
           */}
           <Question title={t('q_held_class')} help={t('q_held_class_help')}>
-            <select
+            <SelectPick
+              layout="grid"
+              placeholder="—"
               value={heldClass}
-              onChange={(e) => setHeldClass(e.target.value)}
+              onChange={(v) => setHeldClass(v)}
+              options={licenseClasses.map((c) => ({ value: c, label: c }))}
               aria-label={t('q_held_class')}
-            >
-              <option value="">—</option>
-              {licenseClasses.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+            />
           </Question>
 
           <Question title={t('q_class')} help={t('q_class_help')}>
-            <select
+            <SelectPick
+              layout="grid"
+              placeholder="—"
               value={requestedClass}
-              onChange={(e) => setRequestedClass(e.target.value)}
+              onChange={(v) => setRequestedClass(v)}
+              options={licenseClasses.map((c) => ({ value: c, label: c }))}
               aria-label={t('q_class')}
-            >
-              <option value="">—</option>
-              {licenseClasses.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+            />
           </Question>
 
           {/*

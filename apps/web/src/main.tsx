@@ -1,6 +1,8 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './theme.css';
+// Site refresh (2026-11-24): one switchable layer. Delete this line to go back.
+import './refresh.css';
 import { App } from './App';
 import { LoginDone } from './components/LoginDone';
 import { LOGIN_DONE } from './account';

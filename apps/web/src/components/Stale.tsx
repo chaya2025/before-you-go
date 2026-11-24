@@ -5,6 +5,8 @@ import type { Result } from '@byg/engine';
 import type { StatusOption } from '../api';
 import { UI, pick, type Lang } from '../i18n';
 import { applyRenewal, readExpiry, type Change, type DocField, type StaleDoc, type Watched } from '../stale';
+import { MonthInput } from './MonthInput';
+import { SelectPick } from './SelectPick';
 
 /**
  * M1 milestone 3: the screens for stale answers (D-127). The logic lives in
@@ -124,14 +126,13 @@ export function StaleAsk({
           )}
           <div className="field">
             <label htmlFor="st-until">{t('st_valid_until')}</label>
-            <input
+            <MonthInput
               id="st-until"
-              type="month"
               className="num"
               min={MONTH_MIN}
               max={MONTH_MAX}
               value={until}
-              onChange={(e) => setUntil(e.target.value)}
+              onChange={(v) => setUntil(v)}
               aria-invalid={until !== '' && until <= doc.expires ? true : undefined}
             />
             {until !== '' && until <= doc.expires && <p className="field-error">{t('st_until_after')}</p>}
@@ -218,16 +219,17 @@ export function QuickCheck({
       >
         <div className="field">
           <label htmlFor="qc-type">{t('qc_visa_type')}</label>
-          <select id="qc-type" value={visaType} onChange={(e) => setVisaType(e.target.value)}>
-            {statuses.map((s) => (
-              <option key={s.value} value={s.value}>{pick(s.label, lang)}</option>
-            ))}
-          </select>
+          <SelectPick
+            id="qc-type"
+            value={visaType}
+            onChange={(v) => setVisaType(v)}
+            options={statuses.map((s) => ({ value: s.value, label: pick(s.label, lang) }))}
+          />
         </div>
         <UploadRead kind="visa" lang={lang} onLogin={onLogin} onRead={({ fields: f }) => f.expires && setVisaExp(f.expires)} />
         <div className="field">
           <label htmlFor="qc-visa">{t('qc_visa_until')}</label>
-          <input id="qc-visa" type="month" className="num" min={MONTH_MIN} max={MONTH_MAX} value={visaExp} onChange={(e) => setVisaExp(e.target.value)} />
+          <MonthInput id="qc-visa" className="num" min={MONTH_MIN} max={MONTH_MAX} value={visaExp} onChange={(v) => setVisaExp(v)} />
         </div>
         <UploadRead
           kind="passport"
@@ -243,7 +245,7 @@ export function QuickCheck({
         />
         <div className="field">
           <label htmlFor="qc-pass">{t('qc_passport_until')}</label>
-          <input id="qc-pass" type="month" className="num" min={MONTH_MIN} max={MONTH_MAX} value={passExp} onChange={(e) => setPassExp(e.target.value)} />
+          <MonthInput id="qc-pass" className="num" min={MONTH_MIN} max={MONTH_MAX} value={passExp} onChange={(v) => setPassExp(v)} />
         </div>
         <div className="row-btns">
           <button className="btn btn-primary" type="submit" disabled={busy}>{t('qc_save')}</button>

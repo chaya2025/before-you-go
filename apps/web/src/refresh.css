@@ -1,0 +1,508 @@
+/* ==========================================================================
+   SITE REFRESH (2026-11-24, her ask: "nicer, more visual, more up to date
+   with today's sites. Don't change anything important.")
+   ==========================================================================
+
+   ⭐ ONE SWITCH. Everything here is a layer on top of theme.css, loaded after
+   it in main.tsx. Delete that one import line and the site is exactly what
+   it was. No component logic, wording, order or data depends on this file.
+
+   ⚠️ WHAT THIS FILE NEVER TOUCHES
+   - The certainty scale colours (information, not design).
+   - Amber's one meaning: "you are here / the next action / progress". The
+     scroll bar at the top is progress, so it may be amber; nothing else new is.
+   - Print (every effect sits inside `@media screen`), reduced motion (all
+     motion is switched off at the end), RTL (logical properties only).
+
+   The language is the Tal chat's (D-236): layered soft depth, glass where
+   something floats, generous radius, motion that explains instead of
+   decorating, all from the existing tokens.
+   ========================================================================== */
+
+:root {
+  --r-xl: 24px;
+  /* Depth in three steps, all tinted with the ink green, never grey. */
+  --depth-1: 0 1px 2px rgba(19, 46, 43, 0.05), 0 4px 14px -6px rgba(19, 46, 43, 0.12);
+  --depth-2: 0 1px 2px rgba(19, 46, 43, 0.05), 0 18px 40px -22px rgba(19, 46, 43, 0.32);
+  --depth-3: 0 2px 6px rgba(19, 46, 43, 0.06), 0 34px 70px -34px rgba(12, 31, 29, 0.55);
+  /* A 1px light line along the top edge of a raised surface: reads as light. */
+  --edge-light: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  --ink-glow: linear-gradient(160deg, #1f4741 0%, var(--ink) 55%, var(--ink-deep) 100%);
+}
+
+@media screen {
+  html { scroll-behavior: smooth; }
+  ::selection { background: rgba(200, 120, 30, 0.22); color: var(--ink); }
+
+  /* ---- The room: a quiet living light behind everything ----------------
+     Two slow glows (sage and warm sand) and a fine paper grain, fixed behind
+     the page. Sections with their own ground still cover it; it shows in the
+     gaps, so the page never reads as flat beige again. */
+  body { position: relative; isolation: isolate; }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: -20vmax;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(38vmax 30vmax at 85% 8%, rgba(219, 233, 225, 0.9), transparent 70%),
+      radial-gradient(34vmax 28vmax at 10% 60%, rgba(239, 223, 198, 0.75), transparent 70%),
+      radial-gradient(30vmax 24vmax at 70% 95%, rgba(219, 233, 225, 0.6), transparent 70%);
+    animation: rf-drift 38s ease-in-out infinite alternate;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.07 0 0 0 0 0.18 0 0 0 0 0.17 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  @keyframes rf-drift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(-3vmax, 2vmax, 0) scale(1.06); }
+  }
+
+  /* ---- The header: a floating glass bar -------------------------------- */
+  .mast {
+    /* The page fades out under the bar, so text never peeks above it. */
+    background: linear-gradient(180deg, var(--paper) 0%, rgba(250, 247, 241, 0.85) 55%, rgba(250, 247, 241, 0) 100%);
+    backdrop-filter: none;
+    border-block-end: 0;
+    padding: 0.6rem clamp(0.6rem, 2vw, 1.2rem) 0;
+  }
+  .mast-in {
+    background: rgba(255, 253, 249, 0.72);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    border: 1px solid rgba(19, 46, 43, 0.08);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--depth-1), var(--edge-light);
+    padding-block: 0.5rem;
+    padding-inline: clamp(0.9rem, 2.5vw, 1.4rem);
+  }
+  .mark .logo-3d, .mark img, .mark svg { transition: transform var(--t-move) var(--ease); }
+  .mark:hover .logo-3d, .mark:hover img, .mark:hover svg { transform: rotate(-6deg) scale(1.06); }
+
+  /* Reading progress: a thin amber line across the very top (amber = progress). */
+  @supports (animation-timeline: scroll()) {
+    .mast::after {
+      content: '';
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--amber), #e0a860);
+      transform-origin: left;
+      transform: scaleX(0);
+      animation: rf-progress linear both;
+      animation-timeline: scroll(root);
+      z-index: 60;
+    }
+    [dir='rtl'] .mast::after, .mast:dir(rtl)::after { transform-origin: right; }
+  }
+  @keyframes rf-progress { to { transform: scaleX(1); } }
+
+  /* ---- Surfaces: cards that sit on the page, not drawn on it ----------- */
+  .card,
+  .beat-card,
+  .notice,
+  .bucket,
+  .quick-check {
+    border-radius: var(--r-xl);
+    box-shadow: var(--depth-2), var(--edge-light);
+    border-color: rgba(19, 46, 43, 0.07);
+  }
+  .card-action:hover,
+  .beat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--depth-3), var(--edge-light);
+  }
+  .beat-card { transition: transform var(--t-move) var(--ease), box-shadow var(--t-move) var(--ease); }
+
+  /* ---- Buttons: a little light, a little lift --------------------------- */
+  .btn { box-shadow: 0 1px 1px rgba(19, 46, 43, 0.06); }
+  .btn-primary {
+    background: var(--ink-glow);
+    box-shadow: 0 10px 24px -12px rgba(12, 31, 29, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+  .btn-amber, .close .btn {
+    box-shadow: 0 12px 26px -12px rgba(200, 120, 30, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .btn-quiet {
+    background: rgba(255, 253, 249, 0.75);
+    backdrop-filter: blur(6px);
+  }
+  /* ⚠️ Focus rings are NOT restyled here: theme.css draws them amber on
+     purpose ("focus IS where you are standing"). */
+
+  /* ---- The questions: answers you want to press ------------------------ */
+  .option {
+    border-color: rgba(19, 46, 43, 0.12);
+    box-shadow: var(--depth-1);
+    transition: border-color var(--t-quick) var(--ease), box-shadow var(--t-move) var(--ease),
+      background var(--t-quick) var(--ease), transform var(--t-move) var(--ease);
+  }
+  .option:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--depth-2);
+  }
+  input[type='text'], input[type='email'], input[type='date'], input[type='number'],
+  input[type='password'], select, textarea {
+    transition: border-color var(--t-quick) var(--ease), box-shadow var(--t-quick) var(--ease);
+  }
+
+  /* ---- The numbers band: the chat's dark header, as a dashboard -------- */
+  .figures {
+    border-radius: var(--r-xl);
+    border: 0;
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: var(--depth-3);
+  }
+  .figure {
+    background:
+      radial-gradient(120% 140% at 100% 0%, rgba(217, 180, 120, 0.12), transparent 60%),
+      var(--ink-glow);
+    padding-block: 1.15rem;
+  }
+  .figure b { font-size: clamp(1.9rem, 3vw, 2.4rem); letter-spacing: -0.02em; }
+
+  /* ---- Dark bands on the landing page: depth instead of flat ink ------- */
+  .ground-ink, .close, .gets {
+    background:
+      radial-gradient(70% 120% at 90% 0%, rgba(217, 180, 120, 0.12), transparent 60%),
+      radial-gradient(60% 100% at 0% 100%, rgba(127, 194, 155, 0.08), transparent 60%),
+      var(--ink-glow);
+  }
+  .get { transition: transform var(--t-move) var(--ease); }
+  .get:hover { transform: translateY(-3px); }
+  .get svg { filter: drop-shadow(0 4px 10px rgba(200, 120, 30, 0.35)); }
+
+  /* ---- Screen titles: bigger, tighter, more confident ------------------ */
+  .screen-band h1, .band-head h2, .svc h2, .hero h1 { letter-spacing: -0.015em; }
+  .screen-band {
+    background:
+      radial-gradient(60% 140% at 12% 0%, rgba(219, 233, 225, 0.7), transparent 65%),
+      radial-gradient(90% 130% at 82% 0%, rgba(200, 120, 30, 0.12) 0%, rgba(200, 120, 30, 0) 62%),
+      linear-gradient(180deg, var(--sand-deep) 0%, var(--sand) 52%, transparent 100%);
+    border-block-end: 0;
+  }
+
+  /* ---- The road: the step the person stands on glows ------------------- */
+  .road-part-now {
+    border-radius: 28px;
+    box-shadow: var(--depth-2), var(--edge-light);
+  }
+  .step-row { transition: background var(--t-quick) var(--ease); }
+  .step-row .step-head { border-radius: 14px; }
+  .step-do_now .step-index { text-shadow: 0 6px 18px rgba(200, 120, 30, 0.35); }
+
+  /* ---- Photos: framed like a magazine, a slow zoom on hover ------------ */
+  .svc-photo, .hero-photo { overflow: hidden; }
+  .svc-photo img { transition: transform 1.2s var(--ease); }
+  .svc:hover .svc-photo img { transform: scale(1.04); }
+
+  /* ---- The footer -------------------------------------------------------- */
+  .site-foot {
+    background: var(--ink-glow);
+    padding-block: 1.6rem;
+  }
+
+  /* ---- Scrolling in: each block rises into place as it enters ----------
+     Native CSS (scroll-driven animations); browsers without it simply show
+     everything, so nothing can ever stay hidden. */
+  @supports (animation-timeline: view()) {
+    .card, .notice, .bucket, .figures, .beat-card, .decl, .svc-in {
+      animation: rf-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+  /* `translate`, not `transform`: an animation that holds `transform` would
+     override the cards' hover lift. The two properties add up instead. */
+  @keyframes rf-rise {
+    from { opacity: 0; translate: 0 22px; }
+    to { opacity: 1; translate: 0 0; }
+  }
+
+  /* ---- Scrollbar ---------------------------------------------------------- */
+  html { scrollbar-color: rgba(19, 46, 43, 0.28) transparent; scrollbar-width: thin; }
+
+  /* ---- Phone: the floating bar hugs the edges a little closer ---------- */
+  @media (max-width: 30rem) {
+    .mast { padding: 0.4rem 0.4rem 0; }
+    .mast-in { padding-inline: 0.75rem; }
+  }
+}
+
+/* Motion off means off: the room stops, nothing rises, nothing lifts. */
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+  .mast::after { display: none; }
+  .card, .notice, .bucket, .figures, .beat-card, .decl, .svc-in { animation: none !important; }
+  .card-action:hover, .beat-card:hover, .option:hover, .get:hover { transform: none; }
+  .svc:hover .svc-photo img { transform: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* ==========================================================================
+   ROUND 2 (her feedback: "the middle pages are dead: the questions, the
+   document input"). Life for the flow screens: a real progress bar, numbered
+   questions that tick when answered, answer tiles that respond, an upload
+   that looks like a drop zone. Same rules: style only, amber only for
+   "here", motion off when the system asks.
+   ========================================================================== */
+@media screen {
+  /* ---- The flow bar: four segments you can actually see ---------------- */
+  .progress { gap: 0.45rem; }
+  .progress li {
+    height: 8px;
+    background: rgba(19, 46, 43, 0.1);
+    box-shadow: inset 0 1px 2px rgba(19, 46, 43, 0.12);
+    position: relative;
+    overflow: hidden;
+  }
+  .progress li[data-state='done'] {
+    background: linear-gradient(90deg, #2c5a53, var(--ink));
+  }
+  .progress li[data-state='here'] {
+    background: linear-gradient(90deg, var(--amber), #e0a860);
+    box-shadow: 0 0 0 3px rgba(200, 120, 30, 0.15), 0 4px 14px -4px rgba(200, 120, 30, 0.6);
+  }
+  /* A light that runs along the segment he is on: "this is live". */
+  .progress li[data-state='here']::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.65) 50%, transparent 100%);
+    translate: -100% 0;
+    animation: rf-sheen 2.4s ease-in-out infinite;
+  }
+  @keyframes rf-sheen { to { translate: 100% 0; } }
+
+  /* ---- Questions: numbered, alive, ticked when answered ---------------- */
+  .page-intake .stack:has(> section.card) { counter-reset: rf-q; }
+  .page-intake section.card {
+    counter-increment: rf-q;
+    position: relative;
+    padding-inline-start: clamp(3.6rem, 6vw, 4.4rem);
+    animation: rf-pop 420ms var(--ease) both;
+    transition: box-shadow var(--t-move) var(--ease), border-color var(--t-move) var(--ease);
+  }
+  .page-intake section.card > h3 { font-size: 1.18rem; letter-spacing: -0.01em; }
+  /* The number, in a round badge at the start of the card. */
+  .page-intake section.card::before {
+    content: counter(rf-q);
+    position: absolute;
+    inset-inline-start: clamp(0.9rem, 2vw, 1.25rem);
+    inset-block-start: 1.45rem;
+    width: 2.15rem;
+    height: 2.15rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1.5px solid rgba(19, 46, 43, 0.16);
+    box-shadow: var(--depth-1);
+    transition: background var(--t-move) var(--ease), color var(--t-move) var(--ease);
+  }
+  /* Answered: the number becomes a tick, the card settles. */
+  .page-intake section.card:has(.option[aria-pressed='true'])::before,
+  .page-intake section.card:has(.month-trigger:not(.month-empty))::before {
+    content: '\2713';
+    background: var(--ink-glow);
+    color: var(--paper);
+    border-color: transparent;
+    animation: rf-tick 380ms var(--ease) both;
+  }
+  .page-intake section.card:has(.option[aria-pressed='true']) {
+    border-color: rgba(19, 46, 43, 0.14);
+  }
+  /* A thin line joining one question to the next, like the road. */
+  .page-intake section.card + section.card::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: calc(clamp(0.9rem, 2vw, 1.25rem) + 1.07rem);
+    inset-block-start: calc(-1 * var(--gap) - 2px);
+    height: calc(var(--gap) + 1.45rem);
+    border-inline-start: 2px dashed rgba(19, 46, 43, 0.18);
+  }
+  @keyframes rf-pop {
+    from { opacity: 0; translate: 0 18px; scale: 0.98; }
+    to { opacity: 1; translate: 0 0; scale: 1; }
+  }
+  @keyframes rf-tick {
+    0% { transform: scale(0.6); }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  /* ---- Answer tiles: they respond to the hand -------------------------- */
+  .option {
+    overflow: hidden;
+    background: linear-gradient(180deg, #fffefb, var(--surface));
+  }
+  .option::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(219, 233, 225, 0.55) 50%, transparent 70%);
+    translate: -120% 0;
+    transition: translate 700ms var(--ease);
+    pointer-events: none;
+  }
+  .option:hover:not(:disabled)::after { translate: 120% 0; }
+  .option[aria-pressed='true'] {
+    background: linear-gradient(180deg, #fff8ee, var(--amber-soft));
+    box-shadow: inset 3px 0 0 0 var(--amber), 0 10px 24px -16px rgba(200, 120, 30, 0.7);
+  }
+  [dir='ltr'] .option[aria-pressed='true'] {
+    box-shadow: inset -3px 0 0 0 var(--amber), 0 10px 24px -16px rgba(200, 120, 30, 0.7);
+  }
+  .option[aria-pressed='true']::before { animation: rf-tick 320ms var(--ease) both; }
+  /* Once a question is answered, the other answers step back a little. */
+  .card:has(.option[aria-pressed='true']) .option[aria-pressed='false']:not(:hover) { opacity: 0.82; }
+  /* Long lists of answers sit in two columns on a wide screen. */
+  @media (min-width: 760px) {
+    .page-intake .card .stack-sm:has(> .option:nth-child(4)) {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.6rem;
+    }
+    .page-intake .card .stack-sm:has(> .option:nth-child(4)) > * { margin: 0; }
+  }
+
+  /* ---- Fields: soft wells that light up when you type ------------------ */
+  /* A text box with no `type` (the document numbers and names) never got the
+     site's input style and showed the browser's grey default. Same look as
+     every other input now, including the amber focus. */
+  input:not([type]) {
+    min-height: 54px;
+    width: 100%;
+    padding: 0 var(--gap);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--ink);
+    font: inherit;
+    transition: border-color var(--t-quick) var(--ease), box-shadow var(--t-quick) var(--ease);
+  }
+  input:not([type]):hover { border-color: var(--muted); }
+  input:not([type]):focus-visible {
+    outline: none;
+    border-color: var(--amber);
+    box-shadow: 0 0 0 4px var(--amber-soft);
+  }
+  .field input, .field select, .field textarea {
+    background: linear-gradient(180deg, #fbf8f2, var(--surface));
+    border-radius: 14px;
+  }
+  .field input:not(:focus-visible), .field select:not(:focus-visible) {
+    box-shadow: inset 0 1px 2px rgba(19, 46, 43, 0.06);
+  }
+  .field-label { font-weight: 500; }
+
+  /* ---- Documents: each group is a document, with its own icon ---------- */
+  .doc-group h3 { display: flex; align-items: center; gap: 0.6rem; }
+  .page .card.doc-group > h3:first-child::before,
+  .doc-group h3::before {
+    content: '';
+    flex: none;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 12px;
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23faf7f1' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z'/%3E%3Cpath d='M14 3v5h5M9 13h6M9 17h4'/%3E%3C/svg%3E") center / 1.15rem no-repeat,
+      var(--ink-glow);
+    box-shadow: 0 6px 14px -8px rgba(12, 31, 29, 0.7);
+    transform: none;
+  }
+  /* The questions carry a number now, so the small gold diamond steps aside. */
+  .page-intake section.card > h3:first-child::before { display: none; }
+  .page .card.doc-group:has(.option[aria-pressed='true']) > h3:first-child::before,
+  .doc-group:has(.option[aria-pressed='true']) h3::before {
+    background:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23faf7f1' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 1.1rem no-repeat,
+      var(--ink-glow);
+    animation: rf-tick 380ms var(--ease) both;
+  }
+  .doc-group-note { padding-inline-start: 2.7rem; }
+
+  /* Upload: a drop zone, not a small grey button. */
+  .upload-read { border-bottom: 0; }
+  .upload-read-btn {
+    align-self: stretch;
+    justify-content: center;
+    min-height: 3.4rem;
+    border: 1.5px dashed rgba(19, 46, 43, 0.25) !important;
+    border-radius: 16px !important;
+    background:
+      radial-gradient(80% 120% at 50% 0%, rgba(219, 233, 225, 0.7), transparent 70%),
+      var(--paper) !important;
+    color: var(--ink);
+    box-shadow: none;
+  }
+  .upload-read-btn:hover {
+    border-color: var(--ink) !important;
+    background:
+      radial-gradient(80% 120% at 50% 0%, rgba(219, 233, 225, 1), transparent 70%),
+      var(--surface) !important;
+    color: var(--ink) !important;
+  }
+  .upload-read-btn::before { display: none; }
+
+  /* The live check while he types: a pulse that says "listening". */
+  .live-check {
+    position: relative;
+    border-radius: 14px;
+    background: linear-gradient(180deg, var(--sage-top), var(--surface));
+    border: 1px solid var(--line-sage);
+    padding: 0.7rem 0.9rem;
+    padding-inline-start: 2rem;
+  }
+  .live-check::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0.85rem;
+    inset-block-start: 1.05rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #4f8f73;
+    box-shadow: 0 0 0 0 rgba(79, 143, 115, 0.5);
+    animation: rf-pulse 1.8s ease-out infinite;
+  }
+  @keyframes rf-pulse { to { box-shadow: 0 0 0 9px rgba(79, 143, 115, 0); } }
+
+  /* ---- Diagnosis: facts as a clean, scannable sheet -------------------- */
+  .facts-row {
+    border-radius: 10px;
+    padding-inline: 0.6rem;
+    transition: background var(--t-quick) var(--ease);
+  }
+  .facts-row:nth-child(odd) { background: rgba(243, 233, 216, 0.4); }
+  .facts-row:hover { background: rgba(219, 233, 225, 0.6); }
+
+  /* ---- The big "next" button at the foot of a flow screen -------------- */
+  .page-intake .btn-primary,
+  .page-documents .btn-primary,
+  .page-diagnosis .btn-primary {
+    min-height: 3.3rem;
+    padding-inline: 2rem;
+    font-size: 1.02rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress li[data-state='here']::after { animation: none; display: none; }
+  .page-intake section.card,
+  .page-intake section.card:has(.option[aria-pressed='true'])::before,
+  .option[aria-pressed='true']::before,
+  .doc-group:has(.option[aria-pressed='true']) h3::before { animation: none; }
+  .option::after { display: none; }
+  .live-check::before { animation: none; }
+}

@@ -11,6 +11,7 @@ import type { Diagnosis, DocumentQuestion, Result } from '@byg/engine';
 import type { Answers } from './Intake';
 import { readDocument, type DocKind, type ReadFlags, type Reading } from '../api';
 import { getAccessToken } from '../account';
+import { MonthInput } from './MonthInput';
 
 /**
  * ============================================================================
@@ -628,14 +629,13 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
         <Field label={t('d_passport_expires')} problem={problems.passport_expires} lang={lang}>
           {/* ⚠️ min and max, which were missing entirely — "9999-12" used to be
               accepted in silence and every date calculation after it was wrong. */}
-          <input
-            type="month"
+          <MonthInput
             min={MONTH_MIN}
             max={MONTH_MAX}
             aria-invalid={invalidAttr(problems.passport_expires)}
             style={invalid(problems.passport_expires)}
             value={passportExpires}
-            onChange={(e) => setPassportExpires(e.target.value)}
+            onChange={(v) => setPassportExpires(v)}
           />
         </Field>
         <Field label={t('d_passport_name')} problem={problems.passport_name_latin} lang={lang}>
@@ -673,15 +673,14 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
       >
         <UploadRead kind="visa" lang={lang} onLogin={onLogin} onRead={({ fields: f, flags }) => { onRead('visa', flags); if (f.expires) setVisaExpires(f.expires); }} />
         <Field label={t('d_visa_expires')} problem={problems.visa_expires} lang={lang}>
-          <input
-            type="month"
+          <MonthInput
             min={MONTH_MIN}
             max={MONTH_MAX}
             aria-invalid={invalidAttr(problems.visa_expires)}
             style={invalid(problems.visa_expires)}
             value={visaExpires}
-            onChange={(e) => {
-              setVisaExpires(e.target.value);
+            onChange={(v) => {
+              setVisaExpires(v);
               setNoVisaDoc(false);
               /**
                * ⭐⭐ FOUND 23.9 BY WALKING THE SCREEN, AND IT WAS THE WORST BUG
@@ -762,14 +761,13 @@ export function Documents({ lang, questions, onSubmit, liveCheck, onLogin, onSki
           }}
         />
           <Field label={t('d_licence_expires')} problem={problems.licence_expires} lang={lang}>
-            <input
-              type="month"
+            <MonthInput
               min={MONTH_MIN}
               max={MONTH_MAX}
               aria-invalid={invalidAttr(problems.licence_expires)}
               style={invalid(problems.licence_expires)}
               value={licenceExpires}
-              onChange={(e) => setLicenceExpires(e.target.value)}
+              onChange={(v) => setLicenceExpires(v)}
             />
           </Field>
           <Field label={t('d_licence_name')} problem={problems.licence_name} lang={lang}>
